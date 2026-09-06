@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Surakkha v1 — Architecture Deck</title>
+<style>
+  :root {
+    --ink: #0f172a;
+    --ink-soft: #334155;
+    --ink-mute: #64748b;
+    --bg: #f8fafc;
+    --paper: #ffffff;
+    --accent: #0e7490;
+    --accent-soft: #cffafe;
+    --warn: #b45309;
+    --warn-soft: #fef3c7;
+    --danger: #b91c1c;
+    --ok: #047857;
+    --ok-soft: #d1fae5;
+    --border: #e2e8f0;
+    --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.55;
+  }
+  header {
+    background: linear-gradient(120deg, #0e7490 0%, #155e75 100%);
+    color: white;
+    padding: 32px 40px 28px;
+  }
+  header h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: -0.01em; }
+  header .subtitle { opacity: 0.92; font-size: 14px; }
+  header .meta {
+    display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px;
+    font-size: 12px; opacity: 0.9;
+  }
+  header .meta span { background: rgba(255,255,255,0.12); padding: 4px 10px; border-radius: 999px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 140px);
+  }
+  nav.toc {
+    background: var(--paper);
+    border-right: 1px solid var(--border);
+    padding: 20px 14px;
+    position: sticky; top: 0; align-self: start;
+    height: 100vh; overflow-y: auto;
+  }
+  nav.toc h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-mute); margin: 14px 6px 8px;
+  }
+  nav.toc a {
+    display: block; padding: 6px 10px; margin: 2px 0;
+    color: var(--ink-soft); text-decoration: none;
+    border-radius: 6px; font-size: 14px;
+    border-left: 3px solid transparent;
+  }
+  nav.toc a:hover { background: var(--bg); }
+  nav.toc a.active {
+    background: var(--accent-soft); color: var(--accent);
+    border-left-color: var(--accent); font-weight: 600;
+  }
+
+  main {
+    padding: 32px 40px 80px;
+    max-width: 1100px;
+  }
+  section { margin: 0 0 56px; }
+  section h2 {
+    font-size: 22px; margin: 0 0 14px;
+    border-bottom: 2px solid var(--border); padding-bottom: 8px;
+  }
+  section h3 {
+    font-size: 16px; margin: 24px 0 8px;
+    color: var(--ink);
+  }
+  p { margin: 8px 0; color: var(--ink-soft); }
+  code {
+    font-family: var(--mono); font-size: 0.92em;
+    background: var(--bg); padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--border);
+    color: var(--ink);
+  }
+  ul { margin: 8px 0 8px 18px; color: var(--ink-soft); }
+  li { margin: 4px 0; }
+
+  .paradigm {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: 16px 18px; border-radius: 6px; margin: 18px 0;
+    color: #0c4a6e;
+  }
+  .paradigm strong { color: #0c4a6e; font-size: 15px; }
+
+  table.ad-table {
+    width: 100%; border-collapse: collapse; margin: 14px 0;
+    font-size: 14px;
+  }
+  table.ad-table th, table.ad-table td {
+    text-align: left; padding: 10px 12px;
+    border: 1px solid var(--border); vertical-align: top;
+  }
+  table.ad-table th {
+    background: var(--bg); font-weight: 600; color: var(--ink);
+  }
+  table.ad-table tr.ad-row { cursor: pointer; }
+  table.ad-table tr.ad-row:hover { background: var(--bg); }
+  table.ad-table td.ad-id {
+    font-family: var(--mono); font-weight: 700; color: var(--accent);
+    width: 70px;
+  }
+  table.ad-table .rule-cell {
+    color: var(--ink-soft); font-size: 13px;
+  }
+  .prevent { color: var(--danger); font-size: 12px; font-weight: 600; }
+  .binds { color: var(--ok); font-size: 12px; font-family: var(--mono); }
+
+  details.ad-detail {
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--paper); margin: 6px 0;
+    overflow: hidden;
+  }
+  details.ad-detail[open] { box-shadow: 0 1px 4px rgba(15,23,42,0.06); }
+  details.ad-detail summary {
+    padding: 10px 14px; cursor: pointer; font-weight: 600;
+    display: flex; gap: 10px; align-items: baseline;
+    list-style: none;
+  }
+  details.ad-detail summary::-webkit-details-marker { display: none; }
+  details.ad-detail summary .arrow {
+    transition: transform 0.2s; color: var(--ink-mute); font-size: 11px;
+    margin-left: auto;
+  }
+  details.ad-detail[open] summary .arrow { transform: rotate(90deg); }
+  details.ad-detail .body {
+    padding: 4px 14px 14px; font-size: 14px; color: var(--ink-soft);
+    border-top: 1px solid var(--border); background: #fafbfc;
+  }
+  details.ad-detail .body dl { margin: 8px 0; }
+  details.ad-detail .body dt {
+    font-weight: 600; color: var(--ink); margin-top: 6px;
+    font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  details.ad-detail .body dd { margin: 4px 0 8px 12px; }
+
+  .diagram-card {
+    background: var(--paper); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px; margin: 18px 0;
+  }
+  .diagram-card .caption {
+    font-size: 12px; color: var(--ink-mute); text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 8px;
+  }
+  .diagram-card svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  .diagram-card .reading {
+    margin-top: 12px; font-size: 13px; color: var(--ink-soft);
+  }
+
+  .inherited-grid {
+    display: grid; gap: 8px; grid-template-columns: 1fr;
+    margin: 12px 0 4px;
+  }
+  .inherited-row {
+    display: grid; grid-template-columns: 220px 200px 1fr;
+    gap: 12px; padding: 10px 12px;
+    border: 1px solid var(--border); border-radius: 6px;
+    background: var(--paper); font-size: 13px;
+  }
+  .inherited-row .src { font-weight: 600; color: var(--ink); }
+  .inherited-row .from { color: var(--ink-mute); font-family: var(--mono); font-size: 12px; }
+  .inherited-row .binds-here { color: var(--accent); font-family: var(--mono); font-size: 12px; }
+
+  .deferred-grid {
+    display: grid; gap: 8px; grid-template-columns: 1fr; margin: 8px 0;
+  }
+  .deferred-row {
+    padding: 10px 12px; border: 1px solid var(--border);
+    border-radius: 6px; background: #fffbeb; border-left: 3px solid var(--warn);
+    font-size: 13px; color: var(--ink-soft);
+  }
+  .deferred-row .name { font-weight: 600; color: var(--ink); display: block; margin-bottom: 4px; }
+  .deferred-row .revisit {
+    display: block; margin-top: 6px; color: var(--warn); font-size: 12px;
+    font-family: var(--mono);
+  }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 18px 40px;
+    color: var(--ink-mute); font-size: 12px; background: var(--paper);
+  }
+  footer code { font-size: 11px; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { display: none; }
+    main { padding: 20px 18px 60px; }
+    header { padding: 24px 18px 18px; }
+    .inherited-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Surakkha v1 — Architecture Deck</h1>
+  <div class="subtitle">Lighthouse-city water-safety monitoring · Dhaka deployment · architecture spine walk-through</div>
+  <div class="meta">
+    <span>Altitude: feature</span>
+    <span>Paradigm: event-sourced core + CQRS read models</span>
+    <span>16 ADs</span>
+    <span>16 constraints inherited</span>
+    <span>Updated 2026-09-06</span>
+  </div>
+</header>
+
+<div class="layout">
+
+<nav class="toc" aria-label="Table of contents">
+  <h2>Overview</h2>
+  <a href="#paradigm">Design paradigm</a>
+  <a href="#inherited">Inherited invariants</a>
+
+  <h2>Invariants</h2>
+  <a href="#ads">All 16 ADs</a>
+  <a href="#ad-1">AD-1 Event store = audit chain</a>
+  <a href="#ad-2">AD-2 Hybrid aggregate</a>
+  <a href="#ad-3">AD-3 Sealed components</a>
+  <a href="#ad-4">AD-4 Schema versioning</a>
+  <a href="#ad-5">AD-5 Tenant isolation</a>
+  <a href="#ad-6">AD-6 RBAC</a>
+  <a href="#ad-7">AD-7 Three UIs</a>
+  <a href="#ad-8">AD-8 Multi-radio</a>
+  <a href="#ad-9">AD-9 Single-region Dhaka</a>
+  <a href="#ad-10">AD-10 Observability</a>
+  <a href="#ad-11">AD-11 Two-person rule</a>
+  <a href="#ad-12">AD-12 Actor identity</a>
+  <a href="#ad-13">AD-13 Version-of-record</a>
+  <a href="#ad-14">AD-14 Idempotency</a>
+  <a href="#ad-15">AD-15 Change authority</a>
+  <a href="#ad-16">AD-16 Retention + RTBF</a>
+
+  <h2>Diagrams</h2>
+  <a href="#diag-dependency">Dependency direction</a>
+  <a href="#diag-container">System / container</a>
+  <a href="#diag-deployment">Deployment topology</a>
+
+  <h2>Map &amp; Boundaries</h2>
+  <a href="#conventions">Consistency conventions</a>
+  <a href="#capability-map">Capability → architecture</a>
+  <a href="#deferred">Deferred</a>
+  <a href="#stack">Stack seed</a>
+</nav>
+
+<main>
+
+<section id="paradigm">
+  <h2>Design paradigm</h2>
+  <div class="paradigm">
+    <strong>Event-sourced core + CQRS read models.</strong> All state changes are events written to an append-only stream. The audit chain gateway is the event store — not a separate log bolted onto operational state. Read models (projections) are derived from the event stream and serve Priya-desktop, PHA-pane, the fusion engine output, the simulator, and WB evidence export. Commands that mutate state (escalate, execute step, capture deviation, approve amendment, issue message) are issued against projections and emit new events. <em>The audit chain IS the database.</em>
+  </div>
+
+  <h3>Why this paradigm</h3>
+  <ul>
+    <li><strong>C-8 content-addressed audit chain</strong> → event store blocks are content-addressed; every block references prior hash. Chain integrity becomes a property of the store, not a separate concern.</li>
+    <li><strong>C-13 liability split via audit evidence</strong> → each event carries <code>actor_identity</code>; replay proves who committed to what. The split is structural, not contractual.</li>
+    <li><strong>FR-3.5 deviation as first-class event</strong> → <code>DeviationCaptured</code> is an event, not a flag. Operationally and audit-wise equivalent.</li>
+    <li><strong>FR-3.7 simulator</strong> → "what would have happened" = event replay through a hypothetical playbook version. Inputs come from the stream; outputs do not write back.</li>
+    <li><strong>FR-6.3 audit browser</strong> → audit browser is event-stream query with filtering. Same primitives as the Priya dashboard, different view.</li>
+    <li><strong>C-7 fusion v1 → v2 ML swap</strong> → swap is a projection-rebuild, not a service change. Sealed contract holds; implementation churns.</li>
+  </ul>
+</section>
+
+<section id="inherited">
+  <h2>Inherited invariants</h2>
+  <p>The spec's <code>architecture-invariants.md</code> already commits to specific design calls. The spine inherits them as ADOPTED — read-only, not re-derived here.</p>
+  <div class="inherited-grid">
+    <div class="inherited-row"><span class="src">Multi-tenant per-city</span><span class="from">C-1 + §1</span><span class="binds-here">AD-5, AD-6</span></div>
+    <div class="inherited-row"><span class="src">Three UIs as products</span><span class="from">C-2 + §2</span><span class="binds-here">AD-7</span></div>
+    <div class="inherited-row"><span class="src">Fusion sealed contract</span><span class="from">C-7 + §3</span><span class="binds-here">AD-3</span></div>
+    <div class="inherited-row"><span class="src">Playbook sealed contract</span><span class="from">§4</span><span class="binds-here">AD-3, AD-13</span></div>
+    <div class="inherited-row"><span class="src">Pluggable channel adapters</span><span class="from">§5</span><span class="binds-here">AD-3, AD-8</span></div>
+    <div class="inherited-row"><span class="src">Audit chain single gateway</span><span class="from">C-8 + §6</span><span class="binds-here">AD-1, AD-4, AD-16</span></div>
+    <div class="inherited-row"><span class="src">Defense-in-depth RBAC</span><span class="from">§7</span><span class="binds-here">AD-6, AD-12</span></div>
+    <div class="inherited-row"><span class="src">Multi-radio tiers</span><span class="from">C-15 + §8</span><span class="binds-here">AD-8</span></div>
+    <div class="inherited-row"><span class="src">Tiered PHA-approval SLA</span><span class="from">C-3</span><span class="binds-here">AD-11, AD-15</span></div>
+    <div class="inherited-row"><span class="src">Liability split vendor / PHA / utility</span><span class="from">C-13</span><span class="binds-here">AD-12</span></div>
+    <div class="inherited-row"><span class="src">WHO template library</span><span class="from">C-14</span><span class="binds-here">AD-13, AD-15</span></div>
+    <div class="inherited-row"><span class="src">WB procurement — no lock-in</span><span class="from">C-16</span><span class="binds-here">AD-9, AD-10</span></div>
+    <div class="inherited-row"><span class="src">SMS first-class for Anjali</span><span class="from">C-11</span><span class="binds-here">AD-8</span></div>
+    <div class="inherited-row"><span class="src">Privacy-by-default + RTBF</span><span class="from">C-10</span><span class="binds-here">AD-5, AD-16</span></div>
+  </div>
+</section>
+
+<section id="ads">
+  <h2>All 16 Architecture Decisions (ADs)</h2>
+  <p>Each AD binds a spec/PRD load-bearing call, prevents a class of divergence, and states the enforceable rule. Click any row to expand the full rule.</p>
+
+  <table class="ad-table">
+    <thead>
+      <tr>
+        <th>AD</th>
+        <th>Title</th>
+        <th>Prevents</th>
+        <th>Bound by</th>
+      </tr>
+    </thead>
+    <tbody id="ad-tbody"></tbody>
+  </table>
+
+  <h3 style="margin-top:36px">Full AD text</h3>
+
+  <details class="ad-detail" id="ad-1">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-1</span>Event store IS the audit chain <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>CAP-6 + C-8; all state mutations across all components.</dd>
+        <dt>Prevents</dt><dd>Dual-writes between audit chain and operational state; "audit log" as a logging afterthought; retroactive tampering without detection.</dd>
+        <dt>Rule</dt><dd>Every state change in the system is an event written to the audit chain gateway. No component writes to operational storage directly; all reads of operational state are projections of the event stream. The chain is content-addressed and each block references the prior block's hash (per C-8). Per-city namespace; federation operates on aggregated projections only. The cryptographic chain hash is gateway-computed at write-time and stored in the block header; the underlying store is unaware of chaining.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-2">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-2</span>Hybrid aggregate model (Observation + Incident) <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>CAP-5 + FR-2 (fusion) + FR-5 (Priya incident dashboard).</dd>
+        <dt>Prevents</dt><dd>Write-side bottleneck of correlating-and-then-writing (incident-centric) and the command-target-projection gap of pure-observation (observation-centric).</dd>
+        <dt>Rule</dt><dd>Observations are first-class events written to the stream independently of any incident. The Incident Aggregator reads the observation stream and materializes an Incident when ≥1 observation correlates into a coherent story (configurable per contaminant class). Incident identity is content-addressed: <code>incident_id = sha256(canonical(observation_event_ids[] | tenant_id | correlation_window_id | contaminant_class))</code>. The Incident Aggregator is the sole writer of <code>IncidentCreated</code> events — no other component may emit one. Correlation window configuration lives in <code>platform-config/</code> and is read identically by the fusion engine and the Incident Aggregator.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-3">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-3</span>Sealed-component contracts <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>CAP-5, CAP-7; FR-2, FR-3; architecture-invariants.md §3, §4.</dd>
+        <dt>Prevents</dt><dd>v2 swap breaking consumer contracts; silent drift between fusion v1 (weighted voting) and fusion v2 (ML); silent drift between playbook engine v1 and v2.</dd>
+        <dt>Rule</dt><dd>Each sealed component exposes a stable input/output contract, versioned. Consumers depend on the contract, not on the implementation. The fusion contract's <code>source_attribution</code> is pinned: <code>[{observation_id: ULID, source_type: enum, weight: float, observed_at: ISO8601}]</code> — not free-form strings. The simulator harness is a sealed component that <strong>does not persist</strong> — inputs read from the event stream, outputs returned to caller, not written back. Sealed list: Audit Chain Gateway, Source-Fusion Engine, Incident Aggregator, Playbook Engine, Simulator Harness, Channel Adapters, Multi-Radio Ingestion, Auth + RBAC, UIs.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-4">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-4</span>Event-schema evolution: strict versioning + upcasters <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>AD-1 (event store); all consumers of any event.</dd>
+        <dt>Prevents</dt><dd>Schema drift between v1 and v2; projection rebuild failures on schema change; silent loss of old events during evolution.</dd>
+        <dt>Rule</dt><dd>Every event schema has a version (v1, v2, v3…). New versions add fields but never rename or remove. Old events are upcasted on read by per-version upcaster functions. Schema-version bumps require PHA + vendor dual sign-off — bumping is a two-person-rule event. Upcasters are owned by the component that owns the event type and shipped in lockstep with the version bump; the chain-integrity monitor flags any projection that lags behind the latest upcaster.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-5">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-5</span>Strict logical per-tenant isolation <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-1 + C-10; CAP-6 + CAP-7.</dd>
+        <dt>Prevents</dt><dd>Cross-tenant data leakage; accidental federation reads; data-sovereignty violations.</dd>
+        <dt>Rule</dt><dd>Each tenant city has its own logical database with its own audit-chain namespace. No cross-tenant joins at any layer (gateway, service, data-access). Federation (v2+) operates on aggregated projections only — never on raw cross-city reads. Tenant isolation is verified at all three RBAC layers (AD-6).</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-6">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-6</span>RBAC defense-in-depth, three layers <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-10 + architecture-invariants.md §7; all components.</dd>
+        <dt>Prevents</dt><dd>"Single check is load-bearing" failure mode; RBAC gaps surfacing as access-policy violations without audit evidence.</dd>
+        <dt>Rule</dt><dd>Permission checks at (1) gateway / admission, (2) service boundary / component-internal, (3) data-access layer / storage query. The auth service is a component; the policy matrix is per-city; enforcement is a cross-cutting concern. Every access is logged to the audit chain. Override-anomaly detection is logged v1, enforced v2 (per spec).</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-7">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-7</span>Three UIs as separate products <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-2 + CAP-1 + CAP-2 + CAP-3; architecture-invariants.md §2.</dd>
+        <dt>Prevents</dt><dd>One responsive app collapsing persona wins; shared release cadence coupling Anjali-mobile / Priya-desktop / PHA-pane.</dd>
+        <dt>Rule</dt><dd>Anjali-mobile (Android, WhatsApp-fronted, offline-first), Priya-desktop (web dashboard), and PHA-pane (read-mostly regulator pane) are three separate products with separate deploy cadences. They communicate via the audit chain gateway and the channel adapters, not via shared UI code. No shared component library above the data-layer.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-8">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-8</span>Multi-radio contract enforced at gateway <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-15 + architecture-invariants.md §8; FR-1.4 + FR-4.3 + FR-4.4.</dd>
+        <dt>Prevents</dt><dd>Sensor silence being silently dropped; cross-adapter inconsistency in fallback; gap between "sensor offline" and "sensor silent = audit event".</dd>
+        <dt>Rule</dt><dd>Every sensor ingest request declares a radio tier (cellular primary → LPWAN secondary → SD-card store-and-forward tertiary). The gateway routes through the right adapter based on declared tier. Adapters are port-swappable (C-15). Sensor silence beyond a configurable threshold is itself logged as a <code>SensorSilenceObserved</code> event to the audit chain. Anjali's phone acts as the network endpoint for ward sentinel (phone-as-network).</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-9">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-9</span>Single-region Dhaka deployment for v1 <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>PRD §5.4 (data residency); NG-5 (no federation v1); C-16 (WB funding).</dd>
+        <dt>Prevents</dt><dd>Premature multi-region complexity; cross-region data sovereignty violations.</dd>
+        <dt>Rule</dt><dd>v1 ships with active write path in Bangladesh (Bangladesh-resident provider required). Audit-chain gateway writes to local + a single replicated peer. WB evidence export runs as a scheduled job reading from a projection (projection-not-recompute); may not export raw PII or raw observations out of Bangladesh — only aggregated, k-anonymized indicators. Backup snapshots are out-of-region; the active write path stays in Bangladesh.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-10">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-10</span>Operational observability is internal + vendor-neutral <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-8 (audit chain integrity); C-16 (WB procurement); PRD §5.5.</dd>
+        <dt>Prevents</dt><dd>Vendor lock-in for an audit-chain-bound platform; chain-integrity drift undetected; sensor-silence exceeding threshold without operator awareness.</dd>
+        <dt>Rule</dt><dd>Observability stack is internal — OpenTelemetry (CNCF Graduated) for instrumentation; vendor-neutral metrics/logs/traces backend. Monitors: (a) chain-integrity monitor verifying the hash chain every N minutes; (b) sensor-silence monitor alerting on any sensor silent beyond threshold; (c) override-anomaly monitor (logged v1, enforced v2). Logs themselves are events; the chain is the source of truth for everything the platform does.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-11">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-11</span>Two-person rule on T3-boundary + consumer-message events <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-3 + C-4 + C-8; CAP-3 + CAP-4; FR-6.1.</dd>
+        <dt>Prevents</dt><dd>Single-actor mutation of politically sensitive state; signatures landing against different payload versions.</dd>
+        <dt>Rule</dt><dd>Events <code>PlaybookAmendmentApproved</code> (when amendment touches T3 boundary) and <code>ConsumerMessageIssued</code> require dual signatures. Both signatures must attest to the <strong>identical</strong> <code>(event_id, payload_hash, version_id)</code> triple. Implementation uses linked <code>SignatureAttestation</code> events; gateway accepts the underlying command only after both attestations with matching triples are recorded.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-12">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-12</span>Liability split encoded in event actor identity <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-13; CAP-6; PRD §5.5.</dd>
+        <dt>Prevents</dt><dd>Liability split being contractual rather than structural; "who committed to what" being unanswerable under inquiry.</dd>
+        <dt>Rule</dt><dd>Every event carries <code>actor_identity</code> with two sub-fields: <code>role</code> (closed enum per-city-tenant matrix: <code>{vendor, pha_approver, utility_operator, anjali, priya, pha_viewer, system}</code> — strictly this set, never a free-form string) and <code>ref</code> (a unique actor reference resolved from auth-service session token, <strong>not</strong> minted by the emitting component). The gateway <strong>rejects</strong> events whose <code>role</code> is not in the closed enum or whose <code>ref</code> cannot be resolved to a live auth-session reference — enforced at write-rejection, not as a soft check. The audit chain is the evidence surface for the split; the closed enum + session-bound ref make the split structural, not contractual.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-13">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-13</span>Playbook version-of-record; simulator reads from event stream <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>AD-1 (event store), AD-3 (sealed components); FR-3.7 (simulator); C-3, C-13, C-14.</dd>
+        <dt>Prevents</dt><dd>Two units disagreeing on "what version of the playbook was active when this incident ran"; simulator outputs diverging under DR; abandoned draft branches silently treated as live.</dd>
+        <dt>Rule</dt><dd>Every <code>PlaybookVersionPublished</code> event carries a <code>version_id = sha256(canonical(serialized_playbook_definition))</code>. The version-of-record is the latest <code>PlaybookVersionPublished</code> event for the tenant — <strong>not</strong> a DB row, <strong>not</strong> a projection. Lineage is linear: each new version references its predecessor via <code>parent_version_id</code>. Concurrent drafts emit <code>PlaybookVersionDrafted</code> events; only one can be promoted per tenant. Abandoned drafts emit <code>PlaybookVersionAbandoned</code> (append-only). The Simulator Harness reads inputs from the event stream (events in a time window + a hypothetical version_id), never from a projection.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-14">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-14</span>Idempotency by (tenant_id, event_id) <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>AD-1 (event store); all event-emitting components; FR-1 (audit chain), FR-4 (offline-first sync).</dd>
+        <dt>Prevents</dt><dd>Duplicate events from SD-card store-and-forward replay; mobile reconnect storms; double-counting in fusion and aggregation; double-incidents.</dd>
+        <dt>Rule</dt><dd>Every event carries a client-minted <code>event_id</code> (ULID). The gateway <strong>rejects</strong> events whose <code>(tenant_id, event_id)</code> pair is already present in the store with a typed <code>DuplicateEventRejected</code> response — silent dedup is forbidden because the chain must show the attempt. Mobile and SD-card adapters generate a stable <code>event_id</code> once per logical event at user-acknowledged submission time; retries reuse the same <code>event_id</code>.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-15">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-15</span>Change-management authority is structured, not ad hoc <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>AD-4 (schema-versioning), AD-13 (playbook-versioning); all components; C-14 (WHO template library).</dd>
+        <dt>Prevents</dt><dd>Two teams publishing divergent schemas or divergent playbook versions under the same version label; the platform-config projection diverging from what the running components actually read; an unauthorized actor changing city-wide escalation thresholds.</dd>
+        <dt>Rule</dt><dd>Three categories of platform-wide change each have a named authority and a dual-signature event: <strong>Schema-version bump</strong> → event-type owner; dual-signed vendor + pha_approver; emits <code>SchemaVersionBumped</code>. <strong>Playbook version promotion draft → published</strong> → Playbook Engine component; dual-signed pha_approver + utility_operator; emits <code>PlaybookVersionPublished</code>. <strong>City-wide config change</strong> (correlation windows, escalation thresholds, fusion weights, role matrix) → owned by the PHA per-tenant; single-signed pha_approver; emits <code>CityConfigChanged</code> with before/after payload diff. All three are event-sourced and replayable; the running components read config from a projection rebuilt by replaying these events. There is no out-of-band config-update path.</dd>
+      </dl>
+    </div>
+  </details>
+
+  <details class="ad-detail" id="ad-16">
+    <summary><span class="ad-id" style="font-family:var(--mono);color:var(--accent);font-weight:700">AD-16</span>Retention floor + RTBF via tombstone events <span class="arrow">▶</span></summary>
+    <div class="body">
+      <dl>
+        <dt>Binds</dt><dd>C-10 (privacy-by-default including RTBF); AD-1 (append-only chain); AD-5 (per-tenant isolation).</dd>
+        <dt>Prevents</dt><dd>Append-only being silently violated by deletion; RTBF being honored in operational storage but not in the audit chain; retention periods drifting silently.</dd>
+        <dt>Rule</dt><dd>The chain is <strong>append-only and tamper-evident</strong>; nothing in it is ever rewritten or deleted. Right-to-be-forgotten is honored by emitting a <code>SubjectRedacted</code> event that references the subject's <code>actor_ref</code> (or geofenced <code>subject_geo_id</code>); downstream projections apply the redaction on read (subject's payload fields become <code>null</code> / <code>redacted</code>, but the event itself remains in the chain as evidence of the request). Retention floor per tenant (default 7 years; set per WB / city contract — see C-16) is enforced by the chain-integrity monitor; events older than floor are exported to immutable out-of-region cold storage per AD-9 and the live projection continues to serve them via lazy restore. <strong>The chain remembers everything; the projection forgets what the law requires it to forget.</strong></dd>
+      </dl>
+    </div>
+  </details>
+</section>
+
+<section id="diag-dependency">
+  <h2>Dependency direction</h2>
+  <p>External actors never reach into the sealed core; they go through adapters. Adapters depend on the audit chain gateway, not on storage. The sealed components read from the store and depend on each other only through the store. Projections are read-only views.</p>
+
+  <div class="diagram-card">
+    <div class="caption">Figure 1 — Dependency direction across the system</div>
+    <svg viewBox="0 0 1100 520" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif" font-size="12">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#0e7490"/>
+        </marker>
+        <marker id="arrowd" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#b91c1c" stroke-dasharray="2 2"/>
+        </marker>
+      </defs>
+
+      <style>
+        .box { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; rx: 6; ry: 6; }
+        .box-ext { fill: #f1f5f9; stroke: #64748b; }
+        .box-adapt { fill: #ecfeff; stroke: #0891b2; }
+        .box-auth { fill: #fef3c7; stroke: #b45309; stroke-dasharray: 4 3; }
+        .box-core { fill: #cffafe; stroke: #0e7490; }
+        .box-store { fill: #fde68a; stroke: #b45309; stroke-width: 2; }
+        .box-proj { fill: #f5f3ff; stroke: #7c3aed; }
+        .label { fill: #0f172a; font-weight: 600; font-size: 12px; }
+        .sub { fill: #64748b; font-size: 10px; }
+        .swim { fill: #f8fafc; stroke: #cbd5e1; stroke-dasharray: 3 3; rx: 6; }
+        .swim-label { fill: #64748b; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+      </style>
+
+      <rect class="swim" x="20" y="20" width="280" height="220"/>
+      <text class="swim-label" x="34" y="40">External actors</text>
+      <rect class="box box-ext" x="40" y="58" width="100" height="36"/>
+      <text class="label" x="90" y="76" text-anchor="middle">Anjali-mobile</text>
+      <text class="sub" x="90" y="88" text-anchor="middle">CAP-1</text>
+      <rect class="box box-ext" x="160" y="58" width="100" height="36"/>
+      <text class="label" x="210" y="76" text-anchor="middle">Priya-desktop</text>
+      <text class="sub" x="210" y="88" text-anchor="middle">CAP-2</text>
+      <rect class="box box-ext" x="40" y="110" width="100" height="36"/>
+      <text class="label" x="90" y="128" text-anchor="middle">PHA-pane</text>
+      <text class="sub" x="90" y="140" text-anchor="middle">CAP-3</text>
+      <rect class="box box-ext" x="160" y="110" width="100" height="36"/>
+      <text class="label" x="210" y="128" text-anchor="middle">Ramesh-channel</text>
+      <text class="sub" x="210" y="140" text-anchor="middle">CAP-4</text>
+      <rect class="box box-ext" x="40" y="162" width="220" height="36"/>
+      <text class="label" x="150" y="180" text-anchor="middle">Sensor endpoints (5 industrial / 30 sentinel / SCADA)</text>
+      <text class="sub" x="150" y="192" text-anchor="middle">CAP-5</text>
+
+      <rect class="swim" x="20" y="260" width="280" height="100"/>
+      <text class="swim-label" x="34" y="280">Adapter layer (port-swappable)</text>
+      <rect class="box box-adapt" x="40" y="298" width="120" height="36"/>
+      <text class="label" x="100" y="316" text-anchor="middle">Multi-Radio Adapter</text>
+      <text class="sub" x="100" y="328" text-anchor="middle">cellular · LPWAN · SD</text>
+      <rect class="box box-adapt" x="180" y="298" width="100" height="36"/>
+      <text class="label" x="230" y="316" text-anchor="middle">Channel Adapter</text>
+
+      <rect class="box box-auth" x="40" y="380" width="220" height="36"/>
+      <text class="label" x="150" y="398" text-anchor="middle">RBAC + closed-role-actor-identity</text>
+      <text class="sub" x="150" y="410" text-anchor="middle">defense-in-depth, AD-6 + AD-12</text>
+
+      <rect class="swim" x="340" y="20" width="320" height="320"/>
+      <text class="swim-label" x="354" y="40">Sealed components (depend inward only)</text>
+      <rect class="box box-core" x="360" y="58" width="140" height="36"/>
+      <text class="label" x="430" y="76" text-anchor="middle">Source-Fusion Engine</text>
+      <text class="sub" x="430" y="88" text-anchor="middle">CAP-5 · AD-3</text>
+      <rect class="box box-core" x="360" y="110" width="140" height="36"/>
+      <text class="label" x="430" y="128" text-anchor="middle">Incident Aggregator</text>
+      <text class="sub" x="430" y="140" text-anchor="middle">AD-2 sole writer</text>
+      <rect class="box box-core" x="360" y="162" width="140" height="36"/>
+      <text class="label" x="430" y="180" text-anchor="middle">Playbook Engine</text>
+      <text class="sub" x="430" y="192" text-anchor="middle">CAP-7 · FR-3</text>
+      <rect class="box box-core" x="360" y="214" width="140" height="36"/>
+      <text class="label" x="430" y="232" text-anchor="middle">Simulator Harness</text>
+      <text class="sub" x="430" y="244" text-anchor="middle">non-persistent, FR-3.7</text>
+
+      <rect class="box box-store" x="520" y="298" width="120" height="36"/>
+      <text class="label" x="580" y="316" text-anchor="middle">Audit Chain</text>
+      <text class="label" x="580" y="328" text-anchor="middle">Gateway</text>
+
+      <rect class="swim" x="700" y="20" width="380" height="480"/>
+      <text class="swim-label" x="714" y="40">Read models / projections (CQRS)</text>
+      <rect class="box box-proj" x="714" y="58" width="170" height="36"/>
+      <text class="label" x="799" y="76" text-anchor="middle">Priya dashboard projection</text>
+      <text class="sub" x="799" y="88" text-anchor="middle">FR-5</text>
+      <rect class="box box-proj" x="900" y="58" width="170" height="36"/>
+      <text class="label" x="985" y="76" text-anchor="middle">PHA pane projection</text>
+      <text class="sub" x="985" y="88" text-anchor="middle">FR-6 · audit browser</text>
+      <rect class="box box-proj" x="714" y="110" width="170" height="36"/>
+      <text class="label" x="799" y="128" text-anchor="middle">Monthly review cluster</text>
+      <text class="sub" x="799" y="140" text-anchor="middle">FR-3.6</text>
+      <rect class="box box-proj" x="900" y="110" width="170" height="36"/>
+      <text class="label" x="985" y="128" text-anchor="middle">Simulator harness reading</text>
+      <text class="sub" x="985" y="140" text-anchor="middle">FR-3.7</text>
+      <rect class="box box-proj" x="714" y="162" width="356" height="36"/>
+      <text class="label" x="892" y="180" text-anchor="middle">WB evidence export projection (k-anonymized)</text>
+      <text class="sub" x="892" y="192" text-anchor="middle">FR-6.6 · C-16</text>
+      <rect class="box box-proj" x="714" y="214" width="356" height="36"/>
+      <text class="label" x="892" y="232" text-anchor="middle">Chain-integrity monitor (verifies hash chain every N min)</text>
+
+      <line x1="140" y1="94" x2="200" y2="298" stroke="#0e7490" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="210" y1="58" x2="240" y2="298" stroke="#0e7490" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="150" y1="180" x2="200" y2="298" stroke="#0e7490" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="280" y1="316" x2="520" y2="316" stroke="#0e7490" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="640" y1="298" x2="500" y2="76" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="640" y1="316" x2="500" y2="128" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="640" y1="328" x2="500" y2="180" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="640" y1="333" x2="500" y2="232" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="500" y1="76" x2="500" y2="128" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="500" y1="180" x2="799" y2="94" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="500" y1="180" x2="985" y2="94" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="500" y1="180" x2="799" y2="128" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="640" y1="316" x2="799" y2="128" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="640" y1="316" x2="892" y2="180" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="640" y1="316" x2="892" y2="232" stroke="#0e7490" stroke-width="1" marker-end="url(#arrow)"/>
+      <line x1="200" y1="398" x2="500" y2="76" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrowd)"/>
+      <line x1="200" y1="398" x2="630" y2="316" stroke="#b91c1c" stroke-width="1" stroke-dasharray="4 3" marker-end="url(#arrowd)"/>
+    </svg>
+    <div class="reading"><strong>Reading the diagram.</strong> Solid teal arrows are data-flow dependencies; dashed red arrows are RBAC enforcement (cross-cutting). External actors never reach into the sealed core — they go through adapters. Adapters depend on the audit chain gateway, not on storage. The sealed components read from the store and depend on each other only through the store. Projections are read-only views; they never write back to the store.</div>
+  </div>
+</section>
+
+<section id="diag-container">
+  <h2>System / container view</h2>
+  <div class="diagram-card">
+    <div class="caption">Figure 2 — Container view (per-city tenant)</div>
+    <svg viewBox="0 0 1100 720" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif" font-size="11">
+      <style>
+        .box { fill: #ffffff; stroke: #94a3b8; stroke-width: 1; rx: 4; ry: 4; }
+        .gb-external { fill: #f1f5f9; stroke: #64748b; stroke-dasharray: 3 3; rx: 6; }
+        .gb-adapter { fill: #ecfeff; stroke: #0891b2; rx: 6; }
+        .gb-gateway { fill: #fde68a; stroke: #b45309; stroke-width: 2; rx: 6; }
+        .gb-core { fill: #cffafe; stroke: #0e7490; rx: 6; }
+        .gb-proj { fill: #f5f3ff; stroke: #7c3aed; rx: 6; }
+        .gb-storage { fill: #fce7f3; stroke: #be185d; stroke-width: 1.5; rx: 6; }
+        .gb-obs { fill: #fef3c7; stroke: #b45309; stroke-dasharray: 4 3; rx: 6; }
+        .label { fill: #0f172a; font-weight: 600; }
+        .sub { fill: #64748b; font-size: 10px; }
+        .swim { fill: #f8fafc; stroke: #cbd5e1; stroke-dasharray: 2 2; }
+      </style>
+
+      <rect class="swim" x="20" y="20" width="320" height="200"/>
+      <text class="sub" x="34" y="38" font-weight="700" fill="#475569">EXTERNAL ACTORS</text>
+      <rect class="box" x="34" y="50" width="120" height="32"/>
+      <text class="label" x="94" y="70" text-anchor="middle">Anjali-mobile</text>
+      <rect class="box" x="34" y="92" width="120" height="32"/>
+      <text class="label" x="94" y="112" text-anchor="middle">Priya-desktop</text>
+      <rect class="box" x="34" y="134" width="120" height="32"/>
+      <text class="label" x="94" y="154" text-anchor="middle">PHA-pane</text>
+      <rect class="box" x="34" y="176" width="120" height="32"/>
+      <text class="label" x="94" y="196" text-anchor="middle">Ramesh-channel</text>
+      <rect class="box" x="180" y="50" width="146" height="32"/>
+      <text class="label" x="253" y="70" text-anchor="middle">Industrial probes (5)</text>
+      <rect class="box" x="180" y="92" width="146" height="32"/>
+      <text class="label" x="253" y="112" text-anchor="middle">Sentinel strips (30)</text>
+      <text class="sub" x="253" y="123" text-anchor="middle">phone-as-network</text>
+      <rect class="box" x="180" y="134" width="146" height="32"/>
+      <text class="label" x="253" y="154" text-anchor="middle">SCADA read-only</text>
+
+      <rect class="gb-adapter" x="20" y="240" width="320" height="80"/>
+      <text class="sub" x="34" y="258" font-weight="700" fill="#0e7490">ADAPTER LAYER (port-swappable)</text>
+      <rect class="box" x="34" y="270" width="140" height="36"/>
+      <text class="label" x="104" y="290" text-anchor="middle">Multi-Radio Adapter</text>
+      <text class="sub" x="104" y="302" text-anchor="middle">cellular · LPWAN · SD</text>
+      <rect class="box" x="186" y="270" width="140" height="36"/>
+      <text class="label" x="256" y="290" text-anchor="middle">Channel Adapter</text>
+      <text class="sub" x="256" y="302" text-anchor="middle">WhatsApp · SMS</text>
+
+      <rect class="gb-gateway" x="20" y="340" width="320" height="60"/>
+      <text class="sub" x="34" y="358" font-weight="700" fill="#b45309">GATEWAY</text>
+      <rect class="box" x="34" y="368" width="290" height="24"/>
+      <text class="label" x="179" y="384" text-anchor="middle">Audit Chain Gateway (single write path)</text>
+
+      <rect class="gb-core" x="20" y="420" width="320" height="120"/>
+      <text class="sub" x="34" y="438" font-weight="700" fill="#0e7490">SEALED COMPONENTS</text>
+      <rect class="box" x="34" y="450" width="146" height="32"/>
+      <text class="label" x="107" y="470" text-anchor="middle">Source-Fusion</text>
+      <rect class="box" x="186" y="450" width="140" height="32"/>
+      <text class="label" x="256" y="470" text-anchor="middle">Incident Aggregator</text>
+      <rect class="box" x="34" y="486" width="146" height="32"/>
+      <text class="label" x="107" y="506" text-anchor="middle">Playbook Engine</text>
+      <rect class="box" x="186" y="486" width="140" height="32"/>
+      <text class="label" x="256" y="506" text-anchor="middle">Simulator Harness</text>
+      <text class="sub" x="256" y="518" text-anchor="middle">non-persistent</text>
+
+      <rect class="gb-proj" x="20" y="560" width="320" height="120"/>
+      <text class="sub" x="34" y="578" font-weight="700" fill="#7c3aed">PROJECTIONS</text>
+      <rect class="box" x="34" y="588" width="146" height="32"/>
+      <text class="label" x="107" y="608" text-anchor="middle">Priya dashboard</text>
+      <rect class="box" x="186" y="588" width="140" height="32"/>
+      <text class="label" x="256" y="608" text-anchor="middle">PHA pane</text>
+      <rect class="box" x="34" y="624" width="146" height="32"/>
+      <text class="label" x="107" y="644" text-anchor="middle">Monthly cluster</text>
+      <text class="sub" x="107" y="654" text-anchor="middle">FR-3.6</text>
+      <rect class="box" x="186" y="624" width="140" height="32"/>
+      <text class="label" x="256" y="644" text-anchor="middle">WB evidence export</text>
+      <text class="sub" x="256" y="654" text-anchor="middle">k-anonymized</text>
+
+      <rect class="gb-storage" x="380" y="340" width="240" height="160"/>
+      <text class="sub" x="394" y="358" font-weight="700" fill="#be185d">STORAGE</text>
+      <rect class="box" x="394" y="370" width="212" height="40"/>
+      <text class="label" x="500" y="390" text-anchor="middle">Event store (append-only)</text>
+      <text class="sub" x="500" y="402" text-anchor="middle">content-addressed chain</text>
+      <rect class="box" x="394" y="416" width="212" height="40"/>
+      <text class="label" x="500" y="436" text-anchor="middle">Projection DBs (per-projection)</text>
+      <text class="sub" x="500" y="448" text-anchor="middle">rebuilt by replay (AD-4)</text>
+      <rect class="box" x="394" y="462" width="212" height="32"/>
+      <text class="label" x="500" y="482" text-anchor="middle">Out-of-region cold storage</text>
+
+      <rect class="gb-obs" x="380" y="520" width="240" height="160"/>
+      <text class="sub" x="394" y="538" font-weight="700" fill="#b45309">OBSERVABILITY</text>
+      <rect class="box" x="394" y="552" width="212" height="32"/>
+      <text class="label" x="500" y="572" text-anchor="middle">Logs/metrics/traces</text>
+      <text class="sub" x="500" y="582" text-anchor="middle">OTel · vendor-neutral</text>
+      <rect class="box" x="394" y="592" width="212" height="32"/>
+      <text class="label" x="500" y="612" text-anchor="middle">Chain-integrity monitor</text>
+      <rect class="box" x="394" y="632" width="100" height="32"/>
+      <text class="label" x="444" y="652" text-anchor="middle">Sensor-silence</text>
+      <rect class="box" x="506" y="632" width="100" height="32"/>
+      <text class="label" x="556" y="652" text-anchor="middle">Override-anomaly</text>
+
+      <line x1="94" y1="200" x2="100" y2="270" stroke="#0e7490" stroke-width="1.5"/>
+      <line x1="94" y1="124" x2="220" y2="270" stroke="#0e7490" stroke-width="1.5"/>
+      <line x1="94" y1="166" x2="220" y2="270" stroke="#0e7490" stroke-width="1.5"/>
+      <line x1="253" y1="124" x2="100" y2="270" stroke="#0e7490" stroke-width="1.5"/>
+      <line x1="253" y1="166" x2="100" y2="270" stroke="#0e7490" stroke-width="1.5"/>
+      <line x1="280" y1="306" x2="180" y2="368" stroke="#0e7490" stroke-width="2"/>
+      <line x1="180" y1="390" x2="500" y2="390" stroke="#0e7490" stroke-width="1.5"/>
+      <line x1="180" y1="390" x2="100" y2="450" stroke="#0e7490" stroke-width="1"/>
+      <line x1="180" y1="390" x2="256" y2="450" stroke="#0e7490" stroke-width="1"/>
+      <line x1="180" y1="390" x2="107" y2="486" stroke="#0e7490" stroke-width="1"/>
+      <line x1="180" y1="390" x2="256" y2="486" stroke="#0e7490" stroke-width="1"/>
+      <line x1="500" y1="410" x2="500" y2="416" stroke="#cbd5e1"/>
+      <line x1="107" y1="608" x2="394" y2="436" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="256" y1="608" x2="394" y2="436" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="107" y1="644" x2="394" y2="436" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="256" y1="644" x2="394" y2="436" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="500" y1="456" x2="500" y2="462" stroke="#cbd5e1"/>
+      <line x1="500" y1="436" x2="500" y2="552" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="500" y1="572" x2="180" y2="390" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3 3"/>
+      <line x1="156" y1="660" x2="280" y2="290" stroke="#b91c1c" stroke-width="1" stroke-dasharray="3 3"/>
+    </svg>
+  </div>
+</section>
+
+<section id="diag-deployment">
+  <h2>Deployment topology (v1 single-region Dhaka)</h2>
+  <div class="diagram-card">
+    <div class="caption">Figure 3 — Single-region active write path; backup snapshots out-of-region</div>
+    <svg viewBox="0 0 900 360" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, sans-serif" font-size="12">
+      <style>
+        .gb-region { fill: #f8fafc; stroke: #cbd5e1; stroke-dasharray: 4 4; rx: 12; }
+        .gb-region-label { fill: #b45309; font-weight: 700; font-size: 13px; letter-spacing: 0.04em; }
+        .gb-cluster { fill: #ffffff; stroke: #94a3b8; rx: 6; }
+        .gb-pod { fill: #f1f5f9; stroke: #64748b; rx: 4; }
+        .gb-db { fill: #fde68a; stroke: #b45309; stroke-width: 1.5; rx: 4; }
+        .gb-obs { fill: #fef3c7; stroke: #b45309; stroke-dasharray: 4 3; rx: 4; }
+        .gb-replica { fill: #ffe4e6; stroke: #be123c; rx: 4; }
+        .gb-snap { fill: #fce7f3; stroke: #be185d; stroke-dasharray: 3 3; rx: 4; }
+        .label { fill: #0f172a; font-weight: 600; }
+        .sub { fill: #64748b; font-size: 11px; }
+      </style>
+
+      <rect class="gb-region" x="20" y="20" width="600" height="320"/>
+      <text class="gb-region-label" x="40" y="42">BANGLADESH REGION (active write path)</text>
+      <text class="sub" x="40" y="58">per AD-9: Bangladesh-resident provider required</text>
+
+      <rect class="gb-cluster" x="40" y="78" width="560" height="100"/>
+      <text class="sub" x="50" y="96" font-weight="700" fill="#475569">PER-CITY TENANT CLUSTER</text>
+      <rect class="gb-pod" x="50" y="108" width="100" height="32"/>
+      <text class="label" x="100" y="128" text-anchor="middle">Gateway pods</text>
+      <rect class="gb-pod" x="160" y="108" width="180" height="32"/>
+      <text class="label" x="250" y="128" text-anchor="middle">Sealed-component pods</text>
+      <text class="sub" x="250" y="140" text-anchor="middle">Fusion · Incident · Playbook · Simulator</text>
+      <rect class="gb-pod" x="350" y="108" width="180" height="32"/>
+      <text class="label" x="440" y="128" text-anchor="middle">Projection pods</text>
+      <text class="sub" x="440" y="140" text-anchor="middle">Priya · PHA · WB export · Cluster</text>
+      <rect class="gb-obs" x="540" y="108" width="50" height="32"/>
+      <text class="label" x="565" y="128" text-anchor="middle">Obs</text>
+
+      <rect class="gb-cluster" x="40" y="200" width="560" height="80"/>
+      <text class="sub" x="50" y="218" font-weight="700" fill="#475569">PER-TENANT DATA PLANE</text>
+      <rect class="gb-db" x="50" y="228" width="180" height="40"/>
+      <text class="label" x="140" y="248" text-anchor="middle">Event store</text>
+      <text class="sub" x="140" y="260" text-anchor="middle">content-addressed</text>
+      <rect class="gb-db" x="240" y="228" width="180" height="40"/>
+      <text class="label" x="330" y="248" text-anchor="middle">Projection DBs</text>
+      <rect class="gb-replica" x="430" y="228" width="160" height="40"/>
+      <text class="label" x="510" y="248" text-anchor="middle">Replicated peer</text>
+      <text class="sub" x="510" y="260" text-anchor="middle">warm standby</text>
+
+      <rect class="gb-obs" x="40" y="296" width="280" height="32"/>
+      <text class="label" x="180" y="316" text-anchor="middle">Observability stack (OTel · vendor-neutral)</text>
+
+      <rect class="gb-region" x="660" y="20" width="220" height="320"/>
+      <text class="gb-region-label" x="680" y="42">OUT-OF-REGION</text>
+      <text class="sub" x="680" y="58">backup only (per AD-16 retention)</text>
+      <rect class="gb-snap" x="680" y="100" width="180" height="80"/>
+      <text class="label" x="770" y="126" text-anchor="middle">Backup snapshots</text>
+      <text class="sub" x="770" y="142" text-anchor="middle">immutable cold storage</text>
+      <text class="sub" x="770" y="156" text-anchor="middle">retention ≥ 7y default</text>
+
+      <line x1="140" y1="140" x2="140" y2="228" stroke="#0e7490" stroke-width="2"/>
+      <line x1="330" y1="140" x2="330" y2="228" stroke="#0e7490" stroke-width="2"/>
+      <line x1="500" y1="268" x2="180" y2="310" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+      <line x1="140" y1="268" x2="770" y2="180" stroke="#cbd5e1" stroke-dasharray="3 3"/>
+    </svg>
+    <div class="reading"><strong>Reading the diagram.</strong> Per AD-9 the active write path must be Bangladesh-resident. AWS ap-southeast-1 (Singapore) is acceptable as the replicated peer only — it cannot be the active path. Backup snapshots live out-of-region for retention but never serve live reads. The replicated peer is warm standby, not active-active.</div>
+  </div>
+</section>
+
+<section id="conventions">
+  <h2>Consistency conventions</h2>
+  <p>Rules that all components must obey to prevent silent divergence. These are the things two engineers could otherwise pick differently while each obeying every AD.</p>
+  <table class="ad-table">
+    <thead><tr><th>Concern</th><th>Convention</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Identifiers</strong></td><td>ULIDs (lexicographically sortable, time-ordered) for all entity IDs (sensor_id, anjali_id, incident_id, playbook_version_id, event_id). Tenant prefix: <code>{tenant_id}:{entity_id}</code>. Federation IDs use a separate namespace and are never used inside tenant scopes.</td></tr>
+      <tr><td><strong>Event envelope</strong></td><td>Every event: <code>{schema_version, tenant_id, event_type, event_id, occurred_at, ingested_at, actor_identity, correlation_id, causation_id, payload}</code>. <code>correlation_id</code> links events to a logical operation; <code>causation_id</code> links to the event that caused this one.</td></tr>
+      <tr><td><strong>Event timestamps</strong></td><td>UTC always; <code>occurred_at</code> is the source-side time; <code>ingested_at</code> is the gateway time. Skew between them is captured but not normalized.</td></tr>
+      <tr><td><strong>Errors</strong></td><td>Errors are events (<code>CommandRejected</code>, <code>ProjectionFailed</code>, <code>ChainVerificationFailed</code>, <code>DuplicateEventRejected</code>). No exceptions cross component boundaries as raw exceptions; they become events with a typed payload.</td></tr>
+      <tr><td><strong>Logging</strong></td><td>Application logs are operational; the chain is the audit log. Application logs are not load-bearing; chain events are.</td></tr>
+      <tr><td><strong>Configuration</strong></td><td>Per-city config is part of the tenant namespace. Cross-city config (defaults, WHO template library, fusion weights) lives in a shared "platform-config" projection, not in tenant stores.</td></tr>
+      <tr><td><strong>Tenant scoping</strong></td><td>Every event, projection query, and adapter call MUST carry a tenant_id. Missing tenant_id is a request-rejection condition (gateway-enforced).</td></tr>
+      <tr><td><strong>Two-person signatures</strong></td><td>Linked <code>SignatureAttestation</code> events; both must attest to identical <code>(event_id, payload_hash, version_id)</code> triple (per AD-11).</td></tr>
+      <tr><td><strong>Version-of-record</strong></td><td>Playbook version-of-record = latest <code>PlaybookVersionPublished</code> for the tenant (per AD-13); schema version-of-record = latest <code>SchemaVersionBumped</code> (per AD-4 + AD-15).</td></tr>
+      <tr><td><strong>Idempotency</strong></td><td>Gateway rejects duplicate <code>(tenant_id, event_id)</code> with <code>DuplicateEventRejected</code> (per AD-14).</td></tr>
+      <tr><td><strong>Chain hash computation</strong></td><td>Gateway-computed at write-time; underlying store unaware of chaining (per AD-1).</td></tr>
+      <tr><td><strong>Redaction</strong></td><td>RTBF and redactions forward-only via <code>SubjectRedacted</code> events (per AD-16). Chain is never edited.</td></tr>
+      <tr><td><strong>Override / deviation</strong></td><td>All overrides emit an <code>OverrideRecorded</code> or <code>DeviationCaptured</code> event distinct from the underlying state change event. The override event is the audit trail; the state change is its consequence.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="capability-map">
+  <h2>Capability → architecture map</h2>
+  <p>Where each PRD capability/area lives and which ADs govern it.</p>
+  <table class="ad-table">
+    <thead><tr><th>Capability / area</th><th>Lives in</th><th>Governed by</th></tr></thead>
+    <tbody>
+      <tr><td>CAP-1 Anjali one-tap reporting</td><td><code>ui/anjali-mobile/</code> + <code>adapters/radio/</code> + <code>gateway/ingest/</code></td><td>AD-7, AD-8, AD-3, AD-14, C-11</td></tr>
+      <tr><td>CAP-2 Priya ranked action list</td><td><code>projections/priya-dashboard/</code> + <code>ui/priya-desktop/</code> + <code>components/fusion/</code></td><td>AD-2, AD-3, AD-7</td></tr>
+      <tr><td>CAP-3 PHA pane</td><td><code>ui/pha-pane/</code> + <code>projections/pha-pane/</code></td><td>AD-7, AD-3, AD-11, C-3, C-13</td></tr>
+      <tr><td>CAP-4 Ramesh consumer messaging</td><td><code>adapters/channel/</code> + <code>components/playbook/</code></td><td>AD-3, AD-11, C-4</td></tr>
+      <tr><td>CAP-5 source fusion</td><td><code>components/fusion/</code></td><td>AD-3, C-6, C-7</td></tr>
+      <tr><td>CAP-6 audit chain</td><td><code>gateway/chain/</code> + <code>gateway/ingest/</code></td><td>AD-1, AD-4, AD-11, AD-12, AD-16</td></tr>
+      <tr><td>CAP-7 playbook lifecycle</td><td><code>components/playbook/</code> + <code>components/simulator/</code> + <code>projections/cluster/</code></td><td>AD-3, AD-11, AD-13, C-13, C-14</td></tr>
+      <tr><td>FR-1 audit chain invariants</td><td><code>gateway/</code></td><td>AD-1, AD-4, AD-11, AD-12, AD-14, AD-16</td></tr>
+      <tr><td>FR-2 fusion engine</td><td><code>components/fusion/</code></td><td>AD-3, C-6, C-7</td></tr>
+      <tr><td>FR-3.5 deviation capture</td><td><code>gateway/ingest/</code> (event type) + <code>components/playbook/</code></td><td>AD-2, AD-12</td></tr>
+      <tr><td>FR-3.7 simulator</td><td><code>components/simulator/</code></td><td>AD-3 (non-persistence), AD-13 (reads from event stream)</td></tr>
+      <tr><td>FR-4 Anjali offline-first sync</td><td><code>ui/anjali-mobile/</code> queue + <code>adapters/radio/</code></td><td>AD-8, AD-14, C-15</td></tr>
+      <tr><td>FR-5 Priya ranked action list</td><td><code>projections/priya-dashboard/</code></td><td>AD-2, AD-3, AD-7</td></tr>
+      <tr><td>FR-5.6 PHA monthly report (auto-generated)</td><td><code>projections/pha-pane/</code> (monthly cluster)</td><td>AD-13, AD-16, C-16</td></tr>
+      <tr><td>FR-6 PHA audit browser</td><td><code>projections/pha-pane/</code> + <code>gateway/query/</code></td><td>AD-3, AD-12, AD-16</td></tr>
+      <tr><td>FR-6.6 WB evidence export</td><td><code>projections/wb-export/</code></td><td>AD-9 (residency), AD-13 (projection-not-recompute), AD-16 (no raw PII out of region)</td></tr>
+      <tr><td>FR-7 consumer messaging</td><td><code>adapters/channel/</code> + <code>components/playbook/</code></td><td>AD-3, AD-11</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="deferred">
+  <h2>Deferred — every entry has a revisit trigger</h2>
+  <p>Every Deferred entry names the trigger that brings it back into scope. Two units pulling these triggers could otherwise diverge.</p>
+  <div class="deferred-grid">
+    <div class="deferred-row"><span class="name">Event store implementation</span>KurrentDB v25.x vs Apache Kafka vs Postgres-append-only. Greenfield; licensing under verification against C-16 WB procurement; Bangladesh-region deployment constraints unknown.<span class="revisit">→ Stack selection pass during bmad-create-epics-and-stories</span></div>
+    <div class="deferred-row"><span class="name">Language for core services</span>Go vs Rust vs JVM vs Node. No performance profiling data; team composition unknown at spine level.<span class="revisit">→ First-hire / first-implementation pass</span></div>
+    <div class="deferred-row"><span class="name">Language for adapters</span>Often matches core; possibly different for hot-path adapters (Rust for radio adapter).<span class="revisit">→ Same as core language decision</span></div>
+    <div class="deferred-row"><span class="name">Identity provider / RBAC implementation</span>OIDC, Auth0, Keycloak, or custom. WB procurement may constrain; whether PHA already has an IdP unknown.<span class="revisit">→ Dhaka engagement scoping + first PHA integration conversation</span></div>
+    <div class="deferred-row"><span class="name">Bangladesh-resident cloud provider (active path)</span>AD-9 requires Bangladesh-resident active write path; local providers (Pathao Cloud, TigerIT Bangladesh cloud, government cloud) under evaluation.<span class="revisit">→ A8 sub-task validation + first WB procurement cycle</span></div>
+    <div class="deferred-row"><span class="name">WB evidence export format</span>Specific WB program (Bangladesh Water Security Program) determines disbursement-linked indicator format.<span class="revisit">→ OQ-10 finalization + first WB contact</span></div>
+    <div class="deferred-row"><span class="name">Anjali-mobile cross-platform</span>Native Android vs cross-platform. Team composition; WhatsApp Business API SDK availability per platform.<span class="revisit">→ First Anjali-mobile engineering hire</span></div>
+    <div class="deferred-row"><span class="name">Concrete event schemas per type</span>Spine fixes the rule (AD-4), not the schemas. Owned by the implementing code.<span class="revisit">→ First event schema design pass</span></div>
+    <div class="deferred-row"><span class="name">Concrete projection schemas</span>Owned by code. Must be one coordinated pass (fusion and playbook teams must agree or projections diverge).<span class="revisit">→ First projection design pass (coordinated)</span></div>
+    <div class="deferred-row"><span class="name">Simulator harness internals</span>Event-replay library, snapshot strategy, performance budget. Contract fixed (AD-3 + AD-13), internals deferred.<span class="revisit">→ FR-3.7 implementation pass</span></div>
+    <div class="deferred-row"><span class="name">Multi-region DR specifics</span>RPO/RTO targets, replication lag tolerance. AD-9 sets single-region v1.<span class="revisit">→ Federation activation or scale-100K milestone</span></div>
+    <div class="deferred-row"><span class="name">Override-anomaly baselines</span>architecture-invariants.md §7 says "logged v1, enforced v2"; specific baselines need operational data.<span class="revisit">→ First 90 days of operation; v2 enforce pass</span></div>
+    <div class="deferred-row"><span class="name">Retention floor per tenant</span>Default 7 years noted. May differ for water-safety evidence vs. consumer-PII subdomains.<span class="revisit">→ First WB contract + PHA legal review</span></div>
+    <div class="deferred-row"><span class="name">WHO template library content</span>C-14 v1 deliverable; authoring has not begun.<span class="revisit">→ PRD M1 milestone (launch prerequisite)</span></div>
+    <div class="deferred-row"><span class="name">Local-provider replicated peer</span>Active path is Bangladesh-resident; peer may be AWS ap-southeast-1 OR a second Bangladesh provider.<span class="revisit">→ Bangladesh provider selection + first DR exercise</span></div>
+  </div>
+</section>
+
+<section id="stack">
+  <h2>Stack seed</h2>
+  <p>Names only; versions owned by the implementing code per AD. The seed fixes the choices two engineers could otherwise pick differently.</p>
+  <table class="ad-table">
+    <thead><tr><th>Name</th><th>Owner</th></tr></thead>
+    <tbody>
+      <tr><td>Event store</td><td>append-only content-addressed blocks; KurrentDB v25.x (license to verify vs C-16), Apache Kafka, or Postgres-append-only</td></tr>
+      <tr><td>Language (core services)</td><td>TBD — see Deferred</td></tr>
+      <tr><td>Language (UIs)</td><td>Anjali-mobile: Android + WhatsApp Business API client; Priya-desktop + PHA-pane: web app</td></tr>
+      <tr><td>Adapter framework</td><td>TBD — see Deferred</td></tr>
+      <tr><td>Identity / RBAC</td><td>TBD — see Deferred</td></tr>
+      <tr><td>Observability</td><td>OpenTelemetry (CNCF Graduated) for instrumentation; open-source metrics/logs/traces backend (vendor-neutral per AD-10)</td></tr>
+      <tr><td>Cloud (active write path)</td><td>Bangladesh-resident provider required (per AD-9); AWS ap-southeast-1 (Singapore) acceptable only as replicated peer</td></tr>
+      <tr><td>WB evidence export</td><td>projection-not-recompute (per AD-13); k-anonymized indicators only; no raw PII out of Bangladesh (per AD-16)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+
+</div>
+
+<footer>
+  Surakkha v1 architecture spine deck · status: final · updated 2026-09-06 · source: <code>ARCHITECTURE-SPINE.md</code>
+  · built by the <code>bmad-architecture</code> workflow
+</footer>
+
+<script>
+  // Populate the All ADs table from the canonical ADs in the body.
+  const ads = [
+    { id: "AD-1", title: "Event store IS the audit chain", prevents: "dual-writes / audit-afterthought / tampering", binds: "CAP-6 · C-8" },
+    { id: "AD-2", title: "Hybrid aggregate model (Observation + Incident)", prevents: "write bottleneck & cmd/projection gap", binds: "CAP-5 · FR-2 · FR-5" },
+    { id: "AD-3", title: "Sealed-component contracts", prevents: "v2 swap contract drift", binds: "CAP-5 · CAP-7 · FR-2 · FR-3" },
+    { id: "AD-4", title: "Event-schema evolution: strict versioning + upcasters", prevents: "schema drift / rebuild loss", binds: "AD-1 · all consumers" },
+    { id: "AD-5", title: "Strict logical per-tenant isolation", prevents: "cross-tenant leakage / sovereignty breaches", binds: "C-1 · C-10" },
+    { id: "AD-6", title: "RBAC defense-in-depth, three layers", prevents: "single-load-bearing check", binds: "C-10 · all components" },
+    { id: "AD-7", title: "Three UIs as separate products", prevents: "shared release coupling / persona collapse", binds: "C-2 · CAP-1..3" },
+    { id: "AD-8", title: "Multi-radio contract at gateway", prevents: "sensor silence silence / cross-adapter drift", binds: "C-15 · FR-1.4 · FR-4" },
+    { id: "AD-9", title: "Single-region Dhaka deployment for v1", prevents: "premature multi-region / sovereignty", binds: "C-16 · NG-5" },
+    { id: "AD-10", title: "Observability internal + vendor-neutral", prevents: "vendor lock-in / integrity drift", binds: "C-8 · C-16" },
+    { id: "AD-11", title: "Two-person rule (T3 boundary + consumer msg)", prevents: "single-actor mutation / cross-version signatures", binds: "C-3 · C-4 · C-8" },
+    { id: "AD-12", title: "Liability split via actor identity", prevents: "contractual-only liability / unanswered attribution", binds: "C-13" },
+    { id: "AD-13", title: "Version-of-record content-addressed; simulator reads event stream", prevents: "version disagreement / divergent simulator / orphan drafts", binds: "AD-1 · AD-3 · C-14" },
+    { id: "AD-14", title: "Idempotency by (tenant_id, event_id)", prevents: "duplicate events under store-and-forward / storms", binds: "AD-1 · FR-1 · FR-4" },
+    { id: "AD-15", title: "Change-management authority is structured", prevents: "team-divergent schemas / out-of-band config", binds: "AD-4 · AD-13 · C-14" },
+    { id: "AD-16", title: "Retention floor + RTBF via tombstones", prevents: "append-only violation / inconsistent RTBF", binds: "C-10 · AD-1 · AD-5" }
+  ];
+  const tbody = document.getElementById('ad-tbody');
+  if (tbody) {
+    ads.forEach(a => {
+      const tr = document.createElement('tr');
+      tr.className = 'ad-row';
+      tr.onclick = () => {
+        const el = document.getElementById(a.id.toLowerCase());
+        if (el) { el.open = !el.open; el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+      };
+      tr.innerHTML = `<td class="ad-id">${a.id}</td><td>${a.title}</td><td><span class="prevent">${a.prevents}</span></td><td><span class="binds">${a.binds}</span></td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Active TOC highlighting
+  const links = document.querySelectorAll('nav.toc a');
+  const sections = Array.from(links).map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector(`nav.toc a[href="#${e.target.id}"]`);
+        if (link) link.classList.add('active');
+      }
+    });
+  }, { rootMargin: '0% 0% -70% 0%' });
+  sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>

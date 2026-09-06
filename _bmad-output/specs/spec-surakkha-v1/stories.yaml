@@ -1,0 +1,104 @@
+- id: "1"
+  title: Append-only cryptographic audit chain with two-person rule
+  description: >-
+    Single-gateway, content-addressed, hash-chained audit log per CAP-6 + C-8;
+    covers two-person rule on T3-boundary playbook edits and consumer message
+    issuance, per-city namespace, and access-logged reads. Every other story
+    writes through this gateway.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Single gateway, no module writes directly to chain storage
+    (architecture-invariants.md §6). Content-addressed with prior-hash
+    reference (C-8). Two-person rule on T3-boundary playbook edits and
+    consumer message issuance (C-4, C-8). Per-city namespace, federation-ready
+    not active (C-1). Sensor silence logged as event not noise (C-15).
+    Access-logged reads (C-10).
+- id: "2"
+  title: Heterogeneous source-fusion engine with per-source credibility weighting
+  description: >-
+    Sealed-component fusion engine per CAP-5 + C-7: five inputs (sensor,
+    Anjali, complaint, lab, environmental) → ranked 4–6 incident list with
+    source attribution and corroborated confidence. v1 weighted-voting only;
+    ML deferred to v2 with interface unchanged.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Sealed-component contract with stable 5-input / ranked-list-output
+    (C-7, architecture-invariants.md §3). v1 weighted-voting only, ML deferred
+    to v2. Per-contaminant-class weights city-configurable (C-6,
+    detection-layer.md §4). Anjali credibility updates weekly not real-time
+    (detection-layer.md §4).
+- id: "3"
+  title: Playbook authoring, simulation, and deviation-to-amendment lifecycle
+  description: >-
+    Seven-stage playbook lifecycle per CAP-7: author → approve → run →
+    deviate → review → amend → re-approve. Deviations are first-class audit
+    objects and promote to amendments at monthly review; PHA owns approval,
+    not vendor.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    7-stage lifecycle (author → approve → run → deviate → review → amend →
+    re-approve) per playbook-lifecycle.md. PHA owns approval not vendor.
+    Deviation is first-class and promotes to amendment. WHO template library
+    ships with product (C-14). Liability split vendor/PHA/utility per audit
+    chain evidence (C-13).
+- id: "4"
+  title: Anjali one-tap reporting across WhatsApp, voice, image, and SMS
+  description: >-
+    Local-operator mobile surface per CAP-1 + C-11: voice + image + SMS in
+    regional language, offline-first sync, reaches Priya within 5 minutes
+    when online and queues offline-first when not. Anjali is the only
+    trust-bearing interface; SMS is first-class not fallback.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    SMS is first-class not fallback (C-11). Multi-radio offline-first sync
+    (C-15). Phone-as-network for sentinel (C-15). Trust-bearing interface
+    means no Anjali login, no training app (personas.md Anjali). Hybrid
+    incentive surface (stipend + credential + status recognition) per
+    personas.md OQ-4.
+- id: "5"
+  title: Priya ranked action list with playbook execution and deviation capture
+  description: >-
+    Central-operator desktop surface per CAP-2: ranked action list (not raw
+    sensor feeds) with source attribution and corroborated confidence;
+    playbook step execution with deviation capture; auto-generated handover
+    brief at shift change.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Deviation is first-class with friction but not block
+    (playbook-lifecycle.md). Override-reasoning captured to audit chain.
+    Auto-generated handover brief at shift change (personas.md Priya).
+- id: "6"
+  title: PHA pane for playbook approval, threshold tuning, and audit without alteration
+  description: >-
+    Regulator pane per CAP-3: playbook amendment approvals with dual
+    signature at T3 boundary; per-contaminant-class threshold tuning with
+    tiered SLA (acute minutes/on-call, chronic hours/business hours); read-only
+    audit-chain browser; never a message-desk.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Read-mostly pane, never a message-desk (personas.md Dr. Mensah). PHA
+    approval at T2→T3 with tiered SLA per contaminant class (C-3,
+    escalation-policy.md §5a). Two-person rule on T3-boundary playbook edits
+    (C-8). Audit browser is read-only and access-logged. World Bank
+    audit-standard evidence-export from day one (C-16, sales-motion.md §4a).
+- id: "7"
+  title: Ramesh consumer messaging via WhatsApp and SMS at Tier 3 and above
+  description: >-
+    Consumer-side message channel per CAP-4 + C-4: WhatsApp + SMS delivery
+    of "safe / boil / do not drink / wait" notices, sourced and signed;
+    only fires at Tier 3 or above; two-person rule on issuance. No app
+    install, no dashboard, no paywall.
+  spec_checkpoint: true
+  done_checkpoint: true
+  invoke_dev_with: >-
+    Public messages only at Tier 3+ (C-4). Two-person rule on consumer
+    message issuance (C-4, C-8). WhatsApp + SMS redundancy
+    (architecture-invariants.md §5). No app install, no dashboard, no paywall
+    (personas.md Ramesh). Trusted-voice routing (councillor, Anjali) carries
+    more weight than system-issued.

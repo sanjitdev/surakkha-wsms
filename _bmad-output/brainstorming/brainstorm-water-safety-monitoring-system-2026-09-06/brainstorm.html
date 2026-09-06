@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Surakkha — Water Safety Monitoring (Brainstorm Keepsake)</title>
+<style>
+  /* ----------  PALETTE  ----------
+     deep pipe-water ink, paper-rust alarms, ward-morning green,
+     sentinel-strip cream, audit-gold.  No external assets.  */
+  :root{
+    --ink:        #0a1f2b;
+    --ink-2:      #112f3f;
+    --paper:      #f5efe1;
+    --paper-2:    #ece4cf;
+    --water:      #4ea0c9;
+    --water-2:    #256d92;
+    --deep:       #0e3a55;
+    --rust:       #c45a3a;
+    --gold:       #d6a73c;
+    --gold-2:     #b58524;
+    --moss:       #4a7a4a;
+    --moss-2:     #2f5a2f;
+    --priya:      #1c5d8c;
+    --anjali:     #b35a3b;
+    --ramesh:     #6e8b3d;
+    --mensah:     #4d3a78;
+    --attacker:   #8a1e1e;
+    --shadow:     rgba(10,31,43,.18);
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family: "Iowan Old Style","Palatino Linotype",Georgia,serif;
+    color:var(--ink);
+    background:
+      radial-gradient(ellipse at 12% -10%, #d4e7f0 0%, transparent 55%),
+      radial-gradient(ellipse at 110% 10%, #f5e2cc 0%, transparent 50%),
+      linear-gradient(180deg,#fbf6e8 0%,#f1e9d2 100%);
+    line-height:1.55;
+    overflow-x:hidden;
+  }
+
+  /* ----------  COVER / FRONTISPIECE  ---------- */
+  .front{
+    min-height:96vh;
+    padding:6vh 6vw 4vh;
+    position:relative;
+    border-bottom:1px solid #d9c89b;
+    overflow:hidden;
+  }
+  .front::before{
+    /* pipe network under the title — system seen as plumbing */
+    content:"";
+    position:absolute; inset:0;
+    background-image:
+      radial-gradient(circle at 8% 22%, rgba(78,160,201,.55) 0 1.2px, transparent 1.6px),
+      radial-gradient(circle at 22% 78%, rgba(78,160,201,.45) 0 1.2px, transparent 1.6px),
+      radial-gradient(circle at 41% 12%, rgba(196,90,58,.55) 0 1.2px, transparent 1.6px),
+      radial-gradient(circle at 60% 60%, rgba(78,160,201,.45) 0 1.2px, transparent 1.6px),
+      radial-gradient(circle at 78% 28%, rgba(214,167,60,.5) 0 1.2px, transparent 1.6px),
+      radial-gradient(circle at 92% 82%, rgba(74,122,74,.5) 0 1.2px, transparent 1.6px);
+    background-size: 220px 220px, 280px 280px, 320px 320px, 260px 260px, 300px 300px, 240px 240px;
+    opacity:.45;
+    pointer-events:none;
+  }
+  .front::after{
+    /* a single faint horizontal "main" line — the city main pipe */
+    content:"";
+    position:absolute;
+    left:-2%; right:-2%; top:48%;
+    height:2px;
+    background:linear-gradient(90deg, transparent 0%, var(--water-2) 8%, var(--water) 50%, var(--water-2) 92%, transparent 100%);
+    opacity:.35;
+    filter:blur(.4px);
+  }
+  .kicker{
+    text-transform:uppercase; letter-spacing:.32em; font-size:.72rem;
+    color:var(--water-2); font-family:"Inter",system-ui,sans-serif;
+    font-weight:600;
+  }
+  h1.title{
+    font-size: clamp(2.6rem, 6.5vw, 5.4rem);
+    line-height:1.02;
+    margin:.4em 0 .15em;
+    letter-spacing:-.01em;
+    color:var(--ink);
+  }
+  h1.title em{
+    font-style:italic;
+    color:var(--water-2);
+  }
+  .subtitle{
+    max-width:52ch;
+    font-size:1.1rem;
+    color:var(--ink-2);
+    margin-top:.4em;
+  }
+  .meta-row{
+    margin-top:2.4em;
+    display:flex; flex-wrap:wrap; gap:1.6rem 2.4rem;
+    font-family:"Inter",system-ui,sans-serif;
+    font-size:.82rem;
+    color:var(--ink-2);
+  }
+  .meta-row span b{ color:var(--ink); letter-spacing:.06em; text-transform:uppercase; font-size:.68rem; display:block; margin-bottom:.15em;}
+
+  /* a tiny watermark diagram: source → main → tap with a sentry */
+  .watermark{
+    position:absolute; right:5vw; bottom:8vh;
+    width: 280px; height:140px;
+    opacity:.85;
+  }
+
+  /* ----------  SECTIONS  ---------- */
+  section{
+    padding: 8vh 6vw;
+    max-width:1240px;
+    margin: 0 auto;
+    position:relative;
+  }
+  section h2{
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    margin:0 0 .2em;
+    letter-spacing:-.005em;
+    line-height:1.15;
+  }
+  section .eyebrow{
+    text-transform:uppercase; letter-spacing:.34em; font-size:.72rem;
+    font-family:"Inter",system-ui,sans-serif; font-weight:600;
+    color:var(--water-2);
+    display:flex; align-items:center; gap:.8em;
+  }
+  section .eyebrow .num{
+    display:inline-grid; place-items:center;
+    width:1.8em; height:1.8em; border-radius:50%;
+    background:var(--ink); color:var(--paper);
+    font-family:"Inter",sans-serif; font-weight:700;
+    letter-spacing:0;
+  }
+  section p.lede{
+    max-width:62ch; font-size:1.08rem; color:var(--ink-2);
+  }
+
+  /* ----------  TECHNIQUE #1 — FIRST PRINCIPLES ---------- */
+  .bedrock{
+    margin-top:3.2em;
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+    gap: 1.4rem;
+  }
+  .bed{
+    background:var(--paper);
+    border:1px solid #d9c89b;
+    border-radius:6px;
+    padding:1.4rem 1.3rem 1.6rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .bed::before{
+    /* water-table line under each card */
+    content:""; position:absolute; left:0; right:0; bottom:0; height:38%;
+    background:
+      linear-gradient(180deg, rgba(78,160,201,0) 0%, rgba(78,160,201,.25) 100%);
+    pointer-events:none;
+  }
+  .bed .n{ font-family:"Inter",sans-serif; font-weight:700; font-size:.72rem; letter-spacing:.22em; color:var(--water-2);}
+  .bed h3{ font-size:1.05rem; margin:.35em 0 .35em; color:var(--ink);}
+  .bed p{ font-size:.92rem; color:var(--ink-2); margin:0;}
+  .bed.focused{
+    background:linear-gradient(180deg, #fff8e3 0%, #f6e7c1 100%);
+    border-color:#c79b3b;
+    box-shadow:0 0 0 4px rgba(214,167,60,.12);
+  }
+  .bed.focused::after{
+    content:"mined deepest";
+    position:absolute; top:.7rem; right:.7rem;
+    font-family:"Inter",sans-serif; font-size:.6rem;
+    letter-spacing:.18em; text-transform:uppercase;
+    background:var(--gold); color:#2a1f08;
+    padding:.2em .55em; border-radius:99px;
+  }
+
+  /* ----------  TECHNIQUE #2 — ROLE PLAYING ---------- */
+  .cast{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+    gap:1.6rem;
+    margin-top:3em;
+  }
+  .persona{
+    background:var(--paper);
+    border:1px solid #d9c89b;
+    border-radius:8px;
+    padding:1.5rem 1.4rem 1.6rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .persona .chip{
+    display:inline-block;
+    font-family:"Inter",sans-serif;
+    font-size:.62rem; letter-spacing:.2em; text-transform:uppercase;
+    padding:.25em .7em; border-radius:99px;
+    color:#fff;
+  }
+  .persona h3{ margin:.4em 0 0; font-size:1.4rem; letter-spacing:-.005em;}
+  .persona .role{ font-style:italic; color:var(--ink-2); margin:.1em 0 .8em; font-size:.95rem;}
+  .persona ul{
+    margin:.6em 0 0; padding:0 0 0 1.1em;
+    font-size:.9rem; color:var(--ink-2);
+  }
+  .persona ul li{ margin-bottom:.35em;}
+  .persona.priya{ border-top:5px solid var(--priya);}
+  .persona.priya .chip{ background:var(--priya);}
+  .persona.anjali{ border-top:5px solid var(--anjali);}
+  .persona.anjali .chip{ background:var(--anjali);}
+  .persona.ramesh{ border-top:5px solid var(--ramesh);}
+  .persona.ramesh .chip{ background:var(--ramesh);}
+  .persona.mensah{ border-top:5px solid var(--mensah);}
+  .persona.mensah .chip{ background:var(--mensah);}
+  .persona.attacker{ border-top:5px solid var(--attacker); background:linear-gradient(180deg,#fbf1eb 0%, #f1d8c8 100%);}
+  .persona.attacker .chip{ background:var(--attacker);}
+  .persona .sketch{
+    height:64px; margin:.5em 0 .8em; position:relative;
+  }
+
+  /* two-tier climax card */
+  .twotier{
+    margin-top:3.6em;
+    background: linear-gradient(135deg,#0e3a55 0%, #112f3f 60%, #0a1f2b 100%);
+    color:#f3ecda;
+    border-radius:14px;
+    padding: 2.4rem 2rem;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 28px 60px -30px rgba(10,31,43,.7);
+  }
+  .twotier::before{
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 12% 30%, rgba(78,160,201,.18) 0 18%, transparent 40%),
+      radial-gradient(circle at 88% 70%, rgba(196,90,58,.16) 0 22%, transparent 40%);
+    pointer-events:none;
+  }
+  .twotier h2{
+    color:#fff8e3;
+    font-size: clamp(1.7rem,2.8vw,2.4rem);
+    margin:0 0 .2em;
+    position:relative;
+  }
+  .twotier .eyebrow{ color:#9bd0ec;}
+  .twotier .eyebrow .num{ background:var(--gold); color:#2a1f08;}
+  .twotier .loop{
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap:1.2rem;
+    align-items:stretch;
+    margin-top:1.8em;
+    position:relative;
+  }
+  .twotier .col{
+    background:rgba(245,239,225,.06);
+    border:1px solid rgba(245,239,225,.18);
+    border-radius:10px;
+    padding:1.2rem 1.2rem 1.3rem;
+  }
+  .twotier .col h4{
+    margin:0 0 .35em;
+    font-size:1.15rem;
+    color:#fff;
+  }
+  .twotier .col.local h4{ color:#f0b59a;}
+  .twotier .col.global h4{ color:#9bd0ec;}
+  .twotier .col p{ margin:0 0 .5em; font-size:.95rem; color:#e9e0c8;}
+  .twotier .col ul{ margin:.4em 0 0; padding-left:1.1em; font-size:.9rem; color:#dcd0b1;}
+  .twotier .bridge{
+    align-self:center;
+    text-align:center;
+    font-family:"Inter",sans-serif;
+    font-size:.7rem;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--gold);
+    width: 90px;
+  }
+  .twotier .bridge svg{ display:block; margin: 0 auto .4em;}
+
+  /* ----------  TECHNIQUE #3 — CONSTRAINT MAP ---------- */
+  .map{
+    margin-top:2.6em;
+    background:
+      linear-gradient(180deg, rgba(245,239,225,.5) 0%, rgba(245,239,225,0) 100%),
+      repeating-linear-gradient(0deg, transparent 0 23px, rgba(10,31,43,.06) 23px 24px),
+      repeating-linear-gradient(90deg, transparent 0 23px, rgba(10,31,43,.06) 23px 24px),
+      linear-gradient(135deg,#f5efe1 0%,#ece4cf 100%);
+    border:1px solid #d9c89b;
+    border-radius:10px;
+    padding:1.6rem;
+    position:relative;
+  }
+  .map .legend{
+    display:flex; flex-wrap:wrap; gap:.6rem;
+    margin-bottom:1.2rem;
+  }
+  .map .legend span{
+    font-family:"Inter",sans-serif; font-size:.65rem; letter-spacing:.18em;
+    text-transform:uppercase;
+    padding:.25em .6em; border-radius:99px;
+    color:#fff;
+  }
+  .clusters{
+    display:grid;
+    grid-template-columns: repeat(auto-fit,minmax(170px,1fr));
+    gap:.8rem;
+  }
+  .cluster{
+    background:#fbf6e8;
+    border:1px solid #d9c89b;
+    border-radius:8px;
+    padding:1rem;
+  }
+  .cluster h4{
+    margin:0 0 .35em;
+    font-size:.95rem;
+    color:var(--ink);
+  }
+  .cluster .lbl{ font-family:"Inter",sans-serif; font-size:.62rem; letter-spacing:.22em; text-transform:uppercase;}
+  .cluster p{ margin:.2em 0 0; font-size:.85rem; color:var(--ink-2);}
+  .cluster.A .lbl{color:#a14a2e;}
+  .cluster.B .lbl{color:#1c5d8c;}
+  .cluster.C .lbl{color:#4a7a4a;}
+  .cluster.D .lbl{color:#7a5a1f;}
+  .cluster.E .lbl{color:#4d3a78;}
+  .cluster.F .lbl{color:#8a1e1e;}
+
+  .decision-grid{
+    margin-top:2.6em;
+    display:grid; gap:1rem;
+    grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
+  }
+  .dcard{
+    background:var(--paper);
+    border:1px solid #d9c89b;
+    border-left: 4px solid var(--gold);
+    border-radius:6px;
+    padding:1.1rem 1.2rem;
+  }
+  .dcard:nth-child(3n){ border-left-color:var(--water-2);}
+  .dcard:nth-child(3n+2){ border-left-color:var(--anjali);}
+  .dcard .tag{
+    font-family:"Inter",sans-serif;
+    font-size:.6rem; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--ink-2);
+  }
+  .dcard h4{ margin:.15em 0 .3em; font-size:1.05rem; color:var(--ink);}
+  .dcard p{ margin:0; font-size:.9rem; color:var(--ink-2);}
+
+  /* ----------  LIGHTHOUSE DECISION (CLIMAX #2) ---------- */
+  .lighthouse{
+    margin-top:4em;
+    background: linear-gradient(180deg, #0a1f2b 0%, #112f3f 100%);
+    color:#f3ecda;
+    border-radius:14px;
+    padding: 2.6rem 2rem 2.4rem;
+    position:relative;
+    overflow:hidden;
+  }
+  .lighthouse::before{
+    /* lighthouse beam */
+    content:"";
+    position:absolute;
+    top:-30%;
+    left:50%;
+    width:120%;
+    height:160%;
+    background:
+      conic-gradient(from -10deg at 50% 100%, transparent 0deg, rgba(214,167,60,.16) 18deg, transparent 36deg);
+    transform:translateX(-50%);
+    pointer-events:none;
+  }
+  .lighthouse h2{
+    color:#fff8e3;
+    font-size: clamp(1.8rem,3vw,2.5rem);
+    margin:0 0 .3em;
+    position:relative;
+  }
+  .lighthouse .eyebrow{ color:#9bd0ec;}
+  .lighthouse .eyebrow .num{ background:var(--gold); color:#2a1f08;}
+  .lighthouse .lhoy{
+    position:relative;
+    display:grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+    gap:1rem;
+    margin-top:1.6em;
+  }
+  .lhoy .stat{
+    background:rgba(245,239,225,.06);
+    border:1px solid rgba(245,239,225,.2);
+    border-radius:8px;
+    padding:1rem 1.1rem;
+  }
+  .lhoy .stat .big{
+    font-size:1.85rem; font-weight:700; color:#fff;
+    font-family:"Inter",sans-serif;
+    letter-spacing:-.02em;
+  }
+  .lhoy .stat .lbl{
+    font-family:"Inter",sans-serif; font-size:.62rem;
+    letter-spacing:.22em; text-transform:uppercase;
+    color:#9bd0ec; margin-top:.2em;
+  }
+  .lhoy .stat p{ margin:.5em 0 0; font-size:.85rem; color:#dcd0b1;}
+
+  /* ----------  CLOSING FRAME  ---------- */
+  .closing{
+    margin: 6vh 6vw 10vh;
+    max-width:1240px; margin-left:auto; margin-right:auto;
+    padding: 3.4rem 2.4rem;
+    background:
+      radial-gradient(ellipse at 0% 0%, rgba(78,160,201,.18) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 100%, rgba(214,167,60,.18) 0%, transparent 55%),
+      linear-gradient(135deg,#0a1f2b 0%, #163a55 100%);
+    border-radius:18px;
+    color:#f3ecda;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 40px 80px -40px rgba(10,31,43,.6);
+  }
+  .closing::after{
+    /* pulse / signal */
+    content:""; position:absolute; right:-10%; bottom:-30%; width:60%; height:160%;
+    background: radial-gradient(circle at center, rgba(78,160,201,.35) 0%, transparent 60%);
+    filter:blur(20px);
+  }
+  .closing .eyebrow{ color:#9bd0ec;}
+  .closing .eyebrow .num{ background:var(--gold); color:#2a1f08;}
+  .closing h2{
+    font-size: clamp(1.6rem,2.6vw,2.2rem);
+    color:#fff8e3;
+    margin:.4em 0 .5em;
+    max-width: 32ch;
+  }
+  .closing p.synth{
+    font-size:1.15rem;
+    max-width:62ch;
+    color:#f3ecda;
+    line-height:1.55;
+  }
+  .closing p.synth em{ color:var(--gold); font-style:italic;}
+  .closing .sign{
+    margin-top:2em;
+    font-family:"Inter",sans-serif;
+    font-size:.7rem;
+    letter-spacing:.3em; text-transform:uppercase;
+    color:#9bd0ec;
+  }
+
+  /* small SVG icons spacing */
+  svg{ display:block;}
+
+  /* responsive niceties */
+  @media (max-width:720px){
+    .twotier .loop{ grid-template-columns: 1fr;}
+    .twotier .bridge{ width:auto; padding:.4em 0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     COVER / FRONTISPIECE
+     ================================================================ -->
+<header class="front">
+  <div class="kicker">BMAD · Creative-Partner Brainstorm · Keepsake</div>
+  <h1 class="title">Surakkha<br/><em>— water, watched.</em></h1>
+  <p class="subtitle">
+    A single afternoon spent pushing past the obvious sensor-and-dashboard sketch,
+    looking for the angles that turn a monitoring idea into a civic response system.
+  </p>
+
+  <div class="meta-row">
+    <span><b>Date</b>2026-09-06</span>
+    <span><b>Mode</b>Partner · chain not extraction</span>
+    <span><b>Techniques</b>First Principles → Role Playing → Constraint Mapping → Convergence</span>
+    <span><b>Status</b>Convergence reached · v1 locked</span>
+  </div>
+
+  <!-- watermark diagram: source → main → ward sentry → tap -->
+  <svg class="watermark" viewBox="0 0 280 140" aria-hidden="true">
+    <defs>
+      <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6 z" fill="#256d92"/>
+      </marker>
+    </defs>
+    <!-- main -->
+    <line x1="20" y1="70" x2="260" y2="70" stroke="#256d92" stroke-width="2.4"/>
+    <!-- source -->
+    <circle cx="20" cy="70" r="9" fill="#4ea0c9" stroke="#0a1f2b" stroke-width="1.5"/>
+    <text x="20" y="98" text-anchor="middle" font-family="Inter" font-size="9" fill="#112f3f">source</text>
+    <!-- industrial -->
+    <circle cx="80" cy="70" r="6" fill="#1c5d8c"/>
+    <text x="80" y="58" text-anchor="middle" font-family="Inter" font-size="8" fill="#112f3f">5 industrial</text>
+    <!-- sentinel -->
+    <rect x="142" y="64" width="14" height="12" fill="#d6a73c" stroke="#0a1f2b" stroke-width="1"/>
+    <text x="149" y="58" text-anchor="middle" font-family="Inter" font-size="8" fill="#112f3f">1K sentinels</text>
+    <!-- Priya hub -->
+    <circle cx="200" cy="70" r="8" fill="#112f3f"/>
+    <circle cx="200" cy="70" r="3.5" fill="#d6a73c"/>
+    <text x="200" y="98" text-anchor="middle" font-family="Inter" font-size="8" fill="#112f3f">Priya (global)</text>
+    <!-- Anjalis -->
+    <circle cx="240" cy="40" r="5" fill="#b35a3b"/>
+    <circle cx="252" cy="70" r="5" fill="#b35a3b"/>
+    <circle cx="240" cy="100" r="5" fill="#b35a3b"/>
+    <text x="240" y="118" text-anchor="middle" font-family="Inter" font-size="8" fill="#112f3f">50 Anjalis</text>
+    <!-- arrows -->
+    <line x1="29" y1="70" x2="74" y2="70" stroke="#256d92" stroke-width="1" marker-end="url(#arr)"/>
+    <line x1="86" y1="70" x2="142" y2="70" stroke="#256d92" stroke-width="1" marker-end="url(#arr)"/>
+    <line x1="156" y1="70" x2="192" y2="70" stroke="#256d92" stroke-width="1" marker-end="url(#arr)"/>
+    <line x1="200" y1="62" x2="240" y2="44" stroke="#b35a3b" stroke-width="1" stroke-dasharray="2 2" marker-end="url(#arr)"/>
+    <line x1="200" y1="78" x2="240" y2="100" stroke="#b35a3b" stroke-width="1" stroke-dasharray="2 2" marker-end="url(#arr)"/>
+  </svg>
+</header>
+
+<!-- ================================================================
+     TECHNIQUE 1 — FIRST PRINCIPLES
+     ================================================================ -->
+<section id="first-principles">
+  <div class="eyebrow"><span class="num">1</span> First Principles · crack the obvious</div>
+  <h2>What's actually bedrock, and what's just a choice we made early?</h2>
+  <p class="lede">
+    The opening assumption to crack: <em>"we need physical sensors at every point that could be contaminated."</em>
+    That's a choice, not a fact. From it, five bedrock facts surfaced — and the fourth one turned out to be where the product lives.
+  </p>
+
+  <div class="bedrock">
+    <div class="bed">
+      <div class="n">Bedrock 01</div>
+      <h3>Contamination is probabilistic</h3>
+      <p>A state over time, place, and source — never a clean binary, never a single sensor reading.</p>
+    </div>
+    <div class="bed">
+      <div class="n">Bedrock 02</div>
+      <h3>False-negative ≫ false-positive</h3>
+      <p>The cost asymmetry shapes every design call: better to err visible than to be silently wrong.</p>
+    </div>
+    <div class="bed">
+      <div class="n">Bedrock 03</div>
+      <h3>The tap is the terminal node</h3>
+      <p>Safe at the pump, contaminated at the tap. The system is only as good as that moment of consumption.</p>
+    </div>
+    <div class="bed focused">
+      <div class="n">Bedrock 04</div>
+      <h3>Operators exist because contamination is detectable &amp; containable, not preventable</h3>
+      <p>Their job <em>is</em> the response. The product isn't sensors with an app — it's the operator's response loop with sensors attached.</p>
+    </div>
+    <div class="bed">
+      <div class="n">Bedrock 05</div>
+      <h3>No single owner</h3>
+      <p>Water safety is shared across utility, regulator, hospital, consumer. Whoever builds it must build for the seams.</p>
+    </div>
+  </div>
+
+  <p style="margin-top:2.4em; max-width:62ch; color:var(--ink-2);">
+    From <strong>Bedrock 04</strong> came the reframe that ran through the rest of the session:
+    <em>latency of action beats measurement accuracy</em>, <em>operators need a playbook, not a dashboard</em>,
+    and containment matters more than detection. The audit trail isn't a compliance afterthought —
+    it's the operator's defense <em>and</em> the system's forecasting fuel for the next city.
+  </p>
+</section>
+
+<!-- ================================================================
+     TECHNIQUE 2 — ROLE PLAYING (the four personas + attacker)
+     ================================================================ -->
+<section id="role-playing" style="background:linear-gradient(180deg, transparent 0%, rgba(78,160,201,.06) 100%); border-radius:18px;">
+  <div class="eyebrow"><span class="num">2</span> Role Playing · four chairs, one table</div>
+  <h2>Sit in someone else's chair for an hour.</h2>
+  <p class="lede">
+    Each role reveals what the product must do for <em>that</em> person — not what we assumed when we sketched it on a whiteboard.
+    Four real humans and one imagined antagonist. The two-tier operator model emerged from this lens, not from the tech.
+  </p>
+
+  <div class="cast">
+
+    <!-- Priya -->
+    <div class="persona priya">
+      <span class="chip">Global Operator</span>
+      <div class="sketch">
+        <svg viewBox="0 0 220 64" width="100%" height="64">
+          <!-- desk -->
+          <line x1="10" y1="50" x2="210" y2="50" stroke="#1c5d8c" stroke-width="2"/>
+          <!-- monitor -->
+          <rect x="60" y="14" width="70" height="32" rx="2" fill="#0a1f2b"/>
+          <rect x="64" y="18" width="62" height="22" fill="#4ea0c9"/>
+          <polyline points="64,38 75,28 86,32 96,22 108,26 126,30" fill="none" stroke="#fff8e3" stroke-width="1.2"/>
+          <!-- person silhouette -->
+          <circle cx="160" cy="22" r="8" fill="#1c5d8c"/>
+          <path d="M148,50 q12,-20 24,0 z" fill="#1c5d8c"/>
+          <!-- signal beacon -->
+          <circle cx="30" cy="22" r="18" fill="none" stroke="#d6a73c" stroke-dasharray="2 3" opacity=".7"/>
+        </svg>
+      </div>
+      <h3>Priya</h3>
+      <div class="role">Central operator · city dashboard · 99% normal / 1% emergency</div>
+      <ul>
+        <li>Fuses signals by source-priority, not sensor count.</li>
+        <li>Reads sensor silence as data, not maintenance.</li>
+        <li>Handover is tribal knowledge — system surfaces today's open threads first.</li>
+        <li>Deviation is welcome; blame-free review is the goal.</li>
+        <li>Trust on bad day is earned on boring days.</li>
+      </ul>
+    </div>
+
+    <!-- Anjali -->
+    <div class="persona anjali">
+      <span class="chip">Local Operator</span>
+      <div class="sketch">
+        <svg viewBox="0 0 220 64" width="100%" height="64">
+          <!-- school -->
+          <rect x="20" y="20" width="38" height="28" fill="#b35a3b" opacity=".15" stroke="#b35a3b" stroke-width="1.5"/>
+          <polygon points="20,20 39,8 58,20" fill="#b35a3b" opacity=".25" stroke="#b35a3b" stroke-width="1.5"/>
+          <rect x="34" y="32" width="10" height="16" fill="#b35a3b"/>
+          <!-- person -->
+          <circle cx="100" cy="22" r="8" fill="#b35a3b"/>
+          <path d="M88,50 q12,-20 24,0 z" fill="#b35a3b"/>
+          <!-- phone with check -->
+          <rect x="138" y="14" width="28" height="40" rx="3" fill="#0a1f2b"/>
+          <rect x="141" y="18" width="22" height="26" fill="#f5efe1"/>
+          <path d="M144,32 l4,4 l8,-9" stroke="#4a7a4a" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- ward sentinels -->
+          <rect x="190" y="40" width="12" height="10" fill="#d6a73c"/>
+        </svg>
+      </div>
+      <h3>Anjali</h3>
+      <div class="role">School principal, mother, part-time health volunteer · 25 wards × 2</div>
+      <ul>
+        <li>Android with a cracked screen. WhatsApp-only.</li>
+        <li>Knows her school's water visually — not WHO guidelines.</li>
+        <li>One-tap, low-bandwidth, low-frequency, local language.</li>
+        <li>Reports what sensors can't see: taste, smell, dead-end pipes, illegal tappings.</li>
+        <li>Must feel the system is <em>for</em> her, not <em>on</em> her.</li>
+      </ul>
+    </div>
+
+    <!-- Ramesh -->
+    <div class="persona ramesh">
+      <span class="chip">Consumer</span>
+      <div class="sketch">
+        <svg viewBox="0 0 220 64" width="100%" height="64">
+          <!-- house -->
+          <polygon points="20,30 50,12 80,30" fill="#6e8b3d" opacity=".25" stroke="#6e8b3d" stroke-width="1.5"/>
+          <rect x="22" y="30" width="56" height="20" fill="#6e8b3d" opacity=".12" stroke="#6e8b3d" stroke-width="1.5"/>
+          <!-- tap dripping -->
+          <line x1="50" y1="34" x2="50" y2="42" stroke="#6e8b3d" stroke-width="1.5"/>
+          <ellipse cx="50" cy="44" rx="2" ry="3" fill="#4ea0c9"/>
+          <ellipse cx="50" cy="50" rx="2.5" ry="3.5" fill="#4ea0c9" opacity=".6"/>
+          <!-- person -->
+          <circle cx="120" cy="24" r="8" fill="#6e8b3d"/>
+          <path d="M108,52 q12,-20 24,0 z" fill="#6e8b3d"/>
+          <!-- message bubble -->
+          <rect x="156" y="14" width="50" height="30" rx="6" fill="#f5efe1" stroke="#0a1f2b" stroke-width="1"/>
+          <path d="M170,44 l4,6 l6,-6" fill="#f5efe1" stroke="#0a1f2b" stroke-width="1"/>
+          <line x1="162" y1="24" x2="200" y2="24" stroke="#0a1f2b" stroke-width="1"/>
+          <line x1="162" y1="30" x2="190" y2="30" stroke="#0a1f2b" stroke-width="1"/>
+          <line x1="162" y1="36" x2="196" y2="36" stroke="#0a1f2b" stroke-width="1"/>
+        </svg>
+      </div>
+      <h3>Ramesh</h3>
+      <div class="role">Resident · trusts the ward councillor, not the app store</div>
+      <ul>
+        <li>Wants five things: <em>safe now?</em> · <em>should I trust this?</em> · <em>what do I do?</em> · <em>how long?</em> · <em>neighbor's water?</em></li>
+        <li>Will never download a dedicated app or pay for safety info.</li>
+        <li>He <em>is</em> a sensor — symptom reports are the fastest outbreak signal.</li>
+        <li>Without him in the loop, the operator's playbook has a last-mile blind spot.</li>
+      </ul>
+    </div>
+
+    <!-- Dr. Mensah -->
+    <div class="persona mensah">
+      <span class="chip">PHA Regulator</span>
+      <div class="sketch">
+        <svg viewBox="0 0 220 64" width="100%" height="64">
+          <!-- pane of glass -->
+          <rect x="14" y="8" width="100" height="46" rx="2" fill="#f5efe1" stroke="#4d3a78" stroke-width="1.5"/>
+          <line x1="40" y1="8" x2="40" y2="54" stroke="#4d3a78" stroke-width=".7"/>
+          <line x1="64" y1="8" x2="64" y2="54" stroke="#4d3a78" stroke-width=".7"/>
+          <line x1="88" y1="8" x2="88" y2="54" stroke="#4d3a78" stroke-width=".7"/>
+          <line x1="14" y1="24" x2="114" y2="24" stroke="#4d3a78" stroke-width=".7"/>
+          <line x1="14" y1="40" x2="114" y2="40" stroke="#4d3a78" stroke-width=".7"/>
+          <rect x="42" y="26" width="20" height="12" fill="#4d3a78" opacity=".25"/>
+          <rect x="66" y="10" width="20" height="12" fill="#4d3a78" opacity=".45"/>
+          <rect x="90" y="42" width="22" height="10" fill="#4d3a78" opacity=".35"/>
+          <!-- person -->
+          <circle cx="160" cy="22" r="8" fill="#4d3a78"/>
+          <path d="M148,52 q12,-20 24,0 z" fill="#4d3a78"/>
+          <!-- shield -->
+          <path d="M188,16 l8,-3 l8,3 l0,12 q0,9 -8,16 q-8,-7 -8,-16 z" fill="#d6a73c"/>
+        </svg>
+      </div>
+      <h3>Dr. Mensah</h3>
+      <div class="role">Public Health Authority · one pane of glass across all utilities</div>
+      <ul>
+        <li>Wants independent verification of every utility's claims.</li>
+        <li>Wants early warning before hospitals see patients.</li>
+        <li>Wants political cover: timestamped audit trail when the press calls.</li>
+        <li>Hidden incentive: don't expose unfixable problems — system must protect him too.</li>
+        <li>Champion, not gatekeeper: standardizes playbooks across every utility he oversees.</li>
+      </ul>
+    </div>
+
+    <!-- Attacker -->
+    <div class="persona attacker">
+      <span class="chip">Adversary</span>
+      <div class="sketch">
+        <svg viewBox="0 0 220 64" width="100%" height="64">
+          <!-- hood silhouette -->
+          <path d="M82,16 q18,-14 36,0 l4,18 q-22,8 -44,0 z" fill="#8a1e1e"/>
+          <ellipse cx="100" cy="34" rx="10" ry="12" fill="#8a1e1e"/>
+          <!-- eyeslit -->
+          <rect x="93" y="32" width="14" height="2" fill="#fbf1eb"/>
+          <!-- attack vectors radiating -->
+          <line x1="50" y1="50" x2="80" y2="38" stroke="#8a1e1e" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="120" y1="38" x2="150" y2="50" stroke="#8a1e1e" stroke-width="1" stroke-dasharray="3 2"/>
+          <line x1="100" y1="10" x2="100" y2="2" stroke="#8a1e1e" stroke-width="1" stroke-dasharray="3 2"/>
+          <!-- jammed signal -->
+          <g stroke="#c45a3a" stroke-width="1.2" fill="none">
+            <path d="M170,18 q5,-5 10,0"/>
+            <path d="M165,24 q10,-10 20,0"/>
+            <path d="M160,30 q15,-15 30,0"/>
+          </g>
+          <line x1="170" y1="50" x2="200" y2="50" stroke="#c45a3a" stroke-width="1.2"/>
+        </svg>
+      </div>
+      <h3>The Attacker</h3>
+      <div class="role">Script kiddie · state actor · insider — the cheapest is the insider</div>
+      <ul>
+        <li>Spoofed sensor + replay → false boil notice &amp; panic.</li>
+        <li>Jam the network during an event — sensor silence <em>is</em> the attack.</li>
+        <li>Slow-poison protocol: sub-threshold micro-doses, cumulatively harmful.</li>
+        <li>Long-game false positives until operators learn to ignore alerts.</li>
+        <li>Insider playbook tampering, override of real alerts, audit-trail exfiltration.</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- ===== THE CLIMAX: TWO-TIER OPERATOR MODEL ===== -->
+  <div class="twotier">
+    <div class="eyebrow"><span class="num">★</span> Climax of the lens</div>
+    <h2>The two-tier operator model.</h2>
+    <p style="max-width:62ch; color:#e9e0c8;">
+      What started as "operator" turned out to be two very different jobs.
+      One tier works at the scale of a ward and a school. The other works at the scale of a city and a public health authority.
+      Same data, different trust model. The local operator collapses three product threads — the noisy consumer channel,
+      the sensor's blind spots, and the spoofing risk — into a single, credible human at the edge.
+    </p>
+
+    <div class="loop">
+      <div class="col local">
+        <h4>Anjali — Local Operator</h4>
+        <p style="font-style:italic; color:#f0b59a;">Detect.</p>
+        <ul>
+          <li>Reports what sensors can't see — taste, smell, dead-end pipes, illegal tappings.</li>
+          <li>A <em>designated trusted human</em>, not anonymous reporting.</li>
+          <li>Mobile-first · one-tap · local language · WhatsApp-only.</li>
+          <li>50 across 25 wards; chosen by the city, not by you.</li>
+          <li>Credibility is weighted over time.</li>
+        </ul>
+      </div>
+      <div class="bridge">
+        <svg width="80" height="40" viewBox="0 0 80 40" aria-hidden="true">
+          <defs>
+            <marker id="arrG" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 z" fill="#d6a73c"/>
+            </marker>
+          </defs>
+          <line x1="6" y1="20" x2="74" y2="20" stroke="#d6a73c" stroke-width="1.5" marker-end="url(#arrG)"/>
+        </svg>
+        credibility<br/>weighting
+      </div>
+      <div class="col global">
+        <h4>Priya — Global Operator</h4>
+        <p style="font-style:italic; color:#9bd0ec;">Resolve.</p>
+        <ul>
+          <li>Fuses sensor + local + citizen + lab + env into a ranked action list.</li>
+          <li>Runs the admin-authored, PHA-approved playbook — and can deviate when needed.</li>
+          <li>1–2 on the central dashboard in v1.</li>
+          <li>The audit trail is her memory under pressure.</li>
+          <li>The deviation is reviewed, not judged.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     TECHNIQUE 3 — CONSTRAINT MAPPING
+     ================================================================ -->
+<section id="constraints">
+  <div class="eyebrow"><span class="num">3</span> Constraint Mapping · 56 across six families</div>
+  <h2>Most of them are real. Some are imagined. The trick is knowing which.</h2>
+  <p class="lede">
+    The constraint map had 56 items across hardware, connectivity, institutional, political, financial, regulatory,
+    social, environmental, and technical families. They cluster into six working groups. We went deep on
+    <strong>Group A</strong> (capital &amp; deployment) and <strong>Group B</strong> (institutional, political, sales),
+    then dove into <strong>Group D</strong> (trust &amp; adoption) where the two-tier model proved decisive.
+  </p>
+
+  <div class="map">
+    <div class="legend">
+      <span style="background:#a14a2e;">A · capital</span>
+      <span style="background:#1c5d8c;">B · institutional / sales</span>
+      <span style="background:#4a7a4a;">C · data / ML / prod</span>
+      <span style="background:#7a5a1f;">D · trust / adoption</span>
+      <span style="background:#4d3a78;">E · regulatory / liability</span>
+      <span style="background:#8a1e1e;">F · security</span>
+    </div>
+    <div class="clusters">
+      <div class="cluster A">
+        <div class="lbl">Group A</div>
+        <h4>Capital &amp; deployment</h4>
+        <p>5 industrial + 30 sentinels = $92K capex + $65K opex. 6× cheaper than industrial-only with 20× denser coverage.</p>
+      </div>
+      <div class="cluster B">
+        <div class="lbl">Group B</div>
+        <h4>Institutional &amp; sales</h4>
+        <p>18–30 month procurement. Five-role buyer matrix. Champion-stack order: operator → utility → PHA → mayor → finance.</p>
+      </div>
+      <div class="cluster C">
+        <div class="lbl">Group C</div>
+        <h4>Data &amp; ML</h4>
+        <p>Source-fusion engine is the ML heart. 50K readings beat 50. Sentinel density is the data moat.</p>
+      </div>
+      <div class="cluster D">
+        <div class="lbl">Group D</div>
+        <h4>Trust &amp; adoption</h4>
+        <p>All roads lead back to the local operator. Incentive design &gt; feature design. <em>For</em> her, not <em>on</em> her.</p>
+      </div>
+      <div class="cluster E">
+        <div class="lbl">Group E</div>
+        <h4>Regulatory &amp; liability</h4>
+        <p>PHA owns escalation policy. Tamper-evident audit log. Pharmacy-grade version control on the playbook.</p>
+      </div>
+      <div class="cluster F">
+        <div class="lbl">Group F</div>
+        <h4>Security</h4>
+        <p>Sensor signing. Append-only chain. Two-person rule on playbook edits &amp; consumer messages. Red-team mode quarterly.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="decision-grid">
+    <div class="dcard">
+      <div class="tag">Genie move · cost</div>
+      <h4>Integrate, don't manufacture.</h4>
+      <p>Buy industrial probes from Hach/Thermo/Xylem. Build the ward-grade sentinel yourself — paper strip + phone + CV. Differentiation is the source-fusion engine, not the sensor.</p>
+    </div>
+    <div class="dcard">
+      <div class="tag">Genie move · opex</div>
+      <h4>Sell outcomes, not devices.</h4>
+      <p>"Outbreak-free for $X per million liters." Sensor-as-a-service, calibration-as-a-service, operator BPO. Remote calibration drops opex per sensor sublinearly.</p>
+    </div>
+    <div class="dcard">
+      <div class="tag">Genie move · sales</div>
+      <h4>Donor funding is parallel primary motion.</h4>
+      <p>Not a fallback. WHO/UNICEF/World Bank/ADB/smart-cities pay for cities the city itself can't. Donor branding is a sales weapon.</p>
+    </div>
+    <div class="dcard">
+      <div class="tag">Tiered escalation</div>
+      <h4>Four tiers, PHA-owned policy.</h4>
+      <p>0 background → 1 single anomaly → 2 multi-source → 3a targeted · 3b city-wide · 3c state/national → 4 crisis. Operator moves T0→T1→T2; PHA approval gates T2→T3; mayor's office for T3 sub-tier and T4.</p>
+    </div>
+    <div class="dcard">
+      <div class="tag">Champion order</div>
+      <h4>Priya first, finance last.</h4>
+      <p>Selling to finance first is the common mistake. Co-design v1 with Priya. Train 2–3 internal champions per city. Institutionalize the value, not the person.</p>
+    </div>
+    <div class="dcard">
+      <div class="tag">The real constraint</div>
+      <h4>Recruiting &amp; retaining Anjalis.</h4>
+      <p>All Group D constraints converge on the local operator as the only trust-bearing interface. The software is the easy part. The actual operational challenge is human.</p>
+    </div>
+  </div>
+
+  <!-- ===== LIGHTHOUSE DECISION — CLIMAX #2 ===== -->
+  <div class="lighthouse">
+    <div class="eyebrow"><span class="num">★</span> Climax of the day</div>
+    <h2>Lighthouse-city v1 is the right scope. Locked.</h2>
+    <p style="max-width:62ch; color:#dcd0b1;">
+      Don't ship everything. Don't try to be everywhere. Prove the response loop in one city, on the public record,
+      in front of every stakeholder whose trust we need for the next ten.
+    </p>
+    <div class="lhoy">
+      <div class="stat">
+        <div class="big">1</div>
+        <div class="lbl">Lighthouse city</div>
+        <p>A tier-2 Indian city of ~500K, public case study, multi-level champion.</p>
+      </div>
+      <div class="stat">
+        <div class="big">5</div>
+        <div class="lbl">Industrial sensors</div>
+        <p>At source &amp; pump. High-leverage, low-density. Bought, not built.</p>
+      </div>
+      <div class="stat">
+        <div class="big">1,000</div>
+        <div class="lbl">Sentinel strips</div>
+        <p>At schools, hospitals, community points. The data moat, at ward cost.</p>
+      </div>
+      <div class="stat">
+        <div class="big">50</div>
+        <div class="lbl">Anjalis + 1–2 Priyas</div>
+        <p>Across 25 wards. Co-designed with 1–2 real ones. v1 internal advocates.</p>
+      </div>
+      <div class="stat">
+        <div class="big">3</div>
+        <div class="lbl">UIs</div>
+        <p>Anjali-mobile · Priya-desktop · PHA-pane. Three roles, three surfaces.</p>
+      </div>
+      <div class="stat">
+        <div class="big">12–18<span style="font-size:1.05rem;"> mo</span></div>
+        <div class="lbl">To paid renewal</div>
+        <p>From first conversation to renewal. Pilot as non-extractable integration.</p>
+      </div>
+    </div>
+    <p style="margin-top:2em; color:#dcd0b1; max-width:62ch;">
+      <strong style="color:#fff;">Not in v1:</strong>
+      federated multi-city · outcome-priced insurance · calibration-as-a-service ·
+      red-team mode · ML-heavy detection · regulator benchmarking · replacing SCADA · selling to consumers directly.
+      Each one is on deck — but none ships until the response loop is proven.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================
+     CLOSING FRAME — the synthesis
+     ================================================================ -->
+<section class="closing" aria-labelledby="closing">
+  <div class="eyebrow"><span class="num">↻</span> The synthesis</div>
+  <h2 id="closing">Two-tier response loop.</h2>
+  <p class="synth">
+    Two-tier response loop — <em>Anjali detects, Priya resolves</em> — with tiered escalation,
+    admin-authored playbooks, sentinel-anchored local sensing, multi-channel consumer trust-building,
+    PHA-governed escalation, donor-funded lighthouse-city deployment, and a tamper-evident audit chain
+    that is simultaneously the operator's legal defense, the ML training corpus, and the regulator's forecasting fuel —
+    on a multi-tenant SaaS backbone that federates across cities only once the lighthouse proves the model.
+  </p>
+  <div class="sign">Surakkha · session complete · 2026-09-06</div>
+</section>
+
+<script>
+  /* Tiny water-table flourish: as the page scrolls, the cover's faint dot-grid
+     "drains" subtly by lowering opacity near the bottom — purely decorative,
+     no external assets.  Respects prefers-reduced-motion. */
+  (function(){
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    var front = document.querySelector('.front');
+    if (!front) return;
+    var ticking = false;
+    function update(){
+      var y = window.scrollY;
+      var h = front.offsetHeight;
+      var t = Math.min(1, Math.max(0, y / (h * 1.2)));
+      front.style.setProperty('--drain', t.toFixed(3));
+      front.querySelector('h1.title').style.transform = 'translateY(' + (y * 0.05) + 'px)';
+      ticking = false;
+    }
+    window.addEventListener('scroll', function(){
+      if (!ticking){
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    }, {passive:true});
+  })();
+</script>
+</body>
+</html>

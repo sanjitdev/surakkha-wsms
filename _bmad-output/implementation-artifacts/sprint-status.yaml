@@ -1,0 +1,98 @@
+# generated: 2026-09-06
+# last_updated: 2026-09-06
+# project: Surakkha
+# project_key: NOKEY
+# tracking_system: file-system
+# story_location: {project-root}/_bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Epic Status Transitions:
+#   - backlog -> in-progress: Automatically when first story starts (via build's sprint sync)
+#   - in-progress -> done: Manually when all stories reach 'done' status
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created in stories folder
+#   - in-progress: Developer actively working on implementation
+#   - review: Ready for code review (via Dev's code-review workflow)
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Epic transitions to 'in-progress' automatically when first story starts (via build's sprint sync)
+# - Stories can be worked in parallel if team capacity allows
+# - Developer typically creates next story after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
+# - Retrospective appends its action items to action_items; sprint-status surfaces open ones
+
+generated: 2026-09-06
+last_updated: 2026-09-06
+project: Surakkha
+project_key: NOKEY
+tracking_system: file-system
+story_location: '{project-root}/_bmad-output/implementation-artifacts'
+
+development_status:
+  # Epic 1 — Trust Foundation (Audit Chain, RBAC, Multi-tenancy Seam)
+  # Foundational: every later epic writes through the gateway this epic creates.
+  epic-1: backlog
+  1-1-single-gateway-content-addressed-chain-with-per-tenant-namespace: backlog
+  1-2-rbac-defense-in-depth-with-closed-role-enum-and-session-bound-actor-identity: backlog
+  1-3-two-person-rule-idempotency-rtbf-via-tombstones: backlog
+  epic-1-retrospective: optional
+
+  # Epic 2 — Heterogeneous Detection (Source-Fusion Engine)
+  # Sealed-contract fusion engine; v2 may swap to ML without changing the contract.
+  epic-2: backlog
+  2-1-source-fusion-engine-sealed-contract-weighted-voting-city-configurable-weights: backlog
+  epic-2-retrospective: optional
+
+  # Epic 3 — Codified Response (Playbook Lifecycle + Simulator + Deviation-to-Amendment)
+  # WHO-grounded templates + authoring + simulator + deviation cluster to amendment.
+  epic-3: backlog
+  3-1-playbook-authoring-content-addressed-versioning-via-event-stream: backlog
+  3-2-simulator-harness-non-persistent-reads-from-event-stream: backlog
+  3-3-deviation-capture-monthly-cluster-amendment-promotion-liability-split-codification: backlog
+  epic-3-retrospective: optional
+
+  # Epic 4 — Field Reporting (Anjali-mobile Trust-Bearing Interface)
+  # WhatsApp / voice / image / SMS in Bangla; offline-first; multi-radio.
+  epic-4: backlog
+  4-1-anjali-mobile-whatsapp-voice-image-sms-front-end-with-bangla-hybrid-incentive-public-acknowledgement: backlog
+  4-2-multi-radio-storage-and-forward-phone-as-network-for-ward-sentinels: backlog
+  epic-4-retrospective: optional
+
+  # Epic 5 — Operations Desk (Priya-desktop Ranked Action List)
+  # Ranked incident dashboard + playbook execution + deviation capture + handover / monthly report.
+  epic-5: backlog
+  5-1-ranked-incident-dashboard-playbook-step-execution-deviation-capture: backlog
+  5-2-auto-generated-handover-brief-at-shift-change-auto-generated-pha-monthly-report: backlog
+  epic-5-retrospective: optional
+
+  # Epic 6 — Regulator Governance (PHA Pane + World Bank Evidence Export)
+  # Playbook amendment approval (dual signature) + threshold tuning + audit browser + WB export.
+  epic-6: backlog
+  6-1-playbook-amendment-approval-with-dual-signature-per-contaminant-class-threshold-tuning: backlog
+  6-2-read-only-audit-chain-browser-deviation-dashboard-wb-aligned-evidence-export: backlog
+  epic-6-retrospective: optional
+
+  # Epic 7 — Public Notice Channel (Ramesh-class Consumer Messaging)
+  # T3+ WhatsApp + SMS broadcast with two-person rule + councillor trust-bridging.
+  epic-7: backlog
+  7-1-t3-whatsapp-sms-broadcast-with-two-person-rule-councillor-trust-bridging: backlog
+  epic-7-retrospective: optional
