@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Audit log (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div class="page-header__row">
+          <div>
+            <h1>Audit log</h1>
+            <div class="page-header__sub">Complete chronological chain · 13 blocks · 142 events</div>
+          </div>
+          <div style="display: flex; gap: var(--space-sm);">
+            <button class="button button--secondary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
+              Export CSV
+            </button>
+            <button class="button button--secondary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+              Export PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <!-- ── Chain head banner ─────────────────────────── -->
+        <div class="chain-head">
+          <div>
+            <div class="chain-head__title">Chain head · block #13 · 0x4f8a…b21e</div>
+            <div class="chain-head__sub">prev 0x9a1f…3c2d · sealed 14:08:42 IST · root ok</div>
+          </div>
+          <div class="chain-head__stat">
+            <strong>13</strong>
+            blocks
+          </div>
+          <div class="chain-head__stat">
+            <strong>142</strong>
+            events total
+          </div>
+        </div>
+
+        <!-- ── Filters ────────────────────────────────────── -->
+        <div class="inbox-toolbar">
+          <div class="filter-chips" role="tablist" aria-label="Filter audit log">
+            <button class="filter-chip is-active" type="button">
+              All events <span class="filter-chip__count">142</span>
+            </button>
+            <button class="filter-chip" type="button">
+              <span class="filter-chip__dot" style="background: var(--danger);"></span>
+              Errors <span class="filter-chip__count">3</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Signatures <span class="filter-chip__count">38</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Sensor data <span class="filter-chip__count">71</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Citizen reports <span class="filter-chip__count">14</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Notices <span class="filter-chip__count">8</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Auth <span class="filter-chip__count">8</span>
+            </button>
+          </div>
+          <div class="inbox-search">
+            <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;color:var(--fg-tertiary);">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+            </span>
+            <input type="search" class="inbox-search__input" placeholder="Hash · ward · event id · actor…" aria-label="Search audit log">
+          </div>
+        </div>
+
+        <!-- ── Events grouped by block ───────────────────── -->
+        <div class="card data-card" style="padding: 0; margin-top: var(--space-md);">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-time">Time</th>
+                <th class="col-warn" aria-label="Severity"></th>
+                <th>Event</th>
+                <th class="col-where">Actor</th>
+                <th class="col-status">Severity</th>
+                <th class="col-action"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- ── Block #13 ─────────────────────────────── -->
+              <tr>
+                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #13</strong>
+                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 14:08:42 · 4 events · root 0x4f8a…b21e</span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">14:08</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                <td class="col-title">
+                  <strong>Public notice broadcast</strong>
+                  <div class="col-detail">dn-3318 · ward 7 chlorination · 312 households</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--fg-tertiary);">SYS</span>system</td>
+                <td class="col-status"><span class="badge badge--t3">T3</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">14:08</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>Vendor countersignature</strong>
+                  <div class="col-detail">acme · sig 0xb7…4cd · on dn-3318</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--warning);">Acme</span>vendor</td>
+                <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">14:07</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>PHA countersignature</strong>
+                  <div class="col-detail">dr. karim · sig 0xa3…19f · on dn-3318</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--brand-500);">K</span>PHA</td>
+                <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">14:02</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>Operator signature</strong>
+                  <div class="col-detail">priya · sig 0xc1…72a · on dn-3318</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--brand-500);">P</span>operator</td>
+                <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+
+              <!-- ── Block #12 ─────────────────────────────── -->
+              <tr>
+                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #12</strong>
+                    <span class="mono" style="font-size: 10px; color: var(--warning);">hash mismatch detected · auto-escalated</span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="event-row" style="background: var(--danger-bg);">
+                <td class="col-time">13:48</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                <td class="col-title">
+                  <strong>Chain verification failed</strong>
+                  <div class="col-detail">block #12 batch hash mismatch · auto-escalated · SN-1142</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--fg-tertiary);">SYS</span>system</td>
+                <td class="col-status"><span class="badge badge--t3">err</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">13:21</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                <td class="col-title">
+                  <strong>Sensor batch received</strong>
+                  <div class="col-detail">4 sensors · pH 7.4 avg · within range</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--warning);">Acme</span>vendor</td>
+                <td class="col-status"><span class="badge badge--tier">data</span></td>
+                <td class="col-action"><a href="#">Expand ▾</a></td>
+              </tr>
+
+              <!-- ── Block #11 ─────────────────────────────── -->
+              <tr>
+                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #11</strong>
+                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 13:21:09 · 3 events · root 0x5c2e…a14f</span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">13:21</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                <td class="col-title">
+                  <strong>Sensor readings ×4</strong>
+                  <div class="col-detail">ward 3 / 5 / 7 / 12 · pH, chlorine, temp, turbidity</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--warning);">Acme</span>vendor</td>
+                <td class="col-status"><span class="badge badge--tier">data</span></td>
+                <td class="col-action"><a href="#">Expand ▾</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">12:55</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                <td class="col-title">
+                  <strong>Citizen report anchored</strong>
+                  <div class="col-detail">rp-2208 · anjali · ward 7 · 2 photos · geo-tagged</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--success);">A</span>citizen</td>
+                <td class="col-status"><span class="badge badge--tier">inbox</span></td>
+                <td class="col-action"><a href="#">Expand ▾</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">12:55</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>Citizen report countersigned</strong>
+                  <div class="col-detail">priya · anchor sig 0x33…0e8 · rp-2208</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--brand-500);">P</span>operator</td>
+                <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+
+              <!-- ── Block #10 ─────────────────────────────── -->
+              <tr>
+                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #10</strong>
+                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 12:55:33 · 1 event · root 0x8b41…06cd</span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">12:55</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                <td class="col-title">
+                  <strong>Citizen report received</strong>
+                  <div class="col-detail">rp-2208 · anjali · ward 7 · first contact</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--success);">A</span>citizen</td>
+                <td class="col-status"><span class="badge badge--tier">inbox</span></td>
+                <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+              </tr>
+
+              <!-- ── Block #9 ──────────────────────────────── -->
+              <tr>
+                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #9</strong>
+                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 11:30:08 · 2 events · root 0x2f97…1aae</span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">11:30</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>PHA countersignature</strong>
+                  <div class="col-detail">dr. karim · sig 0x77…2b0 · on dn-3301 ward 5</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--brand-500);">K</span>PHA</td>
+                <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">11:28</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>Notice draft anchored</strong>
+                  <div class="col-detail">dn-3301 · ward 5 lead-leach advisory</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--brand-500);">P</span>operator</td>
+                <td class="col-status"><span class="badge badge--tier">draft</span></td>
+                <td class="col-action"><a href="#">Expand ▾</a></td>
+              </tr>
+
+              <!-- ── Block #8 ──────────────────────────────── -->
+              <tr>
+                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #8</strong>
+                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 09:13:51 · 2 events · root 0xc6e3…5d29</span>
+                  </div>
+                </td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">09:13</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                <td class="col-title">
+                  <strong>Operator login</strong>
+                  <div class="col-detail">priya · web session · device paired: phone-tab-2</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--brand-500);">P</span>operator</td>
+                <td class="col-status"><span class="badge badge--tier">auth</span></td>
+                <td class="col-action"><a href="#">Expand ▾</a></td>
+              </tr>
+              <tr class="event-row">
+                <td class="col-time">08:42</td>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                <td class="col-title">
+                  <strong>Sensor drift detected</strong>
+                  <div class="col-detail">SN-1142 ward 3 · pH drift 0.3 over 6h</div>
+                </td>
+                <td class="col-where"><span class="avatar-dot" style="background: var(--warning);">Acme</span>vendor</td>
+                <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                <td class="col-action"><a href="sensors.html">Inspect →</a></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="inbox-pager">
+            <span class="inbox-pager__meta">Showing 14 of 142 events · blocks #8 — #13</span>
+            <div style="display:flex;gap:var(--space-xs);">
+              <button class="button button--secondary" type="button" style="height:28px;font-size:var(--font-size-xs);">‹ Older blocks</button>
+              <button class="button button--secondary" type="button" style="height:28px;font-size:var(--font-size-xs);" disabled>Newer blocks ›</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Expand rows: toggle .is-expanded on the row and show next-sibling detail
+    (function () {
+      document.querySelectorAll('.event-row a[href="#"]').forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          var row = a.closest('.event-row');
+          if (!row) return;
+          row.classList.toggle('is-expanded');
+          a.textContent = row.classList.contains('is-expanded') ? 'Collapse ▴' : 'Expand ▾';
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

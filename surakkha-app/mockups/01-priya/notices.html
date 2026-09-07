@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Notices (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div class="page-header__row">
+          <div>
+            <h1>Notices</h1>
+            <div class="page-header__sub">Public-notice issuance · dual-sig tracking · template library · delivery audit</div>
+          </div>
+          <div style="display: flex; gap: var(--space-sm);">
+            <button class="button button--secondary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+              Templates
+            </button>
+            <a class="button button--primary" href="inbox-detail.html" style="text-decoration: none;">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>
+              New notice
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <!-- ── KPI strip ────────────────────────────────── -->
+        <div class="kpi-strip">
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Drafts awaiting sigs</div>
+            <div class="kpi__value">2 <span class="kpi__unit">pending</span></div>
+            <div class="kpi__delta kpi__delta--neutral">PHA + vendor dual-sig</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Issued today</div>
+            <div class="kpi__value">1 <span class="kpi__unit">published</span></div>
+            <div class="kpi__delta kpi__delta--up">ward 7 chlorination · 14:08</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Broadcast reach</div>
+            <div class="kpi__value">312 <span class="kpi__unit">households</span></div>
+            <div class="kpi__delta kpi__delta--neutral">4 channels · 8 min ago</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Delivery rate</div>
+            <div class="kpi__value">96<span class="kpi__unit">%</span></div>
+            <div class="kpi__delta kpi__delta--up">▲ 4 pts vs avg</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Templates</div>
+            <div class="kpi__value">14 <span class="kpi__unit">available</span></div>
+            <div class="kpi__delta kpi__delta--neutral">8 en · 6 bn</div>
+          </div>
+        </div>
+
+        <!-- ── Filter rail ──────────────────────────────── -->
+        <div class="inbox-toolbar" style="margin-top: var(--space-md);">
+          <div class="filter-chips" role="tablist" aria-label="Filter notices">
+            <button class="filter-chip is-active" type="button">
+              All <span class="filter-chip__count">23</span>
+            </button>
+            <button class="filter-chip" type="button">
+              <span class="filter-chip__dot" style="background: var(--warning);"></span>
+              Awaiting sigs <span class="filter-chip__count">2</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Drafts <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Broadcast <span class="filter-chip__count">18</span>
+            </button>
+            <button class="filter-chip" type="button">
+              Expired <span class="filter-chip__count">2</span>
+            </button>
+          </div>
+          <div class="inbox-search">
+            <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;color:var(--fg-tertiary);">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+            </span>
+            <input type="search" class="inbox-search__input" placeholder="Search by ward, template, or notice id…" aria-label="Search notices">
+          </div>
+        </div>
+
+        <div class="card data-card" style="padding: 0; margin-top: var(--space-md);">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-warn" aria-label="Severity"></th>
+                <th>Notice</th>
+                <th class="col-where">Zone</th>
+                <th class="col-owner">Drafter</th>
+                <th class="col-time">Last activity</th>
+                <th class="col-status">Status</th>
+                <th class="col-action"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Awaiting sigs -->
+              <tr class="row-urgent">
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                <td class="col-title">
+                  <strong>Ward 7 chlorination spike</strong>
+                  <div class="row-sub">dn-3318 · 312 households · 4 channels</div>
+                </td>
+                <td class="col-where"><span class="mono">ward 7</span></td>
+                <td class="col-owner"><span class="avatar-dot" style="background: var(--brand-500);">P</span>Priya</td>
+                <td class="col-time">14:08 · just now</td>
+                <td class="col-status"><span class="badge badge--t3">dual-sig</span></td>
+                <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+              </tr>
+              <tr>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                <td class="col-title">
+                  <strong>Ward 5 lead-leach chronic advisory</strong>
+                  <div class="row-sub">dn-3301 · 198 households · 3 channels</div>
+                </td>
+                <td class="col-where"><span class="mono">ward 5</span></td>
+                <td class="col-owner"><span class="avatar-dot" style="background: var(--brand-500);">P</span>Priya</td>
+                <td class="col-time">11:30 · 2h ago</td>
+                <td class="col-status"><span class="badge badge--t2">PHA signed</span></td>
+                <td class="col-action"><a href="#">Review →</a></td>
+              </tr>
+
+              <!-- My drafts -->
+              <tr>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                <td class="col-title">
+                  <strong>Ward 12 pH drift — advisory</strong>
+                  <div class="row-sub">dn-3307 · 89 households · not yet sent</div>
+                </td>
+                <td class="col-where"><span class="mono">ward 12</span></td>
+                <td class="col-owner"><span class="avatar-dot" style="background: var(--brand-500);">P</span>Priya</td>
+                <td class="col-time">2 d ago</td>
+                <td class="col-status"><span class="badge badge--tier">draft</span></td>
+                <td class="col-action"><a href="#">Edit →</a></td>
+              </tr>
+
+              <!-- Broadcast today -->
+              <tr>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>Ward 7 chlorination spike (FINAL)</strong>
+                  <div class="row-sub">bn-3318 · sealed block #13 · 96% delivered</div>
+                </td>
+                <td class="col-where"><span class="mono">ward 7</span></td>
+                <td class="col-owner"><span class="avatar-dot" style="background: var(--fg-tertiary);">SYS</span>auto</td>
+                <td class="col-time">14:08 · just now</td>
+                <td class="col-status"><span class="badge badge--resolved">broadcast</span></td>
+                <td class="col-action"><a href="verify-flow.html">Verify →</a></td>
+              </tr>
+
+              <!-- Recent broadcasts -->
+              <tr>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                <td class="col-title">
+                  <strong>Ward 5 lead-leach advisory</strong>
+                  <div class="row-sub">bn-3301 · sealed block #9 · 99% delivered</div>
+                </td>
+                <td class="col-where"><span class="mono">ward 5</span></td>
+                <td class="col-owner"><span class="avatar-dot" style="background: var(--fg-tertiary);">SYS</span>auto</td>
+                <td class="col-time">11:30 · 2h ago</td>
+                <td class="col-status"><span class="badge badge--resolved">broadcast</span></td>
+                <td class="col-action"><a href="verify-flow.html">Verify →</a></td>
+              </tr>
+              <tr>
+                <td class="col-warn"><span class="row-severity-dot" style="background: var(--band-medium);"></span></td>
+                <td class="col-title">
+                  <strong>Ward 3 routine weekly update</strong>
+                  <div class="row-sub">bn-3290 · sealed block #5 · expired</div>
+                </td>
+                <td class="col-where"><span class="mono">ward 3</span></td>
+                <td class="col-owner"><span class="avatar-dot" style="background: var(--brand-500);">P</span>Priya</td>
+                <td class="col-time">Yesterday 17:00</td>
+                <td class="col-status"><span class="badge badge--tier">expired</span></td>
+                <td class="col-action"><a href="#">Archive →</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ── Delivery channels audit ──────────────────────── -->
+        <div class="grid-12" style="margin-top: var(--space-md);">
+          <div class="col-8">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Channel delivery — last broadcast (ward 7)</h3>
+                <span class="data-card__meta">312 households · 4 channels</span>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Channel</th>
+                    <th class="col-value">Sent</th>
+                    <th class="col-value">Delivered</th>
+                    <th class="col-status">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-title">SMS gateway</td>
+                    <td class="col-value mono">298</td>
+                    <td class="col-value mono">291</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">98%</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-title">WhatsApp Business</td>
+                    <td class="col-value mono">248</td>
+                    <td class="col-value mono">243</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">98%</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-title">Community radio 95.7 FM</td>
+                    <td class="col-value mono">312</td>
+                    <td class="col-value mono">312</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">100%</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-title">PA system / ward speakers</td>
+                    <td class="col-value mono">14</td>
+                    <td class="col-value mono">14</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">100%</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Template library</h3>
+                <span class="data-card__meta">14 templates</span>
+              </div>
+              <ul class="recent-decisions">
+                <li><span class="recent-decisions__time mono">en</span><span class="recent-decisions__text"><strong>Chlorination drop</strong> · 2 languages</span></li>
+                <li><span class="recent-decisions__time mono">en</span><span class="recent-decisions__text"><strong>Lead-leach chronic</strong> · 2 languages</span></li>
+                <li><span class="recent-decisions__time mono">bn</span><span class="recent-decisions__text"><strong>pH drift advisory</strong> · 2 languages</span></li>
+                <li><span class="recent-decisions__time mono">en</span><span class="recent-decisions__text"><strong>Sensor offline</strong> · 2 languages</span></li>
+                <li><span class="recent-decisions__time mono">bn</span><span class="recent-decisions__text"><strong>All-clear</strong> · 2 languages</span></li>
+                <li><span class="recent-decisions__time mono">en</span><span class="recent-decisions__text"><strong>Scheduled maintenance</strong> · 2 languages</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+</body>
+</html>

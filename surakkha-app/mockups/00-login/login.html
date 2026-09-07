@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha — Sign in</title>
+<link rel="stylesheet" href="../theme.css">
+<style>
+  body { min-height: 100vh; padding: 0; overflow: hidden; }
+
+  .login-shell {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    height: 100vh;
+    max-height: 100vh;
+  }
+  @media (max-width: 900px) {
+    .login-shell { grid-template-columns: 1fr; }
+    .brand-panel { display: none; }
+  }
+
+  /* ── Brand panel ──────────────────────────────────────────── */
+  .brand-panel {
+    background: var(--brand-600);
+    color: #F5F7FA;  /* explicit bright text — survives light+dark */
+    padding: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    background-image:
+      radial-gradient(at top left, color-mix(in srgb, var(--brand-500) 60%, transparent) 0%, transparent 55%),
+      radial-gradient(at bottom right, color-mix(in srgb, var(--brand-400) 25%, transparent) 0%, transparent 60%);
+  }
+  [data-theme="dark"] .brand-panel {
+    background: linear-gradient(160deg, #0B1A2A 0%, #0F2236 100%);
+    background-image:
+      linear-gradient(160deg, #0B1A2A 0%, #0F2236 100%),
+      radial-gradient(at top left, color-mix(in srgb, var(--brand-500) 30%, transparent) 0%, transparent 55%),
+      radial-gradient(at bottom right, color-mix(in srgb, var(--brand-400) 14%, transparent) 0%, transparent 60%);
+  }
+
+  .brand-panel__mark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-md);
+    position: relative;
+    z-index: 1;
+  }
+  .brand-panel__mark-glyph {
+    width: 32px; height: 32px;
+    border: 1.5px solid #F5F7FA;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    color: #F5F7FA;
+  }
+  .brand-panel__mark-text {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: 0.01em;
+    color: #F5F7FA;
+  }
+
+  .brand-panel__title {
+    font-size: 1.875rem;
+    line-height: 1.1;
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.03em;
+    margin: 0;
+    color: #FFFFFF;  /* title gets full white for max legibility */
+    max-width: 16ch;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand-panel__live {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--font-size-xs);
+    color: color-mix(in srgb, #F5F7FA 75%, transparent);
+    font-family: var(--font-family-mono);
+  }
+  .brand-panel__live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse 1600ms ease-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .brand-panel__live-dot { animation: none; }
+  }
+
+  /* ── Picker panel ─────────────────────────────────────────── */
+  .picker-panel {
+    background: var(--bg-base);
+    padding: var(--space-2xl);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .picker-panel__inner {
+    width: 100%;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .picker-panel__heading {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    color: var(--fg-default);
+    margin: 0 0 var(--space-2xl);
+  }
+
+  /* ── Persona cards ─────────────────────────────────────────── */
+  .picker-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .persona {
+    display: grid;
+    grid-template-columns: 36px 1fr 20px;
+    gap: var(--space-md);
+    align-items: center;
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--fg-default);
+    transition: border-color 160ms ease-out, background-color 160ms ease-out;
+  }
+  .persona:hover { border-color: var(--border-strong); }
+  .persona:focus-visible {
+    outline: 2px solid var(--brand-400);
+    outline-offset: 2px;
+  }
+  .persona--selected {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 3px var(--brand-100);
+  }
+  [data-theme="dark"] .persona--selected {
+    background: color-mix(in srgb, var(--brand-500) 6%, var(--bg-surface));
+    box-shadow: 0 0 0 3px var(--brand-200);
+  }
+
+  .persona__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-secondary);
+  }
+  .persona--selected .persona__avatar {
+    background: var(--brand-500);
+    color: var(--bg-surface);
+  }
+
+  .persona__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    line-height: 1.3;
+  }
+
+  .persona__check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-default);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bg-surface);
+    font-size: 10px;
+  }
+  .persona--selected .persona__check {
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+  }
+  .persona--selected .persona__check::after { content: '✓'; }
+
+  /* ── Actions ───────────────────────────────────────────────── */
+  .picker-actions {
+    margin-top: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .button {
+    padding: 0 var(--space-xl);
+  }
+
+  /* ── Demo controls (top-right) ─────────────────────────────── */
+  .demo-controls {
+    position: fixed;
+    top: var(--space-md);
+    right: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    align-items: flex-end;
+    z-index: 10;
+  }
+  .demo-controls__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .demo-chip {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs) var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    color: var(--fg-secondary);
+    cursor: pointer;
+  }
+  .demo-chip--danger { color: var(--danger); border-color: var(--danger); }
+  .demo-chip:hover { background: var(--bg-subtle); }
+  .demo-chip:active { transform: translateY(1px); }
+  .demo-chip[data-state="busy"] {
+    color: var(--warning);
+    border-color: var(--warning);
+    background: var(--warning-bg);
+    pointer-events: none;
+  }
+  .demo-chip[data-state="done"] {
+    color: var(--success);
+    border-color: var(--success);
+    background: var(--success-bg);
+  }
+
+  /* ── Toast (per dim 4 — bottom-right, dismissable, 3 kinds) ─ */
+  .toast-host {
+    position: fixed;
+    bottom: var(--space-xl);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast {
+    pointer-events: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--brand-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    box-shadow: var(--shadow-modal);
+    min-width: 320px;
+    max-width: 480px;
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    gap: var(--space-md);
+    align-items: start;
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    animation: toastIn 200ms ease-out;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .toast--success { border-left-color: var(--success); }
+  .toast--warning { border-left-color: var(--warning); }
+  .toast--danger  { border-left-color: var(--danger); }
+  .toast__icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: var(--font-weight-bold);
+    color: var(--bg-surface);
+    flex-shrink: 0;
+  }
+  .toast--info    .toast__icon { background: var(--brand-500); }
+  .toast--success .toast__icon { background: var(--success); }
+  .toast--warning .toast__icon { background: var(--warning); }
+  .toast--danger  .toast__icon { background: var(--danger); }
+  .toast__body { line-height: 1.4; }
+  .toast__title {
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: 2px;
+  }
+  .toast__meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+  }
+  .toast__close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--fg-tertiary);
+    font-size: 18px;
+    line-height: 1;
+    padding: 0;
+    width: 20px; height: 20px;
+  }
+  .toast__close:hover { color: var(--fg-default); }
+
+  /* ── Confirm modal ──────────────────────────────────────── */
+  .confirm-modal {
+    position: fixed;
+    inset: 0;
+    background: color-mix(in srgb, var(--fg-default) 35%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    animation: toastIn 160ms ease-out;
+  }
+  .confirm-modal[hidden] { display: none; }
+  [data-theme="dark"] .confirm-modal {
+    background: color-mix(in srgb, #000000 55%, transparent);
+  }
+  .confirm-modal__card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2xl);
+    max-width: 420px;
+    width: 90%;
+    box-shadow: var(--shadow-modal);
+  }
+  .confirm-modal__title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-sm);
+  }
+  .confirm-modal__body {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    line-height: 1.5;
+    margin: 0 0 var(--space-xl);
+  }
+  .confirm-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+  }
+
+  /* ── Theme toggle ──────────────────────────────────────────── */
+  .theme-toggle {
+    position: fixed;
+    bottom: var(--space-md);
+    right: var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: var(--shadow-modal);
+  }
+</style>
+</head>
+<body>
+  <!-- Demo controls (per Q7) — wired with confirm + toast feedback -->
+  <div class="demo-controls">
+    <span class="demo-controls__label">Demo</span>
+    <button class="demo-chip" type="button" data-action="reset">Reset</button>
+    <button class="demo-chip" type="button" data-action="reseed">Reseed</button>
+    <button class="demo-chip demo-chip--danger" type="button" data-action="tamper">Tamper</button>
+    <button class="demo-chip demo-chip--danger" type="button" data-action="fail">Fail</button>
+  </div>
+
+  <!-- Confirm modal — only shown when a destructive demo action is requested -->
+  <div class="confirm-modal" id="confirm-modal" hidden role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+    <div class="confirm-modal__card">
+      <h2 id="confirm-title" class="confirm-modal__title"></h2>
+      <p class="confirm-modal__body"></p>
+      <div class="confirm-modal__actions">
+        <button class="button button--secondary" type="button" data-confirm="cancel">Cancel</button>
+        <button class="button button--danger"    type="button" data-confirm="ok">Run</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast host — populated by demo-controls.js -->
+  <div class="toast-host" id="toast-host" aria-live="polite" aria-atomic="false"></div>
+
+  <div class="login-shell">
+
+    <!-- ═══════ BRAND PANEL ═══════ -->
+    <aside class="brand-panel">
+      <div class="brand-panel__mark">
+        <div class="brand-panel__mark-glyph" aria-hidden="true">S</div>
+        <div class="brand-panel__mark-text">Surakkha</div>
+      </div>
+
+      <h1 class="brand-panel__title">Civic water-safety,<br>audited.</h1>
+
+      <div class="brand-panel__live">
+        <span class="brand-panel__live-dot" aria-hidden="true"></span>
+        <span>chain live · 11 blocks</span>
+      </div>
+    </aside>
+
+    <!-- ═══════ PICKER PANEL ═══════ -->
+    <main class="picker-panel">
+      <div class="picker-panel__inner">
+        <h2 class="picker-panel__heading">Sign in</h2>
+
+        <ul class="picker-list" role="radiogroup" aria-label="Persona picker">
+          <li>
+            <button type="button" class="persona persona--selected" role="radio" aria-checked="true">
+              <div class="persona__avatar">P</div>
+              <div class="persona__name">Priya — Operator</div>
+              <div class="persona__check" aria-hidden="true"></div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="persona" role="radio" aria-checked="false">
+              <div class="persona__avatar">A</div>
+              <div class="persona__name">Anjali — Citizen</div>
+              <div class="persona__check" aria-hidden="true"></div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="persona" role="radio" aria-checked="false">
+              <div class="persona__avatar">K</div>
+              <div class="persona__name">Dr. Karim — PHA</div>
+              <div class="persona__check" aria-hidden="true"></div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="persona" role="radio" aria-checked="false">
+              <div class="persona__avatar">V</div>
+              <div class="persona__name">PHA Viewer</div>
+              <div class="persona__check" aria-hidden="true"></div>
+            </button>
+          </li>
+          <li>
+            <button type="button" class="persona" role="radio" aria-checked="false">
+              <div class="persona__avatar">S</div>
+              <div class="persona__name">Acme Sensors — Vendor</div>
+              <div class="persona__check" aria-hidden="true"></div>
+            </button>
+          </li>
+        </ul>
+
+        <div class="picker-actions">
+          <button type="button" class="button button--primary">Continue →</button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script src="demo-controls.js"></script>
+</body>
+</html>

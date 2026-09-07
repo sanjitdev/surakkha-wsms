@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Sensors (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div class="page-header__row">
+          <div>
+            <h1>Sensor fleet</h1>
+            <div class="page-header__sub">12 of 12 online · 1 silent · 3 drifting · 2 cal. due &lt;14d · vendor Acme Sensors</div>
+          </div>
+          <div style="display: flex; gap: var(--space-sm);">
+            <button class="button button--secondary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
+              Export readings
+            </button>
+            <button class="button button--secondary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
+              Refresh fleet
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <!-- ── Fleet health strip ────────────────────────── -->
+        <div class="kpi-strip">
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Online</div>
+            <div class="kpi__value">12 / 12</div>
+            <div class="kpi__delta kpi__delta--up">all reporting</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Silent &gt;5min</div>
+            <div class="kpi__value">1 <span class="kpi__unit">sensor</span></div>
+            <div class="kpi__delta kpi__delta--down">SN-2208 · ward 7 · T3</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Drifting &gt;2σ</div>
+            <div class="kpi__value">3 <span class="kpi__unit">sensors</span></div>
+            <div class="kpi__delta kpi__delta--neutral">pH / chlorine / temp</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Cal. due &lt;14d</div>
+            <div class="kpi__value">2 <span class="kpi__unit">sensors</span></div>
+            <div class="kpi__delta kpi__delta--neutral">SN-4407 · SN-6601</div>
+          </div>
+          <div class="kpi-strip__cell">
+            <div class="kpi__label">Vendor</div>
+            <div class="kpi__value">Acme</div>
+            <div class="kpi__delta kpi__delta--neutral">contract through 2027</div>
+          </div>
+        </div>
+
+        <!-- ── Tabs: All / Silent / Drifting / Calibration ── -->
+        <div class="tabs" role="tablist" aria-label="Sensor fleet views" style="margin-top: var(--space-md); position: static; padding: 0;">
+          <button class="tab active" role="tab" aria-selected="true" data-tab="all">All 12 sensors</button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="silent">Silent <span class="badge badge--t3" style="margin-left: var(--space-xs); font-size: 10px;">1</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="drifting">Drifting <span class="badge badge--t2" style="margin-left: var(--space-xs); font-size: 10px;">3</span></button>
+          <button class="tab" role="tab" aria-selected="false" data-tab="cal">Cal. due <span class="badge badge--t1" style="margin-left: var(--space-xs); font-size: 10px;">2</span></button>
+        </div>
+
+        <div class="grid-12" style="margin-top: var(--space-md);">
+          <div class="col-8">
+            <!-- ── All sensors table ────────────────────── -->
+            <div class="tab-panel active" data-tab="all">
+              <div class="card data-card" style="padding: 0;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="col-warn" aria-label="Severity"></th>
+                      <th>Ward / Sensor</th>
+                      <th class="col-sensor">Last reading</th>
+                      <th class="col-value">vs threshold</th>
+                      <th class="col-time">Last seen</th>
+                      <th class="col-status">Status</th>
+                      <th class="col-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                      <td class="col-title">Ward 1 · <span class="mono" style="color: var(--fg-tertiary);">SN-1001</span></td>
+                      <td class="col-sensor">pH 7.4 · Cl 0.6 ppm</td>
+                      <td class="col-value">ok</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                      <td class="col-title">Ward 2 · <span class="mono" style="color: var(--fg-tertiary);">SN-1055</span></td>
+                      <td class="col-sensor">pH 7.3 · Cl 0.5 ppm</td>
+                      <td class="col-value">ok</td>
+                      <td class="col-time">14:07</td>
+                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                      <td class="col-title">Ward 3 · <span class="mono" style="color: var(--fg-tertiary);">SN-1142</span></td>
+                      <td class="col-sensor">pH 7.9 · Cl 0.5 ppm</td>
+                      <td class="col-value">pH +0.5 ↑</td>
+                      <td class="col-time">08:12</td>
+                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2 drift</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                      <td class="col-title">Ward 4 · <span class="mono" style="color: var(--fg-tertiary);">SN-2201</span></td>
+                      <td class="col-sensor">pH 7.5 · Cl 0.6 ppm</td>
+                      <td class="col-value">ok</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                      <td class="col-title">Ward 5 · <span class="mono" style="color: var(--fg-tertiary);">SN-3301</span></td>
+                      <td class="col-sensor">pH 7.2 · Cl 0.4 ppm</td>
+                      <td class="col-value">Cl low ↓</td>
+                      <td class="col-time">13:58</td>
+                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2 drift</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                      <td class="col-title">Ward 6 · <span class="mono" style="color: var(--fg-tertiary);">SN-3350</span></td>
+                      <td class="col-sensor">pH 7.4 · Cl 0.6 ppm</td>
+                      <td class="col-value">ok</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr style="background: var(--danger-bg);">
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                      <td class="col-title">Ward 7 · <span class="mono" style="color: var(--fg-tertiary);">SN-2208</span></td>
+                      <td class="col-sensor">pH — · Cl 0.1 ppm</td>
+                      <td class="col-value">silent 8m</td>
+                      <td class="col-time">14:01</td>
+                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3 err</span></td>
+                      <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                      <td class="col-title">Ward 8 · <span class="mono" style="color: var(--fg-tertiary);">SN-4401</span></td>
+                      <td class="col-sensor">pH 7.4 · Cl 0.5 ppm</td>
+                      <td class="col-value">ok</td>
+                      <td class="col-time">14:07</td>
+                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                      <td class="col-title">Ward 9 · <span class="mono" style="color: var(--fg-tertiary);">SN-5503</span></td>
+                      <td class="col-sensor">pH 7.4 · Cl 0.6 ppm</td>
+                      <td class="col-value">ok</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                      <td class="col-title">Ward 10 · <span class="mono" style="color: var(--fg-tertiary);">SN-5510</span></td>
+                      <td class="col-sensor">pH 7.5 · Cl 0.6 ppm</td>
+                      <td class="col-value">temp +1.2°</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2 drift</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                      <td class="col-title">Ward 11 · <span class="mono" style="color: var(--fg-tertiary);">SN-6601</span></td>
+                      <td class="col-sensor">pH 7.4 · Cl 0.6 ppm</td>
+                      <td class="col-value">cal. 12 d</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">cal due</span></td>
+                      <td class="col-action"><a href="#">Schedule →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                      <td class="col-title">Ward 12 · <span class="mono" style="color: var(--fg-tertiary);">SN-4407</span></td>
+                      <td class="col-sensor">pH 7.4 · Cl 0.5 ppm</td>
+                      <td class="col-value">cal. 14 d</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">cal due</span></td>
+                      <td class="col-action"><a href="#">Schedule →</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- ── Silent only ──────────────────────────── -->
+            <div class="tab-panel" data-tab="silent" hidden>
+              <div class="card data-card" style="padding: 0;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="col-warn"></th>
+                      <th>Ward / Sensor</th>
+                      <th class="col-sensor">Issue</th>
+                      <th class="col-value">Reading</th>
+                      <th class="col-time">Last seen</th>
+                      <th class="col-status">Severity</th>
+                      <th class="col-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr style="background: var(--danger-bg);">
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                      <td class="col-title">Ward 7 · <span class="mono" style="color: var(--fg-tertiary);">SN-2208</span></td>
+                      <td class="col-sensor">silent 8 min</td>
+                      <td class="col-value">Cl 0.1 ppm</td>
+                      <td class="col-time">14:01</td>
+                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                      <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- ── Drifting only ────────────────────────── -->
+            <div class="tab-panel" data-tab="drifting" hidden>
+              <div class="card data-card" style="padding: 0;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="col-warn"></th>
+                      <th>Ward / Sensor</th>
+                      <th class="col-sensor">Drift</th>
+                      <th class="col-value">Reading</th>
+                      <th class="col-time">Started</th>
+                      <th class="col-status">Severity</th>
+                      <th class="col-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                      <td class="col-title">Ward 3 · <span class="mono" style="color: var(--fg-tertiary);">SN-1142</span></td>
+                      <td class="col-sensor">pH drift</td>
+                      <td class="col-value">pH 7.9 ↑</td>
+                      <td class="col-time">08:12</td>
+                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                      <td class="col-title">Ward 5 · <span class="mono" style="color: var(--fg-tertiary);">SN-3301</span></td>
+                      <td class="col-sensor">chlorine low</td>
+                      <td class="col-value">0.4 ppm</td>
+                      <td class="col-time">13:58</td>
+                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                      <td class="col-title">Ward 10 · <span class="mono" style="color: var(--fg-tertiary);">SN-5510</span></td>
+                      <td class="col-sensor">temp drift</td>
+                      <td class="col-value">+1.2°C</td>
+                      <td class="col-time">14:08</td>
+                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-action"><a href="#">Trace →</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- ── Calibration only ─────────────────────── -->
+            <div class="tab-panel" data-tab="cal" hidden>
+              <div class="card data-card" style="padding: 0;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th class="col-warn"></th>
+                      <th>Ward / Sensor</th>
+                      <th class="col-sensor">Last calibration</th>
+                      <th class="col-value">Next due</th>
+                      <th class="col-time">Days remaining</th>
+                      <th class="col-status">Status</th>
+                      <th class="col-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                      <td class="col-title">Ward 11 · <span class="mono" style="color: var(--fg-tertiary);">SN-6601</span></td>
+                      <td class="col-sensor">2026-07-12</td>
+                      <td class="col-value">2026-09-19</td>
+                      <td class="col-time">12 d</td>
+                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">due</span></td>
+                      <td class="col-action"><a href="#">Schedule →</a></td>
+                    </tr>
+                    <tr>
+                      <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                      <td class="col-title">Ward 12 · <span class="mono" style="color: var(--fg-tertiary);">SN-4407</span></td>
+                      <td class="col-sensor">2026-07-15</td>
+                      <td class="col-value">2026-09-21</td>
+                      <td class="col-time">14 d</td>
+                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">due</span></td>
+                      <td class="col-action"><a href="#">Schedule →</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Fleet health by metric</h3>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">pH</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 92%; background: var(--success);"></div></div>
+                <span class="hbar-value mono">11 / 12</span>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">Chlorine</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 83%; background: var(--warning);"></div></div>
+                <span class="hbar-value mono">10 / 12</span>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">Temperature</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 92%; background: var(--success);"></div></div>
+                <span class="hbar-value mono">11 / 12</span>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">Turbidity</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 100%; background: var(--success);"></div></div>
+                <span class="hbar-value mono">12 / 12</span>
+              </div>
+              <div class="hbar-row" style="margin-bottom:0;">
+                <span class="hbar-label">Online</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 92%; background: var(--success);"></div></div>
+                <span class="hbar-value mono">11 / 12</span>
+              </div>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Vendor · Acme Sensors</h3>
+                <span class="data-card__meta">contract valid</span>
+              </div>
+              <table class="data-table" style="font-size: var(--font-size-xs);">
+                <tbody>
+                  <tr>
+                    <td>Contract</td>
+                    <td style="text-align: right;">through 2027-04-30</td>
+                  </tr>
+                  <tr>
+                    <td>Response SLA</td>
+                    <td style="text-align: right;">4h for T3</td>
+                  </tr>
+                  <tr>
+                    <td>Cal. cadence</td>
+                    <td style="text-align: right;">90 d</td>
+                  </tr>
+                  <tr>
+                    <td>Last batch anchored</td>
+                    <td style="text-align: right;">block #11 · 13:21</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div style="margin-top: var(--space-md); display: flex; gap: var(--space-sm);">
+                <button class="button button--secondary" type="button" style="flex: 1; height: 32px; font-size: var(--font-size-xs);">Contact vendor</button>
+                <button class="button button--secondary" type="button" style="flex: 1; height: 32px; font-size: var(--font-size-xs);">View contract</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Local tab switching for sensor views
+    (function () {
+      var tabs = document.querySelectorAll('.tabs .tab');
+      var panels = document.querySelectorAll('.tab-panel');
+      if (!tabs.length) return;
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          var target = tab.dataset.tab;
+          tabs.forEach(function (t) {
+            var active = t === tab;
+            t.classList.toggle('active', active);
+            t.setAttribute('aria-selected', String(active));
+          });
+          panels.forEach(function (p) {
+            var show = p.dataset.tab === target;
+            if (show) p.removeAttribute('hidden'); else p.setAttribute('hidden', '');
+          });
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

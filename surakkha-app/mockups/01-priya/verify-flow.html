@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Verify chain (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div>
+          <h1>Verify on-chain record</h1>
+          <div class="page-header__sub">Paste a notice hash, scan a QR, or pick a recent block to inspect signatures and contents</div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <!-- ── Verify input + result ──────────────────────── -->
+        <div class="card data-card" style="padding: var(--space-lg);">
+          <div style="display: grid; grid-template-columns: 1fr auto auto; gap: var(--space-md); align-items: center;">
+            <div>
+              <label style="font-size: var(--font-size-xs); color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: var(--font-weight-semibold); display: block; margin-bottom: var(--space-xs);">Hash or notice id</label>
+              <input type="text" class="input" value="0x4f8a2b9c7d1e0f5a3b6c8d2e1f4a7b9c0d3e5f1a8b2c4d6e8f0a1b3c5d7e9f" style="font-family: var(--font-family-mono); font-size: var(--font-size-sm);">
+            </div>
+            <button class="button button--primary" type="button" style="margin-top: var(--space-lg);">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" x2="17" y1="12" y2="12"/></svg></span>
+              Verify
+            </button>
+            <button class="button button--secondary" type="button" style="margin-top: var(--space-lg);">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg></span>
+              Scan QR
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Verification result ────────────────────────── -->
+        <div class="verify-result verify-result--ok" style="margin-top: var(--space-md);">
+          <div class="verify-result__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="verify-result__body">
+            <div class="verify-result__head">
+              <h2>Verified · 4 of 4 signatures valid</h2>
+              <span class="data-card__meta">block #13 · sealed 14:08:42 IST</span>
+            </div>
+            <p>Hash <span class="mono" style="color: var(--fg-secondary);">0x4f8a…b21e</span> is present in the chain and matches block #13. All four signers' keys verify against the published device roster. No tampering detected across the 7-block walk back.</p>
+            <div class="verify-result__chips">
+              <span class="verify-chip verify-chip--ok"><span class="verify-chip__dot"></span>SHA-256 hash match</span>
+              <span class="verify-chip verify-chip--ok"><span class="verify-chip__dot"></span>4/4 signatures valid</span>
+              <span class="verify-chip verify-chip--ok"><span class="verify-chip__dot"></span>Merkle proof OK</span>
+              <span class="verify-chip verify-chip--ok"><span class="verify-chip__dot"></span>No tampering · 7 blocks walked</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-12" style="margin-top: var(--space-md);">
+          <!-- ── LEFT · Block contents + signature list ───── -->
+          <div class="col-8">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Block #13 — contents</h3>
+                <span class="data-card__meta">sealed 14:08:42 · 4 events</span>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="col-warn" aria-label="Severity"></th>
+                    <th>Event</th>
+                    <th class="col-where">Where</th>
+                    <th class="col-time">Time</th>
+                    <th class="col-status">Severity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                    <td class="col-title"><strong>Public notice broadcast</strong><div class="row-sub">dn-3318 · ward 7 chlorination</div></td>
+                    <td class="col-where mono">ward 7</td>
+                    <td class="col-time">14:08</td>
+                    <td class="col-status"><span class="badge badge--t3">T3</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                    <td class="col-title"><strong>Vendor countersignature</strong><div class="row-sub">acme · sig 0xb7…4cd</div></td>
+                    <td class="col-where mono">ward 7</td>
+                    <td class="col-time">14:08</td>
+                    <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                    <td class="col-title"><strong>PHA countersignature</strong><div class="row-sub">dr. karim · sig 0xa3…19f</div></td>
+                    <td class="col-where mono">ward 7</td>
+                    <td class="col-time">14:07</td>
+                    <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                    <td class="col-title"><strong>Operator signature</strong><div class="row-sub">priya · sig 0xc1…72a</div></td>
+                    <td class="col-where mono">ward 7</td>
+                    <td class="col-time">14:02</td>
+                    <td class="col-status"><span class="badge badge--resolved">sig</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Walk back through 7 blocks</h3>
+                <span class="data-card__meta">each block's prev_hash matches</span>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="col-status">#</th>
+                    <th>Sealed at</th>
+                    <th class="col-where">Prev hash</th>
+                    <th class="col-where">Merkle root</th>
+                    <th class="col-status">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="col-status mono"><strong>13</strong></td>
+                    <td>14:08:42</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x9a1f…3c2d</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x4f8a…b21e</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-status mono"><strong>12</strong></td>
+                    <td>13:48:17</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x77d0…8b3a</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x9a1f…3c2d</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-status mono"><strong>11</strong></td>
+                    <td>13:21:09</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x5c2e…a14f</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x77d0…8b3a</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-status mono"><strong>10</strong></td>
+                    <td>12:55:33</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x8b41…06cd</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x5c2e…a14f</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-status mono"><strong>9</strong></td>
+                    <td>11:30:08</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x2f97…1aae</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x8b41…06cd</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-status mono"><strong>8</strong></td>
+                    <td>09:13:51</td>
+                    <td class="col-where mono" style="font-size: 10px;">0xc6e3…5d29</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x2f97…1aae</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                  <tr>
+                    <td class="col-status mono"><strong>7</strong></td>
+                    <td>08:42:14</td>
+                    <td class="col-where mono" style="font-size: 10px;">0x1a44…f883</td>
+                    <td class="col-where mono" style="font-size: 10px;">0xc6e3…5d29</td>
+                    <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ── RIGHT · Signers + inspection details ──────── -->
+          <div class="col-4">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Signers on this block</h3>
+                <span class="data-card__meta">4 of 4</span>
+              </div>
+              <table class="data-table" style="font-size: var(--font-size-xs);">
+                <tbody>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--brand-500);">P</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Priya</strong><div class="row-sub">operator · sig 0xc1…72a</div></td>
+                    <td class="col-action"><span class="verify-chip verify-chip--ok" style="font-size: 10px;"><span class="verify-chip__dot"></span>ok</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--brand-500);">K</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Dr. Karim</strong><div class="row-sub">PHA · sig 0xa3…19f</div></td>
+                    <td class="col-action"><span class="verify-chip verify-chip--ok" style="font-size: 10px;"><span class="verify-chip__dot"></span>ok</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--warning);">Acme</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Acme Sensors</strong><div class="row-sub">vendor · sig 0xb7…4cd</div></td>
+                    <td class="col-action"><span class="verify-chip verify-chip--ok" style="font-size: 10px;"><span class="verify-chip__dot"></span>ok</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--fg-tertiary);">SYS</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Chain sealer</strong><div class="row-sub">system · sig 0x00…ee1</div></td>
+                    <td class="col-action"><span class="verify-chip verify-chip--ok" style="font-size: 10px;"><span class="verify-chip__dot"></span>ok</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Block summary</h3>
+              </div>
+              <div class="block-meta">
+                <div class="block-meta__row">
+                  <span class="block-meta__label">Block height</span>
+                  <span class="block-meta__value mono">#13</span>
+                </div>
+                <div class="block-meta__row">
+                  <span class="block-meta__label">Sealed at</span>
+                  <span class="block-meta__value mono">2026-09-07 14:08:42 IST</span>
+                </div>
+                <div class="block-meta__row">
+                  <span class="block-meta__label">Merkle root</span>
+                  <span class="block-meta__value mono" style="font-size: 10px;">0x4f8a…b21e</span>
+                </div>
+                <div class="block-meta__row">
+                  <span class="block-meta__label">Prev hash</span>
+                  <span class="block-meta__value mono" style="font-size: 10px;">0x9a1f…3c2d</span>
+                </div>
+                <div class="block-meta__row">
+                  <span class="block-meta__label">Events</span>
+                  <span class="block-meta__value mono">4</span>
+                </div>
+                <div class="block-meta__row">
+                  <span class="block-meta__label">Total chain size</span>
+                  <span class="block-meta__value mono">13 blocks · 0.4 MB</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Public verification URL</h3>
+              </div>
+              <p style="font-size: var(--font-size-xs); color: var(--fg-secondary); margin: 0 0 var(--space-sm); line-height: var(--line-height-body);">Anyone with this URL can independently verify the record — no login required.</p>
+              <code style="display:block; padding: var(--space-sm) var(--space-md); background: var(--bg-subtle); border-radius: var(--radius-sm); font-size: 10px; color: var(--fg-secondary); font-family: var(--font-family-mono); word-break: break-all;">surakkha.app/v/0x4f8a2b9c7d1e0f5a3b6c8d2e1f4a7b9c0d3e5f1a8b2c4d6e8f0a1b3c5d7e9f</code>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Recent verifications history ─────────────── -->
+        <div class="card data-card" style="margin-top: var(--space-md);">
+          <div class="data-card__head">
+            <h3 class="data-card__title">Recent verifications</h3>
+            <span class="data-card__meta">last 7 days · 23 checks</span>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th class="col-time">When</th>
+                <th>What was checked</th>
+                <th>Hash</th>
+                <th class="col-status">Result</th>
+                <th class="col-action"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="col-time">14:08 today</td>
+                <td class="col-title">Ward 7 notice broadcast</td>
+                <td class="mono" style="font-size: 10px;">0x4f8a…b21e</td>
+                <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">4/4 sigs</span></td>
+                <td class="col-action"><a href="#">Re-run</a></td>
+              </tr>
+              <tr>
+                <td class="col-time">13:50 today</td>
+                <td class="col-title">Block #12 batch hash mismatch</td>
+                <td class="mono" style="font-size: 10px;">0x9a1f…3c2d</td>
+                <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">1 err</span></td>
+                <td class="col-action"><a href="#">Inspect</a></td>
+              </tr>
+              <tr>
+                <td class="col-time">11:30 today</td>
+                <td class="col-title">Ward 5 PHA countersig</td>
+                <td class="mono" style="font-size: 10px;">0x2f97…1aae</td>
+                <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                <td class="col-action"><a href="#">Re-run</a></td>
+              </tr>
+              <tr>
+                <td class="col-time">Yesterday 16:22</td>
+                <td class="col-title">Citizen report anchor</td>
+                <td class="mono" style="font-size: 10px;">0x1a44…f883</td>
+                <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">ok</span></td>
+                <td class="col-action"><a href="#">Re-run</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Settings (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div>
+          <h1>Settings</h1>
+          <div class="page-header__sub">Preferences · alert thresholds · signature device · notification channels</div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <div class="grid-12">
+          <div class="col-3">
+            <div class="card" style="padding: var(--space-md);">
+              <div class="card-heading" style="font-size: var(--font-size-sm); margin: 0 0 var(--space-sm);">Sections</div>
+              <nav class="settings-nav">
+                <a href="#locale" class="settings-nav__link active">Locale &amp; language</a>
+                <a href="#appearance" class="settings-nav__link">Appearance</a>
+                <a href="#notifications" class="settings-nav__link">Notifications</a>
+                <a href="#thresholds" class="settings-nav__link">Alert thresholds</a>
+                <a href="#signature" class="settings-nav__link">Signature device</a>
+                <a href="#channels" class="settings-nav__link">Delivery channels</a>
+                <a href="#account" class="settings-nav__link">Account &amp; sessions</a>
+                <a href="#data" class="settings-nav__link">Data &amp; privacy</a>
+              </nav>
+            </div>
+          </div>
+
+          <div class="col-9">
+            <!-- ── Locale & language ──────────────────────── -->
+            <div class="settings-section" id="locale">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Locale &amp; language</h2>
+                  <div class="settings-section__sub">display language · date format · timezone</div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Display language</div>
+                  <div class="settings-row__help">Affects all UI text, system messages, and notice templates you draft.</div>
+                </div>
+                <div class="settings-row__control">
+                  <div class="locale-pills" role="tablist">
+                    <button class="locale-pills__btn is-active" type="button">EN</button>
+                    <button class="locale-pills__btn" type="button">বাংলা</button>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Timezone</div>
+                  <div class="settings-row__help">IST · Asia/Dhaka (UTC+06:00)</div>
+                </div>
+                <div class="settings-row__control">
+                  <select class="input" style="height: 32px; font-size: var(--font-size-sm); width: 200px;">
+                    <option>UTC+06:00 — Dhaka</option>
+                    <option>UTC+05:30 — Kolkata</option>
+                    <option>UTC+00:00 — UTC</option>
+                  </select>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Date format</div>
+                  <div class="settings-row__help">Used in tables, audit log, and notice bodies.</div>
+                </div>
+                <div class="settings-row__control">
+                  <div class="locale-pills" role="tablist">
+                    <button class="locale-pills__btn" type="button">DD MMM YYYY</button>
+                    <button class="locale-pills__btn is-active" type="button">YYYY-MM-DD</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Appearance ─────────────────────────────── -->
+            <div class="settings-section" id="appearance">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Appearance</h2>
+                  <div class="settings-section__sub">theme · density · data table width</div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Theme</div>
+                  <div class="settings-row__help">Light for daylight shift, dark for control-room monitors.</div>
+                </div>
+                <div class="settings-row__control">
+                  <div class="locale-pills" role="tablist">
+                    <button class="locale-pills__btn" type="button">Light</button>
+                    <button class="locale-pills__btn is-active" type="button">System</button>
+                    <button class="locale-pills__btn" type="button">Dark</button>
+                  </div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Reduce motion</div>
+                  <div class="settings-row__help">Disable the chain-fresh pulse and tab transitions.</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-switch__slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">High-contrast mode</div>
+                  <div class="settings-row__help">Boost border and text contrast for outdoor visibility.</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-switch__slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Notifications ──────────────────────────── -->
+            <div class="settings-section" id="notifications">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Notifications</h2>
+                  <div class="settings-section__sub">when to wake you · which severities · quiet hours</div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">T3 urgent — always wake</div>
+                  <div class="settings-row__help">Phone vibration, app badge, and SMS regardless of quiet hours.</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-switch__slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">T2 elevated — in-app only</div>
+                  <div class="settings-row__help">Badge + inbox count · no sound.</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="toggle-switch__slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">T1 / T0 — digest</div>
+                  <div class="settings-row__help">Bundled into a 30-min digest instead of per-event.</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="toggle-switch__slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Quiet hours</div>
+                  <div class="settings-row__help">T2 and below are silenced. T3 still wakes you.</div>
+                </div>
+                <div class="settings-row__control">
+                  <span class="mono" style="font-size: var(--font-size-sm);">22:00</span>
+                  <span style="color: var(--fg-tertiary);">→</span>
+                  <span class="mono" style="font-size: var(--font-size-sm);">06:00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Alert thresholds ───────────────────────── -->
+            <div class="settings-section" id="thresholds">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Alert thresholds</h2>
+                  <div class="settings-section__sub">Per-parameter · ward-level override available</div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Chlorine residual</div>
+                  <div class="settings-row__help">Trigger T2 when reading falls below this for ≥ 5 min.</div>
+                </div>
+                <div class="settings-row__control threshold-slider" style="width: 280px;">
+                  <span class="threshold-slider__label">low</span>
+                  <input type="range" min="0" max="1.5" step="0.1" value="0.3" id="cl-slider">
+                  <span class="threshold-slider__value" id="cl-val">0.3 ppm</span>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">pH drift (vs 7-day median)</div>
+                  <div class="settings-row__help">Trigger T2 when deviation exceeds this.</div>
+                </div>
+                <div class="settings-row__control threshold-slider" style="width: 280px;">
+                  <span class="threshold-slider__label">±</span>
+                  <input type="range" min="0" max="1.5" step="0.1" value="0.5" id="ph-slider">
+                  <span class="threshold-slider__value" id="ph-val">0.5 pH</span>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Silence duration</div>
+                  <div class="settings-row__help">Trigger T3 if a sensor goes silent longer than this.</div>
+                </div>
+                <div class="settings-row__control threshold-slider" style="width: 280px;">
+                  <input type="range" min="1" max="30" step="1" value="5" id="sil-slider">
+                  <span class="threshold-slider__value" id="sil-val">5 min</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Signature device ───────────────────────── -->
+            <div class="settings-section" id="signature">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Signature device</h2>
+                  <div class="settings-section__sub">your keypair for dual-sig notice issuance</div>
+                </div>
+              </div>
+              <div class="signature-device">
+                <div class="signature-device__icon">
+                  <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" x2="12" y1="18" y2="18"/></svg>
+                </div>
+                <div class="signature-device__body">
+                  <div class="signature-device__name">Pixel 7 · Priya</div>
+                  <div class="signature-device__meta">fingerprint enrolled · 2026-08-14 · pub key 0x4f8a…b21e</div>
+                </div>
+                <div>
+                  <span class="signature-device__status">● paired</span>
+                </div>
+                <div>
+                  <button class="button button--secondary" type="button" style="height: 32px; font-size: var(--font-size-xs);">Re-pair</button>
+                </div>
+              </div>
+              <div class="signature-device" style="margin-top: var(--space-sm);">
+                <div class="signature-device__icon">
+                  <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" x2="12" y1="18" y2="18"/></svg>
+                </div>
+                <div class="signature-device__body">
+                  <div class="signature-device__name">Tab S9 · backup</div>
+                  <div class="signature-device__meta">paired 2026-08-22 · last used 7 d ago</div>
+                </div>
+                <div>
+                  <span class="signature-device__status" style="color: var(--fg-tertiary);">● standby</span>
+                </div>
+                <div>
+                  <button class="button button--secondary" type="button" style="height: 32px; font-size: var(--font-size-xs);">Promote</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Delivery channels ──────────────────────── -->
+            <div class="settings-section" id="channels">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Delivery channels (your role)</h2>
+                  <div class="settings-section__sub">which channels you can broadcast on as an operator</div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">SMS gateway</div>
+                  <div class="settings-row__help">Outbound only · uses operator key</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-switch__slider"></span></label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">WhatsApp Business</div>
+                  <div class="settings-row__help">Template-based, requires PHA countersig for T3</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-switch__slider"></span></label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Community radio (95.7 FM)</div>
+                  <div class="settings-row__help">Pre-recorded scripts · live cut-in needs PHA</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch"><input type="checkbox"><span class="toggle-switch__slider"></span></label>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">PA system / ward speakers</div>
+                  <div class="settings-row__help">Per-ward routing · T2+ only</div>
+                </div>
+                <div class="settings-row__control">
+                  <label class="toggle-switch"><input type="checkbox" checked><span class="toggle-switch__slider"></span></label>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Account ────────────────────────────────── -->
+            <div class="settings-section" id="account">
+              <div class="settings-section__head">
+                <div>
+                  <h2 class="settings-section__title">Account &amp; sessions</h2>
+                  <div class="settings-section__sub">your profile · active sessions · key rotation</div>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Display name</div>
+                  <div class="settings-row__help">Shown in notice signatures and audit log.</div>
+                </div>
+                <div class="settings-row__control">
+                  <input type="text" class="input" value="Priya Subramanian" style="width: 240px; height: 32px; font-size: var(--font-size-sm);">
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Role</div>
+                  <div class="settings-row__help">utility_operator · granted 2025-11-04 by PHA approver</div>
+                </div>
+                <div class="settings-row__control">
+                  <span class="badge badge--tier" style="font-size: 10px;">utility_operator</span>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Active sessions</div>
+                  <div class="settings-row__help">3 devices · this browser + 2 paired</div>
+                </div>
+                <div class="settings-row__control">
+                  <button class="button button--secondary" type="button" style="height: 32px; font-size: var(--font-size-xs);">Manage</button>
+                </div>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row__label">Rotate signature key</div>
+                  <div class="settings-row__help">Generates a new keypair · requires re-pairing all devices.</div>
+                </div>
+                <div class="settings-row__control">
+                  <button class="button button--danger" type="button" style="height: 32px; font-size: var(--font-size-xs);">Rotate</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: var(--space-sm); margin-top: var(--space-lg);">
+              <button class="button button--secondary" type="button">Discard changes</button>
+              <button class="button button--primary" type="button">Save settings</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Threshold sliders — keep the live value in sync
+    (function () {
+      function bind(id, valId, suffix) {
+        var s = document.getElementById(id);
+        var v = document.getElementById(valId);
+        if (!s || !v) return;
+        s.addEventListener('input', function () {
+          v.textContent = s.value + suffix;
+        });
+      }
+      bind('cl-slider', 'cl-val', ' ppm');
+      bind('ph-slider', 'ph-val', ' pH');
+      bind('sil-slider', 'sil-val', ' min');
+    })();
+
+    // Settings nav: smooth scroll + active state
+    (function () {
+      var links = document.querySelectorAll('.settings-nav__link');
+      if (!links.length) return;
+      links.forEach(function (a) {
+        a.addEventListener('click', function (e) {
+          var href = a.getAttribute('href');
+          if (!href || !href.startsWith('#')) return;
+          var target = document.querySelector(href);
+          if (!target) return;
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          links.forEach(function (l) { l.classList.remove('active'); });
+          a.classList.add('active');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

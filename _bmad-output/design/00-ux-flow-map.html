@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — UX Flow Map (interactive)</title>
+<link rel="stylesheet" href="../../surakkha-app/mockups/theme.css">
+<style>
+  /* ── Page-level layout ─────────────────────────────────────── */
+  .flowmap-shell {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    min-height: 100vh;
+  }
+  @media (max-width: 1100px) {
+    .flowmap-shell { grid-template-columns: 1fr; }
+  }
+  .flowmap-head {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-xl) 0;
+  }
+  .flowmap-head h1 {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-xs);
+  }
+  .flowmap-head__sub {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+  .flowmap-head__meta {
+    margin-top: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+
+  /* ── Diagram panel (left) ──────────────────────────────────── */
+  .diagram-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    overflow: hidden;
+  }
+  .diagram-panel__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .diagram-panel__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .diagram-panel__legend {
+    display: flex;
+    gap: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .diagram-panel__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-swatch {
+    width: 10px; height: 10px; border-radius: 2px;
+    background: var(--brand-500);
+  }
+  .legend-swatch--accent { background: var(--warning); }
+  .legend-swatch--ghost { background: var(--fg-tertiary); opacity: 0.4; }
+
+  .diagram-wrap {
+    overflow: auto;
+    border-radius: var(--radius-sm);
+    background: var(--bg-base);
+  }
+
+  /* SVG node + edge styles */
+  .diagram-wrap svg { display: block; }
+  .diagram-wrap text {
+    font-family: var(--font-family-sans);
+    fill: var(--fg-default);
+  }
+  .diagram-wrap .node-rect {
+    fill: var(--bg-surface);
+    stroke: var(--border-default);
+    stroke-width: 1;
+    rx: 4;
+    transition: fill 120ms ease-out, stroke 120ms ease-out;
+  }
+  .diagram-wrap .node-label {
+    font-size: 13px;
+    font-weight: 500;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .diagram-wrap .node-sub {
+    font-size: 10px;
+    fill: var(--fg-tertiary);
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-family: var(--font-family-mono);
+    pointer-events: none;
+  }
+  .diagram-wrap .node-group { cursor: pointer; }
+  .diagram-wrap .node-group:hover .node-rect { stroke: var(--brand-500); stroke-width: 2; }
+  .diagram-wrap .node-group.is-active .node-rect {
+    fill: var(--brand-100);
+    stroke: var(--brand-500);
+    stroke-width: 2;
+  }
+  [data-theme="dark"] .diagram-wrap .node-group.is-active .node-rect {
+    fill: var(--brand-200);
+  }
+  .diagram-wrap .node-group.is-dimmed { opacity: 0.25; }
+
+  .diagram-wrap .node-role {
+    font-size: 9px;
+    fill: var(--brand-500);
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-family: var(--font-family-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+  .diagram-wrap .node-ghost .node-rect { fill: var(--bg-subtle); stroke-dasharray: 4 3; }
+  .diagram-wrap .node-ghost .node-label { fill: var(--fg-tertiary); }
+
+  .diagram-wrap .edge {
+    fill: none;
+    stroke: var(--border-default);
+    stroke-width: 1.5;
+  }
+  .diagram-wrap .edge--accent { stroke: var(--warning); stroke-width: 2; }
+  .diagram-wrap .edge-label {
+    font-size: 9px;
+    fill: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    text-anchor: middle;
+  }
+  .diagram-wrap .edge-group.is-dimmed { opacity: 0.15; }
+
+  /* ── Persona panel (right) ─────────────────────────────────── */
+  .persona-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    min-width: 0;
+  }
+  .persona-tabs {
+    display: flex;
+    gap: 2px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2px;
+    margin-bottom: var(--space-md);
+  }
+  .persona-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 120ms ease-out, color 120ms ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+  }
+  .persona-tab:hover { color: var(--fg-default); }
+  .persona-tab.is-active {
+    background: var(--bg-surface);
+    color: var(--brand-600);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  [data-theme="dark"] .persona-tab.is-active {
+    background: var(--bg-surface);
+    color: var(--brand-400);
+  }
+  .persona-tab__role {
+    font-family: var(--font-family-mono);
+    font-size: 9px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .persona-pane { display: none; }
+  .persona-pane.is-active { display: block; }
+
+  .persona-pane__quote {
+    background: var(--bg-base);
+    border-left: 3px solid var(--brand-500);
+    padding: var(--space-md) var(--space-lg);
+    margin: 0 0 var(--space-lg);
+    font-style: italic;
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .persona-pane__section-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-lg) 0 var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .persona-pane__section-title:first-of-type { margin-top: 0; }
+
+  /* journey table */
+  .journey-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+  }
+  .journey-table th {
+    text-align: left;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-tertiary);
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .journey-table td {
+    padding: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+    color: var(--fg-default);
+  }
+  .journey-table tr:last-child td { border-bottom: none; }
+  .journey-table td:first-child {
+    font-family: var(--font-family-mono);
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-xs);
+    width: 28px;
+  }
+  .journey-table .chain-event {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--brand-500);
+    background: var(--brand-100);
+    padding: 2px var(--space-xs);
+    border-radius: var(--radius-xs);
+    display: inline-block;
+  }
+  [data-theme="dark"] .journey-table .chain-event {
+    background: var(--brand-200);
+    color: var(--brand-400);
+  }
+  .journey-table .chain-event--ghost {
+    color: var(--fg-tertiary);
+    background: var(--bg-subtle);
+  }
+
+  /* narrative (12.x per-persona day) */
+  .narrative-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .narrative-list li {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+  .narrative-list li:first-child { border-top: none; }
+  .narrative-list .time {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .narrative-list code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    background: var(--bg-subtle);
+    padding: 1px var(--space-xs);
+    border-radius: var(--radius-xs);
+    color: var(--fg-default);
+  }
+
+  /* decisions list (13.x) */
+  .decisions-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .decisions-list li {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-top: 1px solid var(--border-subtle);
+    align-items: baseline;
+  }
+  .decisions-list li:first-child { border-top: none; }
+  .decisions-list .check {
+    color: var(--success);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-md);
+    line-height: 1;
+  }
+  .decisions-list .label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--brand-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: var(--space-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+  .decisions-list .body {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-body);
+  }
+
+  /* ── Theme toggle (re-use) ──────────────────────────────────── */
+  .theme-toggle {
+    position: fixed;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: var(--shadow-modal);
+  }
+</style>
+</head>
+<body>
+
+<header class="flowmap-head">
+  <h1>UX Flow Map — interactive</h1>
+  <p class="flowmap-head__sub">Source: <span class="mono">00-ux-flow-map.md</span> · bridge between EXPERIENCE.md and the mockup pass. Click a node in the diagram to focus that screen · click a persona tab to see their day + locked decisions.</p>
+  <div class="flowmap-head__meta">
+    <span>5 personas</span>
+    <span>·</span>
+    <span>7 Priya routes</span>
+    <span>·</span>
+    <span>15 cross-screen transitions</span>
+    <span>·</span>
+    <span>7 locked decisions</span>
+    <span>·</span>
+    <span>DRAFT 2026-09-07</span>
+  </div>
+</header>
+
+<main class="flowmap-shell">
+
+  <!-- ─────────────────────────── LEFT: Diagram ─────────── -->
+  <section class="diagram-panel" aria-label="Screen transition diagram">
+    <div class="diagram-panel__head">
+      <h2 class="diagram-panel__title">Cross-screen transition diagram (§11)</h2>
+      <div class="diagram-panel__legend">
+        <span><span class="legend-swatch"></span>Priya route</span>
+        <span><span class="legend-swatch legend-swatch--accent"></span>T3 two-tap path</span>
+        <span><span class="legend-swatch legend-swatch--ghost"></span>Phase 2 / ghost</span>
+      </div>
+    </div>
+
+    <div class="diagram-wrap" id="diagramWrap">
+      <!-- SVG injected by JS so it stays editable as one block -->
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── RIGHT: Persona panel ─────── -->
+  <section class="persona-panel" aria-label="Persona narratives">
+
+    <div class="persona-tabs" role="tablist" aria-label="Persona">
+      <button class="persona-tab is-active" role="tab" aria-selected="true" data-persona="priya">
+        Priya <span class="persona-tab__role">util op</span>
+      </button>
+      <button class="persona-tab" role="tab" aria-selected="false" data-persona="anjali">
+        Anjali <span class="persona-tab__role">citizen</span>
+      </button>
+      <button class="persona-tab" role="tab" aria-selected="false" data-persona="pha_approver">
+        Dr. Karim <span class="persona-tab__role">PHA</span>
+      </button>
+      <button class="persona-tab" role="tab" aria-selected="false" data-persona="pha_viewer">
+        PHA Viewer <span class="persona-tab__role">audit</span>
+      </button>
+      <button class="persona-tab" role="tab" aria-selected="false" data-persona="vendor">
+        Acme <span class="persona-tab__role">vendor</span>
+      </button>
+    </div>
+
+    <!-- ─────────── PRIYA ─────────── -->
+    <div class="persona-pane is-active" data-persona="priya">
+      <div class="persona-pane__quote">"I resolve incidents; I pass shift cleanly."</div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.3)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        All 7 Priya page templates: <span class="mono">Login · Dashboard · InboxList · InboxDetail · VerifyFlow · AuditLog · Settings</span>
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.3)</h3>
+      <table class="journey-table">
+        <thead>
+          <tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Opens app</td><td>Login</td><td>Picks persona</td><td><span class="chain-event">OperatorAuthenticated</span></td></tr>
+          <tr><td>2</td><td>Login success</td><td>Dashboard</td><td>Reads KPIs + 24h sensor history</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>3</td><td>Anomalous KPI</td><td>InboxList</td><td>Reads ranked incident rows</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>4</td><td>Picks incident</td><td>InboxDetail</td><td>Reads source + fusion score</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>5</td><td>Confirm playbook step</td><td>InboxDetail</td><td>Executes Step 1 (sensor reading)</td><td><span class="chain-event">PlaybookStepExecuted</span></td></tr>
+          <tr><td>6</td><td>Crosses T2 threshold</td><td>InboxDetail</td><td>Escalates to T2</td><td><span class="chain-event">IncidentEscalated</span></td></tr>
+          <tr><td>7</td><td>Crosses T3 (after dual-sig)</td><td>InboxDetail</td><td>Two-tap confirms issuance</td><td><span class="chain-event">MessageIssuanceConfirmed → PublicNoticeIssued</span></td></tr>
+          <tr><td>8</td><td>Deviates from playbook</td><td>InboxDetail</td><td>Captures override-with-reasoning</td><td><span class="chain-event">DeviationCaptured</span></td></tr>
+          <tr><td>9</td><td>Approves sensor reading</td><td>VerifyFlow</td><td>Confirms photo matches reading</td><td><span class="chain-event">SensorReadingVerified</span></td></tr>
+          <tr><td>10</td><td>Reviews the week</td><td>AuditLog</td><td>Filters by ward/time/actor</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>11</td><td>Shift change</td><td>Dashboard</td><td>Reads handover brief</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>12</td><td>Tweak preferences</td><td>Settings</td><td>Flips a toggle</td><td><span class="chain-event">AuditEntry{setting_changed}</span></td></tr>
+          <tr><td>13</td><td>Logout</td><td>Login</td><td>—</td><td><span class="chain-event">OperatorAccessLogged</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">Priya's day (§12.1)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">09:00</span><span>Login → Dashboard. Sees 2 open incidents from overnight.</span></li>
+        <li><span class="time">09:05</span><span>InboxList → InboxDetail on the chlorination-spike row.</span></li>
+        <li><span class="time">09:06</span><span>Execute "Confirm with sensor reading" → <code>PlaybookStepExecuted</code>.</span></li>
+        <li><span class="time">09:08</span><span>Sensor confirms; escalate to T2 → <code>IncidentEscalated</code>. Sends for PHA dual-sig queue (parallel track).</span></li>
+        <li><span class="time">09:13</span><span>PHA signs. Utility_message_desk signs. Notification lands on Priya's chrome "dual-sig complete, can issue."</span></li>
+        <li><span class="time">09:14</span><span>Two-tap confirm → <code>PublicNoticeIssued</code>. Ramesh gets notice in WhatsApp + SMS. Anjali gets "your report mattered" ack.</span></li>
+        <li><span class="time">09:25</span><span>Sensor normalizes; safe-now issued.</span></li>
+        <li><span class="time">09:30</span><span>Dashboard's handover brief is clean.</span></li>
+        <li><span class="time">17:30</span><span>Slight pH drift on Ward 12. Captures deviation; sets a follow-up note for next operator.</span></li>
+        <li><span class="time">17:55</span><span>Handovers to night's operator via the same handover brief; the dashboard is their starting state.</span></li>
+        <li><span class="time">18:00</span><span>Settings → flip "auto-acknowledge Anjali reports" on. (Save is immediate; audit entry lands.)</span></li>
+        <li><span class="time">18:01</span><span>Logout. <code>OperatorAccessLogged{type:logout}</code>.</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Locked decisions (§13)</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.1</span><span class="body">Login: persona-picker only — no username/password fields in Phase 1. Phase 2 swaps the picker for real auth with zero changes elsewhere.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.2</span><span class="body">T3 two-tap modal: two entry points — incident row "Issue" button AND top-chrome notification badge. Same modal opens from both.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">App shell: shared Priya chrome with role-aware variants. Other personas hide nav items + render role-specific home.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.4</span><span class="body">Verify is Priya-only. PHA-Viewer sees queue read-only. PHA Approver does NOT verify.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.5</span><span class="body">Anjali acknowledgement: feed + passive notification (belt-and-suspenders).</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.6</span><span class="body">Settings persist to IndexedDB; each change emits <code>AuditEntry{setting_changed}</code>.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.7</span><span class="body">Demo controls visible on Login + Settings Danger zone; each gated by confirm modal.</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ─────────── ANJALI ─────────── -->
+    <div class="persona-pane" data-persona="anjali">
+      <div class="persona-pane__quote">"I report fast, my reports matter, my effort earns status."</div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.2)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        <strong>Phase 1 mockup:</strong> what-it-will-look-like preview only.<br>
+        <strong>Phase 2:</strong> Anjali-mobile (deferred per dim 5c). WhatsApp thread + SMS bubble for receipt/ack.
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.2)</h3>
+      <table class="journey-table">
+        <thead><tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Notification / opens app</td><td>Anjali home</td><td>Sees Report card + ack feed</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>2</td><td>Taps Report</td><td>Anjali report sheet</td><td>Voice 8s + photo + optional text</td><td><span class="chain-event chain-event--ghost">draft</span></td></tr>
+          <tr><td>3</td><td>Taps Submit</td><td>Anjali report sheet (submitting)</td><td>Spinner → "report received" pulse</td><td><span class="chain-event">AnjaliReportSubmitted</span></td></tr>
+          <tr><td>4</td><td>Network returns</td><td>— (background)</td><td>Queue drains, replayed same event_id</td><td><span class="chain-event">AnjaliReportSubmitted</span></td></tr>
+          <tr><td>5</td><td>Report triggers action</td><td>Anjali home (ack)</td><td>Reads "your report triggered action X"</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">Anjali's flow · Tuesday (§12.2)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">14:00</span><span>Opens Anjali-mobile. Sees Report card.</span></li>
+        <li><span class="time">14:01</span><span>Taps Report. Voice: "Ward 7 school, chlorine smell, kids about to drink." (8s) + photo of sentinel strip (yellow).</span></li>
+        <li><span class="time">14:01</span><span>Submit. "Report received" pulse. Lands <code>AnjaliReportSubmitted</code> event.</span></li>
+        <li><span class="time">14:01</span><span>Closes app.</span></li>
+        <li><span class="time">17:30</span><span>Notification: "Your report on Tuesday 14:01 at Ward 7 contributed to the safe-now notice. Thank you."</span></li>
+        <li><span class="time">Friday</span><span>Councillor cites her by name at the school.</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Relevant decisions</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">Anjali chrome is intentionally minimal (Phase 2 mobile). Phase 1 mockup renders a single "Submit a report" card + ack feed.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.5</span><span class="body">Belt-and-suspenders: feed + passive WhatsApp notification when her report triggers action.</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ─────────── PHA APPROVER ─────────── -->
+    <div class="persona-pane" data-persona="pha_approver">
+      <div class="persona-pane__quote">"I deliver clean water without political blowback; I cross-utility benchmark; I have early-warning."</div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.4)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        <strong>Phase 1 mockup:</strong> Approve surface rendered inside Priya's chrome (role switch only).<br>
+        <strong>Phase 2:</strong> PHA-pane (deferred per dim 5e).
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.4)</h3>
+      <table class="journey-table">
+        <thead><tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Login as pha_approver</td><td>Login → /approve</td><td>Persona picker → submit</td><td><span class="chain-event">OperatorAuthenticated</span></td></tr>
+          <tr><td>2</td><td>Lands</td><td>Approve queue</td><td>Reads pending dual-sig items</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>3</td><td>Picks one</td><td>Approve detail</td><td>Reviews body / diff; signs</td><td><span class="chain-event">SignatureAttestation</span></td></tr>
+          <tr><td>4</td><td>Vendor countersigns (off-site)</td><td>—</td><td>—</td><td><span class="chain-event">SignatureAttestation</span></td></tr>
+          <tr><td>5</td><td>Both signatures on chain</td><td>Approve queue</td><td>Affordance flips to "approved"</td><td><span class="chain-event">PublicNoticeIssued</span></td></tr>
+          <tr><td>6</td><td>Chronic-class review</td><td>PHA aggregate tiles</td><td>Reads deviation dashboard</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">PHA Approver's flow · Tuesday (§12.3)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">09:30</span><span>Login → /approve.</span></li>
+        <li><span class="time">09:31</span><span>1 pending: T3 public notice for Ward 7 chlorination. Same incident Priya is about to confirm.</span></li>
+        <li><span class="time">09:32</span><span>Reviews body + diff. Signs → <code>SignatureAttestation</code> (first of two). Payload_hash visible in mono.</span></li>
+        <li><span class="time">09:35</span><span>Vendor countersigns (off-site, async). <code>SignatureAttestation</code> (second).</span></li>
+        <li><span class="time">09:36</span><span>Affordance on Priya's chrome flips from "pending" to "approved."</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Relevant decisions</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">Chrome hides VerifyFlow; replaces Dashboard with Approve queue. Settings stays for prefs.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.4</span><span class="body">PHA Approver does NOT verify (Priya-only).</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ─────────── PHA VIEWER ─────────── -->
+    <div class="persona-pane" data-persona="pha_viewer">
+      <div class="persona-pane__quote">"I have early-warning before hospitals see cases; my decisions are defensible in press conferences."</div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.5)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        Same Priya chrome but Verify and Approve are disabled. Settings is read-only. <strong>AuditLog is the home screen.</strong>
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.5)</h3>
+      <table class="journey-table">
+        <thead><tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Login as pha_viewer</td><td>Login → /audit</td><td>Persona picker → submit</td><td><span class="chain-event">OperatorAuthenticated</span></td></tr>
+          <tr><td>2</td><td>Lands</td><td>AuditLog</td><td>Reads full event stream</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>3</td><td>Filters applied</td><td>AuditLog (filtered)</td><td>Reads filtered slice</td><td><span class="chain-event">OperatorAccessLogged{audit_filter}</span></td></tr>
+          <tr><td>4</td><td>Drills into event</td><td>AuditLog (event detail)</td><td>Reads full envelope + chain hash</td><td><span class="chain-event">OperatorAccessLogged{audit_drilldown}</span></td></tr>
+          <tr><td>5</td><td>Weekly review</td><td>AuditLog (heatmap)</td><td>Reads 7×24 activity heatmap</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">PHA Viewer's flow · Friday (§12.4)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">09:00</span><span>Login → /audit.</span></li>
+        <li><span class="time">09:05</span><span>Filters to <code>event_type: IncidentEscalated</code>, <code>actor_role: utility_operator</code>, last 7 days. Sees 14 events.</span></li>
+        <li><span class="time">09:10</span><span>Drills into 1 event. Reads full envelope. (Access logged.)</span></li>
+        <li><span class="time">09:15</span><span>Looks at 7×24 heatmap. Sees spikes at 09:00 + 17:00 (operator shift-change SLOs).</span></li>
+        <li><span class="time">09:20</span><span>Logs out.</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Relevant decisions</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">Chrome hides VerifyFlow + InboxDetail writes. Home is AuditLog. Settings is read-only.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.4</span><span class="body">PHA Viewer sees Verify queue read-only for cross-checks (Priya-only writes).</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ─────────── VENDOR ─────────── -->
+    <div class="persona-pane" data-persona="vendor">
+      <div class="persona-pane__quote">"My readings are accepted, my sensors stay calibrated, my retail relationship is healthy."</div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.6)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        <strong>Phase 1 mockup:</strong> sub-page inside Priya chrome with role switch.<br>
+        <strong>Phase 2:</strong> dedicated Vendor page template (needs dim-5 extension v1.1).
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.6)</h3>
+      <table class="journey-table">
+        <thead><tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Login as vendor</td><td>Login → /vendor</td><td>Persona picker → submit</td><td><span class="chain-event">OperatorAuthenticated</span></td></tr>
+          <tr><td>2</td><td>Lands</td><td>Vendor dashboard</td><td>Sees per-sensor status (5 states)</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>3</td><td>Picks sensor</td><td>Vendor sensor detail</td><td>Reads readings + metadata + cal date</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>4</td><td>Submits batch</td><td>Vendor submit batch</td><td>Picks param + value + captured_at</td><td><span class="chain-event">SensorReadingSubmitted</span></td></tr>
+          <tr><td>5</td><td>Replay (same event_id)</td><td>Vendor submit batch (success)</td><td>—</td><td><span class="chain-event">deduplicated: true</span></td></tr>
+          <tr><td>6</td><td>Config update</td><td>Vendor sensor detail</td><td>Flips a config field</td><td><span class="chain-event">SensorConfigChanged</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">Vendor's flow · Monday (§12.5)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">08:00</span><span>Login as vendor → /vendor.</span></li>
+        <li><span class="time">08:01</span><span>Sees fleet: 18 online, 2 late, 1 offline. (The offline is Ward 5 pump station.)</span></li>
+        <li><span class="time">08:05</span><span>Picks the offline. Re-calibrates on-device. Submits new batch of readings from last 24h.</span></li>
+        <li><span class="time">08:06</span><span>Submits: <code>SensorReadingSubmitted</code> × 96 (24h × 4 readings/hour).</span></li>
+        <li><span class="time">08:07</span><span>Last batch lands as <code>deduplicated: true</code> (because same <code>event_id</code> got replayed by a re-sync). No double-write.</span></li>
+        <li><span class="time">08:10</span><span>Logs out.</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Relevant decisions</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">Chrome hides Dashboard / Inbox / Verify / Audit. Home is the Vendor fleet page.</span></span></li>
+      </ul>
+    </div>
+
+  </section>
+
+</main>
+
+<button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+  ◐ Toggle theme
+</button>
+
+<script>
+  // ────────────────────────────────────────────────────── diagram
+  // Nodes are positioned on a 4-row × 3-col grid.
+  // x = column (0,1,2) · y = row (0,1,2,3)
+  // Each node: { id, label, sub, role, x, y, ghost? }
+  // Edges: { from, to, label?, accent? }
+
+  var NODES = [
+    // col 0
+    { id: 'login',         label: 'Login',              sub: 'cross-persona',         role: 'all',     x: 0, y: 0 },
+    { id: 'dashboard',     label: 'Dashboard',          sub: 'KPIs + handover',       role: 'priya',   x: 0, y: 1 },
+    { id: 'handover',      label: 'Handover',           sub: 'shift brief',           role: 'priya',   x: 0, y: 2 },
+    { id: 'settings',      label: 'Settings',           sub: 'preferences',           role: 'priya',   x: 0, y: 3 },
+
+    // col 1
+    { id: 'inbox_list',    label: 'InboxList',          sub: 'ranked queue',          role: 'priya',   x: 1, y: 1 },
+    { id: 'inbox_detail',  label: 'InboxDetail',        sub: 'playbook + T3 modal',   role: 'priya',   x: 1, y: 2 },
+    { id: 'verify',        label: 'VerifyFlow',         sub: 'photo + reading',       role: 'priya',   x: 1, y: 3 },
+
+    // col 2
+    { id: 'audit',         label: 'AuditLog',           sub: 'event stream',          role: 'pha_v',   x: 2, y: 1 },
+    { id: 'approve',       label: 'Approve queue',      sub: 'dual-sig',              role: 'pha_a',   x: 2, y: 2 },
+    { id: 'vendor',        label: 'Vendor fleet',       sub: 'sensor status',         role: 'vendor',  x: 2, y: 3 },
+
+    // Phase 2 ghost surfaces
+    { id: 'anjali',        label: 'Anjali-mobile',      sub: 'phase 2',               role: 'citizen', x: 0, y: 4, ghost: true },
+    { id: 'ramesh',        label: 'WhatsApp / SMS',     sub: 'no UI',                 role: 'ramesh',  x: 1, y: 4, ghost: true },
+  ];
+
+  var EDGES = [
+    // Login landings (per persona)
+    { from: 'login', to: 'dashboard', label: 'priya' },
+    { from: 'login', to: 'anjali',    label: 'anjali', ghost: true },
+    { from: 'login', to: 'approve',   label: 'pha_a' },
+    { from: 'login', to: 'audit',     label: 'pha_v' },
+    { from: 'login', to: 'vendor',    label: 'vendor' },
+
+    // Priya primary path
+    { from: 'dashboard',    to: 'inbox_list',   label: 'KPI click' },
+    { from: 'inbox_list',   to: 'inbox_detail', label: 'pick row' },
+    { from: 'inbox_detail', to: 'inbox_list',   label: 'back', reverse: true },
+    { from: 'dashboard',    to: 'handover',     label: 'shift change', reverse: true },
+
+    // Priya side routes (any → verify, audit, settings)
+    { from: 'dashboard',    to: 'verify' },
+    { from: 'inbox_list',   to: 'verify' },
+    { from: 'dashboard',    to: 'audit' },
+    { from: 'inbox_list',   to: 'audit' },
+    { from: 'dashboard',    to: 'settings' },
+    { from: 'inbox_list',   to: 'settings' },
+
+    // T3 two-tap accent
+    { from: 'inbox_detail', to: 'ramesh', label: 'PublicNoticeIssued', accent: true, ghost: true },
+
+    // PHA approver side
+    { from: 'approve', to: 'audit', label: 'aggregate tiles' },
+
+    // Settings reachable from anywhere
+    { from: 'verify',  to: 'settings', reverse: true },
+    { from: 'audit',   to: 'settings', reverse: true },
+
+    // Logout: every authenticated screen back to Login (subtle)
+    { from: 'dashboard', to: 'login', label: 'logout', reverse: true, dim: true },
+    { from: 'approve',   to: 'login', label: 'logout', reverse: true, dim: true },
+    { from: 'audit',     to: 'login', label: 'logout', reverse: true, dim: true },
+    { from: 'vendor',    to: 'login', label: 'logout', reverse: true, dim: true },
+  ];
+
+  // Layout math
+  var COL_W = 200, ROW_H = 110, PAD_X = 30, PAD_Y = 30;
+  var NODE_W = 160, NODE_H = 64;
+
+  function px(n) { return PAD_X + n.x * (COL_W); }
+  function py(n) { return PAD_Y + n.y * (ROW_H); }
+
+  function nodeCenter(n, axis) {
+    if (axis === 'x') return px(n) + NODE_W / 2;
+    if (axis === 'y') return py(n) + NODE_H / 2;
+  }
+
+  function buildSvg() {
+    var w = PAD_X * 2 + 3 * COL_W + NODE_W - COL_W; // last col extends to right
+    var h = PAD_Y * 2 + 5 * ROW_H + NODE_H - ROW_H;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '">';
+
+    // Arrow marker
+    svg += '<defs>';
+    svg += '<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker>';
+    svg += '<marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--warning)"/></marker>';
+    svg += '</defs>';
+
+    // Edges first (under nodes)
+    svg += '<g class="edges">';
+    EDGES.forEach(function (e) {
+      var a = NODES.find(function (n) { return n.id === e.from; });
+      var b = NODES.find(function (n) { return n.id === e.to; });
+      if (!a || !b) return;
+
+      // Determine start/end edges based on relative positions
+      var x1, y1, x2, y2;
+      if (a.x === b.x && a.y === b.y) return; // skip self
+      if (a.x < b.x) {
+        // left → right
+        x1 = px(a) + NODE_W; y1 = nodeCenter(a, 'y');
+        x2 = px(b);         y2 = nodeCenter(b, 'y');
+      } else if (a.x > b.x) {
+        // right → left (back)
+        x1 = px(a);         y1 = nodeCenter(a, 'y');
+        x2 = px(b) + NODE_W; y2 = nodeCenter(b, 'y');
+      } else if (a.y < b.y) {
+        // top → bottom
+        x1 = nodeCenter(a, 'x'); y1 = py(a) + NODE_H;
+        x2 = nodeCenter(b, 'x'); y2 = py(b);
+      } else {
+        // bottom → top
+        x1 = nodeCenter(a, 'x'); y1 = py(a);
+        x2 = nodeCenter(b, 'x'); y2 = py(b) + NODE_H;
+      }
+
+      var cls = 'edge';
+      if (e.accent) cls += ' edge--accent';
+      var marker = e.accent ? 'url(#arrow-accent)' : 'url(#arrow)';
+      // For non-accent edges, color follows border-default
+      var color = e.accent ? 'var(--warning)' : (e.dim ? 'var(--border-subtle)' : 'var(--border-default)');
+      svg += '<g class="edge-group" data-from="' + e.from + '" data-to="' + e.to + '">';
+      svg += '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" style="color:' + color + ';stroke:currentColor;" marker-end="' + marker + '"/>';
+      if (e.label) {
+        var mx = (x1 + x2) / 2;
+        var my = (y1 + y2) / 2;
+        // nudge label off the line
+        if (a.x === b.x) mx += 8;
+        svg += '<text class="edge-label" x="' + mx + '" y="' + (my - 4) + '">' + e.label + '</text>';
+      }
+      svg += '</g>';
+    });
+    svg += '</g>';
+
+    // Nodes
+    svg += '<g class="nodes">';
+    NODES.forEach(function (n) {
+      var cls = 'node-group';
+      if (n.ghost) cls += ' node-ghost';
+      svg += '<g class="' + cls + '" data-node="' + n.id + '">';
+      svg += '<rect class="node-rect" x="' + px(n) + '" y="' + py(n) + '" width="' + NODE_W + '" height="' + NODE_H + '"/>';
+      svg += '<text class="node-label" x="' + nodeCenter(n, 'x') + '" y="' + (py(n) + 24) + '">' + n.label + '</text>';
+      svg += '<text class="node-sub" x="' + nodeCenter(n, 'x') + '" y="' + (py(n) + 42) + '">' + n.sub + '</text>';
+      svg += '<text class="node-role" x="' + nodeCenter(n, 'x') + '" y="' + (py(n) + 56) + '">' + n.role + '</text>';
+      svg += '</g>';
+    });
+    svg += '</g>';
+
+    svg += '</svg>';
+    document.getElementById('diagramWrap').innerHTML = svg;
+  }
+
+  // ────────────────────────────────────────────────────── persona tabs
+  function wireTabs() {
+    var tabs = document.querySelectorAll('.persona-tab');
+    var panes = document.querySelectorAll('.persona-pane');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var key = tab.dataset.persona;
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', String(on));
+        });
+        panes.forEach(function (p) {
+          var on = p.dataset.persona === key;
+          p.classList.toggle('is-active', on);
+        });
+      });
+    });
+  }
+
+  // ────────────────────────────────────────────────────── node click
+  function wireNodes() {
+    var nodes = document.querySelectorAll('.node-group');
+    var edges = document.querySelectorAll('.edge-group');
+    nodes.forEach(function (g) {
+      g.addEventListener('click', function () {
+        var id = g.dataset.node;
+        var active = g.classList.contains('is-active');
+
+        // Toggle off if already active
+        nodes.forEach(function (n) { n.classList.remove('is-active'); });
+        if (!active) g.classList.add('is-active');
+
+        // Dim unrelated edges/nodes
+        edges.forEach(function (e) {
+          var touches = e.dataset.from === id || e.dataset.to === id;
+          e.classList.toggle('is-dimmed', !active && !touches);
+        });
+        nodes.forEach(function (n) {
+          if (n === g) return;
+          var touches = n.dataset.node === id;
+          // BFS-light: just touch direct neighbors
+          if (!active && !touches) {
+            // check if there's any edge from/to this node
+            var hasEdge = false;
+            edges.forEach(function (e) {
+              if ((e.dataset.from === id && e.dataset.to === n.dataset.node) ||
+                  (e.dataset.to   === id && e.dataset.from === n.dataset.node)) hasEdge = true;
+            });
+            n.classList.toggle('is-dimmed', !hasEdge);
+          } else {
+            n.classList.remove('is-dimmed');
+          }
+        });
+      });
+    });
+    // Click background to clear
+    document.getElementById('diagramWrap').addEventListener('click', function (e) {
+      if (e.target === this || e.target.tagName === 'svg') {
+        nodes.forEach(function (n) { n.classList.remove('is-active', 'is-dimmed'); });
+        edges.forEach(function (e) { e.classList.remove('is-dimmed'); });
+      }
+    });
+  }
+
+  buildSvg();
+  wireTabs();
+  wireNodes();
+</script>
+
+</body>
+</html>

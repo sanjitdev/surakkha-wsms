@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Inbox (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div class="page-header__row">
+          <div>
+            <h1>Inbox</h1>
+            <div class="page-header__sub">Action queue · 7 threads · 2 awaiting your signature · 1 T3 broadcast</div>
+          </div>
+          <div style="display: flex; gap: var(--space-sm);">
+            <button class="button button--secondary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
+              Export queue
+            </button>
+            <button class="button button--primary" type="button">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>
+              New draft
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <!-- ── Filter rail ─────────────────────────────────────── -->
+        <div class="inbox-toolbar">
+          <div class="filter-chips" role="tablist" aria-label="Filter inbox">
+            <button class="filter-chip is-active" type="button" role="tab" aria-selected="true">
+              All <span class="filter-chip__count">7</span>
+            </button>
+            <button class="filter-chip" type="button" role="tab" aria-selected="false">
+              <span class="filter-chip__dot" style="background: var(--danger);"></span>
+              T3 urgent <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip" type="button" role="tab" aria-selected="false">
+              Awaiting sigs <span class="filter-chip__count">2</span>
+            </button>
+            <button class="filter-chip" type="button" role="tab" aria-selected="false">
+              My drafts <span class="filter-chip__count">1</span>
+            </button>
+            <button class="filter-chip" type="button" role="tab" aria-selected="false">
+              Citizen reports <span class="filter-chip__count">3</span>
+            </button>
+            <button class="filter-chip" type="button" role="tab" aria-selected="false">
+              Resolved · today <span class="filter-chip__count">12</span>
+            </button>
+          </div>
+
+          <div class="inbox-search">
+            <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;color:var(--fg-tertiary);">
+              <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="8"/><line x1="21" x2="16.65" y1="21" y2="16.65"/></svg>
+            </span>
+            <input type="search" class="inbox-search__input" placeholder="Search by ward, sensor, hash, or citizen name…" aria-label="Search inbox">
+          </div>
+        </div>
+
+        <div class="grid-12" style="margin-top: var(--space-md);">
+          <div class="col-8">
+            <div class="card data-card" style="padding: 0;">
+              <div class="data-card__head" style="padding: var(--space-md) var(--space-lg); border-bottom: 1px solid var(--border-subtle);">
+                <h3 class="data-card__title">Action queue — sorted T3 → T1, then newest first</h3>
+                <span class="data-card__meta">7 threads · last updated 14:08</span>
+              </div>
+
+              <table class="data-table data-table--inbox">
+                <thead>
+                  <tr>
+                    <th class="col-check"><input type="checkbox" aria-label="Select all"></th>
+                    <th class="col-warn" aria-label="Severity"></th>
+                    <th>Thread</th>
+                    <th class="col-where">Where</th>
+                    <th class="col-owner">Owner</th>
+                    <th class="col-status">Severity</th>
+                    <th class="col-action"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- T3 · URGENT · needs dual-sig -->
+                  <tr class="row-urgent">
+                    <td class="col-check"><input type="checkbox" aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                    <td class="col-title">
+                      <strong>Ward 7 chlorination spike</strong>
+                      <div class="row-sub">PHA + vendor dual-sig pending · SN-2208 silent 8 min</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">ward 7</span>
+                      <div class="row-sub">SN-2208</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--brand-500);">P</span>
+                      Priya
+                    </td>
+                    <td class="col-status"><span class="badge badge--t3">T3</span></td>
+                    <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+                  </tr>
+
+                  <!-- T2 · Awaiting PHA countersignature -->
+                  <tr>
+                    <td class="col-check"><input type="checkbox" aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                    <td class="col-title">
+                      <strong>Ward 5 lead-leach chronic</strong>
+                      <div class="row-sub">8-day trend · awaiting lab result + PHA countersig</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">ward 5</span>
+                      <div class="row-sub">SN-3301</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--success);">A</span>
+                      Anjali
+                    </td>
+                    <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                    <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+                  </tr>
+
+                  <!-- T2 · Awaiting vendor countersignature -->
+                  <tr>
+                    <td class="col-check"><input type="checkbox" aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                    <td class="col-title">
+                      <strong>Ward 3 pH drift correction</strong>
+                      <div class="row-sub">Acme vendor draft · needs operator review</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">ward 3</span>
+                      <div class="row-sub">SN-1142</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--warning);">Acme</span>
+                      Vendor
+                    </td>
+                    <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                    <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
+                  </tr>
+
+                  <!-- T2 · My draft -->
+                  <tr>
+                    <td class="col-check"><input type="checkbox" checked aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                    <td class="col-title">
+                      <strong>Ward 12 pH drift — advisory</strong>
+                      <div class="row-sub">Draft by Priya · 2 d ago · not yet sent</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">ward 12</span>
+                      <div class="row-sub">SN-4407</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--brand-500);">P</span>
+                      Priya
+                    </td>
+                    <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                    <td class="col-action"><a href="inbox-detail.html">Edit →</a></td>
+                  </tr>
+
+                  <!-- T1 · Citizen report -->
+                  <tr>
+                    <td class="col-check"><input type="checkbox" aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                    <td class="col-title">
+                      <strong>Citizen report — discoloured water</strong>
+                      <div class="row-sub">Reported by Anjali (citizen) · 2 photos attached</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">ward 9</span>
+                      <div class="row-sub">SN-5503</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--success);">A</span>
+                      Anjali
+                    </td>
+                    <td class="col-status"><span class="badge badge--t1">T1</span></td>
+                    <td class="col-action"><a href="inbox-detail.html">Review →</a></td>
+                  </tr>
+
+                  <!-- T1 · Chain verification -->
+                  <tr>
+                    <td class="col-check"><input type="checkbox" aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
+                    <td class="col-title">
+                      <strong>Chain verification failed</strong>
+                      <div class="row-sub">Block #12 · auto-flagged · sensor batch hash mismatch</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">block #12</span>
+                      <div class="row-sub">system</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--fg-tertiary);">SYS</span>
+                      System
+                    </td>
+                    <td class="col-status"><span class="badge badge--t1">T1</span></td>
+                    <td class="col-action"><a href="verify-flow.html">Inspect →</a></td>
+                  </tr>
+
+                  <!-- T0 · info -->
+                  <tr>
+                    <td class="col-check"><input type="checkbox" aria-label="Select thread"></td>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--band-medium);"></span></td>
+                    <td class="col-title">
+                      <strong>Ward 12 cal. due in 14 days</strong>
+                      <div class="row-sub">Scheduled maintenance · no action required</div>
+                    </td>
+                    <td class="col-where">
+                      <span class="mono">ward 12</span>
+                      <div class="row-sub">SN-4407</div>
+                    </td>
+                    <td class="col-owner">
+                      <span class="avatar-dot" style="background: var(--warning);">Acme</span>
+                      Vendor
+                    </td>
+                    <td class="col-status"><span class="badge badge--tier">T0</span></td>
+                    <td class="col-action"><a href="sensors.html">Schedule →</a></td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="inbox-bulkbar" hidden>
+                <span class="inbox-bulkbar__count"><strong>1</strong> selected</span>
+                <div class="inbox-bulkbar__actions">
+                  <button class="button button--secondary" type="button" style="height:32px;font-size:var(--font-size-xs);">Assign to me</button>
+                  <button class="button button--secondary" type="button" style="height:32px;font-size:var(--font-size-xs);">Mark reviewed</button>
+                  <button class="button button--danger" type="button" style="height:32px;font-size:var(--font-size-xs);">Archive</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pagination footer -->
+            <div class="inbox-pager">
+              <span class="inbox-pager__meta">Showing 7 of 7</span>
+              <div style="display:flex;gap:var(--space-xs);">
+                <button class="button button--secondary" type="button" style="height:28px;font-size:var(--font-size-xs);" disabled>‹ Prev</button>
+                <button class="button button--secondary" type="button" style="height:28px;font-size:var(--font-size-xs);" disabled>Next ›</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Right rail: counters + recent decisions ─────── -->
+          <div class="col-4">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Queue by severity</h3>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">T3 urgent</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 14%; background: var(--danger);"></div></div>
+                <span class="hbar-value mono">1 / 7</span>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">T2 elevated</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 43%; background: var(--warning);"></div></div>
+                <span class="hbar-value mono">3 / 7</span>
+              </div>
+              <div class="hbar-row">
+                <span class="hbar-label">T1 review</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 29%; background: var(--info);"></div></div>
+                <span class="hbar-value mono">2 / 7</span>
+              </div>
+              <div class="hbar-row" style="margin-bottom:0;">
+                <span class="hbar-label">T0 info</span>
+                <div class="hbar-track"><div class="hbar-fill" style="width: 14%; background: var(--band-medium);"></div></div>
+                <span class="hbar-value mono">1 / 7</span>
+              </div>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Awaiting your action</h3>
+                <span class="data-card__meta">2</span>
+              </div>
+              <table class="data-table" style="font-size: var(--font-size-xs);">
+                <tbody>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Dual-sig broadcast</strong><div class="row-sub">Ward 7 · T3</div></td>
+                    <td class="col-action"><a href="inbox-detail.html">→</a></td>
+                  </tr>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Send draft</strong><div class="row-sub">Ward 12 · T2</div></td>
+                    <td class="col-action"><a href="inbox-detail.html">→</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Recent decisions</h3>
+                <span class="data-card__meta">last 24h</span>
+              </div>
+              <ul class="recent-decisions">
+                <li>
+                  <span class="recent-decisions__time mono">14:01</span>
+                  <span class="recent-decisions__text"><strong>Broadcast</strong> ward 7 notice</span>
+                </li>
+                <li>
+                  <span class="recent-decisions__time mono">13:48</span>
+                  <span class="recent-decisions__text"><strong>Escalated</strong> block #12</span>
+                </li>
+                <li>
+                  <span class="recent-decisions__time mono">11:30</span>
+                  <span class="recent-decisions__text"><strong>Countersigned</strong> ward 5</span>
+                </li>
+                <li>
+                  <span class="recent-decisions__time mono">09:13</span>
+                  <span class="recent-decisions__text"><strong>Reviewed</strong> ward 12 draft</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Toggle bulk-action bar when any row checkbox is checked
+    (function () {
+      var checks = document.querySelectorAll('.data-table--inbox .col-check input[type="checkbox"]');
+      var bar = document.querySelector('.inbox-bulkbar');
+      var count = bar ? bar.querySelector('.inbox-bulkbar__count strong') : null;
+      if (!checks.length || !bar) return;
+      function refresh() {
+        var n = 0;
+        checks.forEach(function (c) { if (c.checked && c !== checks[0]) n++; });
+        if (count) count.textContent = n;
+        if (n > 0) bar.removeAttribute('hidden'); else bar.setAttribute('hidden', '');
+      }
+      checks.forEach(function (c) { c.addEventListener('change', refresh); });
+      refresh();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Ward 7 chlorination spike (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="inbox-list.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">7</span>
+        </a>
+        <a href="verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <div class="page-header">
+        <div class="page-header__row">
+          <div>
+            <div style="margin-bottom: var(--space-xs);">
+              <a href="inbox-list.html" style="font-size: var(--font-size-xs); color: var(--fg-tertiary); text-decoration: none; font-family: var(--font-family-mono);">← Back to inbox</a>
+            </div>
+            <div class="thread-head__row1">
+              <span class="badge badge--t3">T3 urgent</span>
+              <span class="badge badge--open">dual-sig pending</span>
+              <span class="badge badge--escalated">escalated 14:01</span>
+            </div>
+            <h1>Ward 7 chlorination spike</h1>
+            <p class="page-header__sub">SN-2208 silent 8 min · chlorine residual dropped to 0.1 ppm · 312 households affected</p>
+          </div>
+          <div class="thread-head__cta">
+            <button class="button button--primary" type="button" id="openIssuanceBtn">
+              <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+              Issue public notice
+            </button>
+            <button class="button button--secondary" type="button">Request PHA sign-off</button>
+            <button class="button button--secondary" type="button">Assign colleague</button>
+          </div>
+        </div>
+      </div>
+
+      <main class="container--wide">
+        <!-- ── Signature track (where this thread sits) ──────── -->
+        <div class="signature-track" style="margin-bottom: var(--space-md);">
+          <div class="signature-step signature-step--done">
+            <div class="signature-step__num">Step 1</div>
+            <div class="signature-step__role">Operator</div>
+            <div class="signature-step__status">
+              <span class="signature-step__dot"></span>
+              Priya · composed 14:02
+            </div>
+          </div>
+          <div class="signature-step signature-step--active">
+            <div class="signature-step__num">Step 2</div>
+            <div class="signature-step__role">PHA approver</div>
+            <div class="signature-step__status">
+              <span class="signature-step__dot"></span>
+              Awaiting Dr. Karim
+            </div>
+          </div>
+          <div class="signature-step signature-step--pending">
+            <div class="signature-step__num">Step 3</div>
+            <div class="signature-step__role">Vendor countersig</div>
+            <div class="signature-step__status">
+              <span class="signature-step__dot"></span>
+              Awaiting Acme Sensors
+            </div>
+          </div>
+          <div class="signature-step signature-step--pending">
+            <div class="signature-step__num">Step 4</div>
+            <div class="signature-step__role">Broadcast</div>
+            <div class="signature-step__status">
+              <span class="signature-step__dot"></span>
+              SMS · WhatsApp · radio
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-12">
+          <!-- ── LEFT · Timeline + evidence + composer ───── -->
+          <div class="col-8">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Thread timeline</h3>
+                <span class="data-card__meta">9 events · thread id <span class="mono">th-007</span></span>
+              </div>
+              <ul class="timeline">
+                <li class="tl-active">
+                  <div class="timeline__time">14:02 · just now</div>
+                  <p class="timeline__title">Operator drafted public notice</p>
+                  <div class="timeline__meta">Priya · ward 7 template · draft id dn-3318</div>
+                  <div class="timeline__chips">
+                    <span class="badge badge--tier">draft</span>
+                    <span class="badge badge--escalated">dual-sig required</span>
+                  </div>
+                </li>
+                <li class="tl-done">
+                  <div class="timeline__time">14:01 · 1 min ago</div>
+                  <p class="timeline__title">Citizen complaint (Anjali, ward 7)</p>
+                  <div class="timeline__meta">"water smells like bleach" · 2 photos · geotagged</div>
+                  <div class="timeline__chips"><span class="badge badge--t1">citizen</span></div>
+                </li>
+                <li class="tl-done">
+                  <div class="timeline__time">13:58 · 4 min ago</div>
+                  <p class="timeline__title">Chlorine residual alarm</p>
+                  <div class="timeline__meta">SN-2208 ward 7 · 0.1 ppm · threshold 0.3 ppm</div>
+                  <div class="timeline__chips"><span class="badge badge--t2">sensor</span></div>
+                </li>
+                <li class="tl-done">
+                  <div class="timeline__time">13:48 · 14 min ago</div>
+                  <p class="timeline__title">Chain verification failed on block #12</p>
+                  <div class="timeline__meta">SN-1142 batch hash mismatch · auto-escalated</div>
+                  <div class="timeline__chips"><span class="badge badge--t3">chain err</span></div>
+                </li>
+                <li class="tl-done">
+                  <div class="timeline__time">13:21 · 41 min ago</div>
+                  <p class="timeline__title">Routine sensor batch received</p>
+                  <div class="timeline__meta">4 sensors · pH 7.4 avg · within range</div>
+                  <div class="timeline__chips"><span class="badge badge--tier">data</span></div>
+                </li>
+                <li>
+                  <div class="timeline__time">Yesterday 17:30</div>
+                  <p class="timeline__title">Ward 12 cal. due reminder</p>
+                  <div class="timeline__meta">scheduled · no action required</div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- ── Sensor trace + evidence ───────────────── -->
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Sensor trace — SN-2208 last 2h</h3>
+                <span class="data-card__meta">chlorine residual · threshold 0.3 ppm</span>
+              </div>
+              <div class="evidence-grid">
+                <div class="evidence-card">
+                  <div class="evidence-card__head">
+                    <span class="evidence-card__label">13:58 reading</span>
+                    <span class="badge badge--t3" style="font-size: 10px;">alert</span>
+                  </div>
+                  <div class="evidence-card__value">0.1 ppm</div>
+                  <div class="evidence-card__delta">▼ 0.5 ppm from baseline · 17× rate of change</div>
+                </div>
+                <div class="evidence-card">
+                  <div class="evidence-card__head">
+                    <span class="evidence-card__label">13:30 reading</span>
+                    <span class="badge badge--tier" style="font-size: 10px;">ok</span>
+                  </div>
+                  <div class="evidence-card__value">0.6 ppm</div>
+                  <div class="evidence-card__delta">within ±0.1 of weekly median</div>
+                </div>
+                <div class="evidence-card">
+                  <div class="evidence-card__head">
+                    <span class="evidence-card__label">Last calibration</span>
+                  </div>
+                  <div class="evidence-card__value">2026-08-22</div>
+                  <div class="evidence-card__delta">14 d ago · next due in 76 d</div>
+                </div>
+                <div class="evidence-card">
+                  <div class="evidence-card__head">
+                    <span class="evidence-card__label">Affected households</span>
+                  </div>
+                  <div class="evidence-card__value">312</div>
+                  <div class="evidence-card__delta">ward 7 zone B · daytime occupancy 71%</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Composer preview ───────────────────────── -->
+            <div class="composer" style="margin-top: var(--space-md);">
+              <h3 style="margin: 0 0 var(--space-md); font-size: var(--font-size-md); font-weight: var(--font-weight-semibold);">Notice draft — ward 7 chlorination</h3>
+              <div class="composer__row">
+                <span class="composer__label">Channels</span>
+                <div style="display:flex; gap: var(--space-sm); flex-wrap: wrap;">
+                  <span class="badge badge--tier">SMS</span>
+                  <span class="badge badge--tier">WhatsApp</span>
+                  <span class="badge badge--tier">Community radio</span>
+                  <span class="badge badge--tier">PA system</span>
+                </div>
+              </div>
+              <div class="composer__row">
+                <span class="composer__label">Severity</span>
+                <div><span class="badge badge--t3">T3 — do not drink</span></div>
+              </div>
+              <div class="composer__row">
+                <span class="composer__label">Languages</span>
+                <div style="display:flex; gap: var(--space-sm);">
+                  <span class="badge badge--tier">English</span>
+                  <span class="badge badge--tier">বাংলা</span>
+                </div>
+              </div>
+              <div class="composer__row">
+                <span class="composer__label">Body (en)</span>
+                <div style="font-size: var(--font-size-sm); color: var(--fg-secondary); line-height: var(--line-height-body);">
+                  Boil water before drinking. Chlorination levels are low in ward 7 zone B (SN-2208). Boil at least 1 minute. Tanks will be refilled by 18:00. Updates on community radio 95.7 FM.
+                </div>
+              </div>
+              <div class="composer__row">
+                <span class="composer__label">Body (bn)</span>
+                <div class="bangla-text" style="font-size: var(--font-size-sm); color: var(--fg-secondary); line-height: var(--line-height-body-bangla);">
+                  ওয়ার্ড ৭ জোন বি-তে (SN-2208) ক্লোরিনের মাত্রা কমেছে। পান করার আগে অন্তত ১ মিনিট ফুটিয়ে নিন। ট্যাঙ্ক ১৮:০০-এর মধ্যে পূর্ণ হবে।
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── RIGHT · Side panel ───────────────────────── -->
+          <div class="col-4">
+            <div class="card data-card">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Affected zone</h3>
+              </div>
+              <div style="background: var(--bg-inset); border-radius: var(--radius-sm); height: 140px; display: flex; align-items: center; justify-content: center; color: var(--fg-tertiary); font-family: var(--font-family-mono); font-size: var(--font-size-xs); margin-bottom: var(--space-md);">
+                [ ward 7 zone B · map ]
+              </div>
+              <table class="data-table" style="font-size: var(--font-size-xs);">
+                <tbody>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Zone B</strong><div class="row-sub">312 households</div></td>
+                  </tr>
+                  <tr>
+                    <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Zone A</strong><div class="row-sub">adjacent · monitor</div></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">Signers required</h3>
+              </div>
+              <table class="data-table" style="font-size: var(--font-size-xs);">
+                <tbody>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--brand-500);">K</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Dr. Karim</strong><div class="row-sub">PHA approver · ward 7</div></td>
+                    <td class="col-action"><span class="badge badge--escalated" style="font-size: 10px;">pending</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--warning);">Acme</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Acme Sensors</strong><div class="row-sub">vendor · SN-2208 owner</div></td>
+                    <td class="col-action"><span class="badge badge--tier" style="font-size: 10px;">queued</span></td>
+                  </tr>
+                  <tr>
+                    <td><span class="avatar-dot" style="background: var(--brand-500);">P</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Priya</strong><div class="row-sub">operator · drafter</div></td>
+                    <td class="col-action"><span class="badge badge--resolved" style="font-size: 10px;">signed</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card data-card" style="margin-top: var(--space-md);">
+              <div class="data-card__head">
+                <h3 class="data-card__title">On chain</h3>
+                <span class="data-card__meta">block #13 · 4 events</span>
+              </div>
+              <table class="data-table" style="font-size: var(--font-size-xs);">
+                <tbody>
+                  <tr>
+                    <td><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">dn-3318</strong><div class="row-sub">draft · pending sigs</div></td>
+                    <td class="col-action"><a href="verify-flow.html">→</a></td>
+                  </tr>
+                  <tr>
+                    <td><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">al-1142</strong><div class="row-sub">chlorine low · 13:58</div></td>
+                    <td class="col-action"><a href="verify-flow.html">→</a></td>
+                  </tr>
+                  <tr>
+                    <td><span class="row-severity-dot" style="background: var(--success);"></span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">rp-2208</strong><div class="row-sub">citizen report · 14:01</div></td>
+                    <td class="col-action"><a href="verify-flow.html">→</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════════
+       T3 ISSUANCE MODAL — two-tap dual-sig
+       Operator compose → PHA + vendor countersign → broadcast
+       Tap 1: PHA confirm · Tap 2: Vendor confirm · Both armed → broadcast ready
+       ════════════════════════════════════════════════════════════ -->
+  <div class="modal-backdrop" id="issuanceModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal__head">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
+          <span class="badge badge--t3">T3 urgent · dual-sig</span>
+          <span class="data-card__meta">dn-3318 · draft v1</span>
+        </div>
+        <h2 id="modalTitle">Confirm &amp; broadcast — ward 7 notice</h2>
+        <p>Both PHA approver and the SN-2208 vendor must countersign before this notice is broadcast to 312 households. Tap each box to confirm the signature trail is correct.</p>
+      </div>
+
+      <div class="modal__body">
+        <div class="signature-track" style="margin-bottom: var(--space-md);">
+          <div class="signature-step signature-step--done">
+            <div class="signature-step__num">1 · operator</div>
+            <div class="signature-step__role">Priya</div>
+            <div class="signature-step__status"><span class="signature-step__dot"></span>signed 14:02</div>
+          </div>
+          <div class="signature-step signature-step--active" id="step2">
+            <div class="signature-step__num">2 · PHA</div>
+            <div class="signature-step__role">Dr. Karim</div>
+            <div class="signature-step__status" id="step2status">
+              <span class="signature-step__dot"></span>
+              <span id="step2text">Awaiting your tap</span>
+            </div>
+          </div>
+          <div class="signature-step signature-step--pending" id="step3">
+            <div class="signature-step__num">3 · vendor</div>
+            <div class="signature-step__role">Acme Sensors</div>
+            <div class="signature-step__status" id="step3status">
+              <span class="signature-step__dot"></span>
+              <span id="step3text">Awaiting your tap</span>
+            </div>
+          </div>
+          <div class="signature-step signature-step--pending" id="step4">
+            <div class="signature-step__num">4 · broadcast</div>
+            <div class="signature-step__role">All channels</div>
+            <div class="signature-step__status">
+              <span class="signature-step__dot"></span>
+              <span id="step4text">Pending</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="two-tap">
+          <button class="two-tap__btn" type="button" id="tap1" data-tap="pha">
+            <span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 1</span>
+            <span>PHA countersign</span>
+          </button>
+          <button class="two-tap__btn" type="button" id="tap2" data-tap="vendor">
+            <span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 2</span>
+            <span>Vendor countersign</span>
+          </button>
+        </div>
+
+        <div id="receipts"></div>
+
+        <button class="two-tap__broadcast" type="button" id="broadcastBtn" disabled>
+          Broadcast to 312 households · 4 channels
+        </button>
+
+        <p style="font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-top: var(--space-md); line-height: var(--line-height-body);">
+          Both signatures will be appended to block #13 with hash <span class="mono" style="color: var(--fg-secondary);">0x4f8a…b21e</span>. The broadcast event will be visible on chain within 4 seconds. Recipients can verify any notice by scanning its QR code.
+        </p>
+      </div>
+
+      <div class="modal__foot">
+        <button class="button button--secondary" type="button" id="cancelModalBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // ── T3 issuance modal: two-tap dual-sig pattern
+    (function () {
+      var openBtn = document.getElementById('openIssuanceBtn');
+      var modal = document.getElementById('issuanceModal');
+      var cancelBtn = document.getElementById('cancelModalBtn');
+      var tap1 = document.getElementById('tap1');
+      var tap2 = document.getElementById('tap2');
+      var broadcastBtn = document.getElementById('broadcastBtn');
+      var receipts = document.getElementById('receipts');
+      var step2 = document.getElementById('step2');
+      var step3 = document.getElementById('step3');
+      var step4 = document.getElementById('step4');
+      var step2text = document.getElementById('step2text');
+      var step3text = document.getElementById('step3text');
+      var step4text = document.getElementById('step4text');
+      if (!openBtn || !modal) return;
+
+      var armed = { pha: false, vendor: false };
+
+      function update() {
+        if (armed.pha) {
+          tap1.classList.remove('is-armed');
+          tap1.classList.add('is-done');
+          tap1.disabled = true;
+          tap1.textContent = 'PHA countersign · ✓';
+          step2.classList.remove('signature-step--active');
+          step2.classList.add('signature-step--done');
+          step2text.textContent = 'PHA · sig 0xa3…19f';
+        } else {
+          tap1.classList.add('is-armed');
+        }
+        if (armed.vendor) {
+          tap2.classList.remove('is-armed');
+          tap2.classList.add('is-done');
+          tap2.disabled = true;
+          tap2.textContent = 'Vendor countersign · ✓';
+          step3.classList.remove('signature-step--pending');
+          step3.classList.add('signature-step--done');
+          step3text.textContent = 'Vendor · sig 0xb7…4cd';
+        } else {
+          tap2.classList.add('is-armed');
+        }
+        if (armed.pha && armed.vendor) {
+          step4.classList.remove('signature-step--pending');
+          step4.classList.add('signature-step--active');
+          step4text.textContent = 'Ready';
+          broadcastBtn.classList.add('is-ready');
+          broadcastBtn.disabled = false;
+        }
+      }
+
+      function openModal() { modal.removeAttribute('hidden'); }
+      function closeModal() {
+        modal.setAttribute('hidden', '');
+        // reset for re-open
+        armed = { pha: false, vendor: false };
+        tap1.classList.remove('is-armed','is-done'); tap1.disabled = false;
+        tap1.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 1</span><span>PHA countersign</span>';
+        tap2.classList.remove('is-armed','is-done'); tap2.disabled = false;
+        tap2.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 2</span><span>Vendor countersign</span>';
+        step2.classList.remove('signature-step--done'); step2.classList.add('signature-step--active');
+        step3.classList.remove('signature-step--done'); step3.classList.add('signature-step--pending');
+        step4.classList.remove('signature-step--active'); step4.classList.add('signature-step--pending');
+        step2text.textContent = 'Awaiting your tap';
+        step3text.textContent = 'Awaiting your tap';
+        step4text.textContent = 'Pending';
+        broadcastBtn.classList.remove('is-ready'); broadcastBtn.disabled = true;
+        receipts.innerHTML = '';
+      }
+
+      function addReceipt(which) {
+        var d = document.createElement('div');
+        d.className = 'tap-receipt';
+        var now = new Date();
+        var ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+        d.textContent = which + ' countersignature appended to block #13 at ' + ts;
+        receipts.appendChild(d);
+      }
+
+      openBtn.addEventListener('click', openModal);
+      cancelBtn.addEventListener('click', closeModal);
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) closeModal();
+      });
+
+      tap1.addEventListener('click', function () {
+        if (armed.pha) return;
+        armed.pha = true;
+        addReceipt('PHA');
+        update();
+      });
+      tap2.addEventListener('click', function () {
+        if (armed.vendor) return;
+        armed.vendor = true;
+        addReceipt('Vendor');
+        update();
+      });
+      broadcastBtn.addEventListener('click', function () {
+        if (!armed.pha || !armed.vendor) return;
+        broadcastBtn.textContent = 'Broadcasting…';
+        broadcastBtn.disabled = true;
+        setTimeout(function () {
+          broadcastBtn.textContent = '✓ Broadcast · block #13 sealed';
+          broadcastBtn.style.background = 'var(--success)';
+          broadcastBtn.style.borderColor = 'var(--success)';
+        }, 800);
+      });
+
+      // Esc closes modal
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.hasAttribute('hidden')) closeModal();
+      });
+    })();
+  </script>
+</body>
+</html>
