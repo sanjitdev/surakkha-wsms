@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Anjali Mobile Preview (dim 5c)</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* Tokens — light only (Anjali-mobile never sees dark) */
+  :root {
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+    --font-family-bangla:  'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.375rem;
+    --font-size-xxl: 1.75rem;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-body-bangla: 1.6;
+    --line-height-heading-bangla: 1.3;
+
+    --space-xs:  4px;  --space-sm:  8px;  --space-md: 12px;
+    --space-lg: 16px;  --space-xl: 24px;  --space-2xl: 32px;  --space-3xl: 48px;
+    --radius-xs: 2px; --radius-sm: 3px; --radius-md: 4px; --radius-lg: 6px;
+    --height-row-comfortable: 56px;
+  }
+
+  /* Bangla primary */
+  :lang(bn), [data-locale="bn"], .bn-text {
+    font-family: var(--font-family-bangla);
+    line-height: var(--line-height-body-bangla);
+  }
+  .bn-heading {
+    font-family: var(--font-family-bangla);
+    line-height: var(--line-height-heading-bangla);
+  }
+
+  * { box-sizing: border-box; }
+  a { text-decoration: none; color: inherit; }
+
+  body {
+    margin: 0;
+    background: #2A2D32;        /* dark grey device-frame background */
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+  }
+
+  /* preview chrome */
+  .preview-chrome {
+    height: 48px;
+    background: #1A1C1F;
+    color: #E5E7EA;
+    padding-inline: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+    border-bottom: 1px solid #0E1013;
+  }
+  .preview-chrome strong { font-weight: var(--font-weight-semibold); }
+  .preview-chrome .meta { color: #8A8E94; font-size: var(--font-size-xs); }
+
+  /* layout: device-frame column */
+  .preview-stage {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-3xl) var(--space-xl);
+  }
+
+  .device-frame {
+    width: 375px;
+    background: #0E1013;
+    border-radius: 32px;
+    padding: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .device-screen {
+    background: var(--bg-base);
+    border-radius: 24px;
+    overflow: hidden;
+    min-height: 720px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* top chrome inside the device */
+  .top-chrome {
+    height: 56px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-md);
+    padding-top: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .top-chrome-left, .top-chrome-right { display: flex; align-items: center; gap: var(--space-sm); }
+  .top-chrome-title { font-weight: var(--font-weight-semibold); font-size: var(--font-size-md); }
+  .top-chrome-ward { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); padding: 2px 6px; background: var(--bg-subtle); border-radius: var(--radius-xs); }
+  .offline-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--warning-bg);
+    color: var(--warning);
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+  }
+  .online-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--success);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+  }
+
+  /* main scroll area */
+  .screen-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  /* icon */
+  .icon {
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  /* Action card */
+  .action-card {
+    display: block;
+    width: 100%;
+    min-height: 96px;
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--brand-500);
+    color: #FFFFFF;
+    border: none;
+    border-radius: var(--radius-lg);
+    text-align: left;
+    cursor: pointer;
+    margin-bottom: var(--space-xl);
+    font-family: var(--font-family-sans);
+  }
+  .action-card-row { display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-xs); }
+  .action-card-title { font-size: var(--font-size-xl); font-weight: var(--font-weight-bold); }
+  .action-card-sub { font-size: var(--font-size-sm); opacity: 0.85; }
+
+  /* Section heading */
+  .section-label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: var(--space-lg) 0 var(--space-md);
+    padding-inline: var(--space-xs);
+  }
+  .section-label.bn { font-family: var(--font-family-bangla); text-transform: none; letter-spacing: 0; font-weight: var(--font-weight-semibold); }
+
+  /* Status feed row */
+  .feed-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    min-height: var(--height-row-comfortable);
+    padding: var(--space-md) var(--space-sm);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-sm);
+  }
+  .feed-row.bn { padding-block: calc(var(--space-md) + var(--space-xs)); }   /* row-pad modifier */
+  .feed-row.flash {
+    animation: ackPulse 200ms ease-out;
+  }
+  @keyframes ackPulse {
+    0%   { background: var(--success-bg); }
+    100% { background: var(--bg-surface); }
+  }
+  .feed-row-body { flex: 1; min-width: 0; }
+  .feed-row-date {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    margin-bottom: 2px;
+  }
+  .feed-row.bn .feed-row-date { font-family: var(--font-family-bangla); }
+  .feed-row-desc {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .feed-row-desc .secondary { color: var(--fg-secondary); }
+
+  /* Status pill (small variant of dim-4 band-pill) */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    font-family: var(--font-family-sans);
+    flex-shrink: 0;
+  }
+  .status-pill.verified  { background: var(--success-bg); color: var(--success); }
+  .status-pill.sent      { background: var(--info-bg);    color: var(--info); }
+  .status-pill.queued    { background: var(--warning-bg); color: var(--warning); }
+  .status-pill.acknowledged { background: var(--brand-100); color: var(--brand-500); }
+  .status-pill.dismissed { background: var(--bg-subtle); color: var(--fg-tertiary); }
+  .status-pill.failed    { background: var(--danger-bg); color: var(--danger); }
+
+  /* Offline counter */
+  .offline-counter {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-subtle);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-mono);
+    text-align: center;
+  }
+  .offline-counter.bn { font-family: var(--font-family-bangla); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: var(--space-2xl) var(--space-md);
+    color: var(--fg-secondary);
+  }
+  .empty-icon { color: var(--fg-tertiary); margin-bottom: var(--space-md); }
+  .empty-title { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--fg-default); margin-bottom: var(--space-xs); }
+  .empty-body { font-size: var(--font-size-sm); }
+  .empty.bn .empty-title, .empty.bn .empty-body { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    height: 56px;
+    background: var(--bg-surface);
+    border-top: 1px solid var(--border-subtle);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    flex-shrink: 0;
+  }
+  .bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: var(--fg-tertiary);
+    font-size: 10px;
+    text-decoration: none;
+    min-height: 48px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-family-sans);
+  }
+  .bottom-nav-item.active { color: var(--brand-500); }
+  .bottom-nav-item.bn { font-family: var(--font-family-bangla); font-size: 11px; }
+
+  /* COMPOSER MODAL (separate panel below for reference) */
+  .composer-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-lg);
+  }
+  .composer-bar {
+    height: 56px;
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-md);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .composer-bar .cancel { color: var(--fg-secondary); font-size: var(--font-size-md); background: transparent; border: none; padding: var(--space-sm); cursor: pointer; font-family: inherit; min-height: 48px; }
+  .composer-bar .submit {
+    background: var(--brand-500); color: #FFFFFF;
+    height: 36px; padding-inline: var(--space-lg);
+    border: none; border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm); font-weight: var(--font-weight-medium);
+    cursor: pointer; font-family: inherit;
+  }
+  .composer-bar .submit:disabled { background: var(--fg-disabled); cursor: not-allowed; }
+  .composer-bar .submit.bn-text { font-family: var(--font-family-bangla); }
+  .composer-bar .cancel.bn-text { font-family: var(--font-family-bangla); }
+  .composer-row {
+    display: flex; align-items: center; gap: var(--space-md);
+    min-height: 56px;
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--border-subtle);
+    cursor: pointer;
+  }
+  .composer-row:first-of-type { border-top: none; }
+  .composer-row .row-icon { color: var(--brand-500); flex-shrink: 0; }
+  .composer-row .row-body { flex: 1; min-width: 0; }
+  .composer-row .row-title { font-size: var(--font-size-md); font-weight: var(--font-weight-medium); color: var(--fg-default); }
+  .composer-row .row-title.bn-text { font-family: var(--font-family-bangla); }
+  .composer-row .row-sub { font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-top: 2px; }
+  .composer-row .row-sub.bn-text { font-family: var(--font-family-bangla); }
+  .composer-row .row-control { flex-shrink: 0; color: var(--fg-tertiary); }
+
+  .composer-textarea {
+    width: 100%;
+    min-height: 96px;
+    padding: var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    resize: vertical;
+  }
+  .composer-textarea.bn-text { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  .composer-textarea:focus { outline: none; border-color: var(--brand-400); box-shadow: 0 0 0 3px var(--brand-100); }
+
+  /* Toggle (Switch) */
+  .toggle {
+    width: 44px; height: 24px;
+    background: var(--bg-inset);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 120ms ease-out;
+    border: 1px solid var(--border-default);
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--brand-500); border-color: var(--brand-500); }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 18px; height: 18px;
+    background: var(--bg-surface);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transition: transform 120ms ease-out;
+  }
+  .toggle.on .toggle-thumb { transform: translateX(20px); }
+
+  /* Ward selector */
+  .ward-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 48px;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-subtle);
+    border-radius: var(--radius-md);
+    color: var(--fg-default);
+    font-size: var(--font-size-md);
+    cursor: pointer;
+  }
+  .ward-select .label-pair { display: flex; gap: var(--space-sm); align-items: baseline; }
+
+  /* Page wrappers (the multi-frame layout) */
+  .preview-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xl);
+    justify-content: center;
+  }
+
+  /* Stage labels */
+  .stage-label {
+    text-align: center;
+    color: #E5E7EA;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    margin-bottom: var(--space-md);
+  }
+  .stage-label .stage-label-en { color: #B5B9BF; margin-top: 2px; }
+
+  /* Section breaks */
+  .section-break {
+    background: #1A1C1F;
+    padding: var(--space-3xl) var(--space-xl) var(--space-xl);
+    color: #E5E7EA;
+    text-align: center;
+  }
+  .section-break h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: #FFFFFF;
+    margin: 0 0 var(--space-sm);
+  }
+  .section-break p {
+    color: #8A8E94;
+    font-size: var(--font-size-sm);
+    margin: 0;
+    font-family: var(--font-family-mono);
+  }
+
+  /* footer */
+  footer {
+    background: #1A1C1F;
+    color: #8A8E94;
+    padding: var(--space-xl);
+    text-align: center;
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    border-top: 1px solid #0E1013;
+  }
+  footer code { color: #B5B9BF; }
+</style>
+</head>
+
+<body>
+
+<div class="preview-chrome">
+  <div>
+    <strong>Surakkha v1</strong>
+    <span class="meta">· dim 5c · Anjali mobile preview · light-only · Bangla primary</span>
+  </div>
+</div>
+
+<div class="section-break">
+  <h2>Pane 1 — Home (Action card + status feed)</h2>
+  <p>FR-4.5: one action card. Tap targets ≥ 48 px. Bangla primary.</p>
+</div>
+
+<div class="preview-stage">
+  <div class="preview-grid">
+
+    <!-- English version -->
+    <div>
+      <div class="stage-label">data-locale="en" — sample</div>
+      <div class="device-frame">
+        <div class="device-screen">
+
+          <div class="top-chrome">
+            <div class="top-chrome-left">
+              <span class="top-chrome-title">Surakkha</span>
+              <span class="top-chrome-ward">Ward 7</span>
+            </div>
+            <div class="top-chrome-right">
+              <span class="online-pill">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M5.5 5.5a10 10 0 0 1 13 0 M2 2a16 16 0 0 1 20 0 M8.5 8.5a5 5 0 0 1 7 0"/></svg>
+                online
+              </span>
+            </div>
+          </div>
+
+          <div class="screen-scroll">
+
+            <button class="action-card" aria-label="Open report composer">
+              <div class="action-card-row">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="color:#fff;"><path d="m3 11 18-5v12L3 14v-3z M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+                <span class="action-card-title">Report</span>
+              </div>
+              <div class="action-card-sub">What did you notice today?</div>
+            </button>
+
+            <div class="section-label">Recent reports</div>
+
+            <div class="feed-row">
+              <div class="feed-row-body">
+                <div class="feed-row-date">Tue 14:01 · 3 days ago</div>
+                <div class="feed-row-desc">
+                  Ward 7 school · <span class="secondary">chlorine smell</span>
+                </div>
+              </div>
+              <span class="status-pill verified">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                verified
+              </span>
+            </div>
+
+            <div class="feed-row">
+              <div class="feed-row-body">
+                <div class="feed-row-date">Sun 09:12 · 6 days ago</div>
+                <div class="feed-row-desc">
+                  Weekly check-in · <span class="secondary">all clear</span>
+                </div>
+              </div>
+              <span class="status-pill acknowledged">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                acknowledged
+              </span>
+            </div>
+
+            <div class="feed-row" id="flashRow">
+              <div class="feed-row-body">
+                <div class="feed-row-date">Fri 16:24 · 9 days ago</div>
+                <div class="feed-row-desc">
+                  Ward 7 school · <span class="secondary">muddy water at tap</span>
+                </div>
+              </div>
+              <span class="status-pill sent">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+                sent
+              </span>
+            </div>
+
+            <div class="feed-row">
+              <div class="feed-row-body">
+                <div class="feed-row-date">Tue 08:00 · 14 days ago</div>
+                <div class="feed-row-desc">
+                  Sentinel strip · <span class="secondary">chlorine low (CV 0.92)</span>
+                </div>
+              </div>
+              <span class="status-pill acknowledged">acknowledged</span>
+            </div>
+
+          </div>
+
+          <div class="bottom-nav">
+            <button class="bottom-nav-item active" aria-label="Home">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"/></svg>
+              Home
+            </button>
+            <button class="bottom-nav-item" aria-label="Status">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+              Status
+            </button>
+            <button class="bottom-nav-item" aria-label="Profile">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/></svg>
+              Profile
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bangla version -->
+    <div>
+      <div class="stage-label" data-locale="bn">data-locale="bn" — Bangla primary</div>
+      <div class="device-frame">
+        <div class="device-screen" data-locale="bn" lang="bn">
+
+          <div class="top-chrome">
+            <div class="top-chrome-left">
+              <span class="top-chrome-title">Surakkha</span>
+              <span class="top-chrome-ward">ওয়ার্ড ৭</span>
+            </div>
+            <div class="top-chrome-right">
+              <span class="offline-pill">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 5.5a10 10 0 0 1 13 0 M2 2a16 16 0 0 1 20 0 M8.5 8.5a5 5 0 0 1 7 0 M1 1l22 22"/><path d="M9 17v-2a2 2 0 0 1 4 0v2 M13 19h-4"/></svg>
+                ২টি সারিবদ্ধ
+              </span>
+            </div>
+          </div>
+
+          <div class="screen-scroll">
+
+            <button class="action-card" aria-label="রিপোর্ট কম্পোজার খুলুন">
+              <div class="action-card-row">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" style="color:#fff;"><path d="m3 11 18-5v12L3 14v-3z M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+                <span class="action-card-title bn-heading">রিপোর্ট করুন</span>
+              </div>
+              <div class="action-card-sub bn-text">আজ কী লক্ষ্য করলেন?</div>
+            </button>
+
+            <div class="section-label bn bn-heading">সাম্প্রতিক রিপোর্ট</div>
+
+            <div class="feed-row bn">
+              <div class="feed-row-body">
+                <div class="feed-row-date bn-text">মঙ্গল ১৪:০১ · ৩ দিন আগে</div>
+                <div class="feed-row-desc bn-text">
+                  ওয়ার্ড ৭ স্কুল · <span class="secondary bn-text">ক্লোরিনের গন্ধ</span>
+                </div>
+              </div>
+              <span class="status-pill verified bn-text">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                যাচাই
+              </span>
+            </div>
+
+            <div class="feed-row bn">
+              <div class="feed-row-body">
+                <div class="feed-row-date bn-text">রবি ০৯:১২ · ৬ দিন আগে</div>
+                <div class="feed-row-desc bn-text">
+                  সাপ্তাহিক চেক-ইন · <span class="secondary bn-text">সব ঠিক আছে</span>
+                </div>
+              </div>
+              <span class="status-pill acknowledged bn-text">
+                <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                স্বীকৃত
+              </span>
+            </div>
+
+            <div class="offline-counter bn bn-text">
+              অফলাইন · ২টি সারিবদ্ধ, ১৪টি পাঠানো হয়েছে
+            </div>
+
+            <div style="height: var(--space-xl);"></div>
+
+            <div class="empty bn">
+              <div class="empty-icon">
+                <svg class="icon" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+              </div>
+              <div class="empty-title bn-heading">কোন রিপোর্ট নেই</div>
+              <div class="empty-body bn-text">আপনার প্রথম রিপোর্ট এখানে দেখা যাবে।</div>
+            </div>
+
+          </div>
+
+          <div class="bottom-nav">
+            <button class="bottom-nav-item active bn" aria-label="হোম">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2z M9 22V12h6v10"/></svg>
+              হোম
+            </button>
+            <button class="bottom-nav-item bn" aria-label="স্ট্যাটাস">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+              স্ট্যাটাস
+            </button>
+            <button class="bottom-nav-item bn" aria-label="প্রোফাইল">
+              <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21v-2a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v2"/></svg>
+              প্রোফাইল
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-break">
+  <h2>Pane 2 — Report composer (full-screen modal)</h2>
+  <p>4 input modes: voice / photo / free-text / weekly check-in. Submit disabled until input present.</p>
+</div>
+
+<div class="preview-stage">
+  <div class="preview-grid">
+
+    <!-- Composer — Bangla -->
+    <div>
+      <div class="stage-label">Composer · data-locale="bn"</div>
+      <div class="device-frame">
+        <div class="device-screen" data-locale="bn" lang="bn">
+
+          <div class="composer-bar">
+            <button class="cancel bn-text">বাতিল</button>
+            <button class="submit bn-text" disabled>জমা দিন</button>
+          </div>
+
+          <div class="screen-scroll" style="padding-top: 0;">
+
+            <div class="composer-row">
+              <span class="row-icon">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3 M8 22h8"/></svg>
+              </span>
+              <div class="row-body">
+                <div class="row-title bn-text">ভয়েস নোট</div>
+                <div class="row-sub bn-text">টোকা দিয়ে রেকর্ড করুন (সর্বোচ্চ ৬০ সেকেন্ড)</div>
+              </div>
+              <span class="row-control">
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </span>
+            </div>
+
+            <div class="composer-row">
+              <span class="row-icon">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 17a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
+              </span>
+              <div class="row-body">
+                <div class="row-title bn-text">সেন্টিনেল স্ট্রিপ ছবি</div>
+                <div class="row-sub bn-text">ক্যামেরা খুলে স্ট্রিপের ছবি তুলুন</div>
+              </div>
+              <span class="row-control">
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </span>
+            </div>
+
+            <div class="composer-row" style="flex-direction: column; align-items: stretch; min-height: 0;">
+              <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                <span class="row-icon">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9 M16 5l4 4-12 12-4 1 1-4 12-12z"/></svg>
+                </span>
+                <div class="row-body">
+                  <div class="row-title bn-text">ফ্রি টেক্সট</div>
+                  <div class="row-sub bn-text">আপনার পর্যবেক্ষণ লিখুন</div>
+                </div>
+              </div>
+              <textarea class="composer-textarea bn-text" placeholder="কী দেখলেন তা লিখুন..." aria-label="ফ্রি টেক্সট ইনপুট"></textarea>
+            </div>
+
+            <div class="composer-row">
+              <span class="row-icon">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="row-body">
+                <div class="row-title bn-text">সাপ্তাহিক চেক-ইন</div>
+                <div class="row-sub bn-text">এই সপ্তাহে সব ঠিক আছে?</div>
+              </div>
+              <div class="toggle" role="switch" aria-checked="false" aria-label="সাপ্তাহিক চেক-ইন"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div style="padding: var(--space-md) var(--space-lg);">
+              <div class="section-label bn bn-heading">ওয়ার্ড</div>
+              <div class="ward-select" tabindex="0">
+                <div class="label-pair">
+                  <span class="bn-text">ওয়ার্ড ৭</span>
+                  <span class="bn-text" style="color: var(--fg-secondary);">— সদর / Sadar</span>
+                </div>
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Composer — English -->
+    <div>
+      <div class="stage-label">Composer · data-locale="en"</div>
+      <div class="device-frame">
+        <div class="device-screen">
+
+          <div class="composer-bar">
+            <button class="cancel">Cancel</button>
+            <button class="submit" disabled>Submit</button>
+          </div>
+
+          <div class="screen-scroll" style="padding-top: 0;">
+
+            <div class="composer-row">
+              <span class="row-icon">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z M19 10v2a7 7 0 0 1-14 0v-2 M12 19v3 M8 22h8"/></svg>
+              </span>
+              <div class="row-body">
+                <div class="row-title">Voice note</div>
+                <div class="row-sub">Tap to record (max 60 s)</div>
+              </div>
+              <span class="row-control">
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </span>
+            </div>
+
+            <div class="composer-row">
+              <span class="row-icon">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 17a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
+              </span>
+              <div class="row-body">
+                <div class="row-title">Sentinel strip photo</div>
+                <div class="row-sub">Open camera and capture the strip</div>
+              </div>
+              <span class="row-control">
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+              </span>
+            </div>
+
+            <div class="composer-row" style="flex-direction: column; align-items: stretch; min-height: 0;">
+              <div style="display: flex; align-items: center; gap: var(--space-md); margin-bottom: var(--space-md);">
+                <span class="row-icon">
+                  <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9 M16 5l4 4-12 12-4 1 1-4 12-12z"/></svg>
+                </span>
+                <div class="row-body">
+                  <div class="row-title">Free text</div>
+                  <div class="row-sub">Type your observation</div>
+                </div>
+              </div>
+              <textarea class="composer-textarea" placeholder="What did you notice?"></textarea>
+            </div>
+
+            <div class="composer-row">
+              <span class="row-icon">
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              </span>
+              <div class="row-body">
+                <div class="row-title">Weekly check-in</div>
+                <div class="row-sub">"Everything OK this week?"</div>
+              </div>
+              <div class="toggle" role="switch" aria-checked="false" aria-label="Weekly check-in"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div style="padding: var(--space-md) var(--space-lg);">
+              <div class="section-label">Ward</div>
+              <div class="ward-select" tabindex="0">
+                <div class="label-pair">
+                  <span>Ward 7</span>
+                  <span style="color: var(--fg-secondary);">— সদর / Sadar</span>
+                </div>
+                <svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section-break">
+  <h2>Acknowledgement pulse demo</h2>
+  <p>200 ms ease-out, one-shot, single fire per row. Click any feed row to replay.</p>
+</div>
+
+<div class="preview-stage">
+  <div style="max-width: 600px; width: 100%;">
+    <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: var(--space-md);">
+      <p style="margin: 0 0 var(--space-md); font-size: var(--font-size-sm); color: var(--fg-secondary);">Click a row to replay the acknowledgement pulse:</p>
+      <div class="feed-row" data-flash style="cursor: pointer;">
+        <div class="feed-row-body">
+          <div class="feed-row-date">Mon 14:01 · 2 hours ago</div>
+          <div class="feed-row-desc">
+            Ward 7 school · <span class="secondary">chlorine smell</span>
+          </div>
+        </div>
+        <span class="status-pill acknowledged">
+          <svg class="icon" width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          acknowledged
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Contract → <code>_bmad-output/design/05c-anjali-mobile-lockdown.md</code> · dim 5c · 3 panes · 4 input modes · light-only · Bangla primary · 2026-09-07
+</footer>
+
+<script>
+  (function () {
+    const flashRows = document.querySelectorAll('[data-flash]');
+    flashRows.forEach(row => {
+      row.addEventListener('click', () => {
+        // remove the class if already there to restart the animation
+        row.classList.remove('flash');
+        // force reflow
+        void row.offsetWidth;
+        row.classList.add('flash');
+        setTimeout(() => row.classList.remove('flash'), 250);
+      });
+    });
+
+    const toggles = document.querySelectorAll('.toggle');
+    toggles.forEach(t => {
+      t.addEventListener('click', () => {
+        t.classList.toggle('on');
+        const on = t.classList.contains('on');
+        t.setAttribute('aria-checked', on ? 'true' : 'false');
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

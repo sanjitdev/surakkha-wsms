@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Settings Page Preview (dim 5 ext)</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root, [data-theme="light"] {
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+    --shadow-modal:   0 4px 16px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.08);
+
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.375rem;
+    --font-size-xxl: 1.75rem;
+    --font-size-display: 2.25rem;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.25;
+    --line-height-body: 1.5;
+    --line-height-body-bangla: 1.6;
+    --line-height-heading-bangla: 1.3;
+
+    --space-xs:  4px;  --space-sm:  8px;  --space-md: 12px;
+    --space-lg: 16px;  --space-xl: 24px;  --space-2xl: 32px;  --space-3xl: 48px;
+    --radius-xs: 2px; --radius-sm: 3px; --radius-md: 4px; --radius-lg: 6px;
+    --height-input-md: 36px;
+    --height-row-default: 40px;
+    --height-row-comfortable: 56px;
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-600:      #4A8AC4;
+    --brand-500:      #5C9AD0;
+    --brand-400:      #76AEDF;
+    --brand-200:      #2B3E55;
+    --brand-100:      #1F2D3D;
+    --success:        #5DB287;
+    --success-bg:     #1A2D24;
+    --warning:        #D6A865;
+    --warning-bg:     #2D2418;
+    --danger:         #D8806E;
+    --danger-bg:      #2D1F1B;
+    --info:           #76AEDF;
+    --info-bg:        #1F2D3D;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    --shadow-modal:   0 4px 16px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+    color-scheme: dark;
+  }
+
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+  a { text-decoration: none; color: inherit; }
+
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+
+  .preview-chrome {
+    position: sticky; top: 0; z-index: 100;
+    height: 48px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-xl);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: var(--font-size-sm);
+  }
+  .preview-chrome-left { display: flex; align-items: center; gap: var(--space-md); }
+  .preview-chrome-right { display: flex; align-items: center; gap: var(--space-sm); }
+  .preview-chrome strong { font-weight: var(--font-weight-semibold); }
+  .preview-chrome .meta { color: var(--fg-tertiary); font-size: var(--font-size-xs); }
+
+  .seg-btn {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-md);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    height: 28px;
+  }
+  .seg-btn:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .seg-btn.active { background: var(--brand-100); color: var(--brand-500); border-color: var(--brand-400); }
+  [data-theme="dark"] .seg-btn.active { background: var(--brand-200); color: var(--brand-400); border-color: var(--brand-400); }
+
+  /* Top chrome (dim 5 §6) */
+  .top-chrome {
+    height: 56px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .top-chrome-left, .top-chrome-right { display: flex; align-items: center; gap: var(--space-md); }
+  .top-chrome-title { font-weight: var(--font-weight-semibold); font-size: var(--font-size-md); }
+  .top-chrome-meta { color: var(--fg-tertiary); font-size: var(--font-size-xs); font-family: var(--font-family-mono); }
+  .top-chrome-icon-btn {
+    width: 36px; height: 36px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--fg-secondary);
+    cursor: pointer;
+  }
+  .top-chrome-icon-btn:hover { background: var(--bg-subtle); color: var(--fg-default); }
+
+  /* icon */
+  .icon {
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  main {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: var(--space-3xl) var(--space-xl);
+  }
+
+  .page-header { margin-bottom: var(--space-xl); }
+  .page-header h1 {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--space-xs);
+    line-height: var(--line-height-tight);
+  }
+  .page-header .meta {
+    font-size: var(--font-size-sm);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+  }
+
+  /* Settings layout: 2-col grid */
+  .settings-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: var(--space-2xl);
+    align-items: start;
+  }
+  @media (max-width: 1023px) {
+    .settings-layout { grid-template-columns: 1fr; gap: var(--space-lg); }
+  }
+
+  /* Sticky section nav */
+  .settings-nav {
+    position: sticky;
+    top: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  @media (max-width: 1023px) {
+    .settings-nav {
+      position: static;
+      flex-direction: row;
+      overflow-x: auto;
+      padding-bottom: var(--space-sm);
+      gap: var(--space-sm);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+  }
+  .settings-nav-item {
+    display: block;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    border-left: 3px solid transparent;
+  }
+  .settings-nav-item:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .settings-nav-item.active {
+    background: var(--brand-100);
+    color: var(--brand-500);
+    border-left-color: var(--brand-500);
+    font-weight: var(--font-weight-medium);
+  }
+  [data-theme="dark"] .settings-nav-item.active {
+    background: var(--brand-200);
+    color: var(--brand-400);
+    border-left-color: var(--brand-400);
+  }
+  @media (max-width: 1023px) {
+    .settings-nav-item { border-left: none; border-bottom: 3px solid transparent; padding: var(--space-sm); white-space: nowrap; }
+    .settings-nav-item.active { border-bottom-color: var(--brand-500); }
+  }
+
+  .settings-content { display: flex; flex-direction: column; gap: var(--space-lg); }
+
+  /* Section card (dim-4 .card--with-heading) */
+  .section-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .section-card-head {
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .section-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    margin: 0 0 var(--space-xs);
+  }
+  .section-card-desc {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+
+  /* SettingControl rows */
+  .control-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--space-xl);
+    padding: var(--space-md) var(--space-xl);
+    min-height: var(--height-row-comfortable);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .control-row:first-of-type { border-top: none; }
+  .control-row.bn { padding-block: calc(var(--space-md) + var(--space-xs)); }
+  .control-row-label {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    margin: 0;
+  }
+  .control-row-desc {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 2px 0 0;
+  }
+
+  /* Toggle (shadcn Switch pattern, dim-5 ext §3.1) */
+  .toggle {
+    width: 36px; height: 20px;
+    background: var(--bg-inset);
+    border-radius: 999px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 120ms ease-out;
+    border: 1px solid var(--border-default);
+    flex-shrink: 0;
+  }
+  .toggle.on { background: var(--brand-500); border-color: var(--brand-500); }
+  .toggle-thumb {
+    position: absolute;
+    top: 1px; left: 1px;
+    width: 16px; height: 16px;
+    background: var(--bg-surface);
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    transition: transform 120ms ease-out;
+  }
+  .toggle.on .toggle-thumb { transform: translateX(16px); }
+  .toggle-state {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    min-width: 28px;
+    text-align: right;
+  }
+
+  /* Select (dim-4 .input read-only) */
+  .select-display {
+    min-width: 200px;
+    height: var(--height-input-md);
+    padding-inline: var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    font-size: var(--font-size-sm);
+    display: inline-flex; align-items: center; justify-content: space-between; gap: var(--space-sm);
+    cursor: pointer;
+  }
+  .select-display:hover { border-color: var(--border-strong); }
+
+  /* Text input (dim-4 .input) */
+  .text-input {
+    height: var(--height-input-md);
+    padding-inline: var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-family-sans);
+    width: 100%;
+    min-width: 280px;
+  }
+  .text-input:focus { outline: none; border-color: var(--brand-400); box-shadow: 0 0 0 3px var(--brand-100); }
+
+  /* Link row (dim-4 nav row) */
+  .control-row.link {
+    grid-template-columns: 1fr auto;
+    cursor: pointer;
+  }
+  .control-row.link:hover { background: var(--bg-subtle); }
+  .control-row.link .chevron { color: var(--fg-tertiary); }
+
+  /* Danger block (separate from regular section) */
+  .danger-block {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--danger);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg) var(--space-xl);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--space-lg);
+    min-height: 64px;
+  }
+  .danger-icon { color: var(--danger); }
+  .danger-label {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    margin: 0 0 2px;
+  }
+  .danger-desc {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+  .btn-danger-outline {
+    height: var(--height-input-md);
+    padding-inline: var(--space-lg);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--danger);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    font-family: var(--font-family-sans);
+  }
+  .btn-danger-outline:hover { background: var(--danger-bg); }
+
+  h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-3xl) 0 var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+  h3 { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); margin: var(--space-lg) 0 var(--space-xs); }
+  p { margin: 0 0 var(--space-md); color: var(--fg-secondary); }
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    background: var(--bg-subtle);
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    color: var(--fg-default);
+  }
+  .section-meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* locale demo row */
+  .locale-demo-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-lg); margin-bottom: var(--space-lg); }
+  .locale-cell { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: var(--space-lg); }
+  .locale-cell-label { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-bottom: var(--space-md); }
+
+  footer {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border-subtle);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap; border: 0;
+  }
+</style>
+</head>
+
+<body data-theme="light" data-locale="en">
+
+<div class="preview-chrome">
+  <div class="preview-chrome-left">
+    <strong>Surakkha v1</strong>
+    <span class="meta">· dim 5 extension · Settings page preview</span>
+  </div>
+  <div class="preview-chrome-right">
+    <button class="seg-btn" data-set-theme="light">Light</button>
+    <button class="seg-btn" data-set-theme="dark">Dark</button>
+    <span class="meta" style="margin-inline: var(--space-sm);">|</span>
+    <button class="seg-btn" data-set-locale="en">EN</button>
+    <button class="seg-btn" data-set-locale="bn">বাং</button>
+  </div>
+</div>
+
+<!-- Top chrome (dim 5 §6 mock) -->
+<div class="top-chrome" aria-label="Top chrome">
+  <div class="top-chrome-left">
+    <svg class="icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12 L21 12 M3 6 L21 6 M3 18 L21 18"/></svg>
+    <span class="top-chrome-title">Surakkha</span>
+    <span class="top-chrome-meta">Priya · Ward 1</span>
+  </div>
+  <div class="top-chrome-right">
+    <button class="top-chrome-icon-btn" aria-label="Search"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></button>
+    <button class="top-chrome-icon-btn" aria-label="Language: English"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20 M12 2a15 15 0 0 1 0 20 M12 2a15 15 0 0 0 0 20"/></svg></button>
+    <button class="top-chrome-icon-btn" aria-label="Notifications"><svg class="icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9 M10 21a2 2 0 0 0 4 0"/></svg></button>
+  </div>
+</div>
+
+<main>
+
+<div class="page-header">
+  <h1>Settings</h1>
+  <div class="meta">Last saved 2 min ago · auto-saved</div>
+</div>
+
+<div class="settings-layout">
+
+  <!-- Sticky section nav -->
+  <nav class="settings-nav" aria-label="Settings sections">
+    <a href="#account"        class="settings-nav-item active">Account</a>
+    <a href="#notifications"  class="settings-nav-item">Notifications</a>
+    <a href="#display"        class="settings-nav-item">Display</a>
+    <a href="#bangla"         class="settings-nav-item">বাংলা / Bangla</a>
+    <a href="#chain"          class="settings-nav-item">Chain keys</a>
+    <a href="#danger"         class="settings-nav-item">Danger zone</a>
+  </nav>
+
+  <!-- Sections -->
+  <div class="settings-content">
+
+    <!-- Account section (with all 6 control kinds) -->
+    <section class="section-card" id="account" aria-labelledby="account-h">
+      <div class="section-card-head">
+        <h3 class="section-card-title" id="account-h">Account</h3>
+        <p class="section-card-desc">Your operator profile, sign-in preferences, and contact info.</p>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Display name</p>
+          <p class="control-row-desc">Shown in audit logs and councillor notifications.</p>
+        </div>
+        <input class="text-input" type="text" value="Priya Sharma" aria-label="Display name" />
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Phone (for SMS fallback)</p>
+          <p class="control-row-desc">Used only when councillor SMS is undeliverable.</p>
+        </div>
+        <input class="text-input" type="tel" value="+91 98765 43210" aria-label="Phone" />
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Default ward</p>
+          <p class="control-row-desc">Pre-selected when opening an incident.</p>
+        </div>
+        <div class="select-display" role="combobox" aria-label="Default ward" tabindex="0">
+          <span>Ward 1 — সদর / Sadar</span>
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="control-row link">
+        <div>
+          <p class="control-row-label">Two-factor authentication</p>
+          <p class="control-row-desc">TOTP via authenticator app. Required for councillors, optional for operators.</p>
+        </div>
+        <svg class="icon chevron" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+    </section>
+
+    <!-- Notifications -->
+    <section class="section-card" id="notifications" aria-labelledby="notif-h">
+      <div class="section-card-head">
+        <h3 class="section-card-title" id="notif-h">Notifications</h3>
+        <p class="section-card-desc">When and how you want to be alerted.</p>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Email on new high-band incident</p>
+          <p class="control-row-desc">Sent within 60 seconds of verification.</p>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: var(--space-md);">
+          <span class="toggle-state">ON</span>
+          <div class="toggle on" role="switch" aria-checked="true" aria-label="Email on new high-band incident" tabindex="0"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">SMS digest (daily at 09:00)</p>
+          <p class="control-row-desc">One SMS per day summarising overnight activity.</p>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: var(--space-md);">
+          <span class="toggle-state">OFF</span>
+          <div class="toggle" role="switch" aria-checked="false" aria-label="SMS digest" tabindex="0"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Sound on incident</p>
+          <p class="control-row-desc">Single short beep when a verified incident arrives.</p>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: var(--space-md);">
+          <span class="toggle-state">ON</span>
+          <div class="toggle on" role="switch" aria-checked="true" aria-label="Sound on incident" tabindex="0"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Display -->
+    <section class="section-card" id="display" aria-labelledby="display-h">
+      <div class="section-card-head">
+        <h3 class="section-card-title" id="display-h">Display</h3>
+        <p class="section-card-desc">Theme, density, and chart defaults.</p>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Theme</p>
+          <p class="control-row-desc">Light, dark, or follow system.</p>
+        </div>
+        <div class="select-display" role="combobox" aria-label="Theme" tabindex="0">
+          <span>System</span>
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Default chart window</p>
+          <p class="control-row-desc">How much history new charts show.</p>
+        </div>
+        <div class="select-display" role="combobox" aria-label="Default chart window" tabindex="0">
+          <span>Last 24 hours</span>
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bangla -->
+    <section class="section-card" id="bangla" aria-labelledby="bangla-h" data-locale="bn">
+      <div class="section-card-head text-heading">
+        <h3 class="section-card-title text-heading" id="bangla-h">বাংলা / Bangla</h3>
+        <p class="section-card-desc text-sans">Locale, font, and numeral preferences.</p>
+      </div>
+
+      <div class="control-row bn">
+        <div>
+          <p class="control-row-label text-sans">ডিফল্ট ভাষা / Default language</p>
+          <p class="control-row-desc text-sans">UI labels, menus, and inbox titles.</p>
+        </div>
+        <div class="select-display" role="combobox" aria-label="Default language" tabindex="0">
+          <span class="text-sans">ইংরেজি / English</span>
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+
+      <div class="control-row bn">
+        <div>
+          <p class="control-row-label text-sans">বাংলা সংখ্যা ব্যবহার করুন / Use Bengali digits</p>
+          <p class="control-row-desc text-sans">Per-chart ০-৯ when locale is bn.</p>
+        </div>
+        <div style="display: inline-flex; align-items: center; gap: var(--space-md);">
+          <span class="toggle-state">চালু / ON</span>
+          <div class="toggle on" role="switch" aria-checked="true" aria-label="Bengali digits" tabindex="0"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
+
+      <div class="control-row bn">
+        <div>
+          <p class="control-row-label text-sans">রিপোর্টার বার্তা / Reporter message font</p>
+          <p class="control-row-desc text-sans">Hind Siliguri (default) বা Noto Sans Bengali.</p>
+        </div>
+        <div class="select-display" role="combobox" aria-label="Reporter message font" tabindex="0">
+          <span class="text-sans">Noto Sans Bengali</span>
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Chain keys -->
+    <section class="section-card" id="chain" aria-labelledby="chain-h">
+      <div class="section-card-head">
+        <h3 class="section-card-title" id="chain-h">Chain keys</h3>
+        <p class="section-card-desc">API keys for chain anchoring and signature verification.</p>
+      </div>
+
+      <div class="control-row link">
+        <div>
+          <p class="control-row-label">Manage API keys</p>
+          <p class="control-row-desc">Rotate or revoke chain-anchored keys. Active key: <code>pk_live_...8f2a</code></p>
+        </div>
+        <svg class="icon chevron" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div class="control-row">
+        <div>
+          <p class="control-row-label">Auto-rotate every</p>
+          <p class="control-row-desc">Keys older than this are rotated automatically.</p>
+        </div>
+        <div class="select-display" role="combobox" aria-label="Auto-rotate" tabindex="0">
+          <span>90 days</span>
+          <svg class="icon" width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+    </section>
+
+    <!-- Danger zone -->
+    <section id="danger" aria-labelledby="danger-h">
+      <h3 class="sr-only" id="danger-h">Danger zone</h3>
+      <div class="danger-block">
+        <svg class="icon danger-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z M12 9v4 M12 17h.01"/>
+        </svg>
+        <div>
+          <p class="danger-label">Reset all settings</p>
+          <p class="danger-desc">This cannot be undone. Chain keys and API tokens remain intact.</p>
+        </div>
+        <button class="btn-danger-outline">Reset</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<h2>Locale demo · Bangla labels</h2>
+<p class="section-meta">Dim 5 ext §6 · Bangla labels inherit dim 2 §9.4 + dim 4 §15 + dim 5 §10. Row-pad modifier (1 tier of <code>--space-xs</code> block padding) auto-applies.</p>
+<div class="locale-demo-row">
+  <div class="locale-cell" data-locale="en">
+    <div class="locale-cell-label">data-locale="en"</div>
+    <div class="control-row">
+      <div>
+        <p class="control-row-label">Use Bengali digits</p>
+        <p class="control-row-desc">Per-chart ০-৯ when locale is bn.</p>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: var(--space-md);">
+        <span class="toggle-state">ON</span>
+        <div class="toggle on"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+  </div>
+  <div class="locale-cell" data-locale="bn">
+    <div class="locale-cell-label">data-locale="bn"</div>
+    <div class="control-row bn">
+      <div>
+        <p class="control-row-label text-sans">বাংলা সংখ্যা ব্যবহার করুন</p>
+        <p class="control-row-desc text-sans">লোকেল bn হলে প্রতি-চার্ট ০-৯।</p>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: var(--space-md);">
+        <span class="toggle-state text-sans">চালু</span>
+        <div class="toggle on"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h2>SettingControl rendering patterns</h2>
+<p class="section-meta">Dim 5 ext §3 · 6 control kinds · all render inside dim-4 <code>.card--with-heading</code>.</p>
+<table style="width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);">
+  <thead>
+    <tr style="text-align: left; border-bottom: 1px solid var(--border-default);">
+      <th style="padding: 8px;">Kind</th>
+      <th style="padding: 8px;">Renders as</th>
+      <th style="padding: 8px;">Row height</th>
+      <th style="padding: 8px;">Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><code>toggle</code></td><td style="padding: 8px;">shadcn Switch + state label</td><td style="padding: 8px;">56 px</td><td style="padding: 8px;">Immediate commit on flip.</td></tr>
+    <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><code>select</code></td><td style="padding: 8px;">dim-4 input read-only + chevron</td><td style="padding: 8px;">56 px</td><td style="padding: 8px;">Tap opens modal option list.</td></tr>
+    <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><code>text</code></td><td style="padding: 8px;">dim-4 input (stacked label)</td><td style="padding: 8px;">56 px (label takes ~20 px)</td><td style="padding: 8px;">Commit on blur or Enter.</td></tr>
+    <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><code>numeric</code></td><td style="padding: 8px;">dim-4 input type="number"</td><td style="padding: 8px;">56 px</td><td style="padding: 8px;">min/max/step from control shape.</td></tr>
+    <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><code>link</code></td><td style="padding: 8px;">dim-4 nav row + chevron-right</td><td style="padding: 8px;">56 px</td><td style="padding: 8px;">Navigates to href.</td></tr>
+    <tr><td style="padding: 8px;"><code>danger</code></td><td style="padding: 8px;">Separate --bg-subtle inset + --danger icon</td><td style="padding: 8px;">64 px</td><td style="padding: 8px;">Confirmation modal asks for typed reset.</td></tr>
+  </tbody>
+</table>
+
+<footer>
+  <span>Contract → <code>_bmad-output/design/05-settings-lockdown.md</code></span>
+  <span>Dim 5 extension · 7th page template · 2026-09-07</span>
+</footer>
+
+</main>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+    const toggles = document.querySelectorAll('.toggle');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+
+    // toggle demo interaction
+    toggles.forEach(t => {
+      t.addEventListener('click', () => {
+        t.classList.toggle('on');
+        const on = t.classList.contains('on');
+        t.setAttribute('aria-checked', on ? 'true' : 'false');
+        const state = t.parentElement && t.parentElement.querySelector('.toggle-state');
+        if (state) state.textContent = on ? (state.dataset.onLabel || 'ON') : (state.dataset.offLabel || 'OFF');
+      });
+      t.addEventListener('keydown', e => {
+        if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); t.click(); }
+      });
+    });
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

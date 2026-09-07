@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Data Formats Preview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ════════════════════════════════════════════════════════════════
+     TOKENS — colour (dim 1), typography (dim 2), icons (dim 3),
+     spacing (dim 4) re-declared for preview parity.
+     Dim 6 adds no new tokens — data shapes are token-free.
+     ════════════════════════════════════════════════════════════════ */
+  :root, [data-theme="light"] {
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.375rem;
+    --font-size-xxl: 1.75rem;
+    --font-size-display: 2.25rem;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.25;
+    --line-height-body: 1.5;
+    --line-height-body-bangla: 1.6;
+    --line-height-heading-bangla: 1.3;
+    --letter-spacing-tight: -0.01em;
+    --letter-spacing-wide: 0.04em;
+
+    --space-xs:  4px;  --space-sm:  8px;  --space-md: 12px;
+    --space-lg: 16px;  --space-xl: 24px;  --space-2xl: 32px;  --space-3xl: 48px;
+    --radius-xs: 2px; --radius-sm: 3px; --radius-md: 4px; --radius-lg: 6px;
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-600:      #4A8AC4;
+    --brand-500:      #5C9AD0;
+    --brand-400:      #76AEDF;
+    --brand-200:      #2B3E55;
+    --brand-100:      #1F2D3D;
+    --success:        #5DB287;
+    --success-bg:     #1A2D24;
+    --warning:        #D6A865;
+    --warning-bg:     #2D2418;
+    --danger:         #D8806E;
+    --danger-bg:      #2D1F1B;
+    --info:           #76AEDF;
+    --info-bg:        #1F2D3D;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    color-scheme: dark;
+  }
+
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+  a { text-decoration: none; color: inherit; }
+
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+
+  /* ───── chrome ───── */
+  .preview-chrome {
+    position: sticky;
+    top: 0;
+    z-index: var(--space-xl);
+    height: 48px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+  }
+  .preview-chrome-left { display: flex; align-items: center; gap: var(--space-md); }
+  .preview-chrome-right { display: flex; align-items: center; gap: var(--space-sm); }
+  .preview-chrome strong { font-weight: var(--font-weight-semibold); }
+  .preview-chrome .meta { color: var(--fg-tertiary); font-size: var(--font-size-xs); }
+
+  .seg-btn {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-md);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    height: 28px;
+  }
+  .seg-btn:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .seg-btn.active { background: var(--brand-100); color: var(--brand-500); border-color: var(--brand-400); }
+
+  main {
+    padding: var(--space-3xl) var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-tight);
+    margin: 0 0 var(--space-md);
+    line-height: var(--line-height-tight);
+  }
+  h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-3xl) 0 var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+  h3 { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); margin: var(--space-lg) 0 var(--space-xs); }
+  h4 { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin: var(--space-lg) 0 var(--space-xs); color: var(--fg-secondary); text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); }
+  p  { margin: 0 0 var(--space-md); color: var(--fg-secondary); }
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    background: var(--bg-subtle);
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    color: var(--fg-default);
+  }
+  .section-meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* ───── shape cards ───── */
+  .shape-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+  }
+  .shape-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding-block: var(--space-lg);
+    padding-inline: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .shape-card-name {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--brand-500);
+  }
+  .shape-card-blurb {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+  }
+
+  /* ───── code blocks ───── */
+  pre.code-block {
+    background: var(--bg-inset);
+    color: var(--fg-default);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
+    overflow-x: auto;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre;
+  }
+  pre.code-block .kw    { color: var(--brand-500); font-weight: var(--font-weight-semibold); }
+  pre.code-block .type  { color: var(--brand-600); }
+  pre.code-block .str   { color: var(--success); }
+  pre.code-block .com   { color: var(--fg-tertiary); font-style: italic; }
+  pre.code-block .num   { color: var(--warning); }
+  pre.code-block .brand { color: var(--brand-500); }
+  [data-theme="dark"] pre.code-block .kw    { color: var(--brand-400); }
+  [data-theme="dark"] pre.code-block .type  { color: var(--brand-400); }
+
+  /* ───── not-in-data callout ───── */
+  .not-in-data {
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-default);
+    border-left: 3px solid var(--danger);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .not-in-data-title {
+    font-weight: var(--font-weight-semibold);
+    color: var(--danger);
+    font-size: var(--font-size-sm);
+  }
+
+  /* ───── ban vs ok grid ───── */
+  .ban-ok {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  .ban-ok-card {
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: var(--bg-surface);
+  }
+  .ban-ok-card.ban { border-left: 3px solid var(--danger); }
+  .ban-ok-card.ok  { border-left: 3px solid var(--success); }
+  .ban-ok-title {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    margin-bottom: var(--space-xs);
+  }
+  .ban-ok-card.ban .ban-ok-title { color: var(--danger); }
+  .ban-ok-card.ok  .ban-ok-title { color: var(--success); }
+
+  /* ───── table-style shape list ───── */
+  .shape-list { display: flex; flex-direction: column; gap: var(--space-md); margin-bottom: var(--space-lg); }
+  .shape-list-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+  }
+  .shape-list-name {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--brand-500);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-xs);
+  }
+  .shape-list-desc {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+  }
+
+  /* ───── locale demo box ───── */
+  .locale-demo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+  }
+  .locale-cell {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+  }
+  .locale-cell-label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    margin-bottom: var(--space-md);
+  }
+
+  footer {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+</style>
+</head>
+
+<body data-theme="light" data-locale="en">
+
+<div class="preview-chrome">
+  <div class="preview-chrome-left">
+    <strong>Surakkha v1</strong>
+    <span class="meta">· dim 6 · Data Formats preview</span>
+  </div>
+  <div class="preview-chrome-right">
+    <button class="seg-btn" data-set-theme="light">Light</button>
+    <button class="seg-btn" data-set-theme="dark">Dark</button>
+    <span class="meta" style="margin-inline: var(--space-sm);">|</span>
+    <button class="seg-btn" data-set-locale="en">EN</button>
+    <button class="seg-btn" data-set-locale="bn">বাং</button>
+  </div>
+</div>
+
+<main>
+
+<h1>Data Formats</h1>
+<p class="section-meta">Dim 6 · LOCKED contract — 2026-09-07 · TS-first with JSON + Zod examples · 8 component shapes · 6 page-template shapes · 8 empty-state specs · 6 domain entities.</p>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §1 SCOPE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Scope</h2>
+  <p>Component data shapes — what each component receives via props. Covers all 8 dim-4 components, 6 dim-5 page templates, 8 dim-5 empty states, 1 dim-5 audit-log row, plus 6 domain entities (User, Sensor, SensorReading, AnjaliReport, Cluster, ChainRef).</p>
+  <p>Backend wire format (sensor envelopes, signature formats) is deferred to <strong>dim 7</strong>. State management (Redux/Zustand/React Query) is engineering-setup territory.</p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §2 FORMAT CONVENTIONS
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Format Conventions</h2>
+  <p class="section-meta">TS-first; JSON example; optional Zod schema. Branded IDs. ISO 8601 timestamps. Locale at container, not per-string.</p>
+
+  <div class="shape-grid">
+    <div class="shape-card">
+      <div class="shape-card-name">Branded IDs</div>
+      <div class="shape-card-blurb">Domain IDs are branded strings, preventing accidental cross-domain passing (SensorId is not assignable to IncidentId).</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">SensorId</span>   = <span class="kw">string</span> & { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'SensorId'</span> };
+<span class="kw">type</span> <span class="type">IncidentId</span> = <span class="kw">string</span> & { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'IncidentId'</span> };
+<span class="kw">type</span> <span class="type">WardId</span>     = <span class="kw">string</span> & { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'WardId'</span> };
+<span class="kw">type</span> <span class="type">ClusterId</span>  = <span class="kw">string</span> & { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'ClusterId'</span> };</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">ISO 8601 Timestamps</div>
+      <div class="shape-card-blurb">Branded string, not Date object. JSON-serialisable; locale-independent at storage; presentation converts to local time.</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">ISOTimestamp</span> =
+  <span class="kw">string</span> & { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'ISOTimestamp'</span> };
+
+<span class="com">// Example: 2026-09-07T09:21:14.000Z</span>
+<span class="kw">const</span> t: <span class="type">ISOTimestamp</span> = <span class="str">'2026-09-07T09:21:14Z'</span>;</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §3 BANGLA AT CONTAINER
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · Locale at Container (not per-string)</h2>
+  <p class="section-meta">Per dim-4 §15 + dim-5 §10.2: <code>&lt;body data-locale="bn"&gt;</code> flips font for the entire subtree. Bangla content is plain text in data — never <code>{ text, locale }</code>.</p>
+
+  <div class="locale-demo">
+    <div class="locale-cell">
+      <div class="locale-cell-label">data-locale="en" — Plex Sans</div>
+<pre class="code-block">{
+  <span class="brand">"id"</span>: <span class="str">"anjali.p"</span>,
+  <span class="brand">"message"</span>: <span class="str">"Brown water since morning"</span>,
+  <span class="brand">"ward"</span>: <span class="str">"ward-04"</span>
+}</pre>
+      <p style="margin-top: var(--space-md);">Renders "Brown water since morning" in <code>IBM Plex Sans</code>.</p>
+    </div>
+
+    <div class="locale-cell" data-locale="bn">
+      <div class="locale-cell-label">data-locale="bn" — Noto Sans Bengali</div>
+<pre class="code-block">{
+  <span class="brand">"id"</span>: <span class="str">"anjali.p"</span>,
+  <span class="brand">"message"</span>: <span class="str">"সকাল থেকে পানি বাদামি"</span>,
+  <span class="brand">"ward"</span>: <span class="str">"ward-04"</span>
+}</pre>
+      <p class="text-sans" style="margin-top: var(--space-md);">Renders "সকাল থেকে পানি বাদামি" in <code>Noto Sans Bengali</code>.</p>
+    </div>
+  </div>
+
+  <p style="margin-top: var(--space-md); font-size: var(--font-size-xs); color: var(--fg-tertiary);">
+    Same data shape, two rendering styles. The data layer carries the message string verbatim; the rendering layer (driven by <code>data-locale</code>) chooses the font.
+  </p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §4 COMPONENT SHAPES (8 from dim 4)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · Component Shapes (8 from dim 4)</h2>
+  <p class="section-meta">Every dim-4 component has a locked prop shape. Sample TS interfaces below — full code in <code>06-data-formats-lockdown.md §3</code>.</p>
+
+  <div class="shape-grid">
+    <div class="shape-card">
+      <div class="shape-card-name">ButtonProps</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">ButtonSize</span>    = <span class="str">'sm'</span> | <span class="str">'md'</span> | <span class="str">'lg'</span>;
+<span class="kw">type</span> <span class="type">ButtonVariant</span> = <span class="str">'primary'</span> | <span class="str">'secondary'</span>
+                | <span class="str">'ghost'</span> | <span class="str">'danger'</span>;
+
+<span class="kw">interface</span> <span class="type">ButtonProps</span> {
+  <span class="brand">label</span>: <span class="kw">string</span>;
+  <span class="brand">onClick</span>: (e: <span class="type">MouseEvent</span>) =&gt; <span class="kw">void</span>;
+  <span class="brand">variant</span>?: <span class="type">ButtonVariant</span>;   <span class="com">// default: primary</span>
+  <span class="brand">size</span>?: <span class="type">ButtonSize</span>;       <span class="com">// default: md</span>
+  <span class="brand">icon</span>?: <span class="type">IconName</span>;
+  <span class="brand">iconPosition</span>?: <span class="str">'leading'</span> | <span class="str">'trailing'</span>;
+  <span class="brand">disabled</span>?: <span class="kw">boolean</span>;
+  <span class="brand">type</span>?: <span class="str">'button'</span> | <span class="str">'submit'</span> | <span class="str">'reset'</span>;
+  <span class="brand">ariaLabel</span>?: <span class="kw">string</span>;  <span class="com">// required if icon-only</span>
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">InputProps</div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">InputProps</span> {
+  <span class="brand">value</span>: <span class="kw">string</span>;
+  <span class="brand">onChange</span>: (v: <span class="kw">string</span>) =&gt; <span class="kw">void</span>;
+  <span class="brand">placeholder</span>?: <span class="kw">string</span>;
+  <span class="brand">type</span>?: <span class="str">'text'</span> | <span class="str">'email'</span>
+       | <span class="str">'number'</span> | <span class="str">'tel'</span>
+       | <span class="str">'url'</span>   | <span class="str">'search'</span>;
+  <span class="brand">disabled</span>?: <span class="kw">boolean</span>;
+  <span class="brand">readOnly</span>?: <span class="kw">boolean</span>;
+  <span class="brand">leadingIcon</span>?: <span class="type">IconName</span>;
+  <span class="brand">trailingIcon</span>?: <span class="type">IconName</span>;
+  <span class="brand">onTrailingIconClick</span>?: () =&gt; <span class="kw">void</span>;
+  <span class="brand">ariaLabel</span>?: <span class="kw">string</span>;
+  <span class="brand">maxLength</span>?: <span class="kw">number</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">TopChromeProps</div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">TopChromeProps</span> {
+  <span class="brand">wordmark</span>: <span class="kw">string</span>;             <span class="com">// 'Surakkha'</span>
+  <span class="brand">userContext</span>?: <span class="kw">string</span>;        <span class="com">// 'Priya · ward 07'</span>
+  <span class="brand">chainStatus</span>?: <span class="str">'healthy'</span>
+              | <span class="str">'syncing'</span>
+              | <span class="str">'offline'</span>;
+  <span class="brand">locale</span>: <span class="str">'en'</span> | <span class="str">'bn'</span>;
+  <span class="brand">onLocaleToggle</span>: () =&gt; <span class="kw">void</span>;
+  <span class="brand">onUserMenuClick</span>?: () =&gt; <span class="kw">void</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">SidebarProps</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">NavItemId</span> = <span class="kw">string</span> &amp; { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'NavItemId'</span> };
+
+<span class="kw">interface</span> <span class="type">NavItem</span> {
+  <span class="brand">id</span>: <span class="type">NavItemId</span>;
+  <span class="brand">label</span>: <span class="kw">string</span>;
+  <span class="brand">icon</span>: <span class="type">IconName</span>;
+  <span class="brand">to</span>: <span class="kw">string</span>;
+  <span class="brand">badgeCount</span>?: <span class="kw">number</span>;
+  <span class="brand">children</span>?: <span class="type">NavItem</span>[];
+  <span class="brand">requiresPermission</span>?: <span class="type">Permission</span>;
+}
+
+<span class="kw">interface</span> <span class="type">SidebarProps</span> {
+  <span class="brand">items</span>: <span class="type">NavItem</span>[];
+  <span class="brand">activeItemId</span>: <span class="type">NavItemId</span>;
+  <span class="brand">onItemClick</span>: (i: <span class="type">NavItem</span>) =&gt; <span class="kw">void</span>;
+  <span class="brand">collapsed</span>?: <span class="kw">boolean</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">CardProps</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">CardVariant</span> = <span class="str">'with-heading'</span> | <span class="str">'compact'</span>; <span class="com">// dim-4 §9.1</span>
+
+<span class="kw">interface</span> <span class="type">CardProps</span> {
+  <span class="brand">variant</span>: <span class="type">CardVariant</span>;
+  <span class="brand">title</span>?: <span class="kw">string</span>;
+  <span class="brand">meta</span>?: <span class="kw">string</span>;
+  <span class="brand">body</span>?: <span class="type">React</span>.<span class="brand">ReactNode</span>;
+  <span class="brand">footer</span>?: <span class="type">React</span>.<span class="brand">ReactNode</span>;
+  <span class="brand">icon</span>?: <span class="type">IconName</span>;
+  <span class="brand">onClick</span>?: () =&gt; <span class="kw">void</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">ModalProps</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">ModalSize</span> = <span class="str">'sm'</span> | <span class="str">'md'</span> | <span class="str">'lg'</span>;   <span class="com">// 360 / 480 / 640</span>
+
+<span class="kw">interface</span> <span class="type">ModalProps</span> {
+  <span class="brand">open</span>: <span class="kw">boolean</span>;
+  <span class="brand">onOpenChange</span>: (o: <span class="kw">boolean</span>) =&gt; <span class="kw">void</span>;
+  <span class="brand">title</span>: <span class="kw">string</span>;
+  <span class="brand">description</span>?: <span class="kw">string</span>;
+  <span class="brand">size</span>?: <span class="type">ModalSize</span>;
+  <span class="brand">children</span>?: <span class="type">React</span>.<span class="brand">ReactNode</span>;
+  <span class="brand">primaryAction</span>?: <span class="type">ButtonProps</span>;
+  <span class="brand">secondaryAction</span>?: <span class="type">ButtonProps</span>;
+  <span class="brand">destructiveAction</span>?: <span class="type">ButtonProps</span>;
+  <span class="brand">dismissible</span>?: <span class="kw">boolean</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">ToastOptions</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">ToastVariant</span> = <span class="str">'success'</span> | <span class="str">'warning'</span>
+                 | <span class="str">'danger'</span>  | <span class="str">'info'</span>;
+
+<span class="kw">interface</span> <span class="type">ToastAction</span> {
+  <span class="brand">label</span>: <span class="kw">string</span>;
+  <span class="brand">onClick</span>: () =&gt; <span class="kw">void</span>;
+}
+
+<span class="kw">interface</span> <span class="type">ToastOptions</span> {
+  <span class="brand">variant</span>: <span class="type">ToastVariant</span>;
+  <span class="brand">title</span>: <span class="kw">string</span>;
+  <span class="brand">message</span>?: <span class="kw">string</span>;
+  <span class="brand">durationMs</span>?: <span class="kw">number</span>;        <span class="com">// default 4000</span>
+  <span class="brand">action</span>?: <span class="type">ToastAction</span>;
+  <span class="brand">locale</span>?: <span class="str">'en'</span> | <span class="str">'bn'</span>;   <span class="com">// toggles .toast--bangla</span>
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">BandPillProps</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">Band</span> = <span class="str">'high'</span> | <span class="str">'medium'</span> | <span class="str">'low'</span>;
+
+<span class="kw">interface</span> <span class="type">BandPillProps</span> {
+  <span class="brand">band</span>: <span class="type">Band</span>;
+  <span class="brand">label</span>?: <span class="kw">string</span>;  <span class="com">// default: HIGH / MEDIUM / LOW</span>
+}
+
+<span class="com">// icon + colour derived from band:</span>
+<span class="com">// high   → alert-triangle + --band-high</span>
+<span class="com">// medium → minus-circle   + --band-medium</span>
+<span class="com">// low    → info           + --band-low</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §5 PAGE TEMPLATES (6 from dim 5)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Page-Template Shapes (6 from dim 5)</h2>
+  <p class="section-meta">Each page declares <code>containerWidth</code> per dim-5 §3. Data layer carries the page payload; rendering decides layout.</p>
+
+  <div class="shape-grid">
+    <div class="shape-card">
+      <div class="shape-card-name">DashboardPage</div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">KPI</span> {
+  <span class="brand">id</span>: <span class="kw">string</span>;
+  <span class="brand">label</span>: <span class="kw">string</span>;
+  <span class="brand">value</span>: <span class="kw">number</span>;
+  <span class="brand">format</span>: <span class="str">'count'</span> | <span class="str">'percent'</span>
+         | <span class="str">'duration'</span> | <span class="str">'currency'</span>
+         | <span class="str">'number'</span>;
+  <span class="brand">trend</span>?: { <span class="brand">direction</span>: <span class="str">'up'</span>|<span class="str">'down'</span>|<span class="str">'flat'</span>;
+              <span class="brand">deltaPct</span>: <span class="kw">number</span> };
+  <span class="brand">href</span>?: <span class="kw">string</span>;
+}
+
+<span class="kw">interface</span> <span class="type">DashboardPage</span> {
+  <span class="brand">containerWidth</span>: <span class="str">'narrow'</span>|<span class="str">'bangla'</span>|<span class="str">'wide'</span>;
+  <span class="brand">kpis</span>: <span class="type">KPI</span>[];
+  <span class="brand">recentActivity</span>: <span class="type">AuditEntry</span>[];
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">InboxListPage</div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">InboxRow</span> {
+  <span class="brand">id</span>: <span class="kw">string</span>;
+  <span class="brand">icon</span>?: <span class="type">IconName</span>;
+  <span class="brand">title</span>: <span class="kw">string</span>;
+  <span class="brand">meta</span>: <span class="kw">string</span>;
+  <span class="brand">badge</span>?: <span class="type">BandPillProps</span>;
+  <span class="brand">action</span>?: <span class="type">ButtonProps</span>;
+  <span class="brand">href</span>: <span class="kw">string</span>;
+  <span class="brand">timestamp</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">read</span>?: <span class="kw">boolean</span>;
+}
+
+<span class="kw">interface</span> <span class="type">InboxListPage</span> {
+  <span class="brand">containerWidth</span>: <span class="str">'narrow'</span>|<span class="str">'bangla'</span>|<span class="str">'wide'</span>;
+  <span class="brand">rows</span>: <span class="type">InboxRow</span>[];
+  <span class="brand">emptyState</span>?: <span class="type">EmptyStateSpec</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">InboxDetailPage</div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">Incident</span> {
+  <span class="brand">id</span>: <span class="type">IncidentId</span>;
+  <span class="brand">status</span>: <span class="str">'open'</span>|<span class="str">'verified'</span>
+          | <span class="str">'dismissed'</span>|<span class="str">'resolved'</span>;
+  <span class="brand">band</span>: <span class="type">Band</span>;
+  <span class="brand">source</span>: <span class="str">'sensor'</span>|<span class="str">'anjali'</span>
+          | <span class="str">'panchayat'</span>|<span class="str">'pha'</span>;
+  <span class="brand">ward</span>: <span class="type">WardId</span>;
+  <span class="brand">title</span>: <span class="kw">string</span>;
+  <span class="brand">body</span>: <span class="kw">string</span>;
+  <span class="brand">reportedAt</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">chainRefs</span>: <span class="type">ChainRef</span>[];
+  <span class="brand">relatedReports</span>: <span class="type">AnjaliReport</span>[];
+  <span class="brand">timeline</span>: <span class="type">TimelineEvent</span>[];
+}
+
+<span class="kw">interface</span> <span class="type">InboxDetailPage</span> {
+  <span class="brand">containerWidth</span>: <span class="str">'narrow'</span>|<span class="str">'bangla'</span>|<span class="str">'wide'</span>;
+  <span class="brand">incident</span>: <span class="type">Incident</span>;
+  <span class="brand">related</span>: <span class="type">Incident</span>[];
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">VerifyFlowPage</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">VerifyStep</span> = <span class="num">1</span> | <span class="num">2</span> | <span class="num">3</span>;
+
+<span class="kw">interface</span> <span class="type">VerifyFlowPage</span> {
+  <span class="brand">containerWidth</span>: <span class="str">'narrow'</span>|<span class="str">'bangla'</span>|<span class="str">'wide'</span>;
+  <span class="brand">step</span>: <span class="type">VerifyStep</span>;
+  <span class="brand">step1</span>?: <span class="type">SensorClusterEvidence</span>;
+  <span class="brand">step2</span>?: <span class="type">AnjaliCorroborationEvidence</span>;
+  <span class="brand">step3</span>?: <span class="type">CouncillorNotification</span>;
+  <span class="brand">canProceed</span>: <span class="kw">boolean</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">SettingsPage</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">SettingKind</span> = <span class="str">'toggle'</span> | <span class="str">'select'</span>
+                  | <span class="str">'text'</span> | <span class="str">'numeric'</span>
+                  | <span class="str">'link'</span> | <span class="str">'danger'</span>;
+
+<span class="kw">interface</span> <span class="type">SettingControl</span> {
+  <span class="brand">kind</span>: <span class="type">SettingKind</span>;
+  <span class="brand">id</span>: <span class="kw">string</span>;
+  <span class="brand">label</span>: <span class="kw">string</span>;
+  <span class="brand">description</span>?: <span class="kw">string</span>;
+  <span class="brand">value</span>: <span class="kw">unknown</span>;  <span class="com">// boolean / string / number</span>
+  <span class="brand">options</span>?: <span class="type">Array</span>&lt;{ <span class="brand">value</span>: <span class="kw">string</span>; <span class="brand">label</span>: <span class="kw">string</span> }&gt;;
+  <span class="brand">dangerDescription</span>?: <span class="kw">string</span>;  <span class="com">// kind='danger'</span>
+}
+
+<span class="kw">interface</span> <span class="type">SettingsPage</span> {
+  <span class="brand">containerWidth</span>: <span class="str">'narrow'</span>|<span class="str">'bangla'</span>|<span class="str">'wide'</span>;
+  <span class="brand">sections</span>: <span class="type">SettingsSection</span>[];
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">AuditLogPage</div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">AuditEntry</span> {
+  <span class="brand">id</span>: <span class="kw">string</span>;
+  <span class="brand">timestamp</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">chainRef</span>?: <span class="type">ChainRef</span>;
+  <span class="brand">eventType</span>:
+    | <span class="str">'sensor_spike'</span>
+    | <span class="str">'sensor_offline'</span>
+    | <span class="str">'report_received'</span>
+    | <span class="str">'incident_verified'</span>
+    | <span class="str">'incident_dismissed'</span>
+    | <span class="str">'councillor_notified'</span>
+    | <span class="str">'chain_anchored'</span>
+    | <span class="str">'sign_in'</span>
+    | <span class="str">'sign_out'</span>;
+  <span class="brand">band</span>?: <span class="type">Band</span>;
+  <span class="brand">ward</span>?: <span class="type">WardId</span>;
+  <span class="brand">actor</span>: { <span class="brand">kind</span>: <span class="type">ActorKind</span>;
+              <span class="brand">handle</span>: <span class="type">ActorHandle</span>;
+              <span class="brand">display</span>: <span class="kw">string</span> };
+  <span class="brand">action</span>?: { <span class="brand">label</span>: <span class="kw">string</span>;
+                <span class="brand">onClick</span>: () =&gt; <span class="kw">void</span> };
+}
+
+<span class="kw">interface</span> <span class="type">AuditLogPage</span> {
+  <span class="brand">containerWidth</span>: <span class="str">'narrow'</span>|<span class="str">'bangla'</span>|<span class="str">'wide'</span>;
+  <span class="brand">entries</span>: <span class="type">AuditEntry</span>[];
+  <span class="brand">totalCount</span>: <span class="kw">number</span>;
+  <span class="brand">pageNumber</span>: <span class="kw">number</span>;
+  <span class="brand">pageSize</span>: <span class="kw">number</span>;
+}</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §6 EMPTY-STATES (8 from dim 5)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Empty-State Specs (8 from dim 5)</h2>
+  <p class="section-meta">Each empty kind has a default icon + heading + body. Explicit overrides win via the <code>EmptyStateSpec</code>.</p>
+
+  <div class="shape-list">
+    <div class="shape-list-item">
+      <div class="shape-list-name">'no-sensors'</div>
+      <div class="shape-list-desc">No sensors reporting. Icon: <code>activity</code>. Heading: "No sensors reporting". CTA: "Add sensor" (primary).</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'no-incidents'</div>
+      <div class="shape-list-desc">No incidents in ward. Icon: <code>inbox</code>. Heading: "No incidents in this ward". No CTA.</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'no-chain'</div>
+      <div class="shape-list-desc">No chain entries yet. Icon: <code>link</code>. Heading: "No chain entries yet". No CTA.</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'no-reports'</div>
+      <div class="shape-list-desc">No Anjali reports. Icon: <code>message-square</code>. Heading: "No Anjali reports". CTA: "Share reporting link" (secondary).</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'no-search-results'</div>
+      <div class="shape-list-desc">Search returns nothing. Icon: <code>search-x</code>. Heading: "No results for that query".</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'no-filter-results'</div>
+      <div class="shape-list-desc">Filter returned nothing. Icon: <code>filter-x</code>. Heading: "No entries match this filter". CTA: "Clear filter" (secondary).</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'all-caught-up'</div>
+      <div class="shape-list-desc">Positive empty state. Icon: <code>check-circle-2</code>. Heading: "All caught up".</div>
+    </div>
+    <div class="shape-list-item">
+      <div class="shape-list-name">'ward-mismatch'</div>
+      <div class="shape-list-desc">Guard empty. Icon: <code>shield-alert</code>. Heading: "Ward mismatch".</div>
+    </div>
+  </div>
+<pre class="code-block"><span class="kw">interface</span> <span class="type">EmptyStateSpec</span> {
+  <span class="brand">kind</span>: <span class="type">EmptyKind</span>;
+  <span class="brand">icon</span>?: <span class="type">IconName</span>;           <span class="com">// derived from kind if absent</span>
+  <span class="brand">heading</span>?: <span class="kw">string</span>;        <span class="com">// derived from kind if absent</span>
+  <span class="brand">body</span>?: <span class="kw">string</span>;
+  <span class="brand">primaryCta</span>?: <span class="type">ButtonProps</span>;
+  <span class="brand">secondaryCta</span>?: <span class="type">ButtonProps</span>;
+}</pre>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §7 DOMAIN ENTITIES
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · Domain Entities</h2>
+  <p class="section-meta">Users, sensors, reports, clusters, chain refs. All IDs are branded.</p>
+
+  <div class="shape-grid">
+    <div class="shape-card">
+      <div class="shape-card-name">User + Scope + Permission</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">UserId</span>      = <span class="kw">string</span> &amp; { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'UserId'</span> };
+<span class="kw">type</span> <span class="type">ActorHandle</span> = <span class="kw">string</span> &amp; { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'ActorHandle'</span> };
+
+<span class="kw">interface</span> <span class="type">User</span> {
+  <span class="brand">id</span>: <span class="type">UserId</span>;
+  <span class="brand">handle</span>: <span class="type">ActorHandle</span>;
+  <span class="brand">displayName</span>: <span class="kw">string</span>;
+  <span class="brand">email</span>?: <span class="kw">string</span>;
+  <span class="brand">phone</span>?: <span class="kw">string</span>;
+  <span class="brand">role</span>: <span class="str">'priya'</span>|<span class="str">'operator'</span>|<span class="str">'pha'</span>
+       | <span class="str">'anjali'</span>|<span class="str">'admin'</span>;
+  <span class="brand">scopes</span>: <span class="type">Scope</span>[];
+}
+
+<span class="kw">type</span> <span class="type">Permission</span> =
+  | <span class="str">'incident.verify'</span>
+  | <span class="str">'incident.dismiss'</span>
+  | <span class="str">'councillor.notify'</span>
+  | <span class="str">'sensor.add'</span>
+  | <span class="str">'sensor.remove'</span>
+  | <span class="str">'settings.edit'</span>
+  | <span class="str">'audit.view'</span>;</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">Sensor + SensorReading</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">SensorId</span> = <span class="kw">string</span> &amp; { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'SensorId'</span> };
+
+<span class="kw">interface</span> <span class="type">Sensor</span> {
+  <span class="brand">id</span>: <span class="type">SensorId</span>;
+  <span class="brand">ward</span>: <span class="type">WardId</span>;
+  <span class="brand">clusterId</span>?: <span class="type">ClusterId</span>;
+  <span class="brand">installedAt</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">lastSeenAt</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">firmware</span>: <span class="kw">string</span>;
+  <span class="brand">batteryPct</span>?: <span class="kw">number</span>;
+  <span class="brand">status</span>: <span class="str">'online'</span>|<span class="str">'offline'</span>|<span class="str">'degraded'</span>;
+}
+
+<span class="kw">interface</span> <span class="type">SensorReading</span> {
+  <span class="brand">sensorId</span>: <span class="type">SensorId</span>;
+  <span class="brand">ward</span>: <span class="type">WardId</span>;
+  <span class="brand">timestamp</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">turbidityNtu</span>: <span class="kw">number</span>;
+  <span class="brand">pH</span>?: <span class="kw">number</span>;
+  <span class="brand">temperatureC</span>?: <span class="kw">number</span>;
+  <span class="brand">flags</span>?: <span class="type">Array</span>&lt;<span class="str">'spike'</span>|<span class="str">'drift'</span>|<span class="str">'low-battery'</span>|<span class="str">'tamper-suspect'</span>&gt;;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">AnjaliReport</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">ReporterHandle</span> = <span class="kw">string</span> &amp; { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'ReporterHandle'</span> };
+
+<span class="kw">interface</span> <span class="type">AnjaliReport</span> {
+  <span class="brand">id</span>: <span class="type">ReporterHandle</span>;
+  <span class="brand">receivedAt</span>: <span class="type">ISOTimestamp</span>;
+  <span class="brand">ward</span>: <span class="type">WardId</span>;
+  <span class="brand">message</span>: <span class="kw">string</span>;    <span class="com">// plain Bangla or English text</span>
+  <span class="brand">photoUrls</span>?: <span class="kw">string</span>[];
+  <span class="brand">audioUrl</span>?: <span class="kw">string</span>;   <span class="com">// PSTN voice relay</span>
+  <span class="brand">gpxCoords</span>?: { <span class="brand">lat</span>: <span class="kw">number</span>; <span class="brand">lng</span>: <span class="kw">number</span> };
+  <span class="brand">clusterMatch</span>?: <span class="type">ClusterId</span>;
+}</pre>
+    </div>
+
+    <div class="shape-card">
+      <div class="shape-card-name">ChainRef (brand only)</div>
+<pre class="code-block"><span class="kw">type</span> <span class="type">ChainRef</span> = <span class="kw">string</span> &amp; { <span class="kw">readonly</span> <span class="brand">__brand</span>: <span class="str">'ChainRef'</span> };
+
+<span class="com">// Format deferred to dim 7, e.g.</span>
+<span class="com">// '0x7f3a · b9c2 · 4e8d'</span>
+<span class="com">// or a hash chain URI.</span>
+
+<span class="kw">const</span> ref: <span class="type">ChainRef</span> =
+  <span class="str">'0x7f3a·b9c2·4e8d'</span> <span class="kw">as</span> <span class="type">ChainRef</span>;</pre>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §8 WHAT IS NOT IN DATA
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>8 · What is NOT in Data</h2>
+  <p class="section-meta">Per dim-4 §19 + dim-5 §14. If a shape needs any of these for rendering, that's a dim-6 violation — fix the tokens, not the data.</p>
+
+  <div class="not-in-data">
+    <div class="not-in-data-title">⛔ Banned in data:</div>
+    <ul style="margin: 0; padding-left: 20px; color: var(--fg-secondary); line-height: 1.8;">
+      <li>Spacing values <code>{ padding: 16 }</code></li>
+      <li>Color values <code>{ bg: '#F7F7F5' }</code></li>
+      <li>Breakpoint values <code>{ responsive: '>768px' }</code></li>
+      <li>Z-index values <code>{ z: 100 }</code></li>
+      <li>Animation durations <code>{ transition: 150 }</code></li>
+      <li>Shadow values <code>{ shadow: '...' }</code></li>
+      <li>Per-string locale tags <code>{ text, locale }</code></li>
+      <li>Font-family declarations</li>
+      <li><code>any</code> in component prop types</li>
+      <li><code>Date</code> objects (use ISO 8601 strings)</li>
+    </ul>
+  </div>
+
+  <h4>Ban vs OK — examples</h4>
+
+  <h3 style="margin-top: var(--space-md);">Closed-set values</h3>
+  <div class="ban-ok">
+    <div class="ban-ok-card ban">
+      <div class="ban-ok-title">⛔ Ban</div>
+<pre class="code-block">{
+  <span class="brand">"variant"</span>: <span class="str">"primary"</span>, <span class="com">// could be anything</span>
+  <span class="brand">"size"</span>: <span class="str">"medium"</span>,   <span class="com">// string erases enum</span>
+  <span class="brand">"band"</span>: <span class="str">"hiiii"</span>     <span class="com">// typo!</span>
+}</pre>
+    </div>
+    <div class="ban-ok-card ok">
+      <div class="ban-ok-title">✓ OK</div>
+<pre class="code-block">{
+  <span class="brand">"variant"</span>: <span class="str">"primary"</span>,
+  <span class="brand">"size"</span>: <span class="str">"md"</span>,
+  <span class="brand">"band"</span>: <span class="str">"high"</span>     <span class="com">// discriminated union</span>
+}</pre>
+    </div>
+  </div>
+
+  <h3>Per-string locale</h3>
+  <div class="ban-ok">
+    <div class="ban-ok-card ban">
+      <div class="ban-ok-title">⛔ Ban — { text, locale } pairs</div>
+<pre class="code-block">{
+  <span class="brand">"title"</span>: {
+    <span class="brand">"text"</span>: <span class="str">"অঞ্জলি · পানিতে গন্ধ"</span>,
+    <span class="brand">"locale"</span>: <span class="str">"bn"</span>
+  }
+}
+
+<span class="com">// 2× payload size;</span>
+<span class="com">// per-string ambiguity;</span>
+<span class="com">// banned per dim-4 §15.</span></pre>
+    </div>
+    <div class="ban-ok-card ok">
+      <div class="ban-ok-title">✓ OK — plain string at container locale</div>
+<pre class="code-block">{
+  <span class="brand">"title"</span>: <span class="str">"অঞ্জলি · পানিতে গন্ধ"</span>
+}
+
+<span class="com">// renders Bengali when</span>
+<span class="com">// &lt;body data-locale="bn"&gt;,</span>
+<span class="com">// Latin otherwise.</span></pre>
+    </div>
+  </div>
+
+  <h3>Timestamps</h3>
+  <div class="ban-ok">
+    <div class="ban-ok-card ban">
+      <div class="ban-ok-title">⛔ Ban — Date objects</div>
+<pre class="code-block">{
+  <span class="brand">"timestamp"</span>: <span class="kw">new</span> <span class="type">Date</span>(<span class="num">1725694874000</span>),
+  <span class="brand">"by"</span>: <span class="kw">new</span> <span class="type">Date</span>()
+}
+
+<span class="com">// not JSON-serialisable</span>
+<span class="com">// locale-dependent</span>
+<span class="com">// strftime vs ISO confusion</span></pre>
+    </div>
+    <div class="ban-ok-card ok">
+      <div class="ban-ok-title">✓ OK — ISO 8601 branded strings</div>
+<pre class="code-block">{
+  <span class="brand">"timestamp"</span>: <span class="str">"2026-09-07T09:21:14Z"</span>,
+  <span class="brand">"expiresAt"</span>: <span class="str">"2026-12-31T23:59:59Z"</span>
+}
+
+<span class="com">// JSON-serialisable</span>
+<span class="com">// locale-independent</span>
+<span class="com">// one canonical format</span></pre>
+    </div>
+  </div>
+
+  <h3>Numeric values for Bangla rendering</h3>
+  <div class="ban-ok">
+    <div class="ban-ok-card ban">
+      <div class="ban-ok-title">⛔ Ban — store Bangla digits as string</div>
+<pre class="code-block">{
+  <span class="brand">"turbidityNtu"</span>: <span class="str">"৬.৮"</span>,
+  <span class="brand">"incidentCount"</span>: <span class="str">"১২"</span>
+}
+
+<span class="com">// loses arithmetic;</span>
+<span class="com">// locale-tied at storage.</span></pre>
+    </div>
+    <div class="ban-ok-card ok">
+      <div class="ban-ok-title">✓ OK — store number, render Bangla digits</div>
+<pre class="code-block">{
+  <span class="brand">"turbidityNtu"</span>: <span class="num">6.8</span>,
+  <span class="brand">"incidentCount"</span>: <span class="num">12</span>
+}
+
+<span class="com">// --font-variant-numeric:</span>
+<span class="com">//   bengali renders ৬.৮</span>
+<span class="com">//   when locale = 'bn'.</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §9 BANGLA AWARE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>9 · Bangla-aware Data Rules</h2>
+  <p class="section-meta">Three rules from dim-4 §15 + dim-5 §10, restated as data-shape rules.</p>
+
+  <ol style="color: var(--fg-secondary); line-height: 1.8;">
+    <li><strong>Plain-text Bangla strings.</strong> Reporter messages, councillor names, ward names — plain <code>string</code>. Rendering swaps the font based on the container's <code>data-locale</code>.</li>
+    <li><strong>Bangla digits are presentation.</strong> Storage is JS <code>number</code>. <code>font-variant-numeric: bengali</code> renders Bangla digits in Bangla locale. Latin digits stay Latin; chained refs stay Latin even in Bangla locale.</li>
+    <li><strong>No per-string locale tags.</strong> Every locale-bearing field is a plain string. The locale is on <code>&lt;body&gt;</code>.</li>
+  </ol>
+
+  <h3 style="margin-top: var(--space-lg);">Live demo — same data, two locales</h3>
+  <div class="locale-demo">
+    <div class="locale-cell">
+      <div class="locale-cell-label">data-locale="en"</div>
+<pre class="code-block">{
+  <span class="brand">"id"</span>: <span class="str">"anjali.b"</span>,
+  <span class="brand">"message"</span>: <span class="str">"Brown water since morning. Family of 4."</span>,
+  <span class="brand">"ward"</span>: <span class="str">"ward-04"</span>,
+  <span class="brand">"timestamp"</span>: <span class="str">"2026-09-07T09:21:14Z"</span>
+}</pre>
+      <p>Renders: <strong>"Brown water since morning. Family of 4."</strong> in Plex Sans.</p>
+    </div>
+    <div class="locale-cell" data-locale="bn">
+      <div class="locale-cell-label">data-locale="bn"</div>
+<pre class="code-block">{
+  <span class="brand">"id"</span>: <span class="str">"anjali.b"</span>,
+  <span class="brand">"message"</span>: <span class="str">"সকাল থেকে পানি বাদামি। পরিবারে ৪ জন।"</span>,
+  <span class="brand">"ward"</span>: <span class="str">"ward-04"</span>,
+  <span class="brand">"timestamp"</span>: <span class="str">"2026-09-07T09:21:14Z"</span>
+}</pre>
+      <p class="text-sans">Renders: <strong>"সকাল থেকে পানি বাদামি। পরিবারে ৪ জন।"</strong> in Noto Sans Bengali.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §10 ZOD SAMPLES (optional)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>10 · Zod Schema Samples (optional)</h2>
+  <p class="section-meta">If the team adopts Zod, each interface can be mirrored as a runtime validator. Zod is optional — TypeScript types are the source of truth.</p>
+
+<pre class="code-block"><span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">'zod'</span>;
+
+<span class="com">// Branded type via Zod</span>
+<span class="kw">const</span> <span class="type">SensorId</span> = z.<span class="brand">string</span>().<span class="brand">brand</span>&lt;<span class="str">'SensorId'</span>&gt;();
+
+<span class="com">// Discriminated union enums</span>
+<span class="kw">const</span> <span class="type">BandSchema</span> = z.<span class="brand">enum</span>([<span class="str">'high'</span>, <span class="str">'medium'</span>, <span class="str">'low'</span>]);
+<span class="kw">const</span> <span class="type">ButtonVariantSchema</span> = z.<span class="brand">enum</span>([
+  <span class="str">'primary'</span>, <span class="str">'secondary'</span>, <span class="str">'ghost'</span>, <span class="str">'danger'</span>
+]);
+
+<span class="kw">const</span> <span class="type">ButtonPropsSchema</span> = z.<span class="brand">object</span>({
+  <span class="brand">label</span>: z.<span class="brand">string</span>().<span class="brand">min</span>(<span class="num">1</span>),
+  <span class="brand">onClick</span>: z.<span class="brand">function</span>(),
+  <span class="brand">variant</span>: <span class="type">ButtonVariantSchema</span>.<span class="brand">default</span>(<span class="str">'primary'</span>),
+  <span class="brand">size</span>: z.<span class="brand">enum</span>([<span class="str">'sm'</span>, <span class="str">'md'</span>, <span class="str">'lg'</span>]).<span class="brand">default</span>(<span class="str">'md'</span>),
+  <span class="brand">icon</span>: <span class="type">IconNameSchema</span>.<span class="brand">optional</span>(),
+  <span class="brand">disabled</span>: z.<span class="brand">boolean</span>().<span class="brand">default</span>(<span class="kw">false</span>),
+});
+
+<span class="com">// Runtime parse → throws on bad data;</span>
+<span class="com">// or use safeParse for structured failure.</span>
+<span class="kw">const</span> result = <span class="type">ButtonPropsSchema</span>.<span class="brand">safeParse</span>(apiPayload);</pre>
+</section>
+
+</main>
+
+<footer>
+  <span>Surakkha v1 — data formats preview · 2026-09-07</span>
+  <span>Contract → <code>_bmad-output/design/06-data-formats-lockdown.md</code></span>
+</footer>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

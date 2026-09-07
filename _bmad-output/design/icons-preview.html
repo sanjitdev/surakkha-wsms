@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Iconography Preview</title>
+
+<!-- Plex + Bengali, same as dim-2 preview for visual continuity -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     TOKENS — colour from dim 1, typography from dim 2, iconography here.
+     ════════════════════════════════════════════════════════════════════ */
+  :root,
+  [data-theme="light"] {
+    /* Colour tokens (carry from dim 1) */
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-500:      #144A78;
+    --success:        #1E6E47;
+    --warning:        #8A5A1A;
+    --danger:         #8E2E1E;
+    --info:           #1F5E91;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+    --badge-trusted:  #144A78;
+    --badge-new:      #6B6F76;
+    --badge-caution:  #8E2E1E;
+
+    /* Typography tokens (carry from dim 2 / Plex amendment) */
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, -apple-system, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-size-xs:      0.75rem;
+    --font-size-sm:      0.875rem;
+    --font-size-md:      1rem;
+    --font-size-lg:      1.125rem;
+    --font-size-xl:      1.375rem;
+    --font-size-xxl:     1.75rem;
+    --font-size-display: 2.25rem;
+    --font-weight-regular: 400;
+    --font-weight-medium:  500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.2;
+    --line-height-body:  1.5;
+    --line-height-body-bangla: 1.6;
+    --line-height-heading-bangla: 1.3;
+    --line-height-loose: 1.7;
+    --letter-spacing-tight: -0.015em;
+    --letter-spacing-wide:  0.08em;
+    --letter-spacing-tracked: 0.1em;
+
+    /* Iconography tokens — the lockdown subject */
+    --icon-size-xs: 12px;
+    --icon-size-sm: 14px;
+    --icon-size-md: 16px;
+    --icon-size-lg: 20px;
+    --icon-size-xl: 24px;
+
+    --icon-stroke-thin: 1.75;  /* sm and below — was 1.5 in amendment B.1, sub-pixel-thin */
+    --icon-stroke-base: 2;     /* md */
+    --icon-stroke-bold: 2.5;   /* lg and above */
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-500:      #5C9AD0;
+    --success:        #5DB287;
+    --warning:        #D6A865;
+    --danger:         #D8806E;
+    --info:           #76AEDF;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    --badge-trusted:  #5C9AD0;
+    --badge-new:      #8A8E94;
+    --badge-caution:  #D8806E;
+
+    color-scheme: dark;
+  }
+
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 56px;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-tight);
+    line-height: var(--line-height-tight);
+  }
+
+  .lede {
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .switch-group {
+    display: inline-flex;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 2px;
+  }
+
+  .switch-group button {
+    background: transparent;
+    border: none;
+    padding: 5px 12px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-tertiary);
+    cursor: pointer;
+    border-radius: 3px;
+    font-family: inherit;
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+
+  .switch-group button.active {
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    box-shadow: 0 0 0 1px var(--border-default);
+  }
+
+  .switch-group button:not(.active):hover { color: var(--fg-default); }
+
+  section { margin-bottom: 56px; }
+
+  h2 {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tracked);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-tight);
+  }
+
+  .section-meta {
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-sm);
+    margin: 0 0 20px;
+    max-width: 680px;
+    line-height: var(--line-height-body);
+  }
+
+  /* ───── Lucide icon base ─────
+     All icons are inline SVG. They inherit colour via currentColor.
+     Stroke width scales with size tokens via CSS custom-property math.
+
+     Smoothness recipe (Amendment B.2):
+     - viewBox stays 0 0 24 24 (Lucide native grid).
+     - SVG intrinsic width/height = display size (browser-native rasterization).
+     - shape-rendering: browser default (auto = AA on; do NOT set geometricPrecision).
+     - Slightly thicker strokes at small sizes for clean AA at standard DPI.
+     - No transform translateY snap (was causing half-pixel pixelation).
+  ───── */
+  .icon {
+    display: inline-block;
+    vertical-align: middle;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: var(--_icon-stroke, var(--icon-stroke-base));
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+
+  /* Display size = size token. Stroke ladder: small icons use slightly thicker
+     strokes than amendment B — 1.5px reads chunky at 12px, 1.75 reads as a
+     clean continuous line that the browser can anti-alias smoothly. */
+  .icon--xs { width: var(--icon-size-xs); height: var(--icon-size-xs); --_icon-stroke: 1.75; }
+  .icon--sm { width: var(--icon-size-sm); height: var(--icon-size-sm); --_icon-stroke: 1.75; }
+  .icon--md { width: var(--icon-size-md); height: var(--icon-size-md); --_icon-stroke: var(--icon-stroke-base); }
+  .icon--lg { width: var(--icon-size-lg); height: var(--icon-size-lg); --_icon-stroke: var(--icon-stroke-bold); }
+  .icon--xl { width: var(--icon-size-xl); height: var(--icon-size-xl); --_icon-stroke: var(--icon-stroke-bold); }
+
+  /* ───── Icon size grid ───── */
+  .size-grid {
+    display: grid;
+    grid-template-columns: 100px repeat(5, 1fr);
+    gap: 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-surface);
+  }
+
+  .size-cell {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+    color: var(--fg-default);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 56px;
+  }
+
+  .size-cell:nth-child(6n) { border-right: none; }
+  .size-cell:nth-last-child(-n+6) { border-bottom: none; }
+
+  .size-label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-weight: var(--font-weight-regular);
+  }
+
+  /* ───── Inbox mock — dim-1 placeholder system replaced with real Lucide ───── */
+  .inbox-mock {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .surface-header {
+    background: var(--bg-subtle);
+    padding: 10px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+
+  .inbox-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: var(--font-size-sm);
+  }
+
+  .inbox-row:last-child { border-bottom: none; }
+
+  .inbox-band-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    color: #fff;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    line-height: var(--line-height-tight);
+    min-width: 88px;
+  }
+  [data-theme="dark"] .inbox-band-pill { color: #0E1013; }
+
+  .inbox-band-pill.high   { background: var(--band-high); }
+  .inbox-band-pill.medium { background: var(--band-medium); }
+  .inbox-band-pill.low    { background: var(--band-low); }
+
+  .inbox-meta { font-weight: var(--font-weight-medium); color: var(--fg-default); display: flex; align-items: center; gap: 6px; }
+  .inbox-meta-sub { font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-top: 2px; font-weight: var(--font-weight-regular); line-height: var(--line-height-body); display: flex; align-items: center; gap: 6px; }
+
+  .inbox-time {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  [data-locale="bn"] .inbox-row { line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .inbox-meta { font-family: var(--font-family-bangla); }
+  [data-locale="bn"] .inbox-meta-sub { font-family: var(--font-family-bangla); }
+
+  /* ───── Bangla toggle (top-chrome globe) ───── */
+  .top-chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+  }
+
+  .chrome-left, .chrome-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+  }
+
+  .chrome-clock {
+    font-family: var(--font-family-mono);
+    font-variant-numeric: tabular-nums;
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-xs);
+  }
+
+  .locale-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 3px;
+    background: var(--bg-subtle);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-family: inherit;
+  }
+  .locale-toggle:hover { background: var(--bg-inset); color: var(--fg-default); }
+
+  /* ───── Stroke weight comparison ───── */
+  .stroke-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(3, 1fr);
+    gap: 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-surface);
+  }
+
+  .stroke-cell {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 56px;
+    color: var(--fg-default);
+  }
+  .stroke-cell:nth-child(4n) { border-right: none; }
+  .stroke-cell:nth-last-child(-n+4) { border-bottom: none; }
+
+  .stroke-label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+
+  /* ───── Side-by-side: dim-1 placeholder vs dim-3 real icon ───── */
+  .before-after {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .ba-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .ba-panel-header {
+    padding: 10px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .ba-panel-body { padding: 20px; font-size: var(--font-size-sm); color: var(--fg-secondary); }
+
+  /* Legacy placeholder (kept for historical record) */
+  .icon-placeholder-legacy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px; height: 14px;
+    border: 1px dashed currentColor;
+    border-radius: 2px;
+    opacity: 0.35;
+    margin-right: 6px;
+    vertical-align: -2px;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* ───── Surface cards (button samples + badges) ───── */
+  .surface-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .surface-body { padding: 24px; }
+
+  .surfaces { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid transparent;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-family: inherit;
+    line-height: var(--line-height-tight);
+  }
+
+  .btn-primary    { background: var(--brand-500); color: #fff; }
+  [data-theme="dark"] .btn-primary { color: #0E1013; }
+
+  .btn-secondary  { background: var(--bg-surface); color: var(--fg-default); border-color: var(--border-default); }
+  .btn-secondary:hover { background: var(--bg-subtle); }
+
+  .btn-ghost      { background: transparent; color: var(--fg-secondary); }
+  .btn-ghost:hover { background: var(--bg-subtle); color: var(--fg-default); }
+
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: #fff;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.02em;
+    line-height: var(--line-height-tight);
+  }
+  [data-theme="dark"] .badge { color: #0E1013; }
+
+  .badge-trusted { background: var(--badge-trusted); }
+  .badge-new     { background: var(--badge-new); }
+  .badge-caution { background: var(--badge-caution); }
+
+  /* ───── Footer ───── */
+  footer {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-xs);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer code { font-family: var(--font-family-mono); color: var(--fg-secondary); }
+
+  /* ════════════════════════════════════════════════════════════════════
+     §7 — MENU ICON MAPPING (admin nav, mobile nav, settings)
+     ════════════════════════════════════════════════════════════════════ */
+
+  .menu-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 16px;
+  }
+
+  .menu-card { border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--bg-surface); overflow: hidden; }
+  .menu-card-header {
+    background: var(--bg-subtle);
+    padding: 10px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+
+  /* Admin left-nav */
+  .admin-nav { padding: 8px 6px; display: flex; flex-direction: column; gap: 2px; }
+  .admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 4px;
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-tight);
+    cursor: pointer;
+  }
+  .admin-nav-item:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .admin-nav-item.active {
+    background: var(--bg-subtle);
+    color: var(--fg-default);
+    box-shadow: inset 3px 0 0 var(--brand-500);
+  }
+
+  /* Mobile bottom-nav */
+  .mobile-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    padding: 6px 4px 8px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 64px;
+    height: 48px;
+    color: var(--fg-tertiary);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-tight);
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .mobile-nav-item.active { color: var(--brand-500); }
+  .mobile-nav-item:hover { color: var(--fg-default); }
+
+  /* Settings menu */
+  .settings-menu { padding: 4px 0; }
+  .settings-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 36px;
+    padding: 0 16px;
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-tight);
+    cursor: pointer;
+  }
+  .settings-item:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .settings-divider { height: 1px; background: var(--border-subtle); margin: 4px 0; }
+
+  .menu-note {
+    margin-top: 14px;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    line-height: var(--line-height-body);
+  }
+</style>
+</head>
+<body data-theme="light" data-locale="en">
+
+<div class="topbar">
+  <div>
+    <h1>Surakkha v1 — Iconography</h1>
+    <p class="lede">Lucide icon set, inline SVG, currentColor. Five size tokens, three stroke weights, three semantic positions. Toggle theme + locale to verify Bangla/Latin split and dark-mode contrast.</p>
+  </div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <div class="switch-group" role="tablist" aria-label="Theme">
+      <button class="active" data-set-theme="light">Light</button>
+      <button data-set-theme="dark">Dark</button>
+    </div>
+    <div class="switch-group" role="tablist" aria-label="Locale">
+      <button class="active" data-set-locale="en">English</button>
+      <button data-set-locale="bn">বাংলা</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     1. ICON SIZE GRID — all 5 sizes, 6 sample icons
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Icon Size Scale</h2>
+  <p class="section-meta">Five size tokens. Stroke weight auto-scales: 1.5px on xs/sm, 2px on md, 2.5px on lg/xl. This is the optical-balance fix for the Lucide 24px-grid + 2px-stroke default.</p>
+
+  <div class="size-grid">
+    <div class="size-cell"><div class="size-label">xs · 12px · 1.5px</div></div>
+    <div class="size-cell"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M19 9l-7 7-7-7"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+
+    <div class="size-cell"><div class="size-label">sm · 14px · 1.5px</div></div>
+    <div class="size-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M19 9l-7 7-7-7"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+
+    <div class="size-cell"><div class="size-label">md · 16px · 2px</div></div>
+    <div class="size-cell"><svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M19 9l-7 7-7-7"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+
+    <div class="size-cell"><div class="size-label">lg · 20px · 2.5px</div></div>
+    <div class="size-cell"><svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="M19 9l-7 7-7-7"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+
+    <div class="size-cell"><div class="size-label">xl · 24px · 2.5px</div></div>
+    <div class="size-cell"><svg class="icon icon--xl" viewBox="0 0 24 24" width="24" height="24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xl" viewBox="0 0 24 24" width="24" height="24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xl" viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xl" viewBox="0 0 24 24" width="24" height="24"><path d="M19 9l-7 7-7-7"/></svg></div>
+    <div class="size-cell"><svg class="icon icon--xl" viewBox="0 0 24 24" width="24" height="24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+  </div>
+
+  <p class="section-meta" style="margin-top:12px; font-size: var(--font-size-xs);">
+    Sample icons left-to-right: alert-triangle · map-pin · target · chevron-down · search. All paths from Lucide v0.460.0 (MIT).
+  </p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     2. STROKE WEIGHT OPTICAL-BALANCE COMPARISON
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Stroke Weight — Optical Balance</h2>
+  <p class="section-meta">Same Lucide icon at three stroke widths, rendered at sm (14px). 2px stroke at sm reads as chunky/heavy; 1px stroke reads as thin/broken; 1.5px is the optical balance point.</p>
+
+  <div class="stroke-grid">
+    <div class="stroke-cell"><div class="stroke-label">1px (too thin)</div></div>
+    <div class="stroke-cell" style="color: var(--fg-default);">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="width: var(--icon-size-sm); height: var(--icon-size-sm); stroke-width: 1;">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+    </div>
+    <div class="stroke-cell" style="color: var(--fg-default);">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="width: var(--icon-size-sm); height: var(--icon-size-sm); stroke-width: 1;">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+      </svg>
+    </div>
+    <div class="stroke-cell" style="color: var(--fg-default);">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="width: var(--icon-size-sm); height: var(--icon-size-sm); stroke-width: 1;">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+      </svg>
+    </div>
+
+    <div class="stroke-cell"><div class="stroke-label">1.5px (locked)</div></div>
+    <div class="stroke-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></div>
+    <div class="stroke-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div class="stroke-cell"><svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>
+
+    <div class="stroke-cell"><div class="stroke-label">2px (too heavy)</div></div>
+    <div class="stroke-cell" style="color: var(--fg-default);">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="width: var(--icon-size-sm); height: var(--icon-size-sm); stroke-width: 2;">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
+      </svg>
+    </div>
+    <div class="stroke-cell" style="color: var(--fg-default);">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="width: var(--icon-size-sm); height: var(--icon-size-sm); stroke-width: 2;">
+        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
+      </svg>
+    </div>
+    <div class="stroke-cell" style="color: var(--fg-default);">
+      <svg class="icon" viewBox="0 0 24 24" width="14" height="14" style="width: var(--icon-size-sm); height: var(--icon-size-sm); stroke-width: 2;">
+        <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     3. BEFORE/AFTER — dim-1 placeholder system vs dim-3 real icons
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · Before / After — dim-1 placeholder → dim-3 real icon</h2>
+  <p class="section-meta">The dashed `.icon-placeholder` system from dim 1 was a placeholder for the inbox-row leading icons. This is what those positions look like with real Lucide glyphs.</p>
+
+  <div class="before-after">
+    <div class="ba-panel">
+      <div class="ba-panel-header">Before · dim-1 placeholder system</div>
+      <div class="ba-panel-body">
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom: 8px;">
+          <span class="icon-placeholder-legacy">●</span><span style="font-size: var(--font-size-sm);">High band</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom: 8px;">
+          <span class="icon-placeholder-legacy">▢</span><span style="font-size: var(--font-size-sm);">Ward 12 · Mirpur</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="icon-placeholder-legacy">⊕</span><span style="font-size: var(--font-size-sm);">Sensor + 3 Anjali reports</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ba-panel">
+      <div class="ba-panel-header">After · dim-3 Lucide icons</div>
+      <div class="ba-panel-body">
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom: 8px; color: var(--success);">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+          <span style="font-size: var(--font-size-sm); color: var(--fg-default);">High band · alert-triangle</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom: 8px; color: var(--brand-500);">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span style="font-size: var(--font-size-sm); color: var(--fg-default);">Ward 12 · map-pin</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; color: var(--fg-secondary);">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M2 20a8 8 0 0 1 8-8"/><path d="M14 4a8 8 0 0 1 8 8"/><path d="M2 12a10 10 0 0 1 10-10"/><path d="M12 2c5.5 0 10 4.5 10 10"/><path d="M12 12v.01"/></svg>
+          <span style="font-size: var(--font-size-sm); color: var(--fg-default);">Sensor + 3 Anjali · radio-tower</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     4. INBOX MOCK — full inbox row with real Lucide icons
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · Inbox Mock · Real Icons</h2>
+  <p class="section-meta">The dim-3 inbox mock replaces the dashed placeholder system. Three semantic positions per row: band-pill leading (severity), ward location pin, source attribution (sensor / Anjali / councillor).</p>
+
+  <div class="inbox-mock">
+    <div class="surface-header">Admin inbox · dim-3 lock state</div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill high">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        High
+      </span>
+      <div>
+        <div class="inbox-meta">
+          <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Ward 12 · Mirpur
+        </div>
+        <div class="inbox-meta-sub">
+          <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M2 20a8 8 0 0 1 8-8"/><path d="M14 4a8 8 0 0 1 8 8"/><path d="M2 12a10 10 0 0 1 10-10"/><path d="M12 2c5.5 0 10 4.5 10 10"/></svg>
+          Sensor + 3 Anjali reports · NTU 4.2 · 09:14
+        </div>
+      </div>
+      <span class="badge badge-trusted"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M20 6 9 17l-5-5"/></svg>Trusted</span>
+      <span class="inbox-time">2 min ago</span>
+    </div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill medium">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+        Medium
+      </span>
+      <div>
+        <div class="inbox-meta">
+          <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Ward 04 · Dhanmondi
+        </div>
+        <div class="inbox-meta-sub">
+          <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          1 Anjali report · "bad smell" · photo · 09:21
+        </div>
+      </div>
+      <span class="badge badge-new"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4"/></svg>New</span>
+      <span class="inbox-time">7 min ago</span>
+    </div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill low">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Low
+      </span>
+      <div>
+        <div class="inbox-meta">
+          <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          Ward 18 · Uttara
+        </div>
+        <div class="inbox-meta-sub">
+          <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92Z"/></svg>
+          1 councillor voice relay · no GPS · 09:32
+        </div>
+      </div>
+      <span class="badge badge-caution"><svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Caution</span>
+      <span class="inbox-time">12 min ago</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     5. TOP-CHROME WITH BANGLA TOGGLE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Top Chrome · Locale Toggle</h2>
+  <p class="section-meta">Bangla toggle discoverability (per dim 2 hand-off). Globe icon, top-right, aria-label follows locale. Keyboard shortcut Ctrl+Shift+L (not demonstrated here — would be wired in dim 4).</p>
+
+  <div class="top-chrome">
+    <div class="chrome-left">
+      <span>Surakkha</span>
+      <span style="color: var(--fg-tertiary);">·</span>
+      <span>Priya · ward 07</span>
+    </div>
+    <div class="chrome-right">
+      <span class="chrome-clock">14:08:23 BDT · chain fresh</span>
+      <button class="locale-toggle" aria-label="Language / ভাষা">
+        <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span data-locale-display>EN</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     6. BUTTONS + BADGES — icon+text composition
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Components · Icon + Text</h2>
+  <p class="section-meta">Buttons and badges compose icons alongside text. Gap of 6px between icon and text. Icon colour inherits text colour via currentColor.</p>
+
+  <div class="surfaces">
+    <div class="surface-card">
+      <div class="surface-header">Buttons with leading icon</div>
+      <div class="surface-body">
+        <button class="btn btn-primary">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg>
+          Verify incident
+        </button>
+        <button class="btn btn-secondary">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+          Save draft
+        </button>
+        <button class="btn btn-secondary">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Reject
+        </button>
+        <button class="btn btn-ghost">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          Cancel
+        </button>
+      </div>
+    </div>
+
+    <div class="surface-card">
+      <div class="surface-header">Reporter badges · icon leading</div>
+      <div class="surface-body">
+        <div class="badges">
+          <span class="badge badge-trusted">
+            <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
+            Trusted
+          </span>
+          <span class="badge badge-new">
+            <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><circle cx="12" cy="12" r="4"/></svg>
+            New
+          </span>
+          <span class="badge badge-caution">
+            <svg class="icon icon--xs" viewBox="0 0 24 24" width="12" height="12"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            Caution
+          </span>
+        </div>
+        <div style="margin-top:18px; font-size: var(--font-size-xs); color: var(--fg-tertiary); line-height: var(--line-height-body);">
+          Badges are 14px (sm) per dim 2 accessibility amendment. Icons inside badges at xs (12px) keep proportions clean.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     7. MENU ICON MAPPING — admin nav, mobile nav, settings menu
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · Menu Icon Mapping</h2>
+  <p class="section-meta">Three menu surfaces locked in dim-3 amendment B. Admin left-nav (7 items, 16 px icons, 40 px row height). Mobile bottom-nav (5 items, 20 px icons, 48 px tap target). Settings menu (5 items, 14 px icons, 36 px row height). All inherit currentColor; active state uses brand-500.</p>
+
+  <div class="menu-grid">
+
+    <!-- ─── Admin left-nav ─── -->
+    <div class="menu-card">
+      <div class="menu-card-header">Admin left-nav · Priya's desktop</div>
+      <nav class="admin-nav" aria-label="Primary">
+
+        <a class="admin-nav-item active" href="#" aria-current="page">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg>
+          Inbox
+        </a>
+
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+          Triage
+        </a>
+
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          Verification
+        </a>
+
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+          Audit log
+        </a>
+
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M2 20a8 8 0 0 1 8-8"/><path d="M14 4a8 8 0 0 1 8 8"/><path d="M2 12a10 10 0 0 1 10-10"/><path d="M12 2c5.5 0 10 4.5 10 10"/><path d="M12 12v.01"/></svg>
+          Sensors
+        </a>
+
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 18v-2"/><path d="M12 18v-4"/><path d="M16 18v-6"/></svg>
+          Reports
+        </a>
+
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+          Settings
+        </a>
+
+      </nav>
+    </div>
+
+    <!-- ─── Mobile bottom-nav ─── -->
+    <div class="menu-card">
+      <div class="menu-card-header">Operator mobile bottom-nav</div>
+      <div style="display:flex; flex-direction:column; height: 100%;">
+        <div style="flex: 1; padding: 16px; color: var(--fg-tertiary); font-size: var(--font-size-xs); line-height: var(--line-height-body);">
+          Bottom-nav sits on every operator-mobile screen. Active state in brand-500. 20 px icons (icon--lg), 11 px labels, 48 px tap target.
+        </div>
+        <nav class="mobile-nav" aria-label="Mobile primary">
+
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span>Home</span>
+          </a>
+
+          <a class="mobile-nav-item active" href="#" aria-current="page">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg>
+            <span>Inbox</span>
+          </a>
+
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Verify</span>
+          </a>
+
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+            <span>Map</span>
+          </a>
+
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+            <span>Me</span>
+          </a>
+
+        </nav>
+      </div>
+    </div>
+
+    <!-- ─── Settings menu ─── -->
+    <div class="menu-card">
+      <div class="menu-card-header">Settings menu · gear flyout</div>
+      <div class="settings-menu" role="menu">
+
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M12 8a2 2 0 0 0 2-2V4a2 2 0 0 0-4 0v2a2 2 0 0 0 2 2Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/><circle cx="12" cy="12" r="4"/></svg>
+          Theme
+        </div>
+
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Language
+        </div>
+
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          Notifications
+        </div>
+
+        <div class="settings-divider"></div>
+
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+          Chain
+        </div>
+
+        <div class="settings-item" role="menuitem" style="color: var(--danger);">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          Sign out
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <p class="menu-note">
+    Active state uses <code style="font-family: var(--font-family-mono);">--brand-500</code> background-tint + left-border (admin nav) or direct text colour (mobile nav, settings). Icons stay <code style="font-family: var(--font-family-mono);">currentColor</code>; no separate icon colour token. Tap-target sizes are dim-4 territory; row heights shown here are the design-intent values.
+  </p>
+</section>
+
+<footer>
+  <span>Surakkha v1 — iconography preview · 2026-09-07</span>
+  <span>Library → Lucide v0.460.0 (MIT) · Tokens → <code>app/frontend/tokens-icons.css</code></span>
+</footer>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+    const display = document.querySelector('[data-locale-display]');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      if (display) display.textContent = name === 'bn' ? 'বাং' : 'EN';
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

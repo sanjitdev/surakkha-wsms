@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-locale="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dimension 5d — Priya Mobile preview</title>
+<style>
+/* ====================================================================
+ * SURAKKHA — dim 5d Priya-mobile preview
+ * Re-declares dim 1-5b tokens (subset needed for mobile surfaces)
+ * Demo toggles: theme (light/dark), locale (en/bn), viewport (375/768)
+ * ==================================================================== */
+
+:root {
+  /* dim 1 — color (light) */
+  --bg-base: #F7F7F5; --bg-surface: #FFFFFF; --bg-subtle: #F1F1EE; --bg-inset: #ECEBE7;
+  --fg-default: #111418; --fg-secondary: #4A5159; --fg-tertiary: #7A8088; --fg-disabled: #B8BCC2;
+  --border-subtle: #E6E5E1; --border-default: #D4D3CF; --border-strong: #9A9B98;
+  --brand-600: #0F3A5F; --brand-500: #144A78; --brand-400: #1F5E91; --brand-200: #C7D5E3; --brand-100: #E5EDF4;
+  --success: #1E6E47; --success-bg: #E9F2ED;
+  --warning: #8A5A1A; --warning-bg: #F4ECDD;
+  --danger:  #8E2E1E; --danger-bg:  #F2E4E0;
+  --info:    #1F5E91; --info-bg:    #E5EDF4;
+  --band-high: #1E6E47; --band-medium: #6B6F76; --band-low: #A8A9A4;
+
+  /* dim 2 — typography */
+  --font-family-sans: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-family-bangla: 'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif;
+  --font-family-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-size-xs: 12px; --font-size-sm: 13px; --font-size-md: 14px; --font-size-lg: 16px; --font-size-xl: 18px; --font-size-xxl: 22px;
+  --font-weight-regular: 400; --font-weight-medium: 500; --font-weight-semibold: 600; --font-weight-bold: 700;
+  --line-height-body: 1.5; --line-height-body-bangla: 1.6; --line-height-heading: 1.3; --line-height-heading-bangla: 1.3;
+
+  /* dim 4 — spacing, radius, control height, row height */
+  --space-xs: 4px; --space-sm: 8px; --space-md: 12px; --space-lg: 16px;
+  --space-xl: 24px; --space-2xl: 32px; --space-3xl: 48px;
+  --radius-xs: 2px; --radius-sm: 3px; --radius-md: 4px; --radius-lg: 6px;
+  --height-control-sm: 28px; --height-control-md: 36px; --height-control-lg: 44px; --height-control-xl: 48px;
+  --height-row-default: 40px; --height-row-comfortable: 56px;
+
+  /* dim 5b — chart tokens */
+  --chart-axis: var(--fg-tertiary);
+  --chart-grid: var(--border-subtle);
+  --chart-track: var(--bg-inset);
+  --chart-tooltip-bg: var(--bg-surface);
+  --chart-tooltip-border: var(--border-default);
+  --chart-tooltip-fg: var(--fg-default);
+  --chart-legend-fg: var(--fg-secondary);
+
+  /* dim 5d — motion tokens (referenced in §10/§9.3) */
+  --motion-pane-transition: 240ms ease-out;
+  --motion-tab-switch: 160ms ease-out;
+  --motion-new-data-flash: 400ms ease-out;
+}
+
+:root[data-theme="dark"] {
+  --bg-base: #0E1013; --bg-surface: #16191D; --bg-subtle: #1C2025; --bg-inset: #22272D;
+  --fg-default: #ECEDEE; --fg-secondary: #B5B9BF; --fg-tertiary: #80858C; --fg-disabled: #54585E;
+  --border-subtle: #23272D; --border-default: #2E333A; --border-strong: #4A4F57;
+  --brand-600: #4A8AC4; --brand-500: #5C9AD0; --brand-400: #76AEDF; --brand-200: #2B3E55; --brand-100: #1F2D3D;
+  --success: #5DB287; --success-bg: #1A2D24;
+  --warning: #D6A865; --warning-bg: #2D2418;
+  --danger:  #D8806E; --danger-bg:  #2D1F1B;
+  --info:    #76AEDF; --info-bg:    #1F2D3D;
+  --band-high: #3E9B6E; --band-medium: #8A8E94; --band-low: #5A5C60;
+}
+
+/* ====================================================================
+ * Locale-at-container (dim 4 §15, dim 5c §13)
+ * ==================================================================== */
+:root[data-locale="bn"] .bn-text { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+:root[data-locale="bn"] .bn-row { padding-block: calc(var(--space-md) + var(--space-xs)); }
+
+/* Bangla row-pad modifier (dim 4 Amendment A) */
+:root[data-locale="bn"] .action-row.bn { padding-block: calc(var(--space-sm) + var(--space-xs)); }
+
+/* ====================================================================
+ * Base
+ * ==================================================================== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg-base);
+  color: var(--fg-default);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+  -webkit-font-smoothing: antialiased;
+}
+:root[data-locale="bn"] body { font-family: var(--font-family-bangla); }
+
+.preview-shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ====================================================================
+ * Toolbar (preview chrome only — not part of the product)
+ * ==================================================================== */
+.preview-toolbar {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-md) var(--space-lg);
+  display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap;
+  font-family: var(--font-family-sans);
+}
+.preview-toolbar h1 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+}
+.preview-toolbar .toggle-group {
+  display: flex; gap: var(--space-xs); align-items: center;
+  font-size: var(--font-size-xs); color: var(--fg-secondary);
+}
+.preview-toolbar button {
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-sm);
+  height: var(--height-control-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+.preview-toolbar button[aria-pressed="true"] {
+  background: var(--brand-500);
+  color: #fff;
+  border-color: var(--brand-500);
+}
+:root[data-theme="dark"] .preview-toolbar button[aria-pressed="true"] { color: #0E1013; }
+
+/* ====================================================================
+ * Section (preview section block)
+ * ==================================================================== */
+.section {
+  padding: var(--space-xl) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.section h2 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-sm);
+}
+.section .caption {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  margin: 0 0 var(--space-lg);
+}
+
+/* ====================================================================
+ * Device frame (renders at 375 or 768)
+ * ==================================================================== */
+.viewport-row { display: flex; gap: var(--space-xl); flex-wrap: wrap; align-items: flex-start; }
+.device {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-base);
+  box-shadow: 0 1px 0 var(--border-subtle);
+  display: flex; flex-direction: column;
+}
+.device-label {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  margin-bottom: var(--space-xs);
+  font-family: var(--font-family-mono);
+}
+
+/* ====================================================================
+ * Priya mobile shell
+ * ==================================================================== */
+.priya-shell {
+  display: flex; flex-direction: column;
+  background: var(--bg-base);
+}
+.priya-chrome {
+  height: var(--height-control-xl);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 var(--space-md);
+  display: flex; align-items: center; gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+.priya-chrome .wordmark {
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+  font-size: var(--font-size-md);
+}
+.priya-chrome .ward-badge {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  background: var(--bg-subtle);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-xs);
+  margin-left: var(--space-xs);
+}
+.priya-chrome .spacer { flex: 1; }
+.priya-chrome .chain-clock {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-default);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-xs);
+  background: var(--bg-subtle);
+  cursor: pointer;
+}
+.priya-chrome .status-icons { display: flex; gap: var(--space-xs); align-items: center; }
+.priya-chrome .status-icons .si {
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+}
+.priya-chrome .status-icons .si svg { width: 14px; height: 14px; }
+.priya-chrome .status-icons .si-ok svg { color: var(--success); }
+.priya-chrome .status-icons .si-warn svg { color: var(--warning); }
+.priya-chrome .status-icons .si-danger svg { color: var(--danger); }
+
+.priya-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-lg);
+}
+
+/* Section heading */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-sm);
+}
+.section-head .filter-btn {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 2px var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: var(--font-weight-regular);
+}
+
+/* Action list rows (dim 5d §5.1) */
+.action-row {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+  min-height: var(--height-row-comfortable);
+  cursor: pointer;
+  position: relative;
+}
+.action-row:hover { background: var(--bg-subtle); }
+
+/* Tier badge (dim 5d §5.1, EXPERIENCE.md §363) */
+.tier {
+  width: 56px; height: 28px;
+  border-radius: var(--radius-xs);
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-mono);
+  flex-shrink: 0;
+}
+.tier.t0 { background: var(--bg-inset); color: var(--fg-tertiary); }
+.tier.t1 { background: var(--warning-bg); color: var(--fg-default); }
+.tier.t2 { background: var(--warning); color: #fff; }
+.tier.t3 { background: var(--danger); color: #fff; }
+.tier.resolved { background: var(--success-bg); color: var(--fg-default); }
+:root[data-theme="dark"] .tier.t2, :root[data-theme="dark"] .tier.t3 { color: #0E1013; }
+
+.tier .glyph {
+  font-size: 14px; line-height: 1; font-weight: var(--font-weight-bold);
+}
+
+.action-row .content { min-width: 0; }
+.action-row .title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-default);
+  line-height: var(--line-height-heading);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.action-row .source {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  line-height: var(--line-height-body);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.action-row .meta {
+  text-align: right;
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.action-row .meta .time {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+}
+.action-row .meta .conf {
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-secondary);
+}
+.action-row .meta .sla-warn { color: var(--warning); font-weight: var(--font-weight-semibold); }
+.action-row .meta .sla-overdue { color: var(--danger); font-weight: var(--font-weight-semibold); }
+
+/* New-data flash (dim 5d §10.2) */
+@keyframes flash-bg {
+  0% { background: var(--brand-100); }
+  100% { background: var(--bg-surface); }
+}
+.action-row.flash {
+  animation: flash-bg var(--motion-new-data-flash);
+}
+
+/* ====================================================================
+ * Sensor board grid (dim 5d §6)
+ * ==================================================================== */
+.sensor-board {
+  display: grid;
+  gap: var(--space-sm);
+  grid-template-columns: repeat(3, 1fr);
+}
+.sensor-board.tablet { grid-template-columns: repeat(4, 1fr); }
+.sensor-board.large-tablet { grid-template-columns: repeat(6, 1fr); }
+.sensor-cell {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm);
+  min-height: var(--height-control-xl);
+  display: flex; flex-direction: column; gap: 2px;
+  cursor: pointer;
+  position: relative;
+}
+.sensor-cell .row1 {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: var(--font-size-xs);
+}
+.sensor-cell .ward {
+  color: var(--fg-secondary);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-mono);
+}
+.sensor-cell .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.sensor-cell .row2 {
+  display: flex; align-items: baseline; justify-content: space-between;
+  font-size: var(--font-size-xs);
+}
+.sensor-cell .param { color: var(--fg-tertiary); }
+.sensor-cell .value {
+  color: var(--fg-default);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+}
+.sensor-cell .dot.nominal { background: var(--brand-500); }
+.sensor-cell .dot.caution { background: var(--warning); }
+.sensor-cell .dot.breach { background: var(--danger); }
+.sensor-cell .dot.offline { background: var(--fg-tertiary); }
+
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+.sensor-cell.flash .dot { animation: dot-pulse var(--motion-new-data-flash); }
+
+/* ====================================================================
+ * Handover brief (dim 5d §8)
+ * ==================================================================== */
+.handover-section { display: flex; flex-direction: column; gap: var(--space-sm); }
+.handover-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex; flex-direction: column; gap: var(--space-xs);
+}
+.handover-card .h-title {
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  font-weight: var(--font-weight-medium);
+}
+.handover-card .h-sub {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+}
+.handover-card .h-meta {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-mono);
+}
+.handover-card .h-tag {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-xs);
+  display: inline-block;
+  margin-right: var(--space-xs);
+}
+.handover-card .h-tag.deviated { background: var(--warning-bg); color: var(--fg-default); }
+.handover-card .h-tag.pending { background: var(--info-bg); color: var(--fg-default); }
+.handover-card .h-tag.acked { background: var(--success-bg); color: var(--fg-default); }
+
+.empty-state {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+}
+.empty-state .icon-circle {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--bg-subtle);
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: var(--space-sm);
+}
+.empty-state .icon-circle svg { width: 20px; height: 20px; color: var(--fg-tertiary); }
+
+/* ====================================================================
+ * Bottom nav (dim 5d §12)
+ * ==================================================================== */
+.priya-nav {
+  height: 56px;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-subtle);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  flex-shrink: 0;
+}
+.priya-nav button {
+  background: transparent;
+  border: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  font-family: inherit;
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  min-height: var(--height-control-xl);
+  position: relative;
+  padding: 0;
+}
+.priya-nav button[aria-current="page"] { color: var(--fg-default); }
+.priya-nav button[aria-current="page"]::before {
+  content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 32px; height: 3px; background: var(--brand-500); border-radius: 0 0 2px 2px;
+}
+.priya-nav svg { width: 20px; height: 20px; }
+.priya-nav .nav-label { font-size: 11px; font-weight: var(--font-weight-medium); }
+
+/* ====================================================================
+ * Incident detail pane (dim 5d §7)
+ * ==================================================================== */
+.detail-bar {
+  height: var(--height-control-xl);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; padding: 0 var(--space-md);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  flex-shrink: 0;
+}
+.detail-bar button {
+  background: transparent; border: 0; padding: 0; margin-right: var(--space-md);
+  font-family: inherit; color: var(--fg-default); cursor: pointer;
+  display: flex; align-items: center; gap: 4px;
+}
+.detail-bar .spacer { flex: 1; }
+.detail-bar .kebab { color: var(--fg-tertiary); }
+
+.detail-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.detail-section .ds-head {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-tertiary);
+  margin-bottom: var(--space-sm);
+  font-weight: var(--font-weight-semibold);
+}
+.detail-section .ds-body { display: flex; flex-direction: column; gap: var(--space-sm); }
+.detail-section .ds-row {
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  display: flex; gap: var(--space-sm);
+}
+.detail-section .ds-row .label {
+  color: var(--fg-tertiary);
+  width: 100px;
+  flex-shrink: 0;
+}
+.detail-section .ds-row .val {
+  color: var(--fg-default);
+  flex: 1;
+}
+.detail-section .ds-row .val.mono { font-family: var(--font-family-mono); font-size: var(--font-size-xs); }
+.detail-section .ds-row .val .dot { color: var(--brand-500); margin-right: 4px; }
+
+.headline-row {
+  display: flex; align-items: center; gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+.headline-row .tier { width: 56px; }
+.headline-row .head-text {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+  line-height: var(--line-height-heading);
+}
+.headline-row .head-sub {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  margin-top: 2px;
+}
+
+/* Inline sparkline (dim 5b §5) — 7-day history mock */
+.sparkline {
+  height: 80px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+  position: relative;
+  overflow: hidden;
+}
+.sparkline svg { width: 100%; height: 100%; display: block; }
+
+/* Playbook steps */
+.playbook-step {
+  display: flex; gap: var(--space-sm); align-items: flex-start;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.playbook-step:last-child { border-bottom: 0; }
+.playbook-step .step-num {
+  width: 24px; height: 24px;
+  background: var(--bg-subtle);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-secondary);
+  flex-shrink: 0;
+}
+.playbook-step .step-num.done { background: var(--success-bg); color: var(--success); }
+.playbook-step .step-body { flex: 1; }
+.playbook-step .step-title {
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  font-weight: var(--font-weight-medium);
+}
+.playbook-step .step-sub {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  margin-top: 2px;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex; flex-direction: column; gap: var(--space-sm);
+}
+.btn-p {
+  height: var(--height-control-xl);
+  border-radius: var(--radius-md);
+  border: 0;
+  background: var(--brand-500);
+  color: #fff;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+}
+:root[data-theme="dark"] .btn-p { color: #0E1013; }
+.btn-s {
+  height: var(--height-control-xl);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+}
+.btn-w {
+  height: var(--height-control-xl);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--warning);
+  background: transparent;
+  color: var(--warning);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-family: inherit;
+  width: 100%;
+}
+.btn-p:hover { background: var(--brand-600); }
+.btn-s:hover { background: var(--bg-subtle); }
+.btn-w:hover { background: var(--warning-bg); }
+
+/* ====================================================================
+ * T3 two-tap modal (dim 5d §9)
+ * ==================================================================== */
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex; flex-direction: column;
+  justify-content: flex-end;
+  z-index: 100;
+}
+.modal-sheet {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: var(--space-lg);
+  animation: slide-up var(--motion-pane-transition);
+}
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modal-sheet h3 {
+  margin: 0 0 var(--space-md);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  display: flex; align-items: center; gap: var(--space-sm);
+}
+.modal-sheet h3 .tier { width: 56px; }
+.modal-msg-body {
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  margin-bottom: var(--space-md);
+  line-height: var(--line-height-body-bangla);
+}
+.modal-msg-body .tok {
+  font-family: var(--font-family-mono);
+  background: var(--bg-subtle);
+  padding: 0 4px;
+  border-radius: 2px;
+  font-size: var(--font-size-xs);
+}
+.modal-recipients {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  margin-bottom: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-subtle);
+  border-radius: var(--radius-md);
+  display: flex; align-items: center; gap: var(--space-sm);
+}
+.modal-recipients svg { width: 14px; height: 14px; color: var(--brand-500); }
+
+/* Countdown ring (dim 5d §9.2) */
+.countdown-btn {
+  position: relative;
+  overflow: hidden;
+}
+.countdown-btn svg.ring {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  transform: rotate(-90deg);
+}
+.countdown-btn circle {
+  fill: none;
+  stroke: rgba(255,255,255,0.35);
+  stroke-width: 3;
+}
+@keyframes ring-deplete {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 283; }
+}
+.countdown-btn circle.deplete {
+  stroke: #fff;
+  stroke-dasharray: 283;
+  stroke-dashoffset: 0;
+  animation: ring-deplete 5000ms ease-out forwards;
+}
+
+/* ====================================================================
+ * Profile sheet (dim 5d §12)
+ * ==================================================================== */
+.profile-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--font-size-sm);
+}
+.profile-row:last-child { border-bottom: 0; }
+.profile-row .label { color: var(--fg-default); }
+.profile-row .val { color: var(--fg-tertiary); font-family: var(--font-family-mono); font-size: var(--font-size-xs); }
+
+/* ====================================================================
+ * Map pane mock (dim 5d §11)
+ * ==================================================================== */
+.map-mock {
+  flex: 1;
+  background:
+    linear-gradient(135deg, var(--bg-subtle) 0%, var(--bg-inset) 100%),
+    repeating-linear-gradient(0deg, var(--border-subtle) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(90deg, var(--border-subtle) 0 1px, transparent 1px 40px);
+  background-blend-mode: multiply;
+  position: relative;
+  overflow: hidden;
+}
+.map-mock svg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.map-pin {
+  position: absolute;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-surface);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.map-pin .pulse {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: pin-pulse 2s ease-out infinite;
+}
+@keyframes pin-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.map-pin.nominal { background: var(--brand-500); color: var(--brand-500); }
+.map-pin.caution { background: var(--warning); color: var(--warning); }
+.map-pin.breach { background: var(--danger); color: var(--danger); }
+.map-pin.offline { background: var(--fg-tertiary); color: var(--fg-tertiary); }
+.map-attribution {
+  position: absolute;
+  bottom: var(--space-xs); right: var(--space-xs);
+  font-size: 10px;
+  background: rgba(255,255,255,0.85);
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-sans);
+}
+:root[data-theme="dark"] .map-attribution { background: rgba(0,0,0,0.65); color: var(--fg-secondary); }
+
+/* ====================================================================
+ * Helpers
+ * ==================================================================== */
+.row { display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: flex-start; }
+.col { display: flex; flex-direction: column; gap: var(--space-md); }
+.spacer-12 { height: var(--space-md); }
+.spacer-16 { height: var(--space-lg); }
+
+.token-label {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  margin-top: var(--space-xs);
+}
+
+.note {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  margin-top: var(--space-xs);
+  font-style: italic;
+}
+
+/* ====================================================================
+ * Tabular numerals in chain refs / timestamps
+ * ==================================================================== */
+.mono, time, .chain { font-family: var(--font-family-mono); font-variant-numeric: tabular-nums; }
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="preview-shell">
+
+<!-- ============================================================== -->
+<!-- Preview toolbar (preview chrome only — not in the product)      -->
+<!-- ============================================================== -->
+<div class="preview-toolbar">
+  <h1>dim 5d · Priya mobile</h1>
+  <div class="toggle-group">
+    <span>Theme</span>
+    <button data-theme-set="light" aria-pressed="true">Light</button>
+    <button data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="toggle-group">
+    <span>Locale</span>
+    <button data-locale-set="en" aria-pressed="true">EN</button>
+    <button data-locale-set="bn" aria-pressed="false">বাং</button>
+  </div>
+  <div class="toggle-group">
+    <span>Action list rows</span>
+    <button id="btn-flash-row" aria-pressed="false">Replay new-data flash</button>
+  </div>
+  <div class="toggle-group">
+    <span>T3 two-tap</span>
+    <button id="btn-show-modal" aria-pressed="false">Open issuance modal</button>
+  </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- §3 Layout & §4 Top chrome — Action list @ 375px + 768px         -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Action list pane (home) — phone 375 px · tablet 768 px</h2>
+  <p class="caption">Hot path. Ranked by fusion score desc; T3 pinned to top. Per <span class="mono">EXPERIENCE.md §51,72</span>; tier badges per §363.</p>
+
+  <div class="viewport-row">
+
+    <!-- Phone (375px) -->
+    <div>
+      <div class="device-label">iPhone 13/14 · 375 px</div>
+      <div class="device" style="width: 375px; height: 720px;">
+        <div class="priya-shell" style="height: 100%;">
+
+          <!-- Top chrome -->
+          <div class="priya-chrome">
+            <span class="wordmark">Surakkha</span>
+            <span class="ward-badge">Priya · W07</span>
+            <span class="spacer"></span>
+            <span class="chain-clock">12s</span>
+            <span class="status-icons">
+              <span class="si si-ok" title="Gateway: healthy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+              <span class="si si-ok" title="Sensors: all reporting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+              <span class="si si-warn" title="Anomaly monitor: 1 flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+            </span>
+          </div>
+
+          <!-- Body -->
+          <div class="priya-body">
+
+            <div>
+              <div class="section-head">
+                <span>Action list · 4 open</span>
+                <button class="filter-btn">Filter</button>
+              </div>
+
+              <div class="col" style="gap: var(--space-sm);">
+
+                <!-- T3 row (pinned) -->
+                <div class="action-row">
+                  <span class="tier t3" aria-label="Tier 3 confirmed"><span class="glyph">●</span><span>T3</span></span>
+                  <div class="content">
+                    <div class="title bn-text">Ward 7 · Chlorine smell</div>
+                    <div class="source bn-text">Anjali X (school Y) + Sensor W · 14:01</div>
+                  </div>
+                  <div class="meta">
+                    <span class="conf">Conf: high</span>
+                    <span class="time mono">14:01</span>
+                    <span class="sla-warn mono">3 min left</span>
+                  </div>
+                </div>
+
+                <!-- T2 row -->
+                <div class="action-row">
+                  <span class="tier t2" aria-label="Tier 2 escalated"><span class="glyph">◑</span><span>T2</span></span>
+                  <div class="content">
+                    <div class="title bn-text">Ward 3 · Lead drift</div>
+                    <div class="source bn-text">2 Anjali + 1 cluster · 4 days</div>
+                  </div>
+                  <div class="meta">
+                    <span class="conf">Conf: med</span>
+                    <span class="time mono">09:14</span>
+                  </div>
+                </div>
+
+                <!-- T1 row -->
+                <div class="action-row">
+                  <span class="tier t1" aria-label="Tier 1 caution"><span class="glyph">◔</span><span>T1</span></span>
+                  <div class="content">
+                    <div class="title bn-text">Ward 12 · pH dip</div>
+                    <div class="source bn-text">Sensor L only · 13:42</div>
+                  </div>
+                  <div class="meta">
+                    <span class="conf">Conf: low</span>
+                    <span class="time mono">13:42</span>
+                  </div>
+                </div>
+
+                <!-- T0 row -->
+                <div class="action-row">
+                  <span class="tier t0" aria-label="Tier 0 info"><span class="glyph">○</span><span>T0</span></span>
+                  <div class="content">
+                    <div class="title bn-text">Ward 5 · Calibration log</div>
+                    <div class="source bn-text">Sensor F · scheduled</div>
+                  </div>
+                  <div class="meta">
+                    <span class="conf">—</span>
+                    <span class="time mono">08:00</span>
+                  </div>
+                </div>
+
+                <!-- resolved row -->
+                <div class="action-row">
+                  <span class="tier resolved" aria-label="Resolved"><span class="glyph">✓</span><span>OK</span></span>
+                  <div class="content">
+                    <div class="title bn-text">Ward 2 · Turbidity spike</div>
+                    <div class="source bn-text">Sensor A · resolved 17:30</div>
+                  </div>
+                  <div class="meta">
+                    <span class="conf">Resolved</span>
+                    <span class="time mono">17:30</span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Sensor board (3 col) -->
+            <div>
+              <div class="section-head">
+                <span>Sensor board · 12 cells</span>
+                <span class="filter-btn mono" style="background:transparent;border:0;cursor:default;">3 col</span>
+              </div>
+              <div class="sensor-board">
+                <div class="sensor-cell"><div class="row1"><span class="ward">W07</span><span class="dot breach" title="breach"></span></div><div class="row2"><span class="param">pH</span><span class="value">5.9</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W03</span><span class="dot caution" title="caution"></span></div><div class="row2"><span class="param">NTU</span><span class="value">4.1</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W05</span><span class="dot nominal" title="nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.8</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W12</span><span class="dot nominal" title="nominal"></span></div><div class="row2"><span class="param">pH</span><span class="value">7.2</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W02</span><span class="dot nominal" title="nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">1.4</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W14</span><span class="dot offline" title="offline"></span></div><div class="row2"><span class="param">—</span><span class="value">—</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W08</span><span class="dot nominal" title="nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.6</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W11</span><span class="dot caution" title="caution"></span></div><div class="row2"><span class="param">pH</span><span class="value">6.4</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W04</span><span class="dot nominal" title="nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">0.9</span></div></div>
+              </div>
+              <div class="note">Each cell: ward · status dot (semantic) · reading. Tap → incident detail (dim 5d §6.3).</div>
+            </div>
+
+          </div>
+
+          <!-- Bottom nav -->
+          <div class="priya-nav">
+            <button aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="nav-label">Action</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="nav-label">Handover</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span class="nav-label">Map</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Profile</span></button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Tablet (768px) -->
+    <div>
+      <div class="device-label">iPad mini · 768 px</div>
+      <div class="device" style="width: 768px; height: 720px;">
+        <div class="priya-shell" style="height: 100%;">
+          <div class="priya-chrome">
+            <span class="wordmark">Surakkha</span>
+            <span class="ward-badge">Priya · W07</span>
+            <span class="spacer"></span>
+            <span class="chain-clock">12s</span>
+            <span class="status-icons">
+              <span class="si si-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span>
+              <span class="si si-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></span>
+              <span class="si si-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></span>
+            </span>
+          </div>
+
+          <!-- Tablet body: action list (col-span-8) + sensor board (col-span-4) -->
+          <div class="priya-body" style="display:grid; grid-template-columns: 8fr 4fr; gap: var(--space-lg); padding: var(--space-lg);">
+            <div>
+              <div class="section-head">
+                <span>Action list · 4 open</span>
+                <button class="filter-btn">Filter</button>
+              </div>
+              <div class="col" style="gap: var(--space-sm);">
+                <div class="action-row">
+                  <span class="tier t3"><span class="glyph">●</span><span>T3</span></span>
+                  <div class="content"><div class="title bn-text">Ward 7 · Chlorine smell</div><div class="source bn-text">Anjali X (school Y) + Sensor W · 14:01</div></div>
+                  <div class="meta"><span class="conf">Conf: high</span><span class="time mono">14:01</span><span class="sla-warn mono">3 min left</span></div>
+                </div>
+                <div class="action-row">
+                  <span class="tier t2"><span class="glyph">◑</span><span>T2</span></span>
+                  <div class="content"><div class="title bn-text">Ward 3 · Lead drift</div><div class="source bn-text">2 Anjali + 1 cluster · 4 days</div></div>
+                  <div class="meta"><span class="conf">Conf: med</span><span class="time mono">09:14</span></div>
+                </div>
+                <div class="action-row">
+                  <span class="tier t1"><span class="glyph">◔</span><span>T1</span></span>
+                  <div class="content"><div class="title bn-text">Ward 12 · pH dip</div><div class="source bn-text">Sensor L only · 13:42</div></div>
+                  <div class="meta"><span class="conf">Conf: low</span><span class="time mono">13:42</span></div>
+                </div>
+                <div class="action-row">
+                  <span class="tier resolved"><span class="glyph">✓</span><span>OK</span></span>
+                  <div class="content"><div class="title bn-text">Ward 2 · Turbidity spike</div><div class="source bn-text">Sensor A · resolved 17:30</div></div>
+                  <div class="meta"><span class="conf">Resolved</span><span class="time mono">17:30</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-head"><span>Sensors</span></div>
+              <div class="sensor-board tablet">
+                <div class="sensor-cell"><div class="row1"><span class="ward">W07</span><span class="dot breach"></span></div><div class="row2"><span class="param">pH</span><span class="value">5.9</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W03</span><span class="dot caution"></span></div><div class="row2"><span class="param">NTU</span><span class="value">4.1</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W05</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.8</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W12</span><span class="dot nominal"></span></div><div class="row2"><span class="param">pH</span><span class="value">7.2</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W02</span><span class="dot nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">1.4</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W14</span><span class="dot offline"></span></div><div class="row2"><span class="param">—</span><span class="value">—</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W08</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.6</span></div></div>
+                <div class="sensor-cell"><div class="row1"><span class="ward">W11</span><span class="dot caution"></span></div><div class="row2"><span class="param">pH</span><span class="value">6.4</span></div></div>
+              </div>
+              <div class="note" style="margin-top: var(--space-md);">Tablet ≥768: 4-col sensor board (dim 5d §6.2). For 6-col, see the "6-col" demo further down.</div>
+            </div>
+          </div>
+
+          <div class="priya-nav">
+            <button aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="nav-label">Action</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="nav-label">Handover</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span class="nav-label">Map</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Profile</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §7 Incident detail pane (T3)                                    -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Incident detail pane — T3 confirmed (dual-signature complete)</h2>
+  <p class="caption">Read-only playbook preview · execute/deviate buttons · T3 issuance affordance. Per <span class="mono">dim 5d §7</span>; T3 modal per §9.</p>
+
+  <div class="viewport-row">
+    <div>
+      <div class="device-label">Detail pane · 375 px</div>
+      <div class="device" style="width: 375px; height: 760px;">
+        <div class="priya-shell" style="height: 100%;">
+          <div class="detail-bar">
+            <button aria-label="Back to action list">← <span>Back</span></button>
+            <div class="spacer"></div>
+            <span class="kebab"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></span>
+          </div>
+
+          <div class="priya-body" style="padding: var(--space-md);">
+
+            <div class="headline-row">
+              <span class="tier t3"><span class="glyph">●</span><span>T3</span></span>
+              <div>
+                <div class="head-text bn-text">Ward 7 · Chlorine smell</div>
+                <div class="head-sub mono">Reported 14:01 · 5 min ago</div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <div class="ds-head">Source attribution</div>
+              <div class="ds-body">
+                <div class="ds-row"><span class="label">Anjali</span><span class="val bn-text"><span class="dot">●</span> Anjali X (school Y, 14:01)</span></div>
+                <div class="ds-row"><span class="label">Sensor</span><span class="val bn-text"><span class="dot">●</span> Sensor W (pump station W, 14:02)</span></div>
+                <div class="ds-row"><span class="label">Confidence</span><span class="val">high · Fusion 0.94</span></div>
+                <div class="ds-row"><span class="label">Chain</span><span class="val mono">0x7f3a · b9c2 · 4e8d</span></div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <div class="ds-head">Sensor history · 7 days</div>
+              <div class="sparkline">
+                <svg viewBox="0 0 320 80" preserveAspectRatio="none">
+                  <line x1="0" y1="60" x2="320" y2="60" stroke="var(--chart-grid)" stroke-width="0.5"/>
+                  <line x1="0" y1="40" x2="320" y2="40" stroke="var(--chart-grid)" stroke-width="0.5"/>
+                  <line x1="0" y1="20" x2="320" y2="20" stroke="var(--chart-grid)" stroke-width="0.5"/>
+                  <polyline fill="none" stroke="var(--brand-500)" stroke-width="1.5" points="0,52 40,48 80,50 120,46 160,44 200,42 240,40 280,38 320,12"/>
+                  <circle cx="320" cy="12" r="3" fill="var(--danger)"/>
+                </svg>
+              </div>
+              <div class="note mono" style="display:flex; justify-content:space-between;"><span>−7d</span><span>now · breach</span></div>
+            </div>
+
+            <div class="detail-section">
+              <div class="ds-head">Playbook recommendation · read-only</div>
+              <div class="playbook-step">
+                <div class="step-num done">✓</div>
+                <div class="step-body"><div class="step-title bn-text">Step 1: Confirm with sensor reading</div><div class="step-sub bn-text">Sensor W confirms at 14:08</div></div>
+              </div>
+              <div class="playbook-step">
+                <div class="step-num done">✓</div>
+                <div class="step-body"><div class="step-title bn-text">Step 2: Escalate to T2</div><div class="step-sub bn-text">Corroboration threshold crossed · auto</div></div>
+              </div>
+              <div class="playbook-step">
+                <div class="step-num">3</div>
+                <div class="step-body"><div class="step-title bn-text">Step 3: Escalate to T3 (PHA gate)</div><div class="step-sub bn-text">PHA attestation pending — 1 of 2 signatures</div></div>
+              </div>
+            </div>
+
+            <div class="detail-section">
+              <div class="ds-head">Actions</div>
+              <div class="action-buttons">
+                <button class="btn-s">Execute Step 3 (PHA attest)</button>
+                <button class="btn-w">Deviate...</button>
+                <button class="btn-p" id="open-modal-btn">Issue public notice (T3)</button>
+              </div>
+              <div class="note">T3 issuance visible only when dual-signature complete. Below modal shows the two-tap flow.</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §9 T3 two-tap modal (overlay)                                   -->
+<!-- ============================================================== -->
+<section class="section" id="modal-section" style="display:none;">
+  <h2>T3 two-tap issuance modal</h2>
+  <p class="caption">Per <span class="mono">EXPERIENCE.md §294-302,337</span>. First tap → redacted preview. Second tap → 5-second countdown ring.</p>
+
+  <div class="viewport-row">
+    <div>
+      <div class="device-label">Modal · 375 px</div>
+      <div class="device" style="width: 375px; height: 760px; position: relative;">
+        <div class="priya-shell" style="height: 100%;">
+          <div class="detail-bar">
+            <button aria-label="Back to action list">← <span>Back</span></button>
+            <div class="spacer"></div>
+          </div>
+          <div class="priya-body" style="padding: var(--space-md);">
+            <div class="headline-row">
+              <span class="tier t3"><span class="glyph">●</span><span>T3</span></span>
+              <div><div class="head-text bn-text">Ward 7 · Chlorine smell</div><div class="head-sub mono">14:01 · chain 0x7f3a</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-overlay" id="modal-overlay">
+          <div class="modal-sheet">
+            <h3><span class="tier t3"><span class="glyph">●</span><span>T3</span></span><span class="bn-text">Issue public notice</span></h3>
+
+            <div class="modal-msg-body bn-text">
+              <span class="tok">{ZONE}</span>-এ পানি ফুটিয়ে খান। সম্ভাব্য দূষণ: ক্লোরিন অবশিষ্ট। ৩ মিনিট ফুটিয়ে নিন। পরবর্তী আপডেট ১৮:০০-এ। — <span class="tok">{PHA_NAME}</span>
+              <div style="margin-top:8px;font-size:11px;color:var(--fg-tertiary);font-family:var(--font-family-sans);">English: Boil water in {ZONE}. Likely contamination: chlorine residual. Boil for 3 minutes. Next update at 18:00. — {PHA_NAME}</div>
+            </div>
+
+            <div class="modal-recipients">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span><strong style="color:var(--fg-default)">Ward 7</strong> · <span class="mono">12,400 recipients</span> · WhatsApp + SMS</span>
+            </div>
+
+            <button class="btn-p countdown-btn" id="confirm-btn">
+              <span style="position:relative;z-index:2;">Confirm issue · 5s</span>
+              <svg class="ring" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" class="deplete"/>
+              </svg>
+            </button>
+            <button class="btn-s" style="margin-top: var(--space-sm);">Cancel</button>
+            <div class="note" style="margin-top:var(--space-md);">Recipients collapsed to count (per EXPERIENCE.md §337). Reveal-full would require 750 ms hold.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §8 Handover brief pane                                          -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Handover brief pane</h2>
+  <p class="caption">Per <span class="mono">EXPERIENCE.md §71</span>. 5 sections: open threads / deviations / PHA approvals / anomalies / recent activity. Each uses dim-5 §8 empty-state pattern when zero.</p>
+
+  <div class="viewport-row">
+    <div>
+      <div class="device-label">Handover · 375 px</div>
+      <div class="device" style="width: 375px; height: 720px;">
+        <div class="priya-shell" style="height: 100%;">
+          <div class="priya-chrome">
+            <span class="wordmark">Surakkha</span>
+            <span class="ward-badge">Handover</span>
+            <span class="spacer"></span>
+          </div>
+          <div class="priya-body">
+            <div>
+              <div class="section-head"><span>Open threads · 2</span></div>
+              <div class="handover-section">
+                <div class="handover-card">
+                  <div><span class="h-tag" style="background:var(--danger-bg);color:var(--danger);">T3</span><span class="h-title bn-text">Ward 7 — Chlorine smell</span></div>
+                  <div class="h-sub bn-text">Step 3 in progress · awaiting second PHA signature</div>
+                  <div class="h-meta mono">Priya · 14:01 · chain 0x7f3a</div>
+                </div>
+                <div class="handover-card">
+                  <div><span class="h-tag" style="background:var(--warning-bg);color:var(--fg-default);">T2</span><span class="h-title bn-text">Ward 3 — Lead drift</span></div>
+                  <div class="h-sub bn-text">Lab confirmation step queued (per amended playbook v3.3)</div>
+                  <div class="h-meta mono">Priya · 09:14 · chain 0x8b41</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-head"><span>Deviations · 1</span></div>
+              <div class="handover-section">
+                <div class="handover-card">
+                  <div><span class="h-tag deviated">Deviated</span><span class="h-title bn-text">Ward 12 · pH dip</span></div>
+                  <div class="h-sub bn-text">Reasoning: skipped lab confirmation — sensor reading already cross-threshold</div>
+                  <div class="h-meta mono">Priya · 13:48 · chain 0x4d2c</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-head"><span>PHA approvals pending · 1</span></div>
+              <div class="handover-section">
+                <div class="handover-card">
+                  <div><span class="h-tag pending">1 of 2 sigs</span><span class="h-title bn-text">Playbook amendment v3.2 → v3.3</span></div>
+                  <div class="h-sub bn-text">Lower chronic threshold from 7d to 5d; add lab-confirm step</div>
+                  <div class="h-meta mono">Dr. Mensah · signed 11:14 · vendor pending</div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-head"><span>Anomalies · 0</span></div>
+              <div class="empty-state">
+                <div class="icon-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div>
+                <div class="bn-text">No anomalies flagged.</div>
+              </div>
+            </div>
+
+            <div>
+              <div class="section-head"><span>Recent activity · 5 · <span style="color:var(--brand-500);">See all →</span></span></div>
+              <div class="handover-section">
+                <div class="handover-card" style="padding: var(--space-sm) var(--space-md);">
+                  <div class="h-sub"><span class="mono" style="color:var(--fg-tertiary);">14:01</span> &nbsp; <span class="bn-text">sensor_spike</span> &nbsp; Ward 7 · Sensor W</div>
+                </div>
+                <div class="handover-card" style="padding: var(--space-sm) var(--space-md);">
+                  <div class="h-sub"><span class="mono" style="color:var(--fg-tertiary);">13:42</span> &nbsp; <span class="bn-text">incident_verified</span> &nbsp; Ward 12 · Priya</div>
+                </div>
+                <div class="handover-card" style="padding: var(--space-sm) var(--space-md);">
+                  <div class="h-sub"><span class="mono" style="color:var(--fg-tertiary);">13:30</span> &nbsp; <span class="bn-text">chain_anchored</span> &nbsp; 0x4d2c</div>
+                </div>
+                <div class="handover-card" style="padding: var(--space-sm) var(--space-md);">
+                  <div class="h-sub"><span class="mono" style="color:var(--fg-tertiary);">11:14</span> &nbsp; <span class="bn-text">signature_attested</span> &nbsp; v3.3 · Dr. Mensah</div>
+                </div>
+                <div class="handover-card" style="padding: var(--space-sm) var(--space-md);">
+                  <div class="h-sub"><span class="mono" style="color:var(--fg-tertiary);">09:14</span> &nbsp; <span class="bn-text">incident_verified</span> &nbsp; Ward 3 · Priya</div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <div class="priya-nav">
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="nav-label">Action</span></button>
+            <button aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="nav-label">Handover</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span class="nav-label">Map</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Profile</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §11 Map pane                                                    -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Map pane — Leaflet mock · sensor markers + attribution</h2>
+  <p class="caption">Per <span class="mono">dim 5b §13</span> (SensorMap chart type #9). Read-only on mobile. Tap marker → sensor detail.</p>
+
+  <div class="viewport-row">
+    <div>
+      <div class="device-label">Map · 375 px</div>
+      <div class="device" style="width: 375px; height: 600px;">
+        <div class="priya-shell" style="height: 100%;">
+          <div class="priya-chrome">
+            <span class="wordmark">Surakkha</span>
+            <span class="ward-badge">Map</span>
+            <span class="spacer"></span>
+          </div>
+          <div class="map-mock">
+            <svg viewBox="0 0 375 480" preserveAspectRatio="xMidYMid slice">
+              <!-- Mock ward polygons / rivers -->
+              <path d="M30 80 Q120 30 240 60 T350 100 L350 200 Q280 240 180 220 T30 180 Z" fill="var(--bg-surface)" stroke="var(--border-default)" stroke-width="1"/>
+              <path d="M80 240 Q160 200 250 280 T340 320" fill="none" stroke="var(--info)" stroke-width="2" opacity="0.6"/>
+              <text x="50" y="100" font-family="var(--font-family-mono)" font-size="10" fill="var(--fg-tertiary)">W07</text>
+              <text x="270" y="130" font-family="var(--font-family-mono)" font-size="10" fill="var(--fg-tertiary)">W03</text>
+              <text x="200" y="240" font-family="var(--font-family-mono)" font-size="10" fill="var(--fg-tertiary)">W12</text>
+              <text x="80" y="300" font-family="var(--font-family-mono)" font-size="10" fill="var(--fg-tertiary)">W05</text>
+              <text x="290" y="340" font-family="var(--font-family-mono)" font-size="10" fill="var(--fg-tertiary)">W02</text>
+            </svg>
+            <div class="map-pin breach" style="left: 35%; top: 40%;"><span class="pulse"></span></div>
+            <div class="map-pin caution" style="left: 70%; top: 35%;"><span class="pulse"></span></div>
+            <div class="map-pin nominal" style="left: 25%; top: 65%;"></div>
+            <div class="map-pin nominal" style="left: 55%; top: 60%;"></div>
+            <div class="map-pin offline" style="left: 80%; top: 75%;"></div>
+            <div class="map-attribution">© OpenStreetMap contributors</div>
+          </div>
+          <div class="priya-nav">
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="nav-label">Action</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="nav-label">Handover</span></button>
+            <button aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span class="nav-label">Map</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Profile</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §12 Profile sheet (bottom-up Sheet)                             -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Profile sheet — opened from bottom-nav Profile cell</h2>
+  <p class="caption">Per <span class="mono">dim 5d §12</span>. Read-only locale display; theme toggle; sign-out; deep-link to desktop.</p>
+
+  <div class="viewport-row">
+    <div>
+      <div class="device-label">Profile · 375 px</div>
+      <div class="device" style="width: 375px; height: 600px;">
+        <div class="priya-shell" style="height: 100%;">
+          <div class="priya-chrome">
+            <span class="wordmark">Surakkha</span>
+            <span class="ward-badge">Profile</span>
+            <span class="spacer"></span>
+          </div>
+          <div class="priya-body">
+            <div style="text-align:center; padding: var(--space-lg) 0;">
+              <div style="width:64px;height:64px;border-radius:50%;background:var(--brand-100);margin:0 auto var(--space-sm);display:flex;align-items:center;justify-content:center;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--brand-500)" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
+              <div style="font-size:var(--font-size-md);font-weight:var(--font-weight-semibold);color:var(--fg-default);">Priya</div>
+              <div style="font-size:var(--font-size-xs);color:var(--fg-tertiary);">Central city operator · Wards 03, 07, 12</div>
+            </div>
+
+            <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding: 0 var(--space-md);">
+              <div class="profile-row"><span class="label">Theme</span><span class="val">Light · Dark · System</span></div>
+              <div class="profile-row"><span class="label">Locale</span><span class="val">en · bn (read-only)</span></div>
+              <div class="profile-row"><span class="label">Ward scope</span><span class="val">3 wards</span></div>
+              <div class="profile-row"><span class="label">Session</span><span class="val">14:01 · token expires 22:01</span></div>
+              <div class="profile-row"><span class="label">Desktop</span><span class="val" style="color:var(--brand-500);">Open desktop settings →</span></div>
+              <div class="profile-row"><span class="label" style="color:var(--danger);">Sign out</span><span class="val" style="color:var(--danger);">⏏</span></div>
+            </div>
+          </div>
+          <div class="priya-nav">
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span class="nav-label">Action</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg><span class="nav-label">Handover</span></button>
+            <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg><span class="nav-label">Map</span></button>
+            <button aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Profile</span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §2 Sensor board 6-col (tablet landscape ≥768)                   -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Sensor board · 6-col tablet landscape</h2>
+  <p class="caption">Per <span class="mono">dim 5d §6.2</span>. At ≥768 viewport, 6 cols on landscape. 18 sample cells shown for density.</p>
+
+  <div class="device" style="width: 768px;">
+    <div class="sensor-board large-tablet" style="padding: var(--space-md);">
+      <div class="sensor-cell"><div class="row1"><span class="ward">W07</span><span class="dot breach"></span></div><div class="row2"><span class="param">pH</span><span class="value">5.9</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W03</span><span class="dot caution"></span></div><div class="row2"><span class="param">NTU</span><span class="value">4.1</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W05</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.8</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W12</span><span class="dot nominal"></span></div><div class="row2"><span class="param">pH</span><span class="value">7.2</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W02</span><span class="dot nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">1.4</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W14</span><span class="dot offline"></span></div><div class="row2"><span class="param">—</span><span class="value">—</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W08</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.6</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W11</span><span class="dot caution"></span></div><div class="row2"><span class="param">pH</span><span class="value">6.4</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W04</span><span class="dot nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">0.9</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W09</span><span class="dot nominal"></span></div><div class="row2"><span class="param">pH</span><span class="value">7.1</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W15</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.7</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W01</span><span class="dot nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">1.2</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W10</span><span class="dot caution"></span></div><div class="row2"><span class="param">pH</span><span class="value">6.6</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W06</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.9</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W13</span><span class="dot nominal"></span></div><div class="row2"><span class="param">pH</span><span class="value">7.0</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W16</span><span class="dot offline"></span></div><div class="row2"><span class="param">—</span><span class="value">—</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W17</span><span class="dot nominal"></span></div><div class="row2"><span class="param">NTU</span><span class="value">1.0</span></div></div>
+      <div class="sensor-cell"><div class="row1"><span class="ward">W18</span><span class="dot nominal"></span></div><div class="row2"><span class="param">Cl₂</span><span class="value">0.8</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §5.4 SLA countdown demo                                         -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>SLA countdown states (per §5.4)</h2>
+  <p class="caption">Color is the secondary signal; countdown text is primary. No animation (per <span class="mono">EXPERIENCE.md §394</span>).</p>
+
+  <div class="device" style="width: 375px;">
+    <div class="priya-body" style="padding: var(--space-md);">
+      <div class="action-row">
+        <span class="tier t3"><span class="glyph">●</span><span>T3</span></span>
+        <div class="content"><div class="title bn-text">Ward 7 · Chlorine smell</div><div class="source bn-text">Anjali X + Sensor W · 14:01</div></div>
+        <div class="meta"><span class="conf">Conf: high</span><span class="time mono">14:01</span><span class="mono" style="color:var(--fg-default);font-weight:600;">7 min left</span></div>
+      </div>
+      <div class="action-row">
+        <span class="tier t3"><span class="glyph">●</span><span>T3</span></span>
+        <div class="content"><div class="title bn-text">Ward 7 · Chlorine smell</div><div class="source bn-text">Anjali X + Sensor W · 14:01</div></div>
+        <div class="meta"><span class="conf">Conf: high</span><span class="time mono">14:01</span><span class="sla-warn mono">1 min left</span></div>
+      </div>
+      <div class="action-row">
+        <span class="tier t3"><span class="glyph">●</span><span>T3</span></span>
+        <div class="content"><div class="title bn-text">Ward 7 · Chlorine smell</div><div class="source bn-text">Anjali X + Sensor W · 14:01</div></div>
+        <div class="meta"><span class="conf">Conf: high</span><span class="time mono">14:01</span><span class="sla-overdue mono">overdue 47s</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §10 SSE connection state machine                                -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>SSE connection states (per §10.1)</h2>
+  <p class="caption">Live updates drive the action list + sensor board. The status dot in top chrome signals connection health.</p>
+
+  <div class="row" style="gap: var(--space-lg);">
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-xs);">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--brand-500);animation: pin-pulse 1.6s ease-out infinite;"></span>
+        <strong>connecting</strong>
+      </div>
+      <div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">First connect attempt — pulsing brand dot</div>
+    </div>
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-xs);">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--success);"></span>
+        <strong>connected</strong>
+      </div>
+      <div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">Solid success — receiving events</div>
+    </div>
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-xs);">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--warning);animation: pin-pulse 1.6s ease-out infinite;"></span>
+        <strong>reconnecting</strong>
+      </div>
+      <div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">Backoff 1→2→4→8s (cap 30s)</div>
+    </div>
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-xs);">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--warning);"></span>
+        <strong>fallback-poll</strong>
+      </div>
+      <div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">After 3 failed retries · 30s polling</div>
+    </div>
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <div style="display:flex;align-items:center;gap:var(--space-sm);margin-bottom:var(--space-xs);">
+        <span style="width:10px;height:10px;border-radius:50%;background:var(--danger);"></span>
+        <strong>offline</strong>
+      </div>
+      <div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">Queued actions indicator + "Offline" label</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §13 Bangla + Latin render rules                                 -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Bangla vs Latin rendering rules (per §13)</h2>
+  <p class="caption">Locale lives on <span class="mono">&lt;body data-locale="bn"&gt;</span>. Bangla primary on prose; Latin on tier badges, chain refs, timestamps. Toggle locale above to see row-pad modifier.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-lg);">
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);">
+      <h3 style="margin:0 0 var(--space-sm);font-size:var(--font-size-md);">Latin (operator baseline)</h3>
+      <table style="width:100%;font-size:var(--font-size-sm);">
+        <tr><td style="color:var(--fg-tertiary);">Tier label</td><td class="mono">T3 · T2 · T1 · T0 · resolved</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Chain ref</td><td class="mono">0x7f3a · b9c2 · 4e8d</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Timestamp</td><td class="mono">2026-09-07T14:01:32Z</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Title</td><td>Ward 7 · Chlorine smell</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Source</td><td>Anjali X (school Y) + Sensor W</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Confidence</td><td>high</td></tr>
+      </table>
+    </div>
+    <div style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);">
+      <h3 style="margin:0 0 var(--space-sm);font-size:var(--font-size-md);">Bangla (bn locale)</h3>
+      <table style="width:100%;font-size:var(--font-size-sm);">
+        <tr><td style="color:var(--fg-tertiary);">Tier label</td><td class="mono">T3 · T2 · T1 · T0 · resolved <em>(Latin)</em></td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Chain ref</td><td class="mono">0x7f3a · b9c2 · 4e8d <em>(Latin)</em></td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Timestamp</td><td class="mono">14:01:32 <em>(Latin)</em></td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Title</td><td class="bn-text" style="font-family:var(--font-family-bangla);">ওয়ার্ড ৭ · ক্লোরিনের গন্ধ</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Source</td><td class="bn-text" style="font-family:var(--font-family-bangla);">অঞ্জলি এক্স (স্কুল ওয়াই) + সেন্সর ডব্লিউ</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Confidence</td><td class="bn-text" style="font-family:var(--font-family-bangla);">উচ্চ</td></tr>
+        <tr><td style="color:var(--fg-tertiary);">Bangla row pad</td><td class="bn-text" style="font-family:var(--font-family-bangla);">+4 px block padding (auto)</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="note">Bangla numerals ০-৯ render in Bangla text via <span class="mono">font-variant-numeric</span>; stored values stay Latin number-typed (per dim 6 §8.2). Tier/chain/time always Latin.</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §6 Sensor board — status dot legend                             -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Sensor board status-dot palette (per §6.1)</h2>
+  <p class="caption">Single brand hue for nominal. Semantic for caution/breach/offline. No second brand hue introduced.</p>
+
+  <div class="row">
+    <div style="display:flex;align-items:center;gap:var(--space-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--brand-500);"></span>
+      <div><div style="font-weight:var(--font-weight-medium);">online · nominal</div><div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">Within ±1σ of trailing 24h mean</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--warning);"></span>
+      <div><div style="font-weight:var(--font-weight-medium);">online · caution</div><div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">Within 1σ-2σ — drift detection</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--danger);"></span>
+      <div><div style="font-weight:var(--font-weight-medium);">online · breach</div><div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">Crossed absolute threshold (e.g. pH&lt;6.5)</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:var(--space-sm);background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:var(--space-md);flex:1;">
+      <span style="width:10px;height:10px;border-radius:50%;background:var(--fg-tertiary);"></span>
+      <div><div style="font-weight:var(--font-weight-medium);">offline</div><div class="bn-text" style="font-size:var(--font-size-xs);color:var(--fg-secondary);">No reading in last 6 minutes</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- Sign-off                                                        -->
+<!-- ============================================================== -->
+<section class="section">
+  <h2>Sign-off</h2>
+  <p class="caption">dim 5d lockdown ready for review. 16 sections in <span class="mono">05d-priya-mobile-lockdown.md</span> cover scope, breakpoints, 4 panes, top chrome, action list, sensor board, detail, handover, T3 two-tap, SSE, map, bottom nav, Bangla rules, accessibility, hand-offs, verification. Companion preview HTML (this file) renders all panes at 375 px + 768 px with theme + locale toggles.</p>
+  <div class="note">Closes dim 5 §7.7 operator-mobile gap. Sets up dim 5e (PHA pane) — the third and final mobile/responsive surface before Gate 0 close-out.</div>
+</section>
+
+</div>
+
+<!-- ====================================================================
+ * Preview JS — theme/locale toggles + flash replay + modal toggle
+ * ==================================================================== -->
+<script>
+(function(){
+  const root = document.documentElement;
+
+  // Theme
+  document.querySelectorAll('[data-theme-set]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-theme-set');
+      root.setAttribute('data-theme', v);
+      document.querySelectorAll('[data-theme-set]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    });
+  });
+
+  // Locale
+  document.querySelectorAll('[data-locale-set]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-locale-set');
+      root.setAttribute('data-locale', v);
+      document.querySelectorAll('[data-locale-set]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    });
+  });
+
+  // Flash replay — re-trigger the new-data-flash animation on all action rows
+  document.getElementById('btn-flash-row').addEventListener('click', (e) => {
+    const btn = e.currentTarget;
+    btn.setAttribute('aria-pressed', 'true');
+    document.querySelectorAll('.action-row').forEach(row => {
+      row.classList.remove('flash');
+      // force reflow
+      void row.offsetWidth;
+      row.classList.add('flash');
+      setTimeout(() => row.classList.remove('flash'), 600);
+    });
+    document.querySelectorAll('.sensor-cell').forEach(cell => {
+      cell.classList.remove('flash');
+      void cell.offsetWidth;
+      cell.classList.add('flash');
+      setTimeout(() => cell.classList.remove('flash'), 600);
+    });
+    setTimeout(() => btn.setAttribute('aria-pressed', 'false'), 600);
+  });
+
+  // Modal toggle
+  const modalSection = document.getElementById('modal-section');
+  const modalBtn = document.getElementById('btn-show-modal');
+  modalBtn.addEventListener('click', () => {
+    const isOpen = modalSection.style.display !== 'none';
+    modalSection.style.display = isOpen ? 'none' : 'block';
+    modalBtn.setAttribute('aria-pressed', String(!isOpen));
+    modalBtn.textContent = !isOpen ? 'Close issuance modal' : 'Open issuance modal';
+    if (!isOpen) modalSection.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  // Open-modal button inside the detail pane also shows the modal
+  const innerOpen = document.getElementById('open-modal-btn');
+  if (innerOpen) {
+    innerOpen.addEventListener('click', () => {
+      modalSection.style.display = 'block';
+      modalBtn.setAttribute('aria-pressed', 'true');
+      modalBtn.textContent = 'Close issuance modal';
+      modalSection.scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  }
+})();
+</script>
+
+</body>
+</html>

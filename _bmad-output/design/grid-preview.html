@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Grid & Pages Preview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     TOKENS — all 54 tokens from dim 1-4 re-declared here for parity with
+     prior previews. Dim 5 adds 6 breakpoint tokens + 1 grid system token.
+     ════════════════════════════════════════════════════════════════════ */
+  :root,
+  [data-theme="light"] {
+    /* Colour (dim 1) */
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+    --badge-trusted:  #144A78;
+    --badge-new:      #6B6F76;
+    --badge-caution:  #8E2E1E;
+
+    /* Typography (dim 2) */
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, -apple-system, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-size-xs:      0.75rem;
+    --font-size-sm:      0.875rem;
+    --font-size-md:      1rem;
+    --font-size-lg:      1.125rem;
+    --font-size-xl:      1.375rem;
+    --font-size-xxl:     1.75rem;
+    --font-size-display: 2.25rem;
+    --font-weight-regular:  400;
+    --font-weight-medium:   500;
+    --font-weight-semibold: 600;
+    --font-weight-bold:     700;
+    --line-height-tight:         1.25;
+    --line-height-body:          1.5;
+    --line-height-body-bangla:   1.6;
+    --line-height-heading-bangla:1.3;
+    --line-height-loose:         1.75;
+    --letter-spacing-tight:    -0.01em;
+    --letter-spacing-normal:    0;
+    --letter-spacing-wide:      0.04em;
+    --letter-spacing-tracked:   0.08em;
+
+    /* Icons (dim 3) */
+    --icon-size-xs: 12px;
+    --icon-size-sm: 14px;
+    --icon-size-md: 16px;
+    --icon-size-lg: 20px;
+    --icon-size-xl: 24px;
+    --icon-stroke-thin: 1.75;
+    --icon-stroke-base: 2;
+    --icon-stroke-bold: 2.5;
+
+    /* Spacing (dim 4) */
+    --space-xs:  4px;
+    --space-sm:  8px;
+    --space-md:  12px;
+    --space-lg:  16px;
+    --space-xl:  24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+
+    /* Radius (dim 4) */
+    --radius-xs: 2px;
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+
+    /* Control heights (dim 4) */
+    --height-control-sm: 28px;
+    --height-control-md: 36px;
+    --height-control-lg: 44px;
+    --height-control-xl: 48px;
+
+    /* Row heights (dim 4 Amendment A) */
+    --height-row-default:     40px;
+    --height-row-comfortable: 56px;
+
+    /* Elevation (dim 4) */
+    --shadow-modal: 0 4px 12px rgba(0,0,0,0.08);
+
+    /* Z-index (dim 4) */
+    --z-base:     0;
+    --z-sticky:   100;
+    --z-dropdown: 200;
+    --z-modal:    300;
+
+    /* Breakpoints (dim 5 — values for reference; not consumed in CSS) */
+    --bp-md:  480px;
+    --bp-lg:  768px;
+    --bp-xl:  1024px;
+    --bp-2xl: 1280px;
+    --bp-3xl: 1440px;
+
+    /* Container widths (dim 5) */
+    --container-narrow:  720px;   /* tablet (lg) */
+    --container-bangla:  1080px;  /* default desktop — Bangla line-length sweet spot */
+    --container-wide:    1280px;  /* full Latin admin surfaces */
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-600:      #4A8AC4;
+    --brand-500:      #5C9AD0;
+    --brand-400:      #76AEDF;
+    --brand-200:      #2B3E55;
+    --brand-100:      #1F2D3D;
+    --success:        #5DB287;
+    --success-bg:     #1A2D24;
+    --warning:        #D6A865;
+    --warning-bg:     #2D2418;
+    --danger:         #D8806E;
+    --danger-bg:      #2D1F1B;
+    --info:           #76AEDF;
+    --info-bg:        #1F2D3D;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    --badge-trusted:  #5C9AD0;
+    --badge-new:      #8A8E94;
+    --badge-caution:  #D8806E;
+    --shadow-modal: 0 4px 12px rgba(0,0,0,0.32);
+
+    color-scheme: dark;
+  }
+
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+    transition: background-color 200ms ease, color 200ms ease;
+  }
+
+  /* ───── chrome bar (preview-only, mimics top-chrome) ───── */
+  .preview-chrome {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-sticky);
+    height: var(--height-control-xl);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+  }
+  .preview-chrome-left { display: flex; align-items: center; gap: var(--space-md); }
+  .preview-chrome-right { display: flex; align-items: center; gap: var(--space-sm); }
+  .preview-chrome strong { font-weight: var(--font-weight-semibold); }
+  .preview-chrome .meta { color: var(--fg-tertiary); font-size: var(--font-size-xs); }
+
+  .seg-btn {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-md);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    height: var(--height-control-sm);
+  }
+  .seg-btn:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .seg-btn.active { background: var(--brand-100); color: var(--brand-500); border-color: var(--brand-400); }
+
+  main {
+    padding: var(--space-3xl) var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-tight);
+    margin: 0 0 var(--space-md);
+    line-height: var(--line-height-tight);
+  }
+  h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-3xl) 0 var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+  h3 { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); margin: var(--space-lg) 0 var(--space-xs); }
+  p  { margin: 0 0 var(--space-md); color: var(--fg-secondary); }
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    background: var(--bg-subtle);
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    color: var(--fg-default);
+  }
+  .section-meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     §1 BREAKPOINTS
+     ════════════════════════════════════════════════════════════════ */
+  .bp-table { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .bp-row {
+    display: grid;
+    grid-template-columns: 96px 1fr 96px 80px;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+  }
+  .bp-row .bp-name { font-family: var(--font-family-mono); font-weight: var(--font-weight-semibold); color: var(--brand-500); }
+  .bp-row .bp-bar  { height: 14px; background: var(--brand-100); border: 1px solid var(--brand-400); border-radius: var(--radius-xs); }
+  .bp-row .bp-width { font-family: var(--font-family-mono); color: var(--fg-secondary); text-align: right; }
+  .bp-row .bp-tailwind { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); text-align: center; }
+
+  /* ════════════════════════════════════════════════════════════════
+     §2 CONTAINER WIDTHS
+     ════════════════════════════════════════════════════════════════ */
+  .container-demo-wrap { display: flex; flex-direction: column; gap: var(--space-xl); }
+  .container-spec {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+  }
+  .container-spec-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+  }
+  .container-spec-name { font-weight: var(--font-weight-semibold); color: var(--fg-default); }
+  .container-spec-px   { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); }
+  .container-bar-wrap  { background: var(--bg-inset); height: 64px; border-radius: var(--radius-md); position: relative; overflow: hidden; }
+  .container-bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 36px;
+    background: var(--brand-100);
+    border: 1px solid var(--brand-400);
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--brand-500);
+    left: 0;
+  }
+  .container-bar--narrow  { width: 720px; max-width: 100%; }
+  .container-bar--bangla  { width: 1080px; max-width: 100%; }
+  .container-bar--wide    { width: 1280px; max-width: 100%; }
+
+  /* ════════════════════════════════════════════════════════════════
+     §3 12-COLUMN GRID
+     ════════════════════════════════════════════════════════════════ */
+  .grid-demo {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: var(--space-md);
+  }
+  @media (min-width: 768px) {
+    .grid-12 { gap: var(--space-lg); }
+  }
+  .grid-col {
+    background: var(--brand-100);
+    border: 1px solid var(--brand-400);
+    border-radius: var(--radius-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--brand-500);
+    text-align: center;
+  }
+  .grid-col--empty { background: var(--bg-subtle); border: 1px dashed var(--border-default); color: var(--fg-tertiary); }
+  .grid-label { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-top: var(--space-xs); }
+
+  /* ════════════════════════════════════════════════════════════════
+     §4 PAGE TEMPLATES (wireframes)
+     ════════════════════════════════════════════════════════════════ */
+  .template-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: var(--space-xl); }
+  .template-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .template-card-head { display: flex; justify-content: space-between; align-items: baseline; }
+  .template-card-name { font-weight: var(--font-weight-semibold); color: var(--fg-default); }
+  .template-card-tag  { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); }
+  .template-card-body { font-size: var(--font-size-xs); color: var(--fg-secondary); }
+  .wf {
+    background: var(--bg-inset);
+    border: 1px dashed var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-height: 120px;
+  }
+  .wf-row { display: flex; gap: var(--space-xs); }
+  .wf-block { background: var(--brand-100); border: 1px solid var(--brand-400); border-radius: var(--radius-xs); padding: var(--space-xs) var(--space-sm); font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--brand-500); }
+  .wf-block--chrome  { background: var(--bg-base); border-color: var(--border-strong); color: var(--fg-default); }
+  .wf-block--sidebar { background: var(--bg-base); border-color: var(--border-strong); color: var(--fg-default); width: 64px; }
+  .wf-block--main    { background: var(--bg-base); border-color: var(--border-strong); color: var(--fg-default); flex: 1; }
+  .wf-block--card    { background: var(--bg-surface); border-color: var(--border-default); color: var(--fg-secondary); }
+
+  /* ════════════════════════════════════════════════════════════════
+     §5 EMPTY STATES
+     ════════════════════════════════════════════════════════════════ */
+  .empty-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+  }
+  .empty {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding-block: var(--space-xl);
+    padding-inline: var(--space-lg);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .empty-icon { color: var(--fg-tertiary); }
+  .empty-heading { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); color: var(--fg-default); margin: 0; }
+  .empty-body { font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0; max-width: 280px; }
+  .empty-cta { display: flex; gap: var(--space-sm); margin-top: var(--space-sm); }
+  .empty-cta .btn-sm {
+    height: 32px; padding: 0 var(--space-md); border-radius: var(--radius-md);
+    font-size: var(--font-size-xs); font-weight: var(--font-weight-medium);
+    border: 1px solid var(--border-default); background: var(--bg-surface); color: var(--fg-default);
+    cursor: pointer;
+  }
+  .empty-cta .btn-primary {
+    height: 32px; padding: 0 var(--space-md); border-radius: var(--radius-md);
+    font-size: var(--font-size-xs); font-weight: var(--font-weight-medium);
+    background: var(--brand-500); color: #fff; border: none; cursor: pointer;
+  }
+  [data-theme="dark"] .empty-cta .btn-primary { color: #0E1013; }
+
+  /* ════════════════════════════════════════════════════════════════
+     §6 AUDIT-LOG ROW
+     ════════════════════════════════════════════════════════════════ */
+  .audit-table {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: var(--space-lg);
+  }
+  .audit-row {
+    display: grid;
+    grid-template-columns: 80px 1fr auto 96px 160px auto;
+    align-items: center;
+    gap: var(--space-md);
+    height: var(--height-row-default);
+    padding-inline: var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: var(--font-size-sm);
+  }
+  .audit-row:last-child { border-bottom: none; }
+  .audit-row .time  { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); }
+  .audit-row .chain { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .audit-row .type  { display: inline-flex; align-items: center; gap: var(--space-xs); font-size: var(--font-size-xs); color: var(--fg-secondary); padding: 2px var(--space-sm); border-radius: var(--radius-xs); border: 1px solid var(--border-subtle); background: var(--bg-subtle); }
+  .audit-row .type--high   { color: var(--success); border-color: var(--success); }
+  .audit-row .type--danger { color: var(--danger); border-color: var(--danger); }
+  .audit-row .type--info   { color: var(--info); border-color: var(--info); }
+  .audit-row .ward  { font-size: var(--font-size-sm); color: var(--fg-secondary); }
+  .audit-row .actor { font-size: var(--font-size-sm); color: var(--fg-default); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .audit-row .action { color: var(--fg-tertiary); cursor: pointer; }
+  .audit-row .action:hover { color: var(--fg-default); }
+
+  .audit-mobile {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    max-width: 360px;
+  }
+  .audit-mobile-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-block: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .audit-mobile-row:last-child { border-bottom: none; }
+  .audit-mobile-row .time  { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary); }
+  .audit-mobile-row .chain { font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default); }
+  .audit-mobile-row .type  { font-size: var(--font-size-xs); color: var(--fg-secondary); align-self: flex-start; margin-top: var(--space-xs); }
+
+  /* ════════════════════════════════════════════════════════════════
+     §7 TAILWIND CONFIG (read-only code block)
+     ════════════════════════════════════════════════════════════════ */
+  pre.code-block {
+    background: var(--bg-inset);
+    color: var(--fg-default);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
+    overflow-x: auto;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-body);
+    margin: 0;
+  }
+  pre.code-block .kw { color: var(--brand-500); }
+  pre.code-block .str { color: var(--success); }
+  pre.code-block .com { color: var(--fg-tertiary); font-style: italic; }
+  pre.code-block .num { color: var(--warning); }
+
+  footer {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+</style>
+</head>
+
+<body data-theme="light" data-locale="en">
+
+<div class="preview-chrome">
+  <div class="preview-chrome-left">
+    <strong>Surakkha v1</strong>
+    <span class="meta">· dim 5 · Grid & Pages preview</span>
+  </div>
+  <div class="preview-chrome-right">
+    <button class="seg-btn" data-set-theme="light">Light</button>
+    <button class="seg-btn" data-set-theme="dark">Dark</button>
+    <span class="meta" style="margin-inline: var(--space-sm);">|</span>
+    <button class="seg-btn" data-set-locale="en">EN</button>
+    <button class="seg-btn" data-set-locale="bn">বাং</button>
+  </div>
+</div>
+
+<main>
+
+<h1>Grid, Pages & Stack Direction</h1>
+<p class="section-meta">Dim 5 · LOCKED contract — 2026-09-07 · 5 breakpoints · 12-column grid · 6 page templates · 8 empty states · 1 audit-log row spec.</p>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §1 BREAKPOINTS
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Breakpoints</h2>
+  <p class="section-meta">5 breakpoints + the mobile floor (≥ 0). Tailwind <code>screens</code> config maps 1:1. The mobile floor is not a Tailwind screen — it's the no-prefix default block.</p>
+
+  <div class="bp-table">
+    <div class="bp-row">
+      <span class="bp-name">--bp-md</span>
+      <div class="bp-bar" style="width: 480px; max-width: 100%;"></div>
+      <span class="bp-width">≥ 480 px</span>
+      <span class="bp-tailwind">sm:</span>
+    </div>
+    <div class="bp-row">
+      <span class="bp-name">--bp-lg</span>
+      <div class="bp-bar" style="width: 720px; max-width: 100%;"></div>
+      <span class="bp-width">≥ 768 px</span>
+      <span class="bp-tailwind">md:</span>
+    </div>
+    <div class="bp-row">
+      <span class="bp-name">--bp-xl</span>
+      <div class="bp-bar" style="width: 960px; max-width: 100%;"></div>
+      <span class="bp-width">≥ 1024 px</span>
+      <span class="bp-tailwind">lg:</span>
+    </div>
+    <div class="bp-row">
+      <span class="bp-name">--bp-2xl</span>
+      <div class="bp-bar" style="width: 1200px; max-width: 100%;"></div>
+      <span class="bp-width">≥ 1280 px</span>
+      <span class="bp-tailwind">xl:</span>
+    </div>
+    <div class="bp-row">
+      <span class="bp-name">--bp-3xl</span>
+      <div class="bp-bar" style="width: 1400px; max-width: 100%;"></div>
+      <span class="bp-width">≥ 1440 px</span>
+      <span class="bp-tailwind">2xl:</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §2 CONTAINER WIDTHS
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Container Widths</h2>
+  <p class="section-meta">Three container tokens. Pages declare which one they use — the 1080 px Bangla-tuned width is the default for mixed-content dashboards; 1280 px is the full Latin-admin ceiling.</p>
+
+  <div class="container-demo-wrap">
+    <div class="container-spec">
+      <div class="container-spec-head">
+        <span class="container-spec-name">--container-narrow · tablet</span>
+        <span class="container-spec-px">720 px @ ≥ bp-lg (768)</span>
+      </div>
+      <div class="container-bar-wrap"><div class="container-bar container-bar--narrow">720 px</div></div>
+    </div>
+    <div class="container-spec">
+      <div class="container-spec-head">
+        <span class="container-spec-name">--container-bangla · default dashboard</span>
+        <span class="container-spec-px">1080 px @ ≥ bp-xl (1024) — Bangla line-length sweet spot</span>
+      </div>
+      <div class="container-bar-wrap"><div class="container-bar container-bar--bangla">1080 px</div></div>
+    </div>
+    <div class="container-spec">
+      <div class="container-spec-head">
+        <span class="container-spec-name">--container-wide · full Latin admin</span>
+        <span class="container-spec-px">1280 px @ ≥ bp-2xl (1280) — capped at bp-3xl</span>
+      </div>
+      <div class="container-bar-wrap"><div class="container-bar container-bar--wide">1280 px</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §3 12-COLUMN GRID
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · 12-column Grid</h2>
+  <p class="section-meta">12 columns. Mobile gutter: <code>--space-md</code> (12 px). Desktop gutter (≥ 768): <code>--space-lg</code> (16 px). No fifth gutter size.</p>
+
+  <div class="grid-demo">
+    <div class="grid-12">
+      <div class="grid-col">1</div><div class="grid-col">2</div><div class="grid-col">3</div>
+      <div class="grid-col">4</div><div class="grid-col">5</div><div class="grid-col">6</div>
+      <div class="grid-col">7</div><div class="grid-col">8</div><div class="grid-col">9</div>
+      <div class="grid-col">10</div><div class="grid-col">11</div><div class="grid-col">12</div>
+    </div>
+    <div class="grid-label">12 single columns</div>
+  </div>
+
+  <div class="grid-demo">
+    <div class="grid-12">
+      <div class="grid-col" style="grid-column: span 4;">col-span-4</div>
+      <div class="grid-col" style="grid-column: span 4;">col-span-4</div>
+      <div class="grid-col" style="grid-column: span 4;">col-span-4</div>
+    </div>
+    <div class="grid-label">3 × col-span-4 — KPI cards (Priya dashboard)</div>
+  </div>
+
+  <div class="grid-demo">
+    <div class="grid-12">
+      <div class="grid-col" style="grid-column: span 8;">col-span-8</div>
+      <div class="grid-col" style="grid-column: span 4;">col-span-4</div>
+    </div>
+    <div class="grid-label">col-span-8 + col-span-4 — primary content + thin sidebar</div>
+  </div>
+
+  <div class="grid-demo">
+    <div class="grid-12">
+      <div class="grid-col" style="grid-column: span 6;">col-span-6</div>
+      <div class="grid-col" style="grid-column: span 6;">col-span-6</div>
+    </div>
+    <div class="grid-label">col-span-6 + col-span-6 — inbox detail 2-pane</div>
+  </div>
+
+  <div class="grid-demo">
+    <div class="grid-12">
+      <div class="grid-col" style="grid-column: span 12;">col-span-12 — full row (sensor board, audit log, verify flow)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §4 PAGE TEMPLATES
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · Page Templates (Priya desktop)</h2>
+  <p class="section-meta">6 page templates locked. Wireframes below — full implementations land in v1.1 once the React/Vite/Tailwind scaffold is built. Anjali / Operator / PHA-pane grids deferred to dim 5b/c/d (per AD-7 no-collapse rule).</p>
+
+  <div class="template-grid">
+
+    <div class="template-card">
+      <div class="template-card-head">
+        <span class="template-card-name">1 · Login</span>
+        <span class="template-card-tag">480 px card</span>
+      </div>
+      <div class="wf" style="min-height: 200px; justify-content: center; align-items: center; background: var(--brand-100);">
+        <div class="wf-block wf-block--card" style="width: 280px; padding: var(--space-xl); text-align: center;">Surakkha<br>Sign in</div>
+      </div>
+      <div class="template-card-body">Centred card on full-viewport brand background. No sidebar, no top-chrome. Returns to dashboard on success.</div>
+    </div>
+
+    <div class="template-card">
+      <div class="template-card-head">
+        <span class="template-card-name">2 · Dashboard</span>
+        <span class="template-card-tag">1080 px / 1280 px</span>
+      </div>
+      <div class="wf">
+        <div class="wf-block wf-block--chrome" style="height: 28px;">TopChrome · 48 px</div>
+        <div class="wf-row" style="flex: 1;">
+          <div class="wf-block wf-block--sidebar">Sidebar</div>
+          <div class="wf-block wf-block--main">
+            <div class="wf-row">
+              <div class="wf-block wf-block--card" style="flex: 1;">KPI</div>
+              <div class="wf-block wf-block--card" style="flex: 1;">KPI</div>
+              <div class="wf-block wf-block--card" style="flex: 1;">KPI</div>
+              <div class="wf-block wf-block--card" style="flex: 1;">KPI</div>
+            </div>
+            <div class="wf-block wf-block--card" style="margin-top: var(--space-xs); flex: 1;">Sensor board</div>
+          </div>
+        </div>
+      </div>
+      <div class="template-card-body">TopChrome + Sidebar + Main. KPI row (col-span-3 × 4) + sensor board (col-span-12). Stacks to single column on &lt; 768.</div>
+    </div>
+
+    <div class="template-card">
+      <div class="template-card-head">
+        <span class="template-card-name">3 · Inbox List</span>
+        <span class="template-card-tag">1080 px</span>
+      </div>
+      <div class="wf">
+        <div class="wf-block wf-block--chrome" style="height: 28px;">TopChrome</div>
+        <div class="wf-row" style="flex: 1;">
+          <div class="wf-block wf-block--sidebar">Sidebar</div>
+          <div class="wf-block wf-block--main">
+            <div class="wf-block wf-block--card" style="height: 56px;">InboxRow · comfortable</div>
+            <div class="wf-block wf-block--card" style="height: 56px; margin-top: var(--space-xs);">InboxRow · comfortable</div>
+            <div class="wf-block wf-block--card" style="height: 56px; margin-top: var(--space-xs);">InboxRow · comfortable</div>
+          </div>
+        </div>
+      </div>
+      <div class="template-card-body">Stack of <code>InboxRow</code> at <code>--height-row-comfortable</code> (56 px). col-span-12. Bangla rows auto +1 tier block padding (dim 4 §15.4).</div>
+    </div>
+
+    <div class="template-card">
+      <div class="template-card-head">
+        <span class="template-card-name">4 · Inbox Detail</span>
+        <span class="template-card-tag">1080 px · 2-pane</span>
+      </div>
+      <div class="wf">
+        <div class="wf-block wf-block--chrome" style="height: 28px;">TopChrome</div>
+        <div class="wf-row" style="flex: 1;">
+          <div class="wf-block wf-block--sidebar">Sidebar</div>
+          <div class="wf-block" style="display: flex; gap: var(--space-xs); flex: 1; background: transparent; border: none; padding: 0;">
+            <div class="wf-block wf-block--card" style="flex: 5;">Related<br>incidents</div>
+            <div class="wf-block wf-block--card" style="flex: 7;">Incident detail<br>+ timeline</div>
+          </div>
+        </div>
+      </div>
+      <div class="template-card-body">2-pane main: col-span-5 related + col-span-7 detail. Drops to single pane below 768. Bangla-tuned 1080 px.</div>
+    </div>
+
+    <div class="template-card">
+      <div class="template-card-head">
+        <span class="template-card-name">5 · Verify Flow</span>
+        <span class="template-card-tag">720 px · wizard</span>
+      </div>
+      <div class="wf">
+        <div class="wf-block wf-block--chrome" style="height: 28px;">TopChrome</div>
+        <div class="wf-block wf-block--card" style="flex: 1;">Step 1 · Sensor cluster</div>
+        <div class="wf-block wf-block--card" style="flex: 1;">Step 2 · Anjali corroboration</div>
+        <div class="wf-block wf-block--card" style="flex: 1;">Step 3 · Councillor notify</div>
+      </div>
+      <div class="template-card-body">3-step wizard. Narrow container (720 px) for focused reading. Each step is a single <code>card--with-heading</code> stacked vertically with <code>--space-xl</code> gap.</div>
+    </div>
+
+    <div class="template-card">
+      <div class="template-card-head">
+        <span class="template-card-name">6 · Audit Log</span>
+        <span class="template-card-tag">1280 px · table</span>
+      </div>
+      <div class="wf">
+        <div class="wf-block wf-block--chrome" style="height: 28px;">TopChrome</div>
+        <div class="wf-row" style="flex: 1;">
+          <div class="wf-block wf-block--sidebar">Sidebar</div>
+          <div class="wf-block wf-block--main">
+            <div class="wf-block wf-block--card" style="height: 40px;">Audit row · dense</div>
+            <div class="wf-block wf-block--card" style="height: 40px; margin-top: var(--space-xs);">Audit row · dense</div>
+            <div class="wf-block wf-block--card" style="height: 40px; margin-top: var(--space-xs);">Audit row · dense</div>
+          </div>
+        </div>
+      </div>
+      <div class="template-card-body">Full Latin admin — extends to 1280 px. Dense rows at <code>--height-row-default</code> (40 px). Plex Mono for chain refs. Spec'd in §6.</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §5 EMPTY STATES
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Empty States (8 patterns)</h2>
+  <p class="section-meta">Each empty uses <code>card--with-heading</code> as container; icon at <code>--icon-size-xl</code> (24 px) <code>--fg-tertiary</code>; heading <code>--font-size-md</code>; body <code>--font-size-sm</code>. CTAs are optional (0, 1, or 2).</p>
+
+  <div class="empty-grid">
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      <h3 class="empty-heading">No sensors reporting</h3>
+      <p class="empty-body">Add your first sensor to start collecting turbidity readings from this ward.</p>
+      <div class="empty-cta">
+        <button class="btn-primary">Add sensor</button>
+      </div>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+      <h3 class="empty-heading">No incidents in this ward</h3>
+      <p class="empty-body">No reports in the past 24 hours. The sensor cluster is calm.</p>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <h3 class="empty-heading">No chain entries yet</h3>
+      <p class="empty-body">The chain will appear here as the first sensor readings are anchored.</p>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <h3 class="empty-heading">No Anjali reports</h3>
+      <p class="empty-body">Share the reporting link with residents to gather ground-truth signals.</p>
+      <div class="empty-cta">
+        <button class="btn-sm">Share reporting link</button>
+      </div>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+      <h3 class="empty-heading">No results for that query</h3>
+      <p class="empty-body">Try fewer or different keywords, or clear the search to see all entries.</p>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <h3 class="empty-heading">No entries match this filter</h3>
+      <p class="empty-body">Adjust the filter or clear it to see the full list.</p>
+      <div class="empty-cta">
+        <button class="btn-sm">Clear filter</button>
+      </div>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      <h3 class="empty-heading">All caught up</h3>
+      <p class="empty-body">No pending reports. The ward is quiet — go stretch your legs.</p>
+    </div>
+
+    <div class="empty">
+      <svg class="icon empty-icon" viewBox="0 0 24 24" width="24" height="24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+      <h3 class="empty-heading">Ward mismatch</h3>
+      <p class="empty-body">You're scoped to ward 07. Switch accounts or contact your supervisor to access this ward.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §6 AUDIT-LOG ROW
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Audit-log Row</h2>
+  <p class="section-meta">Densest surface in v1. Desktop: 6-slot grid (time · chain ref · event type · ward · actor · action) at <code>--height-row-default</code> (40 px). Plex Mono for time + chain. Mobile: collapses to 1-column timeline at <code>--height-row-comfortable</code> (56 px).</p>
+
+  <div class="audit-table">
+    <div class="audit-row">
+      <span class="time">09:21:14</span>
+      <span class="chain">0x7f3a · b9c2 · 4e8d</span>
+      <span class="type type--danger">
+        <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.75" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
+        chain_write_failed
+      </span>
+      <span class="ward">Ward 07</span>
+      <span class="actor">priya.k@dhaka.gov</span>
+      <span class="action">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </span>
+    </div>
+    <div class="audit-row">
+      <span class="time">09:18:02</span>
+      <span class="chain">0x7f3a · b8f1 · 4e8d</span>
+      <span class="type type--high">
+        <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.75" stroke="currentColor" fill="none"><path d="M20 6 9 17l-5-5"/></svg>
+        incident_verified
+      </span>
+      <span class="ward">Ward 12</span>
+      <span class="actor">priya.k@dhaka.gov</span>
+      <span class="action">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </span>
+    </div>
+    <div class="audit-row">
+      <span class="time">09:14:51</span>
+      <span class="chain">0x7f3a · b8d4 · 4e8c</span>
+      <span class="type type--info">
+        <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.75" stroke="currentColor" fill="none"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        report_received
+      </span>
+      <span class="ward">Ward 04</span>
+      <span class="actor">anjali.b · SMS</span>
+      <span class="action">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </span>
+    </div>
+    <div class="audit-row">
+      <span class="time">09:11:08</span>
+      <span class="chain">0x7f3a · b892 · 4e8b</span>
+      <span class="type">
+        <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14" stroke-width="1.75" stroke="currentColor" fill="none"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/></svg>
+        sensor_offline
+      </span>
+      <span class="ward">Ward 18</span>
+      <span class="actor">sensor #B7-N1</span>
+      <span class="action">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </span>
+    </div>
+  </div>
+
+  <p style="margin-top: var(--space-md); font-size: var(--font-size-xs); color: var(--fg-tertiary); font-family: var(--font-family-mono);">
+    Desktop: 6-column grid · 80px · 1fr · auto · 96px · 160px · auto<br>
+    Mobile (≤ 768): collapses to single-column timeline · 56 px row · time stacked over chain stacked over type
+  </p>
+
+  <div class="audit-mobile" style="margin-top: var(--space-lg);">
+    <div class="audit-mobile-row">
+      <span class="time">09:21:14</span>
+      <span class="chain">0x7f3a · b9c2 · 4e8d</span>
+      <span class="type type--danger">chain_write_failed</span>
+    </div>
+    <div class="audit-mobile-row">
+      <span class="time">09:18:02</span>
+      <span class="chain">0x7f3a · b8f1 · 4e8d</span>
+      <span class="type type--high">incident_verified</span>
+    </div>
+    <div class="audit-mobile-row">
+      <span class="time">09:14:51</span>
+      <span class="chain">0x7f3a · b8d4 · 4e8c</span>
+      <span class="type type--info">report_received</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §7 TAILWIND CONFIG (read-only)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · Tailwind Config (specification)</h2>
+  <p class="section-meta">Read-only spec for what <code>tailwind.config.js</code> will contain when the production React/Vite/Tailwind/shadcn scaffold lands. Maps all 54 dim 1-4 tokens via <code>var(--*)</code>. shadcn CLI auto-detects this shape.</p>
+
+<pre class="code-block"><span class="com">// tailwind.config.js — spec'd by dim 5 §D</span>
+<span class="kw">export default</span> {
+  content: [<span class="str">'./index.html'</span>, <span class="str">'./src/**/*.{ts,tsx}'</span>],
+  darkMode: [<span class="str">'class'</span>, <span class="str">'[data-theme="dark"]'</span>],
+  theme: {
+    screens: {
+      sm: <span class="str">'480px'</span>,    <span class="com">// --bp-md</span>
+      md: <span class="str">'768px'</span>,    <span class="com">// --bp-lg</span>
+      lg: <span class="str">'1024px'</span>,   <span class="com">// --bp-xl</span>
+      xl: <span class="str">'1280px'</span>,   <span class="com">// --bp-2xl</span>
+      <span class="str">'2xl'</span>: <span class="str">'1440px'</span>  <span class="com">// --bp-3xl</span>
+    },
+    extend: {
+      colors: {
+        bg:    { base: <span class="str">'var(--bg-base)'</span>,    surface: <span class="str">'var(--bg-surface)'</span>, subtle: <span class="str">'var(--bg-subtle)'</span>, inset: <span class="str">'var(--bg-inset)'</span> },
+        fg:    { default: <span class="str">'var(--fg-default)'</span>, secondary: <span class="str">'var(--fg-secondary)'</span>, tertiary: <span class="str">'var(--fg-tertiary)'</span>, disabled: <span class="str">'var(--fg-disabled)'</span> },
+        border:{ subtle: <span class="str">'var(--border-subtle)'</span>, <span class="kw">default</span>: <span class="str">'var(--border-default)'</span>, strong: <span class="str">'var(--border-strong)'</span> },
+        brand: { 600: <span class="str">'var(--brand-600)'</span>, 500: <span class="str">'var(--brand-500)'</span>, 400: <span class="str">'var(--brand-400)'</span>, 200: <span class="str">'var(--brand-200)'</span>, 100: <span class="str">'var(--brand-100)'</span> },
+        success: <span class="str">'var(--success)'</span>, <span class="str">'success-bg'</span>: <span class="str">'var(--success-bg)'</span>,
+        warning: <span class="str">'var(--warning)'</span>, <span class="str">'warning-bg'</span>: <span class="str">'var(--warning-bg)'</span>,
+        danger:  <span class="str">'var(--danger)'</span>,  <span class="str">'danger-bg'</span>:  <span class="str">'var(--danger-bg)'</span>,
+        info:    <span class="str">'var(--info)'</span>,    <span class="str">'info-bg'</span>:    <span class="str">'var(--info-bg)'</span>,
+        band:    { high: <span class="str">'var(--band-high)'</span>, medium: <span class="str">'var(--band-medium)'</span>, low: <span class="str">'var(--band-low)'</span> },
+      },
+      spacing: {
+        xs: <span class="str">'var(--space-xs)'</span>,  sm: <span class="str">'var(--space-sm)'</span>,  md: <span class="str">'var(--space-md)'</span>,  lg: <span class="str">'var(--space-lg)'</span>,
+        xl: <span class="str">'var(--space-xl)'</span>,  <span class="str">'2xl'</span>: <span class="str">'var(--space-2xl)'</span>,  <span class="str">'3xl'</span>: <span class="str">'var(--space-3xl)'</span>
+      },
+      borderRadius: {
+        xs: <span class="str">'var(--radius-xs)'</span>,  sm: <span class="str">'var(--radius-sm)'</span>,  md: <span class="str">'var(--radius-md)'</span>,  lg: <span class="str">'var(--radius-lg)'</span>
+      },
+      fontFamily: {
+        sans: <span class="str">'var(--font-family-sans)'</span>, bangla: <span class="str">'var(--font-family-bangla)'</span>, mono: <span class="str">'var(--font-family-mono)'</span>
+      },
+      fontSize: {
+        xs: <span class="str">'var(--font-size-xs)'</span>, sm: <span class="str">'var(--font-size-sm)'</span>, md: <span class="str">'var(--font-size-md)'</span>,
+        lg: <span class="str">'var(--font-size-lg)'</span>, xl: <span class="str">'var(--font-size-xl)'</span>, <span class="str">'2xl'</span>: <span class="str">'var(--font-size-xxl)'</span>, <span class="str">'3xl'</span>: <span class="str">'var(--font-size-display)'</span>
+      },
+      boxShadow: { modal: <span class="str">'var(--shadow-modal)'</span> },
+      zIndex: { sticky: <span class="str">'var(--z-sticky)'</span>, dropdown: <span class="str">'var(--z-dropdown)'</span>, modal: <span class="str">'var(--z-modal)'</span> }
+    }
+  }
+}
+</pre>
+
+  <p style="margin-top: var(--space-md); font-size: var(--font-size-xs); color: var(--fg-tertiary);">
+    This is the <strong>spec</strong> — actual file lands in the production React scaffold workstream (deferred from dim 5).
+  </p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §8 BANGLA LOCALE TOGGLE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>8 · Bangla Locale Toggle</h2>
+  <p class="section-meta">Locale switch above re-tints Bangla content. Click <strong>বাং</strong> to see how this preview's body text + audit-log row meta flip to Noto Sans Bengali.</p>
+
+  <p class="text-sans" style="background: var(--bg-subtle); padding: var(--space-lg); border-radius: var(--radius-md); border-left: 3px solid var(--brand-500);">
+    এটি একটি বাংলা ডেমো। "পানিতে গন্ধ পাচ্ছি" — ওয়ার্ড ০৪ থেকে অঞ্জলির রিপোর্ট।
+    <br><span style="color: var(--fg-tertiary); font-size: var(--font-size-xs);">↑ Latin: "This is a Bangla demo. 'I smell something in the water' — Anjali's report from Ward 04."</span>
+  </p>
+</section>
+
+</main>
+
+<footer>
+  <span>Surakkha v1 — grid &amp; pages preview · 2026-09-07</span>
+  <span>Tokens → <code>_bmad-output/design/05-grid-pages-stack-lockdown.md</code></span>
+</footer>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

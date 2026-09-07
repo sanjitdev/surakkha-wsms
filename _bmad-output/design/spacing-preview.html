@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Spacing & Components Preview</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     TOKENS — colour from dim 1, typography from dim 2, icons from dim 3,
+     spacing/components here in dim 4.
+     ════════════════════════════════════════════════════════════════════ */
+  :root,
+  [data-theme="light"] {
+    /* Colour (dim 1) */
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+    --badge-trusted:  #144A78;
+    --badge-new:      #6B6F76;
+    --badge-caution:  #8E2E1E;
+
+    /* Typography (dim 2) */
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, -apple-system, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-size-xs:      0.75rem;
+    --font-size-sm:      0.875rem;
+    --font-size-md:      1rem;
+    --font-size-lg:      1.125rem;
+    --font-size-xl:      1.375rem;
+    --font-size-xxl:     1.75rem;
+    --font-size-display: 2.25rem;
+    --font-weight-regular: 400;
+    --font-weight-medium:  500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.2;
+    --line-height-body:  1.5;
+    --line-height-body-bangla: 1.6;
+    --line-height-heading-bangla: 1.3;
+    --line-height-loose: 1.7;
+    --letter-spacing-tight: -0.015em;
+    --letter-spacing-wide:  0.08em;
+    --letter-spacing-tracked: 0.1em;
+
+    /* Icons (dim 3) */
+    --icon-size-xs: 12px;
+    --icon-size-sm: 14px;
+    --icon-size-md: 16px;
+    --icon-size-lg: 20px;
+    --icon-size-xl: 24px;
+    --icon-stroke-thin: 1.75;
+    --icon-stroke-base: 2;
+    --icon-stroke-bold: 2.5;
+
+    /* Spacing (dim 4) */
+    --space-xs:  4px;
+    --space-sm:  8px;
+    --space-md:  12px;
+    --space-lg:  16px;
+    --space-xl:  24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+
+    /* Radius (dim 4) */
+    --radius-xs: 2px;
+    --radius-sm: 3px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+
+    /* Control heights (dim 4) */
+    --height-control-sm: 28px;
+    --height-control-md: 36px;
+    --height-control-lg: 44px;
+    --height-control-xl: 48px;
+
+    /* Row heights (dim 4 Amendment A) */
+    --height-row-default:     40px;
+    --height-row-comfortable: 56px;
+
+    /* Elevation (dim 4) */
+    --shadow-modal: 0 4px 12px rgba(0,0,0,0.08);
+
+    /* Z-index (dim 4) */
+    --z-base:     0;
+    --z-sticky:   100;
+    --z-dropdown: 200;
+    --z-modal:    300;
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-600:      #4A8AC4;
+    --brand-500:      #5C9AD0;
+    --brand-400:      #76AEDF;
+    --brand-200:      #2B3E55;
+    --brand-100:      #1F2D3D;
+    --success:        #5DB287;
+    --success-bg:     #1A2D24;
+    --warning:        #D6A865;
+    --warning-bg:     #2D2418;
+    --danger:         #D8806E;
+    --danger-bg:      #2D1F1B;
+    --info:           #76AEDF;
+    --info-bg:        #1F2D3D;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    --badge-trusted:  #5C9AD0;
+    --badge-new:      #8A8E94;
+    --badge-caution:  #D8806E;
+    --shadow-modal: 0 4px 12px rgba(0,0,0,0.32);
+
+    color-scheme: dark;
+  }
+
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+
+  a { text-decoration: none; color: inherit; }
+
+  body {
+    margin: 0;
+    padding: var(--space-3xl) 56px;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    -webkit-font-smoothing: antialiased;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-2xl);
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    margin: 0 0 var(--space-xs);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-tight);
+    line-height: var(--line-height-tight);
+  }
+
+  .lede {
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    max-width: 720px;
+  }
+
+  .switch-group {
+    display: inline-flex;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2px;
+  }
+
+  .switch-group button {
+    background: transparent;
+    border: none;
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-tertiary);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+
+  .switch-group button.active {
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    box-shadow: 0 0 0 1px var(--border-default);
+  }
+
+  .switch-group button:not(.active):hover { color: var(--fg-default); }
+
+  section { margin-bottom: var(--space-3xl); }
+
+  h2 {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tracked);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-tight);
+  }
+
+  .section-meta {
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-sm);
+    margin: 0 0 var(--space-lg);
+    max-width: 720px;
+    line-height: var(--line-height-body);
+  }
+
+  /* ───── Icon base (carries dim-3 amendment B.3) ───── */
+  .icon {
+    display: block;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: var(--_icon-stroke, var(--icon-stroke-base));
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+  }
+  .icon--xs { width: var(--icon-size-xs); height: var(--icon-size-xs); --_icon-stroke: 1.75; }
+  .icon--sm { width: var(--icon-size-sm); height: var(--icon-size-sm); --_icon-stroke: 1.75; }
+  .icon--md { width: var(--icon-size-md); height: var(--icon-size-md); --_icon-stroke: var(--icon-stroke-base); }
+  .icon--lg { width: var(--icon-size-lg); height: var(--icon-size-lg); --_icon-stroke: var(--icon-stroke-bold); }
+  .icon--xl { width: var(--icon-size-xl); height: var(--icon-size-xl); --_icon-stroke: var(--icon-stroke-bold); }
+
+  /* ───── §1 spacing scale visualization ───── */
+  .space-row {
+    display: grid;
+    grid-template-columns: 110px 80px 1fr;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--fg-default);
+    background: var(--bg-surface);
+  }
+  .space-row:first-child { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+  .space-row:last-child { border-bottom: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+  .space-row + .space-row { border-top: 1px solid var(--border-subtle); }
+  .space-token {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-default);
+    font-weight: var(--font-weight-medium);
+  }
+  .space-value {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .space-bar { background: var(--brand-500); height: 12px; border-radius: 2px; }
+
+  /* ───── §2 radius scale ───── */
+  .radius-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+  }
+  .radius-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .radius-sample {
+    background: var(--bg-subtle);
+    padding: var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .radius-square { width: 56px; height: 56px; background: var(--brand-500); }
+  .radius-label {
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-mono);
+  }
+
+  /* ───── §3 height tiers ───── */
+  .height-row {
+    display: grid;
+    grid-template-columns: 160px 60px 1fr;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .height-row:first-child { border-radius: var(--radius-md) var(--radius-md) 0 0; }
+  .height-row:last-child { border-bottom: none; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+  .height-bar { background: var(--brand-500); border-radius: 2px; }
+
+  /* ───── §4 buttons ───── */
+  .btn-row { display: flex; gap: var(--space-md); flex-wrap: wrap; align-items: center; margin-bottom: var(--space-lg); }
+  .btn-row + .btn-row { padding-top: var(--space-lg); border-top: 1px dashed var(--border-subtle); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+    line-height: var(--line-height-tight);
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+    white-space: nowrap;
+  }
+
+  .btn-sm { height: var(--height-control-sm); padding: 0 var(--space-md); font-size: var(--font-size-sm); }
+  .btn-md { height: var(--height-control-md); padding: 0 var(--space-lg); font-size: var(--font-size-sm); }
+  .btn-lg { height: var(--height-control-lg); padding: 0 var(--space-xl); font-size: var(--font-size-md); }
+
+  .btn-primary { background: var(--brand-500); color: #fff; }
+  [data-theme="dark"] .btn-primary { color: #0E1013; }
+  .btn-primary:hover { background: var(--brand-600); }
+  .btn-primary:focus-visible { box-shadow: 0 0 0 2px var(--brand-400); outline: none; }
+
+  .btn-secondary { background: var(--bg-surface); color: var(--fg-default); border-color: var(--border-default); }
+  .btn-secondary:hover { background: var(--bg-subtle); }
+  .btn-secondary:focus-visible { box-shadow: 0 0 0 2px var(--brand-400); outline: none; }
+
+  .btn-ghost { background: transparent; color: var(--fg-secondary); }
+  .btn-ghost:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .btn-ghost:focus-visible { box-shadow: 0 0 0 2px var(--brand-400); outline: none; }
+
+  /* Danger button: outline + tinted-bg hover per dim 1 §7.3 (no filled danger) */
+  .btn-danger { background: transparent; color: var(--danger); border-color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-bg); }
+  .btn-danger:focus-visible { box-shadow: 0 0 0 2px var(--danger); outline: none; }
+
+  /* Icon-only button: square */
+  .btn-icon-only.btn-sm { width: var(--height-control-sm); padding: 0; }
+  .btn-icon-only.btn-md { width: var(--height-control-md); padding: 0; }
+  .btn-icon-only.btn-lg { width: var(--height-control-lg); padding: 0; }
+
+  /* Disabled state */
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .btn-primary:disabled { background: var(--brand-500); }
+  .btn-secondary:disabled { background: var(--bg-surface); color: var(--fg-disabled); border-color: var(--border-subtle); }
+  .btn-ghost:disabled { color: var(--fg-disabled); }
+
+  /* ───── §5 inputs ───── */
+  .input {
+    height: var(--height-control-md);
+    padding: 0 var(--space-md);
+    background: var(--bg-inset);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    color: var(--fg-default);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+    width: 100%;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .input::placeholder { color: var(--fg-tertiary); }
+  .input:focus { outline: none; border-color: var(--brand-400); box-shadow: 0 0 0 2px var(--brand-200); }
+  .input:disabled { color: var(--fg-disabled); background: var(--bg-subtle); border-color: var(--border-subtle); cursor: not-allowed; }
+
+  .search-wrap { position: relative; }
+  .search-wrap .icon {
+    position: absolute;
+    left: var(--space-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--fg-tertiary);
+  }
+  .search-wrap .input { padding-left: calc(var(--space-md) * 2 + var(--icon-size-md)); }
+
+  .input-label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-secondary);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+
+  /* ───── §6 top-chrome ───── */
+  .top-chrome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-lg);
+    height: var(--height-control-xl);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    background: var(--bg-surface);
+  }
+  .chrome-left, .chrome-right { display: flex; align-items: center; gap: var(--space-md); font-size: var(--font-size-sm); color: var(--fg-secondary); }
+  .chrome-clock { font-family: var(--font-family-mono); font-variant-numeric: tabular-nums; color: var(--fg-tertiary); font-size: var(--font-size-xs); }
+  .chrome-title { font-weight: var(--font-weight-semibold); color: var(--fg-default); }
+
+  .locale-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 0 var(--space-md);
+    height: var(--height-control-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--bg-subtle);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    font-size: var(--font-size-xs);
+    font-family: inherit;
+    font-weight: var(--font-weight-medium);
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+  .locale-toggle:hover { background: var(--bg-inset); color: var(--fg-default); }
+
+  /* ───── §7 nav rows (carries dim-3 amendment B) ───── */
+  .nav-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--space-md); }
+  .nav-card { border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); background: var(--bg-surface); overflow: hidden; }
+  .nav-card-header {
+    background: var(--bg-subtle);
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  /* Admin nav */
+  .admin-nav { padding: var(--space-sm); display: flex; flex-direction: column; gap: 2px; }
+  .admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    height: var(--height-control-lg);
+    padding: 0 var(--space-md);
+    border-radius: var(--radius-md);
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-tight);
+    cursor: pointer;
+    /* Tap target expansion to 48px via padding-block? No — desktop uses 44px floor which the 44px row satisfies. */
+  }
+  .admin-nav-item:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .admin-nav-item.active { background: var(--bg-subtle); color: var(--fg-default); box-shadow: inset 3px 0 0 var(--brand-500); }
+
+  /* Mobile nav */
+  .mobile-nav-wrap { display: flex; flex-direction: column; height: 280px; }
+  .mobile-nav-spacer { flex: 1; padding: var(--space-md); color: var(--fg-tertiary); font-size: var(--font-size-xs); line-height: var(--line-height-body); }
+  .mobile-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: var(--space-xs) var(--space-xs) var(--space-sm);
+    border-top: 1px solid var(--border-subtle);
+    background: var(--bg-surface);
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 4px;
+    gap: 2px;
+    width: 64px;
+    height: var(--height-control-xl);
+    color: var(--fg-tertiary);
+    font-size: 11px;
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: var(--radius-md);
+  }
+  .mobile-nav-item.active { color: var(--brand-500); }
+  .mobile-nav-item:hover { color: var(--fg-default); }
+
+  /* Settings menu */
+  .settings-menu { padding: var(--space-xs) 0; }
+  .settings-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    height: var(--height-control-md);
+    padding: 0 var(--space-lg);
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-tight);
+    cursor: pointer;
+  }
+  .settings-item:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .settings-divider { height: 1px; background: var(--border-subtle); margin: var(--space-xs) 0; }
+
+  /* ───── §8 cards ───── */
+  .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-lg); }
+  .card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+  }
+  /* Amendment A: card-with-heading gets --space-xl block padding for visual air.
+     Compact body-only cards keep --space-lg all sides. */
+  .card--with-heading {
+    padding-block: var(--space-xl);
+    padding-inline: var(--space-lg);
+  }
+  .card-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-xs);
+    line-height: var(--line-height-tight);
+    color: var(--fg-default);
+  }
+  .card-meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    margin: 0 0 var(--space-md);
+  }
+  .card-body {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-body);
+  }
+  .card-footer {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+
+  /* ───── §8.5 row heights (Amendment A) ───── */
+  .row-demo { display: flex; flex-direction: column; gap: var(--space-xs); }
+  .row-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding-inline: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+  }
+  .row-row--default     { height: var(--height-row-default); }
+  .row-row--comfortable { height: var(--height-row-comfortable); }
+  .row-row-text { flex: 1; min-width: 0; }
+  .row-row-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    line-height: var(--line-height-body);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .row-row-meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    line-height: var(--line-height-body);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .row-row-action { flex-shrink: 0; }
+  /* Amendment A: Bangla rows get +1 --space-xs tier of block padding to absorb
+     Bengali descender height (ক, ণ, ব have pronounced descenders). */
+  [data-locale="bn"] .row-row {
+    padding-block: calc(var(--space-md) + var(--space-xs));
+  }
+
+  /* ───── §9 modal ───── */
+  .modal-stage {
+    position: relative;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3xl);
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .modal-scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(14, 16, 19, 0.5);
+    z-index: var(--z-modal);
+  }
+  [data-theme="light"] .modal-scrim { background: rgba(247, 247, 245, 0.5); }
+  .modal-dialog {
+    position: relative;
+    z-index: calc(var(--z-modal) + 1);
+    width: 480px;
+    max-width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-modal);
+  }
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+  }
+  .modal-title { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); margin: 0; line-height: var(--line-height-tight); }
+  .modal-body { font-size: var(--font-size-sm); color: var(--fg-secondary); line-height: var(--line-height-body); }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-md);
+    margin-top: var(--space-xl);
+  }
+
+  /* ───── §10 toasts ───── */
+  .toast-stack {
+    position: relative;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: var(--space-md);
+  }
+  .toast {
+    width: 360px;
+    max-width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-left-width: 3px;
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    gap: var(--space-md);
+    align-items: flex-start;
+    box-shadow: var(--shadow-modal);
+    position: relative;
+    overflow: hidden;
+  }
+  .toast-success { border-left-color: var(--success); }
+  .toast-warning { border-left-color: var(--warning); }
+  .toast-danger  { border-left-color: var(--danger); }
+  .toast-info    { border-left-color: var(--info); }
+
+  /* Amendment A: short Bangla toasts get min-width so they don't render as
+     a cramped ribbon. Icon+text gap becomes em-based inside the Bangla toast
+     so it tracks the Bangla family line-height instead of a px value. */
+  .toast--bangla {
+    min-width: 280px;
+    gap: 0.5em;
+  }
+
+  .toast-icon { color: var(--fg-tertiary); flex-shrink: 0; margin-top: 2px; }
+  .toast-success .toast-icon { color: var(--success); }
+  .toast-warning .toast-icon { color: var(--warning); }
+  .toast-danger  .toast-icon { color: var(--danger); }
+  .toast-info    .toast-icon { color: var(--info); }
+
+  .toast-body { flex: 1; }
+  .toast-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    line-height: var(--line-height-tight);
+    margin-bottom: var(--space-xs);
+  }
+  .toast-message {
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-body);
+  }
+  .toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: currentColor;
+    width: 100%;
+    opacity: 0.6;
+  }
+  .toast-success .toast-progress { color: var(--success); }
+  .toast-warning .toast-progress { color: var(--warning); }
+  .toast-danger  .toast-progress { color: var(--danger); }
+  .toast-info    .toast-progress { color: var(--info); }
+
+  /* ───── §11 band-pill (carries dim-3 §6.1) ───── */
+  .band-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-xs);
+    color: #fff;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    line-height: var(--line-height-tight);
+    min-width: 88px;
+  }
+  [data-theme="dark"] .band-pill { color: #0E1013; }
+  .band-pill.high   { background: var(--band-high); }
+  .band-pill.medium { background: var(--band-medium); }
+  .band-pill.low    { background: var(--band-low); }
+
+  /* ───── Section panel container (carries dim-3 patterns) ───── */
+  .panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .panel-header {
+    background: var(--bg-subtle);
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .panel-body { padding: var(--space-xl); }
+
+  .footnote {
+    margin-top: var(--space-lg);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    line-height: var(--line-height-body);
+  }
+  .footnote code { font-family: var(--font-family-mono); color: var(--fg-secondary); }
+
+  /* ───── Footer ───── */
+  footer {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-subtle);
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-xs);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer code { font-family: var(--font-family-mono); color: var(--fg-secondary); }
+</style>
+</head>
+<body data-theme="light" data-locale="en">
+
+<div class="topbar">
+  <div>
+    <h1>Surakkha v1 — Spacing & Components</h1>
+    <p class="lede">Spacing scale (7), radius scale (4), height tiers (4), 8 core components. Inherits colour (dim 1), typography (dim 2), icons (dim 3, browser-native rasterization). Toggle theme + locale to verify dark-mode and Bangla rendering.</p>
+  </div>
+  <div style="display:flex; gap: var(--space-md); flex-wrap:wrap;">
+    <div class="switch-group" role="tablist" aria-label="Theme">
+      <button class="active" data-set-theme="light">Light</button>
+      <button data-set-theme="dark">Dark</button>
+    </div>
+    <div class="switch-group" role="tablist" aria-label="Locale">
+      <button class="active" data-set-locale="en">English</button>
+      <button data-set-locale="bn">বাংলা</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §1 SPACING SCALE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Spacing Scale</h2>
+  <p class="section-meta">Seven tokens on a 4-pt grid. T-shirt names map to t-shirt sizes used by components. 4-pt base lets every multiple be a multiple of 4.</p>
+
+  <div class="panel">
+    <div class="space-row">
+      <div class="space-token">--space-xs</div>
+      <div class="space-value">4px</div>
+      <div class="space-bar" style="width: var(--space-xs);"></div>
+    </div>
+    <div class="space-row">
+      <div class="space-token">--space-sm</div>
+      <div class="space-value">8px</div>
+      <div class="space-bar" style="width: var(--space-sm);"></div>
+    </div>
+    <div class="space-row">
+      <div class="space-token">--space-md</div>
+      <div class="space-value">12px</div>
+      <div class="space-bar" style="width: var(--space-md);"></div>
+    </div>
+    <div class="space-row">
+      <div class="space-token">--space-lg</div>
+      <div class="space-value">16px</div>
+      <div class="space-bar" style="width: var(--space-lg);"></div>
+    </div>
+    <div class="space-row">
+      <div class="space-token">--space-xl</div>
+      <div class="space-value">24px</div>
+      <div class="space-bar" style="width: var(--space-xl);"></div>
+    </div>
+    <div class="space-row">
+      <div class="space-token">--space-2xl</div>
+      <div class="space-value">32px</div>
+      <div class="space-bar" style="width: var(--space-2xl);"></div>
+    </div>
+    <div class="space-row">
+      <div class="space-token">--space-3xl</div>
+      <div class="space-value">48px</div>
+      <div class="space-bar" style="width: var(--space-3xl);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §2 RADIUS SCALE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Radius Scale</h2>
+  <p class="section-meta">Four radii. Pill (2px) for badges; chip (3px) for switch buttons; control (4px) for buttons/inputs/nav rows; surface (6px) for cards/modals.</p>
+
+  <div class="radius-grid">
+    <div class="radius-card">
+      <div class="radius-sample"><div class="radius-square" style="border-radius: var(--radius-xs);"></div></div>
+      <div class="radius-label">--radius-xs · 2px · pill / badge</div>
+    </div>
+    <div class="radius-card">
+      <div class="radius-sample"><div class="radius-square" style="border-radius: var(--radius-sm);"></div></div>
+      <div class="radius-label">--radius-sm · 3px · chip</div>
+    </div>
+    <div class="radius-card">
+      <div class="radius-sample"><div class="radius-square" style="border-radius: var(--radius-md);"></div></div>
+      <div class="radius-label">--radius-md · 4px · control</div>
+    </div>
+    <div class="radius-card">
+      <div class="radius-sample"><div class="radius-square" style="border-radius: var(--radius-lg);"></div></div>
+      <div class="radius-label">--radius-lg · 6px · surface</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §3 HEIGHT TIERS
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · Control Height Tiers</h2>
+  <p class="section-meta">Four heights. 28 px compact, 36 px default (md button / input), 44 px desktop tap target, 48 px mobile tap target. Components snap to one of these — no in-between heights.</p>
+
+  <div class="panel">
+    <div class="height-row">
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">--height-control-sm</div>
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">28px</div>
+      <div class="height-bar" style="height: var(--height-control-sm); width: var(--height-control-sm);"></div>
+    </div>
+    <div class="height-row">
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">--height-control-md</div>
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">36px</div>
+      <div class="height-bar" style="height: var(--height-control-md); width: var(--height-control-md);"></div>
+    </div>
+    <div class="height-row">
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">--height-control-lg</div>
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">44px</div>
+      <div class="height-bar" style="height: var(--height-control-lg); width: var(--height-control-lg);"></div>
+    </div>
+    <div class="height-row">
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">--height-control-xl</div>
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">48px</div>
+      <div class="height-bar" style="height: var(--height-control-xl); width: var(--height-control-xl);"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §4 BUTTONS — 4 styles × 3 sizes × icon variants
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · Buttons</h2>
+  <p class="section-meta">Four styles (primary / secondary / ghost / danger-outline). Three sizes (sm 28 / md 36 / lg 44). Icon+text uses 8 px gap (--space-sm). Icon-only buttons are square. Danger uses outline + tinted-bg hover (dim 1 §7.3 — no filled danger).</p>
+
+  <div class="panel">
+    <div class="panel-body">
+      <div class="btn-row">
+        <button class="btn btn-primary btn-sm">Verify</button>
+        <button class="btn btn-primary btn-md">Verify incident</button>
+        <button class="btn btn-primary btn-lg">Verify incident</button>
+        <button class="btn btn-primary btn-md" disabled>Verify (disabled)</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary btn-sm">Cancel</button>
+        <button class="btn btn-secondary btn-md">Save draft</button>
+        <button class="btn btn-secondary btn-lg">Save draft</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost btn-sm">Skip</button>
+        <button class="btn btn-ghost btn-md">Skip this step</button>
+        <button class="btn btn-ghost btn-lg">Skip this step</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-danger btn-sm">Reject</button>
+        <button class="btn btn-danger btn-md">Reject report</button>
+        <button class="btn btn-danger btn-lg">Reject report</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary btn-md">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M20 6 9 17l-5-5"/></svg>
+          Approve
+        </button>
+        <button class="btn btn-secondary btn-md">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>
+          Save draft
+        </button>
+        <button class="btn btn-danger btn-md">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Reject
+        </button>
+        <button class="btn btn-ghost btn-md">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          Cancel
+        </button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary btn-icon-only btn-md" aria-label="Verify">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
+        </button>
+        <button class="btn btn-secondary btn-icon-only btn-md" aria-label="Search">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <button class="btn btn-ghost btn-icon-only btn-md" aria-label="More">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>
+        </button>
+        <button class="btn btn-danger btn-icon-only btn-md" aria-label="Delete">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §5 INPUTS — text + search
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Inputs</h2>
+  <p class="section-meta">One size (md, 36 px). Text input and search input (with leading icon). Focus state: brand-400 border + 2 px brand-200 ring. Bangla placeholder renders in Noto Sans Bengali (dim 2 §9.4).</p>
+
+  <div class="panel">
+    <div class="panel-body">
+      <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-lg);">
+        <div>
+          <label class="input-label">Search inbox</label>
+          <div class="search-wrap">
+            <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input class="input" type="text" placeholder="Search by ward or reporter…" />
+          </div>
+        </div>
+        <div>
+          <label class="input-label">Reporter name</label>
+          <input class="input" type="text" placeholder="e.g. Anjali Patil" />
+        </div>
+        <div>
+          <label class="input-label">Ward number</label>
+          <input class="input" type="text" placeholder="e.g. ০৭" value="" />
+        </div>
+      </div>
+      <div style="margin-top: var(--space-lg); display:grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-lg);">
+        <div>
+          <label class="input-label">Focus state</label>
+          <input class="input" type="text" value="Ward 12" autofocus />
+        </div>
+        <div>
+          <label class="input-label">Bangla placeholder</label>
+          <input class="input" type="text" placeholder="ওয়ার্ড নম্বর লিখুন" lang="bn" />
+        </div>
+        <div>
+          <label class="input-label">Disabled</label>
+          <input class="input" type="text" placeholder="Cannot edit" disabled />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §6 TOP-CHROME — with locale globe toggle
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Top Chrome</h2>
+  <p class="section-meta">Application bar. 48 px tall. Locale globe toggle on the right (dim 3 §8). Clock + chain status on the right of the toggle. Bangla locale switches the toggle label.</p>
+
+  <div class="panel">
+    <div class="top-chrome">
+      <div class="chrome-left">
+        <span class="chrome-title">Surakkha</span>
+        <span style="color: var(--fg-tertiary);">·</span>
+        <span>Priya · ward 07</span>
+      </div>
+      <div class="chrome-right">
+        <span class="chrome-clock">14:08:23 BDT · chain fresh</span>
+        <button class="locale-toggle" aria-label="Language / ভাষা">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span data-locale-display>EN</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §7 NAV ROWS — admin / mobile / settings (carries dim-3 §6.5)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · Nav Rows · Admin / Mobile / Settings</h2>
+  <p class="section-meta">Three surfaces from dim-3 amendment B. Admin nav (44 px rows, brand-500 active border). Mobile nav (48 px cells, brand-500 active text). Settings menu (36 px rows, hover-only — no active state).</p>
+
+  <div class="nav-grid">
+
+    <div class="nav-card">
+      <div class="nav-card-header">Admin left-nav · Priya's desktop</div>
+      <nav class="admin-nav" aria-label="Primary">
+        <a class="admin-nav-item active" href="#" aria-current="page">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg>
+          Inbox
+        </a>
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+          Triage
+        </a>
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+          Verification
+        </a>
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg>
+          Audit log
+        </a>
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M2 20a8 8 0 0 1 8-8"/><path d="M14 4a8 8 0 0 1 8 8"/><path d="M2 12a10 10 0 0 1 10-10"/><path d="M12 2c5.5 0 10 4.5 10 10"/><path d="M12 12v.01"/></svg>
+          Sensors
+        </a>
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M8 18v-2"/><path d="M12 18v-4"/><path d="M16 18v-6"/></svg>
+          Reports
+        </a>
+        <a class="admin-nav-item" href="#">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          Settings
+        </a>
+      </nav>
+    </div>
+
+    <div class="nav-card">
+      <div class="nav-card-header">Operator mobile bottom-nav</div>
+      <div class="mobile-nav-wrap">
+        <div class="mobile-nav-spacer">48 px tap target. lg icon (20 px). Active state: brand-500 text colour.</div>
+        <nav class="mobile-nav" aria-label="Mobile primary">
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <span>Home</span>
+          </a>
+          <a class="mobile-nav-item active" href="#" aria-current="page">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11Z"/></svg>
+            <span>Inbox</span>
+          </a>
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+            <span>Verify</span>
+          </a>
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+            <span>Map</span>
+          </a>
+          <a class="mobile-nav-item" href="#">
+            <svg class="icon icon--lg" viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+            <span>Me</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="nav-card">
+      <div class="nav-card-header">Settings menu · gear flyout</div>
+      <div class="settings-menu" role="menu">
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="8" r="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+          Theme
+        </div>
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Language
+        </div>
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+          Notifications
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-item" role="menuitem">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" x2="16" y1="12" y2="12"/></svg>
+          Chain
+        </div>
+        <div class="settings-item" role="menuitem" style="color: var(--danger);">
+          <svg class="icon icon--sm" viewBox="0 0 24 24" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          Sign out
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §8 CARDS / SURFACES
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>8 · Cards &amp; Surfaces</h2>
+  <p class="section-meta">Three cards. 16 px padding (--space-lg). 6 px radius (--radius-lg). 1 px --border-subtle. No shadow (dim 1 §6.5 — borders carry separation work).</p>
+
+  <div class="card-grid">
+    <div class="card card--with-heading">
+      <h3 class="card-title">Sensor #A4-W2</h3>
+      <p class="card-meta">Ward 12 · Mirpur · NTU 4.2</p>
+      <p class="card-body">Turbidity reading above the safe-drinking threshold for 17 minutes. Cluster match with 3 Anjali reports in the same ward within the past hour.</p>
+      <div class="card-footer">
+        <span>Updated 2 min ago</span>
+        <button class="btn btn-secondary btn-sm">View chain</button>
+      </div>
+    </div>
+    <div class="card card--with-heading">
+      <h3 class="card-title">Anjali report · 09:21</h3>
+      <p class="card-meta">Ward 04 · Dhanmondi · photo attached</p>
+      <p class="card-body">"Bad smell from kitchen tap this morning. Water looks slightly brown. Family of 4 drinking from this source."</p>
+      <div class="card-footer">
+        <span>1 corroborating report</span>
+        <button class="btn btn-primary btn-sm">Verify</button>
+      </div>
+    </div>
+    <div class="card card--with-heading">
+      <h3 class="card-title">Councillor Patil · voice relay</h3>
+      <p class="card-meta">Ward 18 · Uttara · no GPS</p>
+      <p class="card-body">"Three families in block 7 complaining about metallic taste. Will send someone to test tomorrow." Recorded and transcribed via PSTN.</p>
+      <div class="card-footer">
+        <span>Caution reporter</span>
+        <button class="btn btn-secondary btn-sm">Listen</button>
+      </div>
+    </div>
+    <div class="card card--compact">
+      <p class="card-body" style="margin: 0;">Compact body-only card. Uses --space-lg all sides (16 px). Reserved for inline content blocks where a heading would be visually noisy — e.g. an inline advisor note in the operator inbox.</p>
+    </div>
+  </div>
+  <p style="margin-top: var(--space-md); font-size: var(--font-size-xs); color: var(--fg-tertiary); font-family: var(--font-family-mono);">Card with heading &nbsp;→ padding-block: var(--space-xl) (24 px) &nbsp;·&nbsp; padding-inline: var(--space-lg) (16 px).<br>Compact body-only &nbsp;→ padding: var(--space-lg) (16 px) all sides.</p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §8.5 ROW HEIGHTS — inbox + table rows (Amendment A)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>8.5 · Row Heights</h2>
+  <p class="section-meta">Two row-height tokens, locked from dim 5 forward. 40 px default (compact scan), 56 px comfortable (sustained reading). Bangla-locale rows automatically grow one block-padding tier to accommodate Bengali descender height.</p>
+
+  <div class="row-demo">
+    <div class="row-row row-row--default">
+      <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+      <div class="row-row-text">
+        <div class="row-row-title">Sensor #B7-N1 · NTU 6.8</div>
+        <div class="row-row-meta">Ward 04 · 12 s ago · unverified</div>
+      </div>
+      <div class="row-row-action"><span class="band-pill band-pill--high" style="font-size: 10px; padding: 2px 8px;">HIGH</span></div>
+    </div>
+    <div class="row-row row-row--comfortable">
+      <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="row-row-text">
+        <div class="row-row-title">Anjali · "Brown water since morning"</div>
+        <div class="row-row-meta">Ward 04 · Dhanmondi · 4 min ago · 1 photo · matches sensor #B7-N1</div>
+      </div>
+      <div class="row-row-action"><button class="btn btn-secondary btn-sm">Open</button></div>
+    </div>
+    <div class="row-row row-row--comfortable" data-locale="bn">
+      <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="row-row-text">
+        <div class="row-row-title text-sans">অঞ্জলি · "সকাল থেকে পানি বাদামি"</div>
+        <div class="row-row-meta text-sans">ওয়ার্ড ০৪ · ধানমন্ডি · ৪ মিনিট আগে · ১ ছবি · সেন্সর #B7-N1 এর সাথে মিলে যায়</div>
+      </div>
+      <div class="row-row-action"><button class="btn btn-secondary btn-sm text-sans">খুলুন</button></div>
+    </div>
+    <div class="row-row row-row--comfortable row-row--bangla-block-pad" data-locale="bn">
+      <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <div class="row-row-text">
+        <div class="row-row-title text-sans">অঞ্জলি · "পানিতে গন্ধ পাচ্ছি"</div>
+        <div class="row-row-meta text-sans">ওয়ার্ড ০৪ · ধানমন্ডি · ৬ মিনিট আগে</div>
+      </div>
+      <div class="row-row-action"><button class="btn btn-secondary btn-sm text-sans">খুলুন</button></div>
+    </div>
+  </div>
+
+  <div style="margin-top: var(--space-md); display: flex; gap: var(--space-lg); flex-wrap: wrap; align-items: center;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+      <div style="height: var(--height-row-default); width: 120px; background: var(--brand-100); border: 1px solid var(--brand-400); border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--brand-500);">40 px</div>
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">--height-row-default</div>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: var(--space-xs);">
+      <div style="height: var(--height-row-comfortable); width: 120px; background: var(--brand-100); border: 1px solid var(--brand-400); border-radius: var(--radius-xs); display: flex; align-items: center; justify-content: center; font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--brand-500);">56 px</div>
+      <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">--height-row-comfortable</div>
+    </div>
+    <div style="flex: 1; min-width: 280px; font-size: var(--font-size-xs); color: var(--fg-secondary); font-family: var(--font-family-mono); line-height: var(--line-height-body);">
+      [data-locale="bn"] .row-row { padding-block: calc(var(--space-md) + var(--space-xs)); }<br>
+      <span style="color: var(--fg-tertiary);">^ Bangla rows automatically add one --space-xs tier of block padding to absorb Bengali descender height.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §10.5 TOAST BANGLA — min-width rule + em-based icon gap (Amendment A)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>10.5 · Bangla Toast Sizing</h2>
+  <p class="section-meta">Short Bangla toasts (e.g. "জমা হয়েছে" — just 9 glyphs) get a min-width so they don't render as a cramped ribbon. Icon+text gap is em-based for Bangla so it tracks the Bangla family line-height instead of a px value.</p>
+
+  <div style="display: flex; gap: var(--space-md); flex-wrap: wrap; padding: var(--space-xl); background: var(--bg-subtle); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+    <div class="toast toast-success toast--bangla" role="status">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
+      <div class="toast-body">
+        <div class="toast-title text-sans">জমা হয়েছে</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+    <div class="toast toast-success" role="status" style="min-width: 280px;">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
+      <div class="toast-body">
+        <div class="toast-title text-sans">ইন্সিডেন্ট যাচাই হয়েছে</div>
+        <div class="toast-message text-sans">ওয়ার্ড ১২ · মিরপুর · কাউন্সিলর কিউ-তে পাঠানো হয়েছে।</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+    <div class="toast toast-success" role="status">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
+      <div class="toast-body">
+        <div class="toast-title">Incident verified</div>
+        <div class="toast-message">Ward 12 · Mirpur · pushed to councillor queue.</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+  </div>
+  <p style="margin-top: var(--space-md); font-size: var(--font-size-xs); color: var(--fg-tertiary); font-family: var(--font-family-mono);">.toast--bangla { min-width: 280px; gap: 0.5em; } &nbsp;·&nbsp; em-based gap tracks Bangla family line-height; px gap is locked at 12 px for Latin rows.</p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §9 MODAL — with scrim
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>9 · Modal</h2>
+  <p class="section-meta">Centred, 480 px max-width. 24 px padding (--space-xl). 6 px radius (--radius-lg). Scrim = --bg-base at 50 % opacity (theme-aware). Single neutral scrim — no tinted scrim.</p>
+
+  <div class="modal-stage">
+    <div class="modal-scrim"></div>
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Verify incident · Ward 12</h3>
+        <button class="btn btn-ghost btn-icon-only btn-sm" aria-label="Close">
+          <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p style="margin: 0 0 var(--space-md);">Sensor #A4-W2 has been reading NTU &gt; 4 for 17 minutes. Three Anjali reports corroborate within the past hour.</p>
+        <p style="margin: 0;">Verify the incident to push to councillor notification queue. This action is signed and recorded to the chain.</p>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost btn-md">Cancel</button>
+        <button class="btn btn-primary btn-md">Verify incident</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §10 TOASTS — 4 semantic variants
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>10 · Toasts</h2>
+  <p class="section-meta">Bottom-right stack. 360 px max-width. 12 px gap (--space-md) between stacked toasts. Auto-dismiss 4 s. 2 px semantic progress bar at bottom edge. Pause-on-hover.</p>
+
+  <div class="toast-stack">
+    <div class="toast toast-success" role="status">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><path d="M20 6 9 17l-5-5"/></svg>
+      <div class="toast-body">
+        <div class="toast-title">Incident verified</div>
+        <div class="toast-message">Ward 12 · Mirpur · pushed to councillor queue.</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+    <div class="toast toast-warning" role="status">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      <div class="toast-body">
+        <div class="toast-title">SLA breach in 2 minutes</div>
+        <div class="toast-message">Sensor #B7-N1 has not reported for 14 minutes.</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+    <div class="toast toast-danger" role="status">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="15" x2="9" y1="9" y2="15"/><line x1="9" x2="15" y1="9" y2="15"/></svg>
+      <div class="toast-body">
+        <div class="toast-title">Chain write failed</div>
+        <div class="toast-message">3 unsynced entries — retrying in 30 s.</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+    <div class="toast toast-info" role="status">
+      <svg class="icon icon--md toast-icon" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+      <div class="toast-body">
+        <div class="toast-title">Bangla locale active</div>
+        <div class="toast-message">Press Ctrl+Shift+L to switch back to English.</div>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §11 BAND-PILL — carries dim-3 §6.1
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>11 · Band-pill · Component Form</h2>
+  <p class="section-meta">Codified here as a component even though its colour tokens live in dim 1. 16 px icon inside 20×20 pill (--icon-size-md, per dim-3 amendment B). 2 px radius (--radius-xs). Three bands: high / medium / low.</p>
+
+  <div class="panel">
+    <div class="panel-body" style="display:flex; gap: var(--space-md); flex-wrap: wrap;">
+      <span class="band-pill high">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        High
+      </span>
+      <span class="band-pill medium">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+        Medium
+      </span>
+      <span class="band-pill low">
+        <svg class="icon icon--md" viewBox="0 0 24 24" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        Low
+      </span>
+    </div>
+  </div>
+  <p class="footnote">
+    Pill background = <code>var(--band-*)</code>. Pill text colour = <code>#fff</code> light / <code>#0E1013</code> dark. Icon inside pill inherits the pill's text colour via <code>currentColor</code>.
+  </p>
+</section>
+
+<footer>
+  <span>Surakkha v1 — spacing &amp; components preview · 2026-09-07</span>
+  <span>Tokens → <code>app/frontend/tokens-spacing.css</code> + <code>tokens-components.css</code></span>
+</footer>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+    const display = document.querySelector('[data-locale-display]');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      if (display) display.textContent = name === 'bn' ? 'বাং' : 'EN';
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

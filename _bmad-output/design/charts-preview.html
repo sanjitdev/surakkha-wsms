@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Charts Preview (dim 5b)</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ════════════════════════════════════════════════════════════════
+     TOKENS — dim 1-4 re-declared + 33 new dim-5b chart tokens.
+     ════════════════════════════════════════════════════════════════ */
+  :root, [data-theme="light"] {
+    /* dim 1 — surfaces */
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    /* dim 1 — text */
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    /* dim 1 — borders */
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    /* dim 1 — brand */
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+    /* dim 1 — semantic */
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+    /* dim 1 — bands */
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+    /* dim 1 — shadow */
+    --shadow-modal:   0 4px 16px rgba(15, 23, 42, 0.12), 0 1px 2px rgba(15, 23, 42, 0.08);
+
+    /* dim 2 — typography */
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+    --font-size-xs: 0.75rem;
+    --font-size-sm: 0.875rem;
+    --font-size-md: 1rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.375rem;
+    --font-size-xxl: 1.75rem;
+    --font-size-display: 2.25rem;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    --line-height-tight: 1.25;
+    --line-height-body: 1.5;
+    --line-height-body-bangla: 1.6;
+    --line-height-heading-bangla: 1.3;
+    --letter-spacing-tight: -0.01em;
+    --letter-spacing-wide: 0.04em;
+
+    /* dim 4 — spacing + radius + control heights */
+    --space-xs:  4px;  --space-sm:  8px;  --space-md: 12px;
+    --space-lg: 16px;  --space-xl: 24px;  --space-2xl: 32px;  --space-3xl: 48px;
+    --radius-xs: 2px; --radius-sm: 3px; --radius-md: 4px; --radius-lg: 6px;
+    --height-input-md: 36px;
+    --height-row-default: 40px;
+    --height-row-comfortable: 56px;
+
+    /* dim 5b — chart tokens (33 new) */
+    --chart-axis-label:           var(--fg-secondary);
+    --chart-axis-tick:            var(--fg-tertiary);
+    --chart-axis-line:            var(--border-default);
+    --chart-tick-length:          4px;
+    --chart-grid-line-major:      var(--border-subtle);
+    --chart-grid-line-major-weight: 1px;
+    --chart-grid-line-minor:      var(--border-subtle);
+    --chart-grid-dash:            none;
+    --chart-bg:                   var(--bg-surface);
+    --chart-scroll-track:         var(--bg-subtle);
+    --chart-tooltip-bg:           var(--bg-base);
+    --chart-tooltip-fg:           var(--fg-default);
+    --chart-tooltip-border:       var(--border-default);
+    --chart-tooltip-shadow:       var(--shadow-modal);
+    --chart-legend-text:          var(--fg-secondary);
+    --chart-legend-swatch-border: var(--border-default);
+    --chart-legend-row-gap:       12px;
+    --chart-series-1: var(--brand-500);
+    --chart-series-2: var(--brand-400);
+    --chart-series-3: var(--success);
+    --chart-series-4: var(--warning);
+    --chart-series-5: var(--danger);
+    --chart-series-6: var(--info);
+    --chart-series-7: var(--band-high);
+    --chart-series-8: var(--band-medium);
+    --chart-series-9: var(--band-low);
+    --chart-series-10: var(--fg-tertiary);
+    --motion-chart-tooltip-in: 120ms ease-out;
+    --motion-chart-tooltip-out: 80ms ease-in;
+    --motion-chart-new-point-flash: 400ms ease-out;
+    --motion-chart-sse-pulse: 1600ms infinite;
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-600:      #4A8AC4;
+    --brand-500:      #5C9AD0;
+    --brand-400:      #76AEDF;
+    --brand-200:      #2B3E55;
+    --brand-100:      #1F2D3D;
+    --success:        #5DB287;
+    --success-bg:     #1A2D24;
+    --warning:        #D6A865;
+    --warning-bg:     #2D2418;
+    --danger:         #D8806E;
+    --danger-bg:      #2D1F1B;
+    --info:           #76AEDF;
+    --info-bg:        #1F2D3D;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    --shadow-modal:   0 4px 16px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
+
+    /* dark chart tokens (only the ones that need swap) */
+    --chart-axis-line:       var(--border-strong);
+    --chart-legend-swatch-border: var(--border-default);
+
+    color-scheme: dark;
+  }
+
+  /* dim 5b §9 — print override */
+  [data-print="true"] {
+    --chart-bg: #ffffff;
+    --chart-grid-line-major: var(--border-strong);
+    --chart-axis-label: var(--fg-default);
+    --chart-axis-tick:  var(--fg-default);
+    --chart-series-3: #1A5A3A;       /* success darker (print-only) */
+    --chart-series-4: #6B4710;       /* warning darker (print-only) */
+    --chart-series-5: #6B1F12;       /* danger darker (print-only) */
+  }
+
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+  a { text-decoration: none; color: inherit; }
+
+  body {
+    margin: 0;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+
+  /* ───── chrome ───── */
+  .preview-chrome {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 48px;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-inline: var(--space-xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+  }
+  .preview-chrome-left { display: flex; align-items: center; gap: var(--space-md); }
+  .preview-chrome-right { display: flex; align-items: center; gap: var(--space-sm); }
+  .preview-chrome strong { font-weight: var(--font-weight-semibold); }
+  .preview-chrome .meta { color: var(--fg-tertiary); font-size: var(--font-size-xs); }
+
+  .seg-btn {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-xs) var(--space-md);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    height: 28px;
+  }
+  .seg-btn:hover { background: var(--bg-subtle); color: var(--fg-default); }
+  .seg-btn.active { background: var(--brand-100); color: var(--brand-500); border-color: var(--brand-400); }
+  [data-theme="dark"] .seg-btn.active { background: var(--brand-200); color: var(--brand-400); border-color: var(--brand-400); }
+
+  main {
+    padding: var(--space-3xl) var(--space-xl);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-tight);
+    margin: 0 0 var(--space-md);
+    line-height: var(--line-height-tight);
+  }
+  h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-3xl) 0 var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+  h3 { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); margin: var(--space-lg) 0 var(--space-xs); }
+  h4 { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin: var(--space-lg) 0 var(--space-xs); color: var(--fg-secondary); text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); }
+  p  { margin: 0 0 var(--space-md); color: var(--fg-secondary); }
+  code {
+    font-family: var(--font-family-mono);
+    font-size: 0.85em;
+    background: var(--bg-subtle);
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    color: var(--fg-default);
+  }
+  .section-meta {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    margin-bottom: var(--space-xl);
+  }
+
+  /* ───── chart card ───── */
+  .chart-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .chart-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-md);
+  }
+  .chart-card-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    margin: 0;
+  }
+  .chart-card-subtitle {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+  }
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: var(--space-xl);
+    margin-bottom: var(--space-xl);
+  }
+
+  .chart-canvas {
+    background: var(--chart-bg);
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-canvas svg { display: block; }
+
+  .axis-text  { font-family: var(--font-family-sans); font-size: 10px; fill: var(--chart-axis-tick); }
+  .axis-line  { stroke: var(--chart-axis-line); stroke-width: 1; }
+  .grid-line  { stroke: var(--chart-grid-line-major); stroke-width: var(--chart-grid-line-major-weight); }
+  .series-line  { fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .series-area  { stroke: none; }
+  .series-dot   { stroke: var(--bg-surface); stroke-width: 1.5; }
+  .series-label { font-family: var(--font-family-sans); font-size: 11px; font-weight: var(--font-weight-semibold); }
+
+  /* legend */
+  .chart-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--chart-legend-row-gap);
+    color: var(--chart-legend-text);
+    font-size: var(--font-size-xs);
+    padding-top: var(--space-sm);
+  }
+  .chart-legend-item { display: inline-flex; align-items: center; gap: var(--space-xs); }
+  .chart-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    border: 1px solid var(--chart-legend-swatch-border);
+  }
+
+  /* tooltip mockup */
+  .chart-tooltip-mock {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: var(--chart-tooltip-bg);
+    color: var(--chart-tooltip-fg);
+    border: 1px solid var(--chart-tooltip-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    box-shadow: var(--chart-tooltip-shadow);
+    font-size: var(--font-size-xs);
+    min-width: 140px;
+    pointer-events: none;
+  }
+  .chart-tooltip-mock .tooltip-row { display: flex; justify-content: space-between; gap: var(--space-md); }
+  .chart-tooltip-mock .tooltip-time { color: var(--fg-tertiary); font-family: var(--font-family-mono); font-size: 10px; margin-bottom: var(--space-xs); }
+
+  /* live indicator (pulsing dot) */
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+  }
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    animation: pulse var(--motion-chart-sse-pulse);
+  }
+  .live-dot.warn { background: var(--warning); animation: none; }
+  @keyframes pulse {
+    0%   { opacity: 0.4; transform: scale(0.9); }
+    50%  { opacity: 1.0; transform: scale(1.1); }
+    100% { opacity: 0.4; transform: scale(0.9); }
+  }
+
+  /* KPI card with sparkline */
+  .kpi-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .kpi-card-label { font-size: var(--font-size-xs); color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: var(--letter-spacing-wide); }
+  .kpi-card-value { font-size: var(--font-size-display); font-weight: var(--font-weight-bold); color: var(--fg-default); line-height: 1; }
+  .kpi-card-trend { font-size: var(--font-size-xs); display: inline-flex; align-items: center; gap: var(--space-xs); }
+  .kpi-card-trend.up   { color: var(--success); }
+  .kpi-card-trend.down { color: var(--danger); }
+  .kpi-card-spark { height: 48px; }
+
+  /* heatmap */
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: 32px repeat(24, 1fr);
+    gap: 2px;
+    font-family: var(--font-family-mono);
+    font-size: 9px;
+    color: var(--chart-axis-tick);
+  }
+  .heatmap-cell { aspect-ratio: 1; border-radius: 2px; }
+  .heatmap-label { display: flex; align-items: center; padding-right: var(--space-xs); }
+
+  /* map mock */
+  .map-mock {
+    background:
+      linear-gradient(0deg, var(--bg-inset), var(--bg-inset)),
+      repeating-linear-gradient(0deg, transparent 0 23px, var(--border-subtle) 23px 24px),
+      repeating-linear-gradient(90deg, transparent 0 23px, var(--border-subtle) 23px 24px);
+    background-blend-mode: normal, multiply, multiply;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .map-mock svg { display: block; }
+  .map-attribution {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: rgba(255, 255, 255, 0.85);
+    color: #333;
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    font-family: var(--font-family-sans);
+  }
+  [data-theme="dark"] .map-attribution { background: rgba(20, 22, 26, 0.85); color: #ddd; }
+  .map-marker {
+    cursor: pointer;
+  }
+  .map-marker-band-high   circle.inner { fill: var(--band-high); }
+  .map-marker-band-medium circle.inner { fill: var(--band-medium); }
+  .map-marker-band-low    circle.inner { fill: var(--band-low); }
+  .map-marker circle.outer {
+    fill: var(--bg-surface);
+    stroke-width: 2;
+  }
+  .map-marker.band-high   circle.outer { stroke: var(--band-high); }
+  .map-marker.band-medium circle.outer { stroke: var(--band-medium); }
+  .map-marker.band-low    circle.outer { stroke: var(--band-low); }
+
+  /* print fallback list (hidden on screen) */
+  .map-print-fallback { display: none; }
+  @media print {
+    .map-print-fallback { display: block !important; }
+    .map-mock { display: none !important; }
+  }
+
+  /* ───── token palette swatches ───── */
+  .palette-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: var(--space-md);
+  }
+  .swatch-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .swatch-chip {
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--chart-legend-swatch-border);
+  }
+  .swatch-name { font-family: var(--font-family-mono); font-size: 11px; font-weight: var(--font-weight-semibold); color: var(--fg-default); }
+  .swatch-maps { font-size: 10px; color: var(--fg-tertiary); }
+
+  /* digit-locale demo (visible in axis tick text) */
+  [data-locale="bn"][data-digit-mode="locale"] .digit-bn { font-family: var(--font-family-bangla); }
+  [data-locale="bn"][data-digit-mode="locale"] .digit-bn text,
+  [data-locale="bn"][data-digit-mode="locale"] .digit-bn tspan { font-feature-settings: "tnum" 1; }
+  [data-locale="bn"] .axis-text,
+  [data-locale="bn"] .tooltip-value { font-family: var(--font-family-bangla); }
+
+  /* mobile width container */
+  .mobile-toggle-frame {
+    width: 100%;
+    transition: width 200ms ease-out;
+  }
+  .mobile-toggle-frame.phone { max-width: 375px; margin-inline: auto; border: 2px dashed var(--border-default); border-radius: var(--radius-lg); padding: var(--space-md); }
+
+  /* sr-only for accessibility text */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  footer {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+
+  /* dim 5b §9 — print mode (full stylesheet) */
+  @media print {
+    body { background: #fff; }
+    .preview-chrome, .seg-btn, footer { display: none !important; }
+    .chart-card { break-inside: avoid; box-shadow: none; border: 1px solid #999; }
+    .live-indicator, .live-dot { display: none; }
+    main { max-width: none; padding: 0; }
+  }
+</style>
+</head>
+
+<body data-theme="light" data-locale="en" data-digit-mode="latin">
+
+<div class="preview-chrome">
+  <div class="preview-chrome-left">
+    <strong>Surakkha v1</strong>
+    <span class="meta">· dim 5b · Charts preview</span>
+  </div>
+  <div class="preview-chrome-right">
+    <button class="seg-btn" data-set-theme="light">Light</button>
+    <button class="seg-btn" data-set-theme="dark">Dark</button>
+    <span class="meta" style="margin-inline: var(--space-sm);">|</span>
+    <button class="seg-btn" data-set-locale="en">EN</button>
+    <button class="seg-btn" data-set-locale="bn">বাং</button>
+    <span class="meta" style="margin-inline: var(--space-sm);">|</span>
+    <button class="seg-btn" data-set-digit="latin">Latin 0-9</button>
+    <button class="seg-btn" data-set-digit="locale">Locale ০-৯</button>
+    <span class="meta" style="margin-inline: var(--space-sm);">|</span>
+    <button class="seg-btn" data-action="phone">Mobile 375px</button>
+    <button class="seg-btn" data-action="print">Print preview</button>
+  </div>
+</div>
+
+<main>
+
+<h1>Data Visualization / Charts</h1>
+<p class="section-meta">Dim 5b · LOCKED contract — 2026-09-07 · 9 chart types · 33 new tokens · Recharts + Leaflet · Priya desktop + mobile + print + real-time.</p>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §1 SCOPE & LIBRARY
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Scope &amp; library</h2>
+  <p>This dimension locks the chart primitive that composes dim-1-4 tokens into time-series, categorical, and geographic visualizations. <strong>Recharts</strong> is the rendering library (~95 KB gzip, declarative, SVG-based, themable via CSS custom properties). <strong>Leaflet + leaflet.markercluster</strong> powers the simple map view (chart type #9).</p>
+  <p>9 chart types ship: time-series line, vertical bar, horizontal bar, donut, sparkline, stacked area, stacked bar, heatmap, sensor map. All 9 are demonstrated below as inline SVG mocks. The actual Recharts + Leaflet integration in <code>surakkha-app/</code> is owned by the engineering-setup workstream — dim 5b ships the contract, not the wiring.</p>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §2 TOKEN PALETTE — 10 series swatches
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Series palette (10 tokens)</h2>
+  <p class="section-meta">No new hues. Each series token aliases a dim-1 source. Dark mode re-binds automatically via dim-1's <code>[data-theme="dark"]</code> block.</p>
+  <div class="palette-grid">
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-1);"></div>
+      <div class="swatch-name">--chart-series-1</div>
+      <div class="swatch-maps">→ --brand-500 (primary)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-2);"></div>
+      <div class="swatch-name">--chart-series-2</div>
+      <div class="swatch-maps">→ --brand-400 (secondary)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-3);"></div>
+      <div class="swatch-name">--chart-series-3</div>
+      <div class="swatch-maps">→ --success (verified)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-4);"></div>
+      <div class="swatch-name">--chart-series-4</div>
+      <div class="swatch-maps">→ --warning (caution)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-5);"></div>
+      <div class="swatch-name">--chart-series-5</div>
+      <div class="swatch-maps">→ --danger (errors)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-6);"></div>
+      <div class="swatch-name">--chart-series-6</div>
+      <div class="swatch-maps">→ --info (neutral info)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-7);"></div>
+      <div class="swatch-name">--chart-series-7</div>
+      <div class="swatch-maps">→ --band-high (sensor critical)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-8);"></div>
+      <div class="swatch-name">--chart-series-8</div>
+      <div class="swatch-maps">→ --band-medium (sensor mixed)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-9);"></div>
+      <div class="swatch-name">--chart-series-9</div>
+      <div class="swatch-maps">→ --band-low (sensor isolated)</div>
+    </div>
+    <div class="swatch-card">
+      <div class="swatch-chip" style="background: var(--chart-series-10);"></div>
+      <div class="swatch-name">--chart-series-10</div>
+      <div class="swatch-maps">→ --fg-tertiary (fallback)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §3 TIME-SERIES LINE CHART
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · Time-series line chart</h2>
+  <p class="section-meta">Dim 5b §6.1 · data: <code>TimeSeriesPoint[]</code> · 240 px default height · multi-series via <code>seriesId</code>.</p>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div>
+        <h3 class="chart-card-title">Sensor pH — last 24 hours</h3>
+        <div class="chart-card-subtitle">aria-label: "Line chart of pH sensor readings, last 24 hours"</div>
+      </div>
+      <div class="live-indicator" aria-label="Live SSE connection">
+        <span class="live-dot"></span>
+        <span>LIVE</span>
+      </div>
+    </div>
+    <div class="chart-canvas" style="height: 240px;">
+      <svg viewBox="0 0 600 240" width="100%" height="240" preserveAspectRatio="none" role="img" aria-label="Line chart of pH sensor readings, last 24 hours" aria-describedby="ts-summary">
+        <!-- grid -->
+        <g class="digit-bn">
+          <line class="grid-line" x1="40" y1="40"  x2="580" y2="40"  />
+          <line class="grid-line" x1="40" y1="90"  x2="580" y2="90"  />
+          <line class="grid-line" x1="40" y1="140" x2="580" y2="140" />
+          <line class="grid-line" x1="40" y1="190" x2="580" y2="190" />
+          <line class="axis-line" x1="40" y1="20" x2="40" y2="220" />
+          <line class="axis-line" x1="40" y1="220" x2="580" y2="220" />
+          <!-- y-axis ticks -->
+          <text class="axis-text" x="34" y="44"  text-anchor="end">9.0</text>
+          <text class="axis-text" x="34" y="94"  text-anchor="end">8.0</text>
+          <text class="axis-text" x="34" y="144" text-anchor="end">7.0</text>
+          <text class="axis-text" x="34" y="194" text-anchor="end">6.0</text>
+          <!-- x-axis ticks (every 3rd on mobile, all on desktop) -->
+          <text class="axis-text" x="80"  y="234" text-anchor="middle">00:00</text>
+          <text class="axis-text" x="180" y="234" text-anchor="middle">06:00</text>
+          <text class="axis-text" x="280" y="234" text-anchor="middle">12:00</text>
+          <text class="axis-text" x="380" y="234" text-anchor="middle">18:00</text>
+          <text class="axis-text" x="480" y="234" text-anchor="middle">২৪:০০</text>
+          <text class="axis-text" x="560" y="234" text-anchor="middle">now</text>
+          <!-- y label -->
+          <text class="axis-text" x="6"  y="130" transform="rotate(-90, 6, 130)" text-anchor="middle">pH</text>
+        </g>
+        <!-- series 1 line (pH) -->
+        <path class="series-line" stroke="var(--chart-series-1)"
+              d="M 60,170 L 100,165 L 140,150 L 180,140 L 220,135 L 260,110 L 300,75 L 340,55 L 380,50 L 420,60 L 460,75 L 500,90 L 540,100 L 560,95" />
+        <!-- series 2 line (turbidity) -->
+        <path class="series-line" stroke="var(--chart-series-2)" stroke-dasharray="4 3"
+              d="M 60,180 L 100,175 L 140,170 L 180,160 L 220,158 L 260,150 L 300,140 L 340,135 L 380,130 L 420,135 L 460,140 L 500,145 L 540,150 L 560,155" />
+        <!-- series 1 dots -->
+        <g class="series-line">
+          <circle class="series-dot" cx="60"  cy="170" r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="100" cy="165" r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="140" cy="150" r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="180" cy="140" r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="220" cy="135" r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="260" cy="110" r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="300" cy="75"  r="4" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="340" cy="55"  r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="380" cy="50"  r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="420" cy="60"  r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="460" cy="75"  r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="500" cy="90"  r="3" fill="var(--chart-series-1)" />
+          <circle class="series-dot" cx="540" cy="100" r="3" fill="var(--chart-series-1)" />
+          <!-- latest = NEW reading (flash effect demo) -->
+          <circle cx="560" cy="95" r="5" fill="var(--chart-series-1)" stroke="var(--bg-surface)" stroke-width="2">
+            <animate attributeName="r" values="5;9;5" dur="0.4s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="1;0.3;1" dur="0.4s" repeatCount="indefinite" />
+          </circle>
+        </g>
+      </svg>
+      <!-- tooltip mockup (sits on top, absolute) -->
+      <div class="chart-tooltip-mock" role="tooltip">
+        <div class="tooltip-time">2026-09-07T15:32:00Z</div>
+        <div class="tooltip-row"><span>pH</span><span class="tooltip-value">7.8</span></div>
+        <div class="tooltip-row"><span>Turbidity</span><span class="tooltip-value">2.4 NTU</span></div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-1);"></span>pH</span>
+      <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-2);"></span>Turbidity (NTU)</span>
+    </div>
+    <p id="ts-summary" class="sr-only">Sensor pH rose from 7.2 to 8.4 between 06:00 and 15:00 today, then settled to 7.8 by 18:00. Turbidity remained between 2.1 and 2.6 NTU. Last reading at 15:32 was 7.8 pH.</p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §4 KPI CARDS WITH SPARKLINES
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · KPI cards with sparklines</h2>
+  <p class="section-meta">Dim 5b §6.5 · 48 px fixed height · embedded in dim 6 <code>KPI</code> card · consumes <code>KPI.trend</code>.</p>
+  <div class="chart-grid">
+    <div class="kpi-card">
+      <div class="kpi-card-label">Active sensors</div>
+      <div class="kpi-card-value">42</div>
+      <div class="kpi-card-trend up">▲ 8% vs last week</div>
+      <svg class="kpi-card-spark" viewBox="0 0 200 48" width="100%" height="48" role="img" aria-label="Sparkline: 7-day trend, up 8%">
+        <path fill="none" stroke="var(--chart-series-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M 0,32 L 28,30 L 56,28 L 84,22 L 112,18 L 140,16 L 168,10 L 200,8" />
+        <circle cx="200" cy="8" r="2.5" fill="var(--chart-series-3)" />
+      </svg>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-label">Open incidents</div>
+      <div class="kpi-card-value">7</div>
+      <div class="kpi-card-trend down">▼ 12% vs last week</div>
+      <svg class="kpi-card-spark" viewBox="0 0 200 48" width="100%" height="48" role="img" aria-label="Sparkline: 7-day trend, down 12%">
+        <path fill="none" stroke="var(--chart-series-5)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M 0,10 L 28,14 L 56,12 L 84,18 L 112,22 L 140,26 L 168,32 L 200,36" />
+        <circle cx="200" cy="36" r="2.5" fill="var(--chart-series-5)" />
+      </svg>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-label">Avg response time</div>
+      <div class="kpi-card-value">18<span style="font-size: var(--font-size-md); color: var(--fg-tertiary);">m</span></div>
+      <div class="kpi-card-trend up">▲ 2m vs last week</div>
+      <svg class="kpi-card-spark" viewBox="0 0 200 48" width="100%" height="48" role="img" aria-label="Sparkline: 7-day trend, slight rise">
+        <path fill="none" stroke="var(--chart-series-4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M 0,28 L 28,26 L 56,24 L 84,26 L 112,22 L 140,18 L 168,20 L 200,16" />
+        <circle cx="200" cy="16" r="2.5" fill="var(--chart-series-4)" />
+      </svg>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-card-label">Verified today</div>
+      <div class="kpi-card-value">14</div>
+      <div class="kpi-card-trend up">▲ 4 vs yesterday</div>
+      <svg class="kpi-card-spark" viewBox="0 0 200 48" width="100%" height="48" role="img" aria-label="Sparkline: 7-day trend, steady rise">
+        <path fill="none" stroke="var(--chart-series-1)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              d="M 0,38 L 28,34 L 56,32 L 84,26 L 112,22 L 140,18 L 168,12 L 200,8" />
+        <circle cx="200" cy="8" r="2.5" fill="var(--chart-series-1)" />
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §5 VERTICAL BAR + HORIZONTAL BAR + DONUT
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Bar charts (vertical, horizontal) + donut</h2>
+  <p class="section-meta">Dim 5b §6.2-6.4 · <code>BarDatum[]</code> shared between vertical/horizontal · <code>DonutSlice[]</code> for band distribution.</p>
+  <div class="chart-grid">
+    <!-- Vertical bar -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Incidents per ward (last 7d)</h3>
+          <div class="chart-card-subtitle">Band-tinted: high = series-7, medium = series-8, low = series-9</div>
+        </div>
+      </div>
+      <div class="chart-canvas" style="height: 240px;">
+        <svg viewBox="0 0 400 240" width="100%" height="240" role="img" aria-label="Vertical bar chart of incidents per ward, last 7 days">
+          <g class="digit-bn">
+            <line class="grid-line" x1="40" y1="40"  x2="380" y2="40"  />
+            <line class="grid-line" x1="40" y1="100" x2="380" y2="100" />
+            <line class="grid-line" x1="40" y1="160" x2="380" y2="160" />
+            <line class="grid-line" x1="40" y1="220" x2="380" y2="220" />
+            <line class="axis-line" x1="40" y1="20" x2="40" y2="220" />
+            <line class="axis-line" x1="40" y1="220" x2="380" y2="220" />
+            <text class="axis-text" x="34" y="44"  text-anchor="end">10</text>
+            <text class="axis-text" x="34" y="104" text-anchor="end">5</text>
+            <text class="axis-text" x="34" y="164" text-anchor="end">2</text>
+            <text class="axis-text" x="34" y="224" text-anchor="end">0</text>
+          </g>
+          <!-- bars (8 wards, 42px each) -->
+          <rect x="60"  y="124" width="32" height="96"  rx="2" fill="var(--chart-series-7)" />
+          <rect x="100" y="100" width="32" height="120" rx="2" fill="var(--chart-series-7)" />
+          <rect x="140" y="148" width="32" height="72"  rx="2" fill="var(--chart-series-8)" />
+          <rect x="180" y="172" width="32" height="48"  rx="2" fill="var(--chart-series-9)" />
+          <rect x="220" y="160" width="32" height="60"  rx="2" fill="var(--chart-series-8)" />
+          <rect x="260" y="184" width="32" height="36"  rx="2" fill="var(--chart-series-9)" />
+          <rect x="300" y="136" width="32" height="84"  rx="2" fill="var(--chart-series-7)" />
+          <rect x="340" y="196" width="32" height="24"  rx="2" fill="var(--chart-series-9)" />
+          <g class="axis-text digit-bn">
+            <text x="76"  y="234" text-anchor="middle">W1</text>
+            <text x="116" y="234" text-anchor="middle">W2</text>
+            <text x="156" y="234" text-anchor="middle">W3</text>
+            <text x="196" y="234" text-anchor="middle">W4</text>
+            <text x="236" y="234" text-anchor="middle">W5</text>
+            <text x="276" y="234" text-anchor="middle">W6</text>
+            <text x="316" y="234" text-anchor="middle">W7</text>
+            <text x="356" y="234" text-anchor="middle">W8</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Horizontal bar -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Slowest response times (councillors)</h3>
+          <div class="chart-card-subtitle">Tick formatter: <code>Intl.NumberFormat unit='minute'</code></div>
+        </div>
+      </div>
+      <div class="chart-canvas" style="height: 240px;">
+        <svg viewBox="0 0 400 240" width="100%" height="240" role="img" aria-label="Horizontal bar chart of councillor response times">
+          <g class="digit-bn">
+            <line class="grid-line" x1="80" y1="20" x2="80" y2="220" />
+            <line class="grid-line" x1="160" y1="20" x2="160" y2="220" />
+            <line class="grid-line" x1="240" y1="20" x2="240" y2="220" />
+            <line class="grid-line" x1="320" y1="20" x2="320" y2="220" />
+            <line class="grid-line" x1="380" y1="20" x2="380" y2="220" />
+            <line class="axis-line" x1="80" y1="20" x2="80"  y2="220" />
+            <line class="axis-line" x1="80" y1="220" x2="380" y2="220" />
+            <text class="axis-text" x="80"  y="234" text-anchor="middle">0</text>
+            <text class="axis-text" x="160" y="234" text-anchor="middle">15</text>
+            <text class="axis-text" x="240" y="234" text-anchor="middle">30</text>
+            <text class="axis-text" x="320" y="234" text-anchor="middle">45</text>
+            <text class="axis-text" x="380" y="234" text-anchor="middle">60m</text>
+          </g>
+          <!-- horizontal bars (5 councillors) -->
+          <rect x="80" y="32"  width="220" height="22" rx="2" fill="var(--chart-series-4)" />
+          <text class="axis-text" x="76" y="48" text-anchor="end">C-1</text>
+          <rect x="80" y="70"  width="180" height="22" rx="2" fill="var(--chart-series-4)" />
+          <text class="axis-text" x="76" y="86" text-anchor="end">C-2</text>
+          <rect x="80" y="108" width="140" height="22" rx="2" fill="var(--chart-series-3)" />
+          <text class="axis-text" x="76" y="124" text-anchor="end">C-3</text>
+          <rect x="80" y="146" width="100" height="22" rx="2" fill="var(--chart-series-3)" />
+          <text class="axis-text" x="76" y="162" text-anchor="end">C-4</text>
+          <rect x="80" y="184" width="60"  height="22" rx="2" fill="var(--chart-series-3)" />
+          <text class="axis-text" x="76" y="200" text-anchor="end">C-5</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Donut -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Band distribution (all wards)</h3>
+          <div class="chart-card-subtitle">Center slot = total incident count</div>
+        </div>
+      </div>
+      <div class="chart-canvas" style="height: 240px;">
+        <svg viewBox="0 0 300 240" width="100%" height="240" role="img" aria-label="Donut chart of band distribution, 3 segments">
+          <!-- donut: 3 segments via stroke-dasharray on a circle -->
+          <circle cx="150" cy="120" r="60" fill="none" stroke="var(--chart-series-7)" stroke-width="36"
+                  stroke-dasharray="113 264" stroke-dashoffset="0" transform="rotate(-90 150 120)" />
+          <circle cx="150" cy="120" r="60" fill="none" stroke="var(--chart-series-8)" stroke-width="36"
+                  stroke-dasharray="150 264" stroke-dashoffset="-113" transform="rotate(-90 150 120)" />
+          <circle cx="150" cy="120" r="60" fill="none" stroke="var(--chart-series-9)" stroke-width="36"
+                  stroke-dasharray="38 264" stroke-dashoffset="-263" transform="rotate(-90 150 120)" />
+          <!-- center label -->
+          <text x="150" y="120" text-anchor="middle" dominant-baseline="middle"
+                style="font-size: 32px; font-weight: var(--font-weight-bold); fill: var(--fg-default);">87</text>
+          <text x="150" y="146" text-anchor="middle"
+                style="font-size: 11px; fill: var(--fg-tertiary);">incidents</text>
+        </svg>
+      </div>
+      <div class="chart-legend">
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-7);"></span>High · 38</span>
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-8);"></span>Medium · 50</span>
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-9);"></span>Low · 13</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §6 STACKED AREA + STACKED BAR
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Stacked charts (area + bar)</h2>
+  <p class="section-meta">Dim 5b §6.6 + §6.7 · Stacked area = sensor parameter composition · Stacked bar = incident lifecycle (normalize=true).</p>
+  <div class="chart-grid">
+    <!-- Stacked area -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Sensor parameter composition (48h)</h3>
+          <div class="chart-card-subtitle">3 channels: pH (series-1), turbidity (series-3), chlorine (series-4)</div>
+        </div>
+      </div>
+      <div class="chart-canvas" style="height: 240px;">
+        <svg viewBox="0 0 600 240" width="100%" height="240" role="img" aria-label="Stacked area chart of sensor parameter composition, 48 hours">
+          <line class="grid-line" x1="40" y1="60"  x2="580" y2="60"  />
+          <line class="grid-line" x1="40" y1="120" x2="580" y2="120" />
+          <line class="grid-line" x1="40" y1="180" x2="580" y2="180" />
+          <line class="axis-line" x1="40" y1="20" x2="40" y2="220" />
+          <line class="axis-line" x1="40" y1="220" x2="580" y2="220" />
+          <text class="axis-text" x="34" y="64"  text-anchor="end">10</text>
+          <text class="axis-text" x="34" y="124" text-anchor="end">5</text>
+          <text class="axis-text" x="34" y="184" text-anchor="end">2</text>
+          <text class="axis-text" x="34" y="224" text-anchor="end">0</text>
+          <!-- area 1 (bottom) - chlorine -->
+          <path class="series-area" fill="var(--chart-series-4)" fill-opacity="0.7"
+                d="M 40,200 L 100,190 L 160,195 L 220,185 L 280,180 L 340,175 L 400,170 L 460,165 L 520,160 L 580,155 L 580,220 L 40,220 Z" />
+          <!-- area 2 (middle) - turbidity -->
+          <path class="series-area" fill="var(--chart-series-3)" fill-opacity="0.7"
+                d="M 40,170 L 100,160 L 160,150 L 220,140 L 280,130 L 340,120 L 400,110 L 460,105 L 520,100 L 580,95 L 580,155 L 520,160 L 460,165 L 400,170 L 340,175 L 280,180 L 220,185 L 160,195 L 100,190 L 40,200 Z" />
+          <!-- area 3 (top) - pH -->
+          <path class="series-area" fill="var(--chart-series-1)" fill-opacity="0.7"
+                d="M 40,140 L 100,120 L 160,100 L 220,90 L 280,80 L 340,70 L 400,60 L 460,55 L 520,50 L 580,45 L 580,95 L 520,100 L 460,105 L 400,110 L 340,120 L 280,130 L 220,140 L 160,150 L 100,160 L 40,170 Z" />
+        </svg>
+      </div>
+      <div class="chart-legend">
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-1);"></span>pH</span>
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-3);"></span>Turbidity (NTU)</span>
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-4);"></span>Chlorine (mg/L)</span>
+      </div>
+    </div>
+
+    <!-- Stacked bar (100% normalized) -->
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Incident lifecycle (normalize = 100%)</h3>
+          <div class="chart-card-subtitle">Verified / Dismissed / Resolved per ward</div>
+        </div>
+      </div>
+      <div class="chart-canvas" style="height: 240px;">
+        <svg viewBox="0 0 400 240" width="100%" height="240" role="img" aria-label="Stacked bar chart, 100% normalized, incident lifecycle by ward">
+          <line class="grid-line" x1="40" y1="40"  x2="380" y2="40"  />
+          <line class="grid-line" x1="40" y1="100" x2="380" y2="100" />
+          <line class="grid-line" x1="40" y1="160" x2="380" y2="160" />
+          <line class="grid-line" x1="40" y1="220" x2="380" y2="220" />
+          <line class="axis-line" x1="40" y1="20" x2="40" y2="220" />
+          <line class="axis-line" x1="40" y1="220" x2="380" y2="220" />
+          <text class="axis-text" x="34" y="44"  text-anchor="end">100%</text>
+          <text class="axis-text" x="34" y="104" text-anchor="end">66%</text>
+          <text class="axis-text" x="34" y="164" text-anchor="end">33%</text>
+          <text class="axis-text" x="34" y="224" text-anchor="end">0%</text>
+          <!-- 6 wards, each split: verified (bottom) / dismissed (middle) / resolved (top) -->
+          <g>
+            <!-- W1 -->
+            <rect x="60" y="64" width="32" height="156" fill="var(--chart-series-3)" />
+            <rect x="60" y="120" width="32" height="56" fill="var(--chart-series-4)" />
+            <rect x="60" y="180" width="32" height="40" fill="var(--chart-series-7)" />
+            <!-- W2 -->
+            <rect x="110" y="80" width="32" height="140" fill="var(--chart-series-3)" />
+            <rect x="110" y="140" width="32" height="40" fill="var(--chart-series-4)" />
+            <rect x="110" y="200" width="32" height="20" fill="var(--chart-series-7)" />
+            <!-- W3 -->
+            <rect x="160" y="100" width="32" height="120" fill="var(--chart-series-3)" />
+            <rect x="160" y="160" width="32" height="40" fill="var(--chart-series-4)" />
+            <rect x="160" y="200" width="32" height="20" fill="var(--chart-series-7)" />
+            <!-- W4 -->
+            <rect x="210" y="120" width="32" height="100" fill="var(--chart-series-3)" />
+            <rect x="210" y="180" width="32" height="20" fill="var(--chart-series-4)" />
+            <rect x="210" y="200" width="32" height="20" fill="var(--chart-series-7)" />
+            <!-- W5 -->
+            <rect x="260" y="140" width="32" height="80" fill="var(--chart-series-3)" />
+            <rect x="260" y="200" width="32" height="20" fill="var(--chart-series-4)" />
+            <rect x="260" y="220" width="32" height="0"  fill="var(--chart-series-7)" />
+            <!-- W6 -->
+            <rect x="310" y="160" width="32" height="60" fill="var(--chart-series-3)" />
+            <rect x="310" y="220" width="32" height="0"  fill="var(--chart-series-4)" />
+            <rect x="310" y="220" width="32" height="0"  fill="var(--chart-series-7)" />
+          </g>
+          <g class="axis-text">
+            <text x="76"  y="234" text-anchor="middle">W1</text>
+            <text x="126" y="234" text-anchor="middle">W2</text>
+            <text x="176" y="234" text-anchor="middle">W3</text>
+            <text x="226" y="234" text-anchor="middle">W4</text>
+            <text x="276" y="234" text-anchor="middle">W5</text>
+            <text x="326" y="234" text-anchor="middle">W6</text>
+          </g>
+        </svg>
+      </div>
+      <div class="chart-legend">
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-3);"></span>Verified</span>
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-4);"></span>Dismissed</span>
+        <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--chart-series-7);"></span>Resolved</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §7 HEATMAP (audit log activity)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · Heatmap (audit log activity, day × hour)</h2>
+  <p class="section-meta">Dim 5b §6.8 · 7×24 grid · 16 px cells · 3 discrete band stops (no smooth gradient per dim 1 §6.4) · server-aggregated, not client-derived.</p>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div>
+        <h3 class="chart-card-title">Activity density (last 30 days)</h3>
+        <div class="chart-card-subtitle">3 buckets: low (band-low), medium (band-medium), high (band-high)</div>
+      </div>
+    </div>
+    <div class="chart-canvas" style="padding: var(--space-md);">
+      <div class="heatmap-grid">
+        <!-- header row (hours) -->
+        <div class="heatmap-label"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">0</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">3</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">6</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">9</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">12</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">15</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">18</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">21</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;">24</div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+        <div class="heatmap-label" style="justify-content: center; font-size: 9px;"></div>
+
+        <!-- data rows: day × 24 hours. Generated via inline style based on a 3-bucket pattern -->
+        <div class="heatmap-label">Sun</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+
+        <div class="heatmap-label">Mon</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+
+        <div class="heatmap-label">Tue</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+
+        <div class="heatmap-label">Wed</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+
+        <div class="heatmap-label">Thu</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+
+        <div class="heatmap-label">Fri</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-high);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+
+        <div class="heatmap-label">Sat</div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-medium);"></div>
+        <div class="heatmap-cell" style="background: var(--band-low);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+        <div class="heatmap-cell" style="background: var(--bg-inset);"></div>
+      </div>
+    </div>
+    <div class="chart-legend">
+      <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--bg-inset); border-color: var(--border-subtle);"></span>0 events</span>
+      <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--band-low);"></span>1-2</span>
+      <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--band-medium);"></span>3-5</span>
+      <span class="chart-legend-item"><span class="chart-legend-swatch" style="background: var(--band-high);"></span>6+</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §8 SENSOR MAP (Leaflet mock as static SVG)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>8 · Sensor map (Leaflet mock)</h2>
+  <p class="section-meta">Dim 5b §6.9 + §13 · Leaflet 1.9.x + leaflet.markercluster · OSM raster tiles · mandatory attribution always visible (mobile included) · print fallback = static list.</p>
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div>
+        <h3 class="chart-card-title">Sensor locations (Ward 1 cluster)</h3>
+        <div class="chart-card-subtitle">14 sensors · 3 cluster bubbles · tap marker → /inbox/:sensorId</div>
+      </div>
+    </div>
+
+    <!-- map mock (hidden in print) -->
+    <div class="map-mock" style="height: 360px;" role="img" aria-label="Map of sensor locations">
+      <svg viewBox="0 0 600 360" width="100%" height="360">
+        <!-- road grid (decorative) -->
+        <g stroke="var(--border-default)" stroke-width="1" fill="none">
+          <line x1="0" y1="90"  x2="600" y2="90"  />
+          <line x1="0" y1="180" x2="600" y2="180" />
+          <line x1="0" y1="270" x2="600" y2="270" />
+          <line x1="150" y1="0" x2="150" y2="360" />
+          <line x1="300" y1="0" x2="300" y2="360" />
+          <line x1="450" y1="0" x2="450" y2="360" />
+        </g>
+        <!-- cluster bubble (top-left, 4 sensors) -->
+        <g class="map-cluster">
+          <circle cx="120" cy="80" r="32" fill="var(--band-medium)" fill-opacity="0.85" stroke="var(--bg-surface)" stroke-width="2" />
+          <text x="120" y="86" text-anchor="middle" style="font-size: 14px; font-weight: var(--font-weight-semibold); fill: var(--bg-base);">4</text>
+        </g>
+        <!-- individual markers -->
+        <g class="map-marker band-high">
+          <circle class="outer" cx="200" cy="120" r="12" />
+          <circle class="inner" cx="200" cy="120" r="5" />
+        </g>
+        <g class="map-marker band-high">
+          <circle class="outer" cx="220" cy="140" r="12" />
+          <circle class="inner" cx="220" cy="140" r="5" />
+        </g>
+        <g class="map-marker band-medium">
+          <circle class="outer" cx="280" cy="180" r="12" />
+          <circle class="inner" cx="280" cy="180" r="5" />
+        </g>
+        <!-- cluster bubble (center, 3 sensors) -->
+        <g class="map-cluster">
+          <circle cx="380" cy="220" r="28" fill="var(--band-high)" fill-opacity="0.85" stroke="var(--bg-surface)" stroke-width="2" />
+          <text x="380" y="226" text-anchor="middle" style="font-size: 13px; font-weight: var(--font-weight-semibold); fill: var(--bg-base);">3</text>
+        </g>
+        <g class="map-marker band-low">
+          <circle class="outer" cx="460" cy="160" r="12" />
+          <circle class="inner" cx="460" cy="160" r="5" />
+        </g>
+        <g class="map-marker band-medium">
+          <circle class="outer" cx="500" cy="280" r="12" />
+          <circle class="inner" cx="500" cy="280" r="5" />
+        </g>
+        <!-- cluster bubble (bottom-right, 2 sensors) -->
+        <g class="map-cluster">
+          <circle cx="540" cy="80" r="24" fill="var(--band-low)" fill-opacity="0.85" stroke="var(--bg-surface)" stroke-width="2" />
+          <text x="540" y="86" text-anchor="middle" style="font-size: 12px; font-weight: var(--font-weight-semibold); fill: var(--bg-base);">2</text>
+        </g>
+        <!-- pin label -->
+        <text x="200" y="148" text-anchor="middle" style="font-size: 9px; fill: var(--fg-tertiary); font-family: var(--font-family-mono);">S-014</text>
+      </svg>
+      <div class="map-attribution">© OpenStreetMap contributors</div>
+    </div>
+
+    <!-- print fallback (only visible in print) -->
+    <div class="map-print-fallback">
+      <h4 style="margin: 0 0 var(--space-sm);">Sensor locations (print list)</h4>
+      <table style="width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid var(--border-default);">
+            <th style="padding: 4px;">Ward</th>
+            <th style="padding: 4px;">Band</th>
+            <th style="padding: 4px;">Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 4px;">Cluster A (north)</td><td style="padding: 4px;">Medium</td><td style="padding: 4px;">4</td></tr>
+          <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 4px;">W1 (west)</td><td style="padding: 4px;">High</td><td style="padding: 4px;">2</td></tr>
+          <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 4px;">W1 (mid)</td><td style="padding: 4px;">Medium</td><td style="padding: 4px;">1</td></tr>
+          <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 4px;">Cluster B (center)</td><td style="padding: 4px;">High</td><td style="padding: 4px;">3</td></tr>
+          <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 4px;">W2 (east)</td><td style="padding: 4px;">Low</td><td style="padding: 4px;">1</td></tr>
+          <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 4px;">W2 (south)</td><td style="padding: 4px;">Medium</td><td style="padding: 4px;">1</td></tr>
+          <tr><td style="padding: 4px;">Cluster C (south)</td><td style="padding: 4px;">Low</td><td style="padding: 4px;">2</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §9 LOCALE — Bengali digit swap
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>9 · Locale — Bengali digit swap</h2>
+  <p class="section-meta">Dim 5b §7 · per-chart <code>digitMode: 'latin' | 'locale'</code> · default latin. Axis ticks swap to ০-৯ only when locale is bn AND digitMode is locale. Tooltip body always uses ISO 8601.</p>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Latin digits (default)</h3>
+          <div class="chart-card-subtitle">digitMode = 'latin' (or locale = 'en')</div>
+        </div>
+      </div>
+      <div class="chart-canvas" style="height: 120px; padding: var(--space-md);">
+        <svg viewBox="0 0 400 100" width="100%" height="100">
+          <line class="grid-line" x1="0" y1="50" x2="400" y2="50" />
+          <line class="axis-line" x1="0" y1="80" x2="400" y2="80" />
+          <text class="axis-text" x="20"  y="94" text-anchor="middle">0</text>
+          <text class="axis-text" x="100" y="94" text-anchor="middle">10</text>
+          <text class="axis-text" x="200" y="94" text-anchor="middle">20</text>
+          <text class="axis-text" x="300" y="94" text-anchor="middle">30</text>
+          <text class="axis-text" x="380" y="94" text-anchor="middle">40</text>
+          <text x="200" y="44" text-anchor="middle" style="font-size: 12px; fill: var(--chart-axis-tick); font-family: var(--font-family-sans);">pH = 7.8, value = 123,456.78</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-head">
+        <div>
+          <h3 class="chart-card-title">Locale digits (Bengali)</h3>
+          <div class="chart-card-subtitle">digitMode = 'locale' AND locale = 'bn' — toggle the chrome</div>
+        </div>
+      </div>
+      <div class="chart-canvas digit-bn" style="height: 120px; padding: var(--space-md);">
+        <svg viewBox="0 0 400 100" width="100%" height="100">
+          <line class="grid-line" x1="0" y1="50" x2="400" y2="50" />
+          <line class="axis-line" x1="0" y1="80" x2="400" y2="80" />
+          <text class="axis-text" x="20"  y="94" text-anchor="middle">০</text>
+          <text class="axis-text" x="100" y="94" text-anchor="middle">১০</text>
+          <text class="axis-text" x="200" y="94" text-anchor="middle">২০</text>
+          <text class="axis-text" x="300" y="94" text-anchor="middle">৩০</text>
+          <text class="axis-text" x="380" y="94" text-anchor="middle">৪০</text>
+          <text x="200" y="44" text-anchor="middle" style="font-size: 12px; fill: var(--chart-axis-tick); font-family: var(--font-family-sans);">pH = ৭.৮, value = ১২৩,৪৫৬.৭৮</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §10 MODE STATE MACHINE
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>10 · Real-time mode state machine</h2>
+  <p class="section-meta">Dim 5b §10 · 3 modes: <code>static</code> (default), <code>poll</code> (30s ±10% jitter), <code>live-sse</code> (EventSource). SSE drops auto-fallback to poll.</p>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3 class="chart-card-title">mode: 'static'</h3>
+      <p style="margin: 0; font-size: var(--font-size-sm);">No fetcher. Data is immutable. Default for all embedded KPI sparklines and historical views.</p>
+      <div class="live-indicator" style="margin-top: var(--space-sm);"><span class="live-dot warn"></span>STATIC</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-card-title">mode: 'poll'</h3>
+      <p style="margin: 0; font-size: var(--font-size-sm);">Triggers <code>onRefresh</code> every <code>refreshIntervalMs</code> with ±10% jitter (default 30s). Consumer refetches via React Query / SWR.</p>
+      <div class="live-indicator" style="margin-top: var(--space-sm);"><span class="live-dot warn"></span>POLLING · 30s</div>
+    </div>
+    <div class="chart-card">
+      <h3 class="chart-card-title">mode: 'live-sse'</h3>
+      <p style="margin: 0; font-size: var(--font-size-sm);">Opens <code>EventSource('/api/sensors/stream')</code>. Exponential backoff 3s/6s/12s/30s cap. After 2 failed reconnects, falls back to poll + emits <code>onConnectionLost</code>.</p>
+      <div class="live-indicator" style="margin-top: var(--space-sm);"><span class="live-dot"></span>LIVE · SSE</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     §11 PLACEMENT MATRIX
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>11 · Per-template chart placement</h2>
+  <p class="section-meta">Dim 5b §14 · Charts attach as props to existing dim 6 page-template types.</p>
+  <table style="width: 100%; border-collapse: collapse; font-size: var(--font-size-sm);">
+    <thead>
+      <tr style="text-align: left; border-bottom: 1px solid var(--border-default);">
+        <th style="padding: 8px;">Template</th>
+        <th style="padding: 8px;">Charts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><strong>Login</strong></td><td style="padding: 8px; color: var(--fg-tertiary);">— (no charts)</td></tr>
+      <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><strong>Dashboard</strong></td><td style="padding: 8px;">4× Sparkline · 1× TimeSeriesLine · 1× Donut · 1× HorizontalBar</td></tr>
+      <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><strong>InboxList</strong></td><td style="padding: 8px;">1× VerticalBar · 1× StackedBar</td></tr>
+      <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><strong>InboxDetail</strong></td><td style="padding: 8px;">1× TimeSeriesLine · 1× StackedArea · 1× SensorMap</td></tr>
+      <tr style="border-bottom: 1px solid var(--border-subtle);"><td style="padding: 8px;"><strong>VerifyFlow</strong></td><td style="padding: 8px;">1× Sparkline · 1× Donut</td></tr>
+      <tr><td style="padding: 8px;"><strong>AuditLog</strong></td><td style="padding: 8px;">1× Heatmap · 1× StackedBar (normalize=true)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  <span>Contract → <code>_bmad-output/design/05b-data-viz-lockdown.md</code></span>
+  <span>9 chart types · 33 new tokens · Recharts + Leaflet · 2026-09-07</span>
+</footer>
+
+</main>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+    const digitButtons = document.querySelectorAll('[data-set-digit]');
+    const actionButtons = document.querySelectorAll('[data-action]');
+    const main = document.querySelector('main');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+
+    function setDigit(name) {
+      root.setAttribute('data-digit-mode', name);
+      digitButtons.forEach(b => b.classList.toggle('active', b.dataset.setDigit === name));
+      try { localStorage.setItem('surakkha-digit-mode', name); } catch (e) {}
+    }
+
+    function togglePhone() {
+      main.classList.toggle('phone-frame');
+    }
+
+    function doPrint() {
+      const prev = root.getAttribute('data-theme');
+      root.setAttribute('data-print', 'true');
+      window.print();
+      // after print dialog closes, remove the flag
+      setTimeout(() => root.removeAttribute('data-print'), 100);
+    }
+
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+    digitButtons.forEach(b => b.addEventListener('click', () => setDigit(b.dataset.setDigit)));
+    actionButtons.forEach(b => {
+      const action = b.dataset.action;
+      if (action === 'phone') b.addEventListener('click', togglePhone);
+      if (action === 'print') b.addEventListener('click', doPrint);
+    });
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+      const d = localStorage.getItem('surakkha-digit-mode');
+      if (d === 'latin' || d === 'locale') setDigit(d);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

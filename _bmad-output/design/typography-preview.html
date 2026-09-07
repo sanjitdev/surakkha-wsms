@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Typography Preview</title>
+
+<!-- IBM Plex Sans (regular/medium/semibold) + IBM Plex Mono (regular) -->
+<!-- Plex Sans ships no Bangla; Bangla is loaded separately as Noto Sans Bengali. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     TOKENS — light theme default, dark via [data-theme="dark"]
+     Inherits colour tokens from palettes-preview.html convention.
+     ════════════════════════════════════════════════════════════════════ */
+  :root,
+  [data-theme="light"] {
+    /* Colour tokens (carry from dim 1) */
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+    --brand-500:      #144A78;
+    --success:        #1E6E47;
+    --warning:        #8A5A1A;
+    --danger:         #8E2E1E;
+    --info:           #1F5E91;
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+    --badge-trusted:  #144A78;
+    --badge-new:      #6B6F76;
+    --badge-caution:  #8E2E1E;
+
+    /* TYPOGRAPHY TOKENS — the lockdown subject */
+    --font-family-sans:    'IBM Plex Sans', 'Noto Sans', system-ui, -apple-system, sans-serif;
+    --font-family-bangla:  'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+    --font-family-mono:    'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+    --font-size-xs:      0.75rem;
+    --font-size-sm:      0.875rem;
+    --font-size-md:      1rem;
+    --font-size-lg:      1.125rem;
+    --font-size-xl:      1.375rem;
+    --font-size-xxl:     1.75rem;
+    --font-size-display: 2.25rem;
+
+    --font-weight-regular:  400;
+    --font-weight-medium:   500;
+    --font-weight-semibold: 600;
+    --font-weight-bold:     700;
+
+    --line-height-tight:           1.2;
+    --line-height-body:            1.5;
+    --line-height-body-bangla:     1.6;
+    --line-height-heading-bangla:  1.3;
+    --line-height-loose:           1.7;
+
+    --letter-spacing-tight:   -0.015em;
+    --letter-spacing-normal:  0;
+    --letter-spacing-wide:    0.08em;
+    --letter-spacing-tracked: 0.1em;
+
+    color-scheme: light;
+  }
+
+  [data-theme="dark"] {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+    --brand-500:      #5C9AD0;
+    --success:        #5DB287;
+    --warning:        #D6A865;
+    --danger:         #D8806E;
+    --info:           #76AEDF;
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+    --badge-trusted:  #5C9AD0;
+    --badge-new:      #8A8E94;
+    --badge-caution:  #D8806E;
+
+    color-scheme: dark;
+  }
+
+  /* Bangla locale flips family-sans and adds body-bangla line-height */
+  [data-locale="bn"] .text-sans   { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .text-heading { font-family: var(--font-family-bangla); line-height: var(--line-height-heading-bangla); }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 56px;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01", "tnum" 0;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-tight);
+    line-height: var(--line-height-tight);
+  }
+
+  .lede {
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .switch-group {
+    display: inline-flex;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 2px;
+  }
+
+  .switch-group button {
+    background: transparent;
+    border: none;
+    padding: 5px 12px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-tertiary);
+    cursor: pointer;
+    border-radius: 3px;
+    font-family: inherit;
+    letter-spacing: var(--letter-spacing-wide);
+    text-transform: uppercase;
+  }
+
+  .switch-group button.active {
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    box-shadow: 0 0 0 1px var(--border-default);
+  }
+
+  .switch-group button:not(.active):hover { color: var(--fg-default); }
+
+  section { margin-bottom: 56px; }
+
+  h2 {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tracked);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-tight);
+  }
+
+  .section-meta {
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-sm);
+    margin: 0 0 20px;
+    max-width: 680px;
+    line-height: var(--line-height-body);
+  }
+
+  /* ───── Type scale grid ───── */
+  .scale-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-surface);
+  }
+
+  .scale-cell {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+    color: var(--fg-default);
+  }
+
+  .scale-cell:last-child,
+  .scale-cell:nth-last-child(-n+3) { border-bottom: none; }
+  .scale-cell:nth-child(3n) { border-right: none; }
+
+  .scale-label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-weight: var(--font-weight-regular);
+  }
+
+  .scale-sample-sans {
+    font-family: var(--font-family-sans);
+    color: var(--fg-default);
+  }
+
+  .scale-sample-bangla {
+    font-family: var(--font-family-bangla);
+    color: var(--fg-default);
+    line-height: var(--line-height-body-bangla);
+  }
+
+  /* ───── Weight ladder ───── */
+  .weight-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg-surface);
+  }
+
+  .weight-cell {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+    color: var(--fg-default);
+    font-size: var(--font-size-md);
+  }
+
+  .weight-cell:nth-child(3n) { border-right: none; }
+  .weight-cell:nth-last-child(-n+3) { border-bottom: none; }
+
+  .weight-label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-weight: var(--font-weight-regular);
+  }
+
+  /* ───── Buttons ───── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    border: 1px solid transparent;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-family: inherit;
+    line-height: var(--line-height-tight);
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+
+  .btn-primary    { background: var(--brand-500);  color: #fff; }
+  [data-theme="dark"] .btn-primary { color: #0E1013; }
+  .btn-primary:hover { background: var(--brand-500); filter: brightness(0.92); }
+
+  .btn-secondary  { background: var(--bg-surface); color: var(--fg-default); border-color: var(--border-default); }
+  .btn-secondary:hover { background: var(--bg-subtle); }
+
+  .btn-danger     { background: var(--bg-surface); color: var(--danger); border-color: var(--border-default); }
+
+  .btn-ghost      { background: transparent; color: var(--fg-secondary); }
+
+  /* ───── Badges — now at 14px (sm) per accessibility review §2 ───── */
+  .badges { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: #fff;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: 0.02em;
+    line-height: var(--line-height-tight);
+  }
+  [data-theme="dark"] .badge { color: #0E1013; }
+
+  .badge .dot {
+    width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.9;
+  }
+
+  .badge-trusted { background: var(--badge-trusted); }
+  .badge-new     { background: var(--badge-new); }
+  .badge-caution { background: var(--badge-caution); }
+
+  /* ───── Cards ───── */
+  .surface-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .surface-header {
+    background: var(--bg-subtle);
+    padding: 10px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+    line-height: var(--line-height-tight);
+  }
+
+  .surface-body { padding: 24px; }
+
+  .surfaces { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ───── Trust bands ───── */
+  .bands { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  .band {
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 18px 20px;
+    color: #fff;
+    background: var(--fg-default);
+  }
+  [data-theme="dark"] .band { color: #0E1013; }
+
+  .band-high   { background: var(--band-high); }
+  .band-medium { background: var(--band-medium); }
+  .band-low    { background: var(--band-low); }
+
+  .band-label-en {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-tracked);
+    opacity: 0.75;
+    margin-bottom: 6px;
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-tight);
+  }
+
+  .band-label-bn {
+    font-family: var(--font-family-bangla);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 8px;
+    line-height: var(--line-height-heading-bangla);
+  }
+
+  .band-desc {
+    font-size: var(--font-size-sm);
+    opacity: 0.85;
+    line-height: var(--line-height-body);
+  }
+
+  /* ───── Inbox mock ───── */
+  .inbox-mock {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .inbox-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: var(--font-size-sm);
+  }
+
+  .inbox-row:last-child { border-bottom: none; }
+
+  .inbox-band-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    color: #fff;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    line-height: var(--line-height-tight);
+    min-width: 76px;
+  }
+  [data-theme="dark"] .inbox-band-pill { color: #0E1013; }
+
+  .inbox-band-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.9; }
+  .inbox-band-pill.high   { background: var(--band-high); }
+  .inbox-band-pill.medium { background: var(--band-medium); }
+  .inbox-band-pill.low    { background: var(--band-low); }
+
+  .inbox-meta { font-weight: var(--font-weight-medium); color: var(--fg-default); }
+  .inbox-meta-sub { font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-top: 2px; font-weight: var(--font-weight-regular); line-height: var(--line-height-body); }
+
+  .inbox-time {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Bangla inbox row */
+  [data-locale="bn"] .inbox-row { line-height: var(--line-height-body-bangla); }
+  [data-locale="bn"] .inbox-meta { font-family: var(--font-family-bangla); }
+  [data-locale="bn"] .inbox-meta-sub { font-family: var(--font-family-bangla); }
+
+  /* ───── Consumer message ───── */
+  .messages {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .message {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    padding: 18px 20px;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+  [data-locale="bn"] .message { line-height: var(--line-height-body-bangla); font-family: var(--font-family-bangla); }
+
+  .message-label {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--fg-tertiary);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: 8px;
+  }
+
+  .message-line { margin: 0 0 6px; color: var(--fg-default); }
+
+  .message-footer {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* VS15 text-style glyph — forced monochrome */
+  .glyph-text {
+    font-variant-emoji: text;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* ───── Tabular figures demo ───── */
+  .ts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .ts-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .ts-panel-header {
+    background: var(--bg-subtle);
+    padding: 8px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .ts-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: 8px 16px;
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    border-bottom: 1px solid var(--border-subtle);
+    font-variant-numeric: proportional-nums;
+  }
+
+  .ts-panel-tabular .ts-row { font-variant-numeric: tabular-nums; }
+
+  .ts-row:last-child { border-bottom: none; }
+  .ts-row .ts-time { color: var(--fg-tertiary); }
+
+  /* ───── Bangla vs English side-by-side ───── */
+  .lang-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .lang-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .lang-panel-header {
+    background: var(--bg-subtle);
+    padding: 10px 16px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .lang-panel-body {
+    padding: 20px;
+    font-size: var(--font-size-md);
+    color: var(--fg-default);
+  }
+
+  .lang-panel-en .lang-panel-body { font-family: var(--font-family-sans); line-height: var(--line-height-body); }
+  .lang-panel-bn .lang-panel-body { font-family: var(--font-family-bangla); line-height: var(--line-height-body-bangla); }
+
+  /* ───── Footer ───── */
+  footer {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-xs);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  footer code { font-family: var(--font-family-mono); color: var(--fg-secondary); }
+
+  /* Mono samples */
+  .mono { font-family: var(--font-family-mono); font-variant-numeric: tabular-nums; }
+
+  /* Icon placeholder for backwards-compat with palettes-preview.html */
+  .icon-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px; height: 14px;
+    border: 1px dashed currentColor;
+    border-radius: 2px;
+    opacity: 0.35;
+    margin-right: 6px;
+    vertical-align: -2px;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+  }
+</style>
+</head>
+<body data-theme="light" data-locale="en">
+
+<div class="topbar">
+  <div>
+    <h1>Surakkha v1 — Typography</h1>
+    <p class="lede">Locked font system across all four surfaces. Toggle theme and locale in the top-right. Tabular numerals, VS15-glyph consumer messaging, Bangla-specific line-heights.</p>
+  </div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <div class="switch-group" role="tablist" aria-label="Theme">
+      <button class="active" data-set-theme="light">Light</button>
+      <button data-set-theme="dark">Dark</button>
+    </div>
+    <div class="switch-group" role="tablist" aria-label="Locale">
+      <button class="active" data-set-locale="en">English</button>
+      <button data-set-locale="bn">বাংলা</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     1. TYPE SCALE — all 7 sizes, both families
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Type Scale</h2>
+  <p class="section-meta">Seven steps. xs (0.75rem) is reserved for tertiary metadata; sm (0.875rem) is the new tier-badge size per the accessibility review.</p>
+
+  <div class="scale-grid">
+    <div class="scale-cell">
+      <div class="scale-label">xs · 0.75rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans">
+      Water in Ward 7 — sample at xs.
+    </div>
+    <div class="scale-cell scale-sample-bangla">
+      ওয়ার্ড ৭-এর পানি — xs নমুনা।
+    </div>
+
+    <div class="scale-cell">
+      <div class="scale-label">sm · 0.875rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans">
+      Water in Ward 7 — sample at sm (badges).
+    </div>
+    <div class="scale-cell scale-sample-bangla">
+      ওয়ার্ড ৭-এর পানি — sm নমুনা (ব্যাজ)।
+    </div>
+
+    <div class="scale-cell">
+      <div class="scale-label">md · 1rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans">
+      Water in Ward 7 — sample at md (body).
+    </div>
+    <div class="scale-cell scale-sample-bangla">
+      ওয়ার্ড ৭-এর পানি — md নমুনা (মূল পাঠ)।
+    </div>
+
+    <div class="scale-cell">
+      <div class="scale-label">lg · 1.125rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans" style="font-weight: var(--font-weight-semibold);">
+      Water in Ward 7 — sample at lg (card title).
+    </div>
+    <div class="scale-cell scale-sample-bangla" style="font-weight: var(--font-weight-semibold);">
+      ওয়ার্ড ৭-এর পানি — lg নমুনা (কার্ড শিরোনাম)।
+    </div>
+
+    <div class="scale-cell">
+      <div class="scale-label">xl · 1.375rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans" style="font-weight: var(--font-weight-semibold); letter-spacing: var(--letter-spacing-tight); line-height: var(--line-height-tight);">
+      Water in Ward 7
+    </div>
+    <div class="scale-cell scale-sample-bangla" style="font-weight: var(--font-weight-semibold);">
+      ওয়ার্ড ৭-এর পানি
+    </div>
+
+    <div class="scale-cell">
+      <div class="scale-label">xxl · 1.75rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans" style="font-weight: var(--font-weight-semibold); letter-spacing: var(--letter-spacing-tight); line-height: var(--line-height-tight);">
+      Page title
+    </div>
+    <div class="scale-cell scale-sample-bangla" style="font-weight: var(--font-weight-semibold);">
+      পৃষ্ঠার শিরোনাম
+    </div>
+
+    <div class="scale-cell">
+      <div class="scale-label">display · 2.25rem</div>
+    </div>
+    <div class="scale-cell scale-sample-sans" style="font-weight: var(--font-weight-bold); letter-spacing: var(--letter-spacing-tight); line-height: var(--line-height-tight);">
+      Display
+    </div>
+    <div class="scale-cell scale-sample-bangla" style="font-weight: var(--font-weight-bold);">
+      প্রদর্শন
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     2. WEIGHT LADDER
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Weight Ladder</h2>
+  <p class="section-meta">Four weights in both families at md size. Bangla family ships matching weights (Noto Sans Bengali 400/500/600/700).</p>
+
+  <div class="weight-grid">
+    <div class="weight-cell"><div class="weight-label">regular · 400</div></div>
+    <div class="weight-cell scale-sample-sans" style="font-weight: var(--font-weight-regular);">
+      Boil water in Ward 7 before drinking.
+    </div>
+    <div class="weight-cell scale-sample-bangla">
+      ওয়ার্ড ৭-এর পানি ফুটিয়ে খান।
+    </div>
+
+    <div class="weight-cell"><div class="weight-label">medium · 500</div></div>
+    <div class="weight-cell scale-sample-sans" style="font-weight: var(--font-weight-medium);">
+      Boil water in Ward 7 before drinking.
+    </div>
+    <div class="weight-cell scale-sample-bangla" style="font-weight: var(--font-weight-medium);">
+      ওয়ার্ড ৭-এর পানি ফুটিয়ে খান।
+    </div>
+
+    <div class="weight-cell"><div class="weight-label">semibold · 600</div></div>
+    <div class="weight-cell scale-sample-sans" style="font-weight: var(--font-weight-semibold);">
+      Boil water in Ward 7 before drinking.
+    </div>
+    <div class="weight-cell scale-sample-bangla" style="font-weight: var(--font-weight-semibold);">
+      ওয়ার্ড ৭-এর পানি ফুটিয়ে খান।
+    </div>
+
+    <div class="weight-cell"><div class="weight-label">bold · 700</div></div>
+    <div class="weight-cell scale-sample-sans" style="font-weight: var(--font-weight-bold);">
+      Boil water in Ward 7 before drinking.
+    </div>
+    <div class="weight-cell scale-sample-bangla" style="font-weight: var(--font-weight-bold);">
+      ওয়ার্ড ৭-এর পানি ফুটিয়ে খান।
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     3. PER-FAMILY LINE-HEIGHT DEMO
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · Per-family Line Height</h2>
+  <p class="section-meta">Latin body uses line-height 1.5. Bangla body uses line-height 1.6 (Bangla glyphs sit higher in the x-height than Latin and need room above their ascenders).</p>
+
+  <div class="lang-compare">
+    <div class="lang-panel lang-panel-en">
+      <div class="lang-panel-header">English · family-sans · lh 1.5</div>
+      <div class="lang-panel-body">
+        <strong>Boil water in Ward 7 before drinking.</strong> Likely contamination: chlorine residual. Boil for 3 minutes, let cool, and store covered. Next update by 18:00. — Dhaka PHA.
+      </div>
+    </div>
+    <div class="lang-panel lang-panel-bn">
+      <div class="lang-panel-header">বাংলা · family-bangla · lh 1.6</div>
+      <div class="lang-panel-body">
+        <strong>ওয়ার্ড ৭-এর পানি ফুটিয়ে খান।</strong> সম্ভাব্য দূষণ: ক্লোরিন অবশিষ্ট। ৩ মিনিট ফুটিয়ে নিন, ঠাণ্ডা করে ঢেকে রাখুন। পরবর্তী হালনাগাদ: ১৮:০০। — ঢাকা পিএইচএ।
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     4. COMPONENT SAMPLES
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · Components</h2>
+  <p class="section-meta">Buttons, badges, cards, bands, inbox mock — all driven by the typography tokens above. Toggle locale to see Bangla family in action.</p>
+
+  <div class="surfaces">
+    <div class="surface-card">
+      <div class="surface-header">Buttons · sm 0.875rem · medium 500</div>
+      <div class="surface-body">
+        <button class="btn btn-primary">Verify incident</button>
+        <button class="btn btn-secondary">Save draft</button>
+        <button class="btn btn-danger">Reject</button>
+        <button class="btn btn-ghost">Cancel</button>
+      </div>
+    </div>
+
+    <div class="surface-card">
+      <div class="surface-header">Reporter badges · sm 0.875rem (was xs)</div>
+      <div class="surface-body">
+        <div class="badges">
+          <span class="badge badge-trusted"><span class="dot"></span>Trusted</span>
+          <span class="badge badge-new"><span class="dot"></span>New</span>
+          <span class="badge badge-caution"><span class="dot"></span>Caution</span>
+        </div>
+        <div style="margin-top:18px; font-size: var(--font-size-xs); color: var(--fg-tertiary); line-height: var(--line-height-body);">
+          Tier-badge size bumped from xs (12px) to sm (14px) per accessibility review §2.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bands" style="margin-top:24px;">
+    <div class="band band-high">
+      <div class="band-label-en">High</div>
+      <div class="band-label-bn">উচ্চ</div>
+      <div class="band-desc">Cluster match + sensor agreement</div>
+    </div>
+    <div class="band band-medium">
+      <div class="band-label-en">Medium</div>
+      <div class="band-label-bn">মধ্যম</div>
+      <div class="band-desc">Single signal or mixed corroboration</div>
+    </div>
+    <div class="band band-low">
+      <div class="band-label-en">Low</div>
+      <div class="band-label-bn">নিম্ন</div>
+      <div class="band-desc">Bulk-triage bucket, isolated</div>
+    </div>
+  </div>
+
+  <div class="inbox-mock" style="margin-top:24px;">
+    <div class="surface-header">Admin inbox · body text uses tabular numerals</div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill high"><span class="dot"></span>High</span>
+      <div class="inbox-meta">
+        Ward 12 · Mirpur
+        <div class="inbox-meta-sub">Sensor + 3 Anjali reports · NTU 4.2 · 09:14</div>
+      </div>
+      <span class="badge badge-trusted"><span class="dot"></span>Trusted</span>
+      <span class="inbox-time">2 min ago</span>
+    </div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill medium"><span class="dot"></span>Medium</span>
+      <div class="inbox-meta">
+        Ward 04 · Dhanmondi
+        <div class="inbox-meta-sub">1 Anjali report · "bad smell" · photo · 09:21</div>
+      </div>
+      <span class="badge badge-new"><span class="dot"></span>New</span>
+      <span class="inbox-time">7 min ago</span>
+    </div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill low"><span class="dot"></span>Low</span>
+      <div class="inbox-meta">
+        Ward 18 · Uttara
+        <div class="inbox-meta-sub">1 Anjali text-only · no GPS · 09:32</div>
+      </div>
+      <span class="badge badge-caution"><span class="dot"></span>Caution</span>
+      <span class="inbox-time">12 min ago</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     5. TABULAR FIGURES DEMO
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Tabular Numerals</h2>
+  <p class="section-meta">Operator data displays must use <code>font-variant-numeric: tabular-nums</code> so columns of figures line up. Without it, digits drift in width and columns look ragged.</p>
+
+  <div class="ts-grid">
+    <div class="ts-panel ts-panel-proportional">
+      <div class="ts-panel-header">Without tabular-nums (default)</div>
+      <div class="ts-row"><span>Ward 12 · Mirpur</span><span class="ts-time">09:14:02</span></div>
+      <div class="ts-row"><span>Ward 04 · Dhanmondi</span><span class="ts-time">09:21:48</span></div>
+      <div class="ts-row"><span>Ward 18 · Uttara</span><span class="ts-time">09:32:11</span></div>
+      <div class="ts-row"><span>Ward 07 · Mohammadpur</span><span class="ts-time">09:47:55</span></div>
+    </div>
+    <div class="ts-panel ts-panel-tabular">
+      <div class="ts-panel-header">With tabular-nums (locked)</div>
+      <div class="ts-row"><span>Ward 12 · Mirpur</span><span class="ts-time">09:14:02</span></div>
+      <div class="ts-row"><span>Ward 04 · Dhanmondi</span><span class="ts-time">09:21:48</span></div>
+      <div class="ts-row"><span>Ward 18 · Uttara</span><span class="ts-time">09:32:11</span></div>
+      <div class="ts-row"><span>Ward 07 · Mohammadpur</span><span class="ts-time">09:47:55</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     6. CONSUMER MESSAGES (Ramesh-channel)
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Consumer Messages (Ramesh-channel)</h2>
+  <p class="section-meta">Six message shapes, both locales. Glyphs forced monochrome via U+FE0E (VS15). ≤ 64 chars per line. Footer is <code>— {ISSUING_AUTHORITY} ({VERIFICATION_HORIZON})</code>.</p>
+
+  <div class="messages">
+
+    <div class="message">
+      <div class="message-label">Safe now · EN</div>
+      <p class="message-line">Water in Ward 7 is safe to drink.<span class="glyph-text"> ✓&#xFE0E;</span></p>
+      <p class="message-line">Resolves prior notice from Tue 14:13.</p>
+      <p class="message-line">Tested at 17:30. Next update at 09:00.</p>
+      <div class="message-footer">— Dhaka PHA (Tue 17:30)</div>
+    </div>
+
+    <div class="message">
+      <div class="message-label">নিরাপদ · BN</div>
+      <p class="message-line">ওয়ার্ড ৭-এর পানি এখন বিশুদ্ধ।<span class="glyph-text"> ✓&#xFE0E;</span></p>
+      <p class="message-line">মঙ্গল ১৪:১৩ থেকে পূর্ববর্তী সতর্কতা প্রত্যাহার।</p>
+      <p class="message-line">পরীক্ষিত: ১৭:৩০। পরবর্তী হালনাগাদ: ০৯:০০।</p>
+      <div class="message-footer">— ঢাকা পিএইচএ (মঙ্গল ১৭:৩০)</div>
+    </div>
+
+    <div class="message">
+      <div class="message-label">Boil · EN</div>
+      <p class="message-line">Boil water in Ward 7 before drinking.</p>
+      <p class="message-line">Likely contamination: chlorine residual.</p>
+      <p class="message-line">Boil 3 min, let cool, store covered.</p>
+      <div class="message-footer">— Dhaka PHA (Tue 18:00)</div>
+    </div>
+
+    <div class="message">
+      <div class="message-label">ফুটিয়ে খান · BN</div>
+      <p class="message-line">ওয়ার্ড ৭-এর পানি ফুটিয়ে খান।</p>
+      <p class="message-line">সম্ভাব্য দূষণ: ক্লোরিন অবশিষ্ট।</p>
+      <p class="message-line">৩ মিনিট ফুটিয়ে নিন, ঠাণ্ডা করে ঢেকে রাখুন।</p>
+      <div class="message-footer">— ঢাকা পিএইচএ (মঙ্গল ১৮:০০)</div>
+    </div>
+
+    <div class="message">
+      <div class="message-label">Do not drink · EN</div>
+      <p class="message-line">Do not drink water in Ward 7.</p>
+      <p class="message-line">Use bottled or tanker-supplied water.</p>
+      <p class="message-line">Boil does not remove this contaminant.</p>
+      <div class="message-footer">— Dhaka PHA (Tue 18:00)</div>
+    </div>
+
+    <div class="message">
+      <div class="message-label">পান করবেন না · BN</div>
+      <p class="message-line">ওয়ার্ড ৭-এর পানি পান করবেন না।</p>
+      <p class="message-line">বোতলজাত বা ট্যাঙ্কারের পানি ব্যবহার করুন।</p>
+      <p class="message-line">ফুটালেও এই দূষক দূর হয় না।</p>
+      <div class="message-footer">— ঢাকা পিএইচএ (মঙ্গল ১৮:০০)</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     7. MONO — chain hashes and event IDs
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>7 · Mono · Chain hashes and event IDs</h2>
+  <p class="section-meta">Mono family renders chain references and event IDs always in Latin digits, regardless of locale. Latin-only by design.</p>
+
+  <div class="surface-card">
+    <div class="surface-header">Audit timeline sample</div>
+    <div class="surface-body mono" style="font-size: var(--font-size-sm);">
+      <div style="margin-bottom: 6px;"><span style="color: var(--fg-tertiary);">event_id</span> &nbsp;evt_01HXYZ3RK7N8Q4W2F</div>
+      <div style="margin-bottom: 6px;"><span style="color: var(--fg-tertiary);">payload_hash</span> &nbsp;sha256:9f4e2c81a7d3b6f5e0c8a1d2b4e6f8c9a1b3d5e7f9c2b4a6d8e0f2c4b6a8d0e2f</div>
+      <div style="margin-bottom: 6px;"><span style="color: var(--fg-tertiary);">version_id</span> &nbsp;pb_v3.2.0_2026-09-01T08:00:00Z</div>
+      <div><span style="color: var(--fg-tertiary);">actor_ref</span> &nbsp;priya.utility_operator.ward_07</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>Surakkha v1 — typography preview · 2026-09-07</span>
+  <span>Tokens → <code>app/frontend/tokens-typography.css</code></span>
+</footer>
+
+<script>
+  (function () {
+    const root = document.body;
+    const themeButtons = document.querySelectorAll('[data-set-theme]');
+    const localeButtons = document.querySelectorAll('[data-set-locale]');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      themeButtons.forEach(b => b.classList.toggle('active', b.dataset.setTheme === name));
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    function setLocale(name) {
+      root.setAttribute('data-locale', name);
+      localeButtons.forEach(b => b.classList.toggle('active', b.dataset.setLocale === name));
+      try { localStorage.setItem('surakkha-locale', name); } catch (e) {}
+    }
+
+    themeButtons.forEach(b => b.addEventListener('click', () => setTheme(b.dataset.setTheme)));
+    localeButtons.forEach(b => b.addEventListener('click', () => setLocale(b.dataset.setLocale)));
+
+    try {
+      const t = localStorage.getItem('surakkha-theme');
+      if (t === 'dark' || t === 'light') setTheme(t);
+      const l = localStorage.getItem('surakkha-locale');
+      if (l === 'bn' || l === 'en') setLocale(l);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>

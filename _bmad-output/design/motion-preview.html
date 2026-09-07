@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en" data-theme="light" data-locale="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dimension 8 — Motion preview</title>
+<style>
+/* ====================================================================
+ * SURAKKHA — dim 8 Motion preview
+ * Re-declares all motion tokens + easings; demonstrates every pattern
+ * Demo toggles: theme (light/dark), reduced-motion (on/off), print (on/off)
+ * ==================================================================== */
+
+:root {
+  /* dim 1 — color (light) */
+  --bg-base: #F7F7F5; --bg-surface: #FFFFFF; --bg-subtle: #F1F1EE; --bg-inset: #ECEBE7;
+  --fg-default: #111418; --fg-secondary: #4A5159; --fg-tertiary: #7A8088; --fg-disabled: #B8BCC2;
+  --border-subtle: #E6E5E1; --border-default: #D4D3CF; --border-strong: #9A9B98;
+  --brand-600: #0F3A5F; --brand-500: #144A78; --brand-400: #1F5E91; --brand-200: #C7D5E3; --brand-100: #E5EDF4;
+  --success: #1E6E47; --success-bg: #E9F2ED;
+  --warning: #8A5A1A; --warning-bg: #F4ECDD;
+  --danger:  #8E2E1E; --danger-bg:  #F2E4E0;
+  --info:    #1F5E91; --info-bg:    #E5EDF4;
+  --band-high: #1E6E47; --band-medium: #6B6F76; --band-low: #A8A9A4;
+
+  /* dim 2 — typography */
+  --font-family-sans: 'Inter', 'IBM Plex Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-family-mono: 'IBM Plex Mono', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  --font-size-xs: 12px; --font-size-sm: 13px; --font-size-md: 14px; --font-size-lg: 16px; --font-size-xl: 18px;
+  --font-weight-regular: 400; --font-weight-medium: 500; --font-weight-semibold: 600; --font-weight-bold: 700;
+
+  /* dim 4 — spacing/radius/height */
+  --space-xs: 4px; --space-sm: 8px; --space-md: 12px; --space-lg: 16px;
+  --space-xl: 24px; --space-2xl: 32px; --space-3xl: 48px;
+  --radius-xs: 2px; --radius-sm: 3px; --radius-md: 4px; --radius-lg: 6px;
+  --height-control-md: 36px; --height-control-lg: 44px; --height-control-xl: 48px;
+
+  /* dim 8 — easings */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.4, 1);
+  --ease-in: cubic-bezier(0.6, 0, 0.8, 0.2);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.6, 1);
+
+  /* dim 8 — motion tokens (per §3.1) */
+  --motion-press-120: 120ms;
+  --motion-tab-switch: 160ms;
+  --motion-toast-pane-in: 160ms;
+  --motion-modal-in: 200ms;
+  --motion-ack-pulse: 200ms;
+  --motion-pane-transition: 240ms;
+  --motion-aggregate-flash: 400ms;
+  --motion-new-data-flash: 400ms;
+  --motion-chart-tooltip-in: 120ms;
+  --motion-chart-new-point-flash: 400ms;
+  --motion-chart-axis-in: 160ms;
+  --motion-chart-grid-in: 160ms;
+  --motion-shake-300: 300ms;
+  --motion-amendment-signed-flash: 600ms;
+  --motion-theme-switch: 150ms;
+}
+
+:root[data-theme="dark"] {
+  --bg-base: #0E1013; --bg-surface: #16191D; --bg-subtle: #1C2025; --bg-inset: #22272D;
+  --fg-default: #ECEDEE; --fg-secondary: #B5B9BF; --fg-tertiary: #80858C; --fg-disabled: #54585E;
+  --border-subtle: #23272D; --border-default: #2E333A; --border-strong: #4A4F57;
+  --brand-600: #4A8AC4; --brand-500: #5C9AD0; --brand-400: #76AEDF; --brand-200: #2B3E55; --brand-100: #1F2D3D;
+  --success: #5DB287; --success-bg: #1A2D24;
+  --warning: #D6A865; --warning-bg: #2D2418;
+  --danger:  #D8806E; --danger-bg:  #2D1F1B;
+  --info:    #76AEDF; --info-bg:    #1F2D3D;
+  --band-high: #3E9B6E; --band-medium: #8A8E94; --band-low: #5A5C60;
+}
+
+/* ====================================================================
+ * Base
+ * ==================================================================== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg-base);
+  color: var(--fg-default);
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-sm);
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: var(--font-family-mono); font-variant-numeric: tabular-nums; }
+
+/* ====================================================================
+ * Preview toolbar (preview chrome only — not in the product)
+ * ==================================================================== */
+.preview-toolbar {
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-md) var(--space-lg);
+  display: flex; align-items: center; gap: var(--space-lg); flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 50;
+}
+.preview-toolbar h1 {
+  margin: 0; font-size: var(--font-size-md); font-weight: var(--font-weight-semibold);
+}
+.preview-toolbar .toggle-group {
+  display: flex; gap: var(--space-xs); align-items: center;
+  font-size: var(--font-size-xs); color: var(--fg-secondary);
+}
+.preview-toolbar button {
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-sm);
+  height: var(--height-control-md);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  font-family: inherit;
+}
+.preview-toolbar button[aria-pressed="true"] {
+  background: var(--brand-500); color: #fff; border-color: var(--brand-500);
+}
+:root[data-theme="dark"] .preview-toolbar button[aria-pressed="true"] { color: #0E1013; }
+
+/* ====================================================================
+ * Section
+ * ==================================================================== */
+.section-block {
+  padding: var(--space-2xl) var(--space-lg);
+  max-width: 1280px; margin: 0 auto;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.section-block h2 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-sm);
+}
+.section-block .caption {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  margin: 0 0 var(--space-xl);
+  max-width: 720px;
+}
+
+.pattern-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-xl); }
+.pattern-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+
+.demo-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  display: flex; flex-direction: column; gap: var(--space-md);
+}
+.demo-card h3 {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  display: flex; align-items: center; gap: var(--space-sm);
+}
+.demo-card .token-name {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  background: var(--bg-inset);
+  padding: 2px var(--space-xs);
+  border-radius: var(--radius-xs);
+  font-weight: var(--font-weight-regular);
+}
+.demo-card .meta {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  margin-top: var(--space-xs);
+}
+.demo-card .meta b { color: var(--fg-secondary); font-weight: var(--font-weight-semibold); }
+
+.demo-stage {
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  min-height: 96px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ====================================================================
+ * §4.1 Press state
+ * ==================================================================== */
+.btn-press {
+  height: var(--height-control-lg);
+  padding: 0 var(--space-xl);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--brand-500);
+  color: #fff;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color var(--motion-press-120) var(--ease-out);
+}
+.btn-press:active { background: var(--brand-600); }
+:root[data-theme="dark"] .btn-press { color: #0E1013; }
+
+/* ====================================================================
+ * §4.2 Modal / Sheet enter
+ * ==================================================================== */
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modal-demo {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  width: 220px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.btn-replay {
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-xs) var(--space-md);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+  font-family: inherit;
+  height: var(--height-control-md);
+}
+
+/* ====================================================================
+ * §4.3 Modal exit
+ * ==================================================================== */
+@keyframes slide-down {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(8px); opacity: 0; }
+}
+.modal-exit {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  width: 200px;
+  text-align: center;
+}
+.modal-exit.is-closing { animation: slide-down 120ms var(--ease-in) forwards; }
+
+/* ====================================================================
+ * §4.4 Ack-pulse (Anjali)
+ * ==================================================================== */
+@keyframes ack-pulse {
+  0% { background-color: var(--brand-100); }
+  100% { background-color: var(--bg-surface); }
+}
+.status-row {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  display: flex; align-items: center; gap: var(--space-sm);
+  width: 280px;
+}
+.status-row.acked { animation: ack-pulse var(--motion-ack-pulse) var(--ease-out) forwards; }
+
+/* Reduced-motion fallback */
+.status-row.acked-nm { border-color: var(--brand-400); border-width: 2px; }
+:root[data-theme="dark"] .status-row.acked-nm { border-color: var(--brand-500); }
+
+/* ====================================================================
+ * §4.5 New-data flash (action row / sensor cell / aggregate tile)
+ * ==================================================================== */
+@keyframes flash-bg {
+  0% { background-color: var(--brand-100); }
+  100% { background-color: var(--bg-surface); }
+}
+.flash-target {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  width: 280px;
+  font-size: var(--font-size-sm);
+}
+.flash-target.flash { animation: flash-bg var(--motion-new-data-flash) var(--ease-out); }
+.flash-target.flash-nm { border: 2px solid var(--brand-400); }
+
+/* Sensor dot pulse */
+@keyframes dot-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+}
+.dot-pulse {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--brand-500);
+}
+.dot-pulse.pulse-anim { animation: dot-pulse var(--motion-new-data-flash) var(--ease-out); }
+
+/* ====================================================================
+ * §4.6 New-row slide-in
+ * ==================================================================== */
+@keyframes slide-down-in {
+  from { transform: translateY(-16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.new-row {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  width: 280px;
+  font-size: var(--font-size-sm);
+}
+.new-row.is-new { animation: slide-down-in var(--motion-pane-transition) var(--ease-out); }
+
+/* ====================================================================
+ * §4.7 T3 countdown ring
+ * ==================================================================== */
+.countdown-btn-demo {
+  position: relative;
+  width: 180px; height: 56px;
+  border-radius: var(--radius-md);
+  background: var(--brand-500);
+  color: #fff;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+:root[data-theme="dark"] .countdown-btn-demo { color: #0E1013; }
+.countdown-btn-demo svg.ring {
+  position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
+  transform: rotate(-90deg);
+}
+.countdown-btn-demo circle {
+  fill: none; stroke: rgba(255,255,255,0.35); stroke-width: 3;
+}
+@keyframes ring-deplete {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: 283; }
+}
+.countdown-btn-demo circle.deplete {
+  stroke: #fff; stroke-dasharray: 283; stroke-dashoffset: 0;
+}
+.countdown-btn-demo.is-running circle.deplete {
+  animation: ring-deplete 5000ms var(--ease-out) forwards;
+}
+:root[data-theme="dark"] .countdown-btn-demo.is-running circle.deplete { stroke: #0E1013; }
+
+/* Text-only fallback for reduced-motion */
+.countdown-text-only {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-md);
+  color: var(--brand-500);
+  background: var(--bg-surface);
+  padding: var(--space-md) var(--space-xl);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+/* ====================================================================
+ * §4.8 SSE heartbeat
+ * ==================================================================== */
+@keyframes heartbeat {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.heartbeat-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--brand-500);
+  display: inline-block;
+}
+.heartbeat-dot.live { animation: heartbeat 1600ms var(--ease-in-out) infinite; }
+
+/* ====================================================================
+ * §4.9 Chain-fail shake
+ * ==================================================================== */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.chain-fail-banner {
+  background: var(--danger-bg);
+  color: var(--danger);
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  width: 100%;
+  text-align: center;
+  border: 1px solid var(--danger);
+}
+.chain-fail-banner.is-shaking { animation: shake var(--motion-shake-300) var(--ease-in-out); }
+.chain-fail-banner.is-static-nm { /* reduced-motion fallback: static, no shake */ }
+
+/* ====================================================================
+ * §4.10 Toast
+ * ==================================================================== */
+.toast-demo {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  width: 300px;
+  display: flex; align-items: center; gap: var(--space-sm);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  font-size: var(--font-size-sm);
+}
+@keyframes toast-in {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.toast-demo.is-toast { animation: toast-in var(--motion-toast-pane-in) var(--ease-out); }
+
+/* ====================================================================
+ * §4.11 Theme switch
+ * ==================================================================== */
+.theme-stage {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-xl);
+  width: 280px;
+  transition: background-color var(--motion-theme-switch) var(--ease-in-out),
+              color var(--motion-theme-switch) var(--ease-in-out);
+}
+
+/* ====================================================================
+ * §4.12 Chart motion
+ * ==================================================================== */
+@keyframes chart-axis-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes chart-grid-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes chart-new-point {
+  0% { r: 4; opacity: 1; }
+  100% { r: 8; opacity: 0; }
+}
+.chart-stage {
+  width: 280px; height: 140px;
+  background: var(--bg-inset);
+  border-radius: var(--radius-md);
+  position: relative;
+  overflow: hidden;
+}
+.chart-stage svg { width: 100%; height: 100%; }
+.chart-stage .axis-line { animation: chart-axis-in var(--motion-chart-axis-in) var(--ease-out); }
+.chart-stage .grid-line { animation: chart-grid-in var(--motion-chart-grid-in) var(--ease-out); }
+.chart-stage .new-point { animation: chart-new-point var(--motion-chart-new-point-flash) var(--ease-out) forwards; }
+
+/* Chart tooltip */
+.chart-tooltip {
+  position: absolute; top: 12px; right: 12px;
+  background: var(--chart-tooltip-bg, var(--bg-surface));
+  border: 1px solid var(--chart-tooltip-border, var(--border-default));
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--font-size-xs);
+  color: var(--fg-default);
+  opacity: 0;
+}
+.chart-tooltip.is-visible { animation: toast-in var(--motion-chart-tooltip-in) var(--ease-out) forwards; }
+
+/* SSE pulse (chart status) */
+@keyframes chart-sse-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.chart-sse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+  margin-right: 4px;
+}
+.chart-sse-dot.live { animation: chart-sse-pulse 1600ms var(--ease-in-out) infinite; }
+
+/* ====================================================================
+ * §4.14 Map pin halo
+ * ==================================================================== */
+@keyframes pin-pulse {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2); opacity: 0; }
+}
+.map-pin {
+  position: relative;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--danger);
+  border: 2px solid var(--bg-surface);
+  margin: 24px;
+}
+.map-pin .halo {
+  position: absolute; inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--danger);
+  opacity: 0;
+}
+.map-pin.live .halo { animation: pin-pulse 2000ms var(--ease-out) infinite; }
+
+/* ====================================================================
+ * §3 Token table
+ * ==================================================================== */
+.token-table {
+  width: 100%; border-collapse: collapse;
+  font-size: var(--font-size-xs);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.token-table th, .token-table td {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.token-table th {
+  background: var(--bg-subtle);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.token-table td.mono { font-family: var(--font-family-mono); }
+.token-table tr:last-child td { border-bottom: 0; }
+
+/* ====================================================================
+ * Reduced-motion toggle (preview-only)
+ * ==================================================================== */
+:root[data-reduced-motion="true"] *,
+:root[data-reduced-motion="true"] *::before,
+:root[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* Print */
+@media print {
+  :root { --bg-base: #FFFFFF; --bg-surface: #FFFFFF; --bg-subtle: #FFFFFF; --bg-inset: #FFFFFF; --fg-default: #000000; --fg-secondary: #000000; --fg-tertiary: #000000; --border-subtle: #000000; --border-default: #000000; }
+  .preview-toolbar, .demo-stage, .demo-card button { display: none !important; }
+  body { background: #FFFFFF !important; }
+  .demo-card { border: 1px solid #000 !important; page-break-inside: avoid; }
+  .token-table { border: 1px solid #000 !important; }
+  .token-table th { background: #FFFFFF !important; color: #000 !important; border-bottom: 1px solid #000 !important; }
+  .token-table td { border-bottom: 1px solid #000 !important; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+.note { font-size: var(--font-size-xs); color: var(--fg-tertiary); font-style: italic; max-width: 720px; }
+.kbd { font-family: var(--font-family-mono); font-size: 11px; background: var(--bg-subtle); border: 1px solid var(--border-default); border-radius: 3px; padding: 1px 4px; color: var(--fg-secondary); }
+</style>
+</head>
+<body>
+
+<div class="preview-toolbar">
+  <h1>dim 8 · Motion</h1>
+  <div class="toggle-group">
+    <span>Theme</span>
+    <button data-theme-set="light" aria-pressed="true">Light</button>
+    <button data-theme-set="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="toggle-group">
+    <span>Reduced motion</span>
+    <button id="btn-rm" aria-pressed="false">Off (motion allowed)</button>
+  </div>
+  <div class="toggle-group">
+    <span>Print mode</span>
+    <button id="btn-print" aria-pressed="false">Toggle data-print</button>
+  </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- §3 Token table — all 14 motion tokens                          -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§3 · Motion tokens</h2>
+  <p class="caption">14 duration tokens + 3 easing tokens + 4 property tokens. Every <span class="mono">transition:</span> declaration in Surakkha references one of these — no raw <span class="mono">ms</span> values in component code.</p>
+
+  <table class="token-table">
+    <thead>
+      <tr>
+        <th>Token</th>
+        <th>Duration</th>
+        <th>Use</th>
+        <th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="mono">--motion-press-120</td><td class="mono">120ms</td><td>Button press state</td><td>EXPERIENCE.md §179</td></tr>
+      <tr><td class="mono">--motion-tab-switch</td><td class="mono">160ms</td><td>Bottom-nav tab switch (mobile)</td><td>dim 5c §12, 5d §10</td></tr>
+      <tr><td class="mono">--motion-toast-pane-in</td><td class="mono">160ms</td><td>Institutional toast fade-in</td><td>dim 5e §14</td></tr>
+      <tr><td class="mono">--motion-modal-in</td><td class="mono">200ms</td><td>Modal enter</td><td>dim 8 §4.2</td></tr>
+      <tr><td class="mono">--motion-ack-pulse</td><td class="mono">200ms</td><td>Anjali "report received" pulse</td><td>EXPERIENCE.md §375</td></tr>
+      <tr><td class="mono">--motion-pane-transition</td><td class="mono">240ms</td><td>Detail pane slide-in</td><td>dim 5c §12, 5d §10</td></tr>
+      <tr><td class="mono">--motion-aggregate-flash</td><td class="mono">400ms</td><td>Aggregate tile flash on SSE update</td><td>dim 5e §14</td></tr>
+      <tr><td class="mono">--motion-new-data-flash</td><td class="mono">400ms</td><td>Action row / sensor cell / chart point flash</td><td>dim 5b §3.7, 5d §10</td></tr>
+      <tr><td class="mono">--motion-chart-tooltip-in</td><td class="mono">120ms</td><td>Chart tooltip fade-in</td><td>dim 5b §3.7</td></tr>
+      <tr><td class="mono">--motion-chart-new-point-flash</td><td class="mono">400ms</td><td>Chart new-point flash</td><td>dim 5b §3.7</td></tr>
+      <tr><td class="mono">--motion-chart-axis-in</td><td class="mono">160ms</td><td>Chart axis fade-in</td><td>dim 5b §3.7</td></tr>
+      <tr><td class="mono">--motion-chart-grid-in</td><td class="mono">160ms</td><td>Chart grid fade-in</td><td>dim 5b §3.7</td></tr>
+      <tr><td class="mono">--motion-shake-300</td><td class="mono">300ms</td><td>Chain-verification failure shake</td><td>EXPERIENCE.md §375</td></tr>
+      <tr><td class="mono">--motion-amendment-signed-flash</td><td class="mono">600ms</td><td>Amendment row success flash</td><td>dim 5e §14</td></tr>
+      <tr><td class="mono">--motion-theme-switch</td><td class="mono">150ms</td><td>Theme switch on body bg/color</td><td>dim 1 §7.6 (exception)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note" style="margin-top:var(--space-md);">The 5-second countdown ring on T3 issuance (dim 5d §9.2) is fixed at <span class="mono">5000ms</span> — not a token because the T3 SLA window is operationally fixed.</div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §3.2 Easing tokens                                              -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§3.2 · Easing tokens</h2>
+  <p class="caption">3 easings only. <span class="mono">--ease-out</span> for state-gain (default), <span class="mono">--ease-in</span> for state-loss, <span class="mono">--ease-in-out</span> for symmetric state-change. No spring physics, no overshoot, no bounce — civic-steady.</p>
+
+  <div class="pattern-grid three-col">
+    <div class="demo-card">
+      <h3><span class="mono">--ease-out</span></h3>
+      <div class="mono" style="font-size:10px;color:var(--fg-tertiary);">cubic-bezier(0.2, 0.8, 0.4, 1)</div>
+      <div class="meta"><b>Default for 80% of motion.</b> Opening, appearing, gaining attention. Press, ack-pulse, new-data flash, modal enter.</div>
+    </div>
+    <div class="demo-card">
+      <h3><span class="mono">--ease-in</span></h3>
+      <div class="mono" style="font-size:10px;color:var(--fg-tertiary);">cubic-bezier(0.6, 0, 0.8, 0.2)</div>
+      <div class="meta"><b>State-loss.</b> Closing, dismissing, deprecating. Modal exit (120ms).</div>
+    </div>
+    <div class="demo-card">
+      <h3><span class="mono">--ease-in-out</span></h3>
+      <div class="mono" style="font-size:10px;color:var(--fg-tertiary);">cubic-bezier(0.4, 0, 0.6, 1)</div>
+      <div class="meta"><b>Symmetric.</b> Theme switch, SSE heartbeat dot, chain-fail shake.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.1 Press state                                                -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.1 · Press state (120ms)</h2>
+  <p class="caption">Per <span class="mono">EXPERIENCE.md §179</span>: "Pressed state: deep-teal-tint for 120ms then back to primary. No animation flourishes." Click and hold to feel the press tint.</p>
+
+  <div class="demo-card">
+    <h3>Button press <span class="token-name">--motion-press-120 + --ease-out</span></h3>
+    <div class="demo-stage">
+      <button class="btn-press">Hold to press</button>
+    </div>
+    <div class="meta">Background-color transitions to <span class="mono">--brand-600</span> on <span class="mono">:active</span>. 120ms ease-out. Reduced-motion: same (too brief to be considered motion).</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.2 Modal / Sheet enter                                        -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.2 · Modal enter (240ms)</h2>
+  <p class="caption">Slide up from <span class="mono">translateY(16px)</span> + opacity fade. Used by Anjali composer, Priya detail overlay, PHA diff dialog.</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Sheet enter <span class="token-name">--motion-pane-transition + --ease-out</span></h3>
+      <div class="demo-stage">
+        <div class="modal-demo" id="modal-demo">Report submitted</div>
+      </div>
+      <button class="btn-replay" id="btn-replay-modal">Replay slide-up</button>
+      <div class="meta">Used for Anjali composer, Priya detail overlay, PHA diff dialog. Reduced-motion: opacity only.</div>
+    </div>
+
+    <div class="demo-card">
+      <h3>Toast enter <span class="token-name">--motion-toast-pane-in</span></h3>
+      <div class="demo-stage">
+        <div class="toast-demo" id="toast-demo">
+          <span style="color:var(--success);">✓</span>
+          <span>Report received</span>
+        </div>
+      </div>
+      <button class="btn-replay" id="btn-replay-toast">Replay toast</button>
+      <div class="meta">Sonner toast pattern. 160ms institutional register (dim 5e §14) or 200ms warmer register (dim 5c).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.4 Ack-pulse                                                  -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.4 · Ack-pulse (200ms)</h2>
+  <p class="caption">Per <span class="mono">EXPERIENCE.md §375</span>: "Anjali acknowledgement ('report received' pulse, 200ms ease-out, one-shot)."</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Status row "acked" <span class="token-name">--motion-ack-pulse</span></h3>
+      <div class="demo-stage">
+        <div class="status-row" id="ack-row">
+          <span style="color:var(--success);">✓</span>
+          <span>Your report reached Priya</span>
+        </div>
+      </div>
+      <button class="btn-replay" id="btn-replay-ack">Replay ack-pulse</button>
+      <div class="meta">Background-color keyframe from <span class="mono">--brand-100</span> to <span class="mono">--bg-surface</span>. One-shot. Reduced-motion: 1s solid <span class="mono">--brand-400</span> border highlight (right demo).</div>
+    </div>
+    <div class="demo-card">
+      <h3>Reduced-motion fallback <span class="token-name">static border</span></h3>
+      <div class="demo-stage">
+        <div class="status-row acked-nm">
+          <span style="color:var(--success);">✓</span>
+          <span>Your report reached Priya</span>
+        </div>
+      </div>
+      <div class="meta">No animation. Just a 2px <span class="mono">--brand-400</span> border. Non-motion cue carries the same signal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.5 New-data flash                                             -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.5 · New-data flash (400ms)</h2>
+  <p class="caption">Action list row / sensor cell / aggregate tile flash when an SSE event lands. Background-color keyframe from <span class="mono">--brand-100</span> to <span class="mono">--bg-surface</span>.</p>
+
+  <div class="pattern-grid three-col">
+    <div class="demo-card">
+      <h3>Row flash <span class="token-name">--motion-new-data-flash</span></h3>
+      <div class="demo-stage">
+        <div class="flash-target" id="flash-row">Ward 7 · sensor_spike</div>
+      </div>
+      <button class="btn-replay" id="btn-replay-row">Replay</button>
+      <div class="meta">Used for action list rows, inbox rows, audit log rows on SSE update.</div>
+    </div>
+    <div class="demo-card">
+      <h3>Sensor dot pulse <span class="token-name">--motion-new-data-flash</span></h3>
+      <div class="demo-stage">
+        <div class="dot-pulse" id="dot-pulse"></div>
+      </div>
+      <button class="btn-replay" id="btn-replay-dot">Replay</button>
+      <div class="meta">Cell bg stays static; only the dot pulses (transform: scale 1 → 1.4 → 1).</div>
+    </div>
+    <div class="demo-card">
+      <h3>Reduced-motion fallback <span class="token-name">static border</span></h3>
+      <div class="demo-stage">
+        <div class="flash-target flash-nm">Ward 7 · sensor_spike</div>
+      </div>
+      <div class="meta">1s solid <span class="mono">--brand-400</span> border highlight. No background-color keyframe.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.6 New-row slide-in                                           -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.6 · New-row slide-in (240ms)</h2>
+  <p class="caption">When a new item arrives (not an update to an existing one). Slides down from <span class="mono">translateY(-16px)</span> + opacity 0. Then plays the flash 240ms later in cascade.</p>
+
+  <div class="demo-card">
+    <h3>New row enter <span class="token-name">--motion-pane-transition + cascade to --motion-new-data-flash</span></h3>
+    <div class="demo-stage">
+      <div class="new-row" id="new-row">Ward 12 · pH dip · sensor L</div>
+    </div>
+    <button class="btn-replay" id="btn-replay-new-row">Replay slide-down</button>
+    <div class="meta">Slide-down first (240ms), then new-data flash (400ms). Reduced-motion: opacity-only fade-in (200ms), no slide, no flash.</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.7 T3 countdown ring                                          -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.7 · T3 countdown ring (5000ms fixed)</h2>
+  <p class="caption">Per <span class="mono">dim 5d §9.2</span> + <span class="mono">EXPERIENCE.md §298,312</span>. Stroke-dashoffset transition; text countdown is the redundant signal under reduced-motion.</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Ring depletion <span class="token-name">5000ms fixed + --ease-out</span></h3>
+      <div class="demo-stage">
+        <button class="countdown-btn-demo" id="countdown-btn">
+          <span style="position:relative;z-index:2;">Confirm · 5s</span>
+          <svg class="ring" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" class="deplete"/>
+          </svg>
+        </button>
+      </div>
+      <button class="btn-replay" id="btn-replay-countdown">Replay 5s countdown</button>
+      <div class="meta">One-shot, lands on <span class="mono">forwards</span>. Button stays in depleted state until user lifts finger. Aria-live text countdown is the redundant signal.</div>
+    </div>
+    <div class="demo-card">
+      <h3>Reduced-motion fallback <span class="token-name">text only</span></h3>
+      <div class="demo-stage">
+        <div class="countdown-text-only">5s → 0s</div>
+      </div>
+      <div class="meta">No ring. Just text. Per <span class="mono">EXPERIENCE.md §312</span>: "The text is the redundant signal — the ring is decoration under <span class="mono">prefers-reduced-motion</span>."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.8 SSE heartbeat                                              -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.8 · SSE heartbeat (1600ms infinite)</h2>
+  <p class="caption">The only infinite motion in v1. Status dot pulses at 1600ms (human breath rate) to signal "live connection."</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Connecting dot <span class="token-name">1600ms infinite + --ease-in-out</span></h3>
+      <div class="demo-stage" style="gap:24px;">
+        <span class="heartbeat-dot live"></span>
+        <span style="font-size:var(--font-size-sm);color:var(--fg-secondary);">connecting...</span>
+      </div>
+      <div class="meta">Opacity 1 → 0.5 → 1 at 1600ms cadence. Used on <span class="mono">connecting</span> + <span class="mono">reconnecting</span> SSE states.</div>
+    </div>
+    <div class="demo-card">
+      <h3>Reduced-motion fallback <span class="token-name">static dot</span></h3>
+      <div class="demo-stage" style="gap:24px;">
+        <span class="heartbeat-dot"></span>
+        <span style="font-size:var(--font-size-sm);color:var(--fg-secondary);">connecting...</span>
+      </div>
+      <div class="meta">Static dot, no opacity pulse. The text label is the cue.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.9 Chain-fail shake                                           -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.9 · Chain-fail shake (300ms)</h2>
+  <p class="caption">Per <span class="mono">EXPERIENCE.md §375</span>: "chain-verification failure (full-screen banner with shake, 300ms one-shot)."</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Shake banner <span class="token-name">--motion-shake-300 + --ease-in-out</span></h3>
+      <div class="demo-stage">
+        <div class="chain-fail-banner" id="shake-banner">Chain verification failed · last good anchor 14:01:32 · ref evt_01HXYZ</div>
+      </div>
+      <button class="btn-replay" id="btn-replay-shake">Replay shake</button>
+      <div class="meta">Symmetric 4-oscillation shake. Reduced-motion: static <span class="mono">--danger-bg</span> strip, no shake.</div>
+    </div>
+    <div class="demo-card">
+      <h3>Reduced-motion fallback <span class="token-name">static strip</span></h3>
+      <div class="demo-stage">
+        <div class="chain-fail-banner is-static-nm">Chain verification failed · last good anchor 14:01:32 · ref evt_01HXYZ</div>
+      </div>
+      <div class="meta">No motion. Text is the signal.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.11 Theme switch                                              -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.11 · Theme switch (150ms)</h2>
+  <p class="caption">Per <span class="mono">dim 1 §7.6</span>: "theme-switch transition on body background/text for smooth mode change (≤150ms)." Toggle the theme button in the toolbar to feel the transition.</p>
+
+  <div class="demo-card">
+    <h3>Body bg/color transition <span class="token-name">--motion-theme-switch + --ease-in-out</span></h3>
+    <div class="demo-stage">
+      <div class="theme-stage" style="color:var(--fg-default);">
+        <div style="font-size:var(--font-size-md);font-weight:600;margin-bottom:8px;">Body surface</div>
+        <div style="font-size:var(--font-size-xs);color:var(--fg-secondary);">bg + color transition over 150ms ease-in-out. Child surfaces snap (no stagger).</div>
+      </div>
+    </div>
+    <div class="meta">Body is the only element that transitions. Cards/modals/toasts snap to the new theme. Avoids the stagger effect that makes theme-switch feel slow.</div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.12 Chart motion                                              -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.12 · Chart motion (dim 5b §3.7)</h2>
+  <p class="caption">Axis + grid fade-in, tooltip enter, new-point flash, SSE pulse. Per <span class="mono">dim 5b §3.7</span>.</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Sparkline + new-point <span class="token-name">--motion-chart-new-point-flash</span></h3>
+      <div class="demo-stage">
+        <div class="chart-stage">
+          <svg viewBox="0 0 280 140" preserveAspectRatio="none">
+            <line x1="20" y1="120" x2="260" y2="120" stroke="var(--chart-grid)" stroke-width="0.5" class="grid-line"/>
+            <line x1="20" y1="80" x2="260" y2="80" stroke="var(--chart-grid)" stroke-width="0.5" class="grid-line"/>
+            <line x1="20" y1="40" x2="260" y2="40" stroke="var(--chart-grid)" stroke-width="0.5" class="grid-line"/>
+            <polyline fill="none" stroke="var(--brand-500)" stroke-width="1.5" points="20,90 50,80 80,84 110,76 140,70 170,64 200,58 230,40 260,12"/>
+            <circle cx="230" cy="40" r="4" fill="var(--warning)"/>
+            <circle cx="260" cy="12" r="4" fill="var(--danger)" class="new-point"/>
+          </svg>
+          <div style="position:absolute;bottom:6px;right:6px;font-size:9px;color:var(--fg-tertiary);font-family:var(--font-family-mono);">
+            <span class="chart-sse-dot live"></span>live
+          </div>
+        </div>
+      </div>
+      <button class="btn-replay" id="btn-replay-chart">Replay new-point flash</button>
+      <div class="meta">New data point at (260, 12) pulses from r=4 with opacity 1 → r=8 opacity 0 over 400ms. SSE pulse dot at the corner signals live mode.</div>
+    </div>
+
+    <div class="demo-card">
+      <h3>Tooltip enter <span class="token-name">--motion-chart-tooltip-in</span></h3>
+      <div class="demo-stage">
+        <div class="chart-stage">
+          <svg viewBox="0 0 280 140" preserveAspectRatio="none">
+            <line x1="20" y1="120" x2="260" y2="120" stroke="var(--chart-grid)" stroke-width="0.5"/>
+            <polyline fill="none" stroke="var(--brand-500)" stroke-width="1.5" points="20,90 50,80 80,84 110,76 140,70 170,64 200,58 230,40 260,12"/>
+            <circle cx="170" cy="64" r="4" fill="var(--brand-500)"/>
+          </svg>
+          <div class="chart-tooltip is-visible" id="chart-tooltip">14:01 · 4.2 NTU</div>
+        </div>
+      </div>
+      <button class="btn-replay" id="btn-replay-tooltip">Replay tooltip</button>
+      <div class="meta">120ms opacity fade-in. Reduced-motion: tooltip always visible (no fade).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §4.14 Map pin halo                                              -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§4.14 · Map pin breach halo (2000ms infinite)</h2>
+  <p class="caption">The only map element that animates. Breach-status pin pulses a halo to draw attention.</p>
+
+  <div class="pattern-grid">
+    <div class="demo-card">
+      <h3>Breach pin halo <span class="token-name">2000ms infinite + --ease-out</span></h3>
+      <div class="demo-stage">
+        <div class="map-pin live">
+          <span class="halo"></span>
+        </div>
+      </div>
+      <div class="meta">Scale 1 → 2 + opacity 0.6 → 0 over 2000ms. Infinite. The pin itself stays static — only the halo pulses.</div>
+    </div>
+    <div class="demo-card">
+      <h3>Reduced-motion fallback <span class="token-name">static halo</span></h3>
+      <div class="demo-stage">
+        <div class="map-pin">
+          <span class="halo" style="opacity:1;"></span>
+        </div>
+      </div>
+      <div class="meta">Static halo at default scale, full opacity.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================== -->
+<!-- §5 Motion matrix summary                                        -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§5 · Motion matrix summary</h2>
+  <p class="caption">Complete inventory: surface × element × motion token × reduced-motion fallback.</p>
+
+  <table class="token-table">
+    <thead>
+      <tr><th>Surface</th><th>Element</th><th>Token</th><th>Reduced-motion fallback</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Anjali mobile</td><td>Submit press</td><td class="mono">--motion-press-120</td><td>unchanged</td></tr>
+      <tr><td>Anjali mobile</td><td>Composer enter</td><td class="mono">--motion-pane-transition</td><td>opacity only</td></tr>
+      <tr><td>Anjali mobile</td><td>Status row acked</td><td class="mono">--motion-ack-pulse</td><td>1s border highlight</td></tr>
+      <tr><td>Priya mobile</td><td>Row press</td><td class="mono">--motion-press-120</td><td>unchanged</td></tr>
+      <tr><td>Priya mobile</td><td>Row new-data flash</td><td class="mono">--motion-new-data-flash</td><td>1s border highlight</td></tr>
+      <tr><td>Priya mobile</td><td>New row insertion</td><td class="mono">--motion-pane-transition + cascade</td><td>opacity fade only</td></tr>
+      <tr><td>Priya mobile</td><td>Sensor dot pulse</td><td class="mono">--motion-new-data-flash</td><td>static border</td></tr>
+      <tr><td>Priya mobile</td><td>Detail pane enter</td><td class="mono">--motion-pane-transition</td><td>opacity only</td></tr>
+      <tr><td>Priya mobile</td><td>T3 countdown ring</td><td class="mono">5000ms fixed</td><td>text countdown only</td></tr>
+      <tr><td>Priya mobile</td><td>SSE heartbeat</td><td class="mono">1600ms infinite</td><td>static dot</td></tr>
+      <tr><td>Priya desktop</td><td>Button press</td><td class="mono">--motion-press-120</td><td>unchanged</td></tr>
+      <tr><td>Priya desktop</td><td>Detail overlay</td><td class="mono">--motion-modal-in</td><td>opacity only</td></tr>
+      <tr><td>Priya desktop</td><td>Two-tap modal</td><td class="mono">--motion-modal-in</td><td>opacity only</td></tr>
+      <tr><td>Priya desktop</td><td>Sonner toast</td><td class="mono">--motion-toast-pane-in</td><td>opacity only</td></tr>
+      <tr><td>Priya desktop</td><td>SLA countdown text</td><td class="mono">(no motion)</td><td>n/a</td></tr>
+      <tr><td>PHA pane</td><td>Aggregate tile update</td><td class="mono">--motion-aggregate-flash</td><td>1s border highlight</td></tr>
+      <tr><td>PHA pane</td><td>Amendment signed</td><td class="mono">--motion-amendment-signed-flash</td><td>1s border highlight</td></tr>
+      <tr><td>PHA pane</td><td>Diff dialog enter</td><td class="mono">--motion-modal-in</td><td>opacity only</td></tr>
+      <tr><td>PHA pane</td><td>Institutional toast</td><td class="mono">--motion-toast-pane-in</td><td>opacity only</td></tr>
+      <tr><td>Charts</td><td>Axis fade-in</td><td class="mono">--motion-chart-axis-in</td><td>static</td></tr>
+      <tr><td>Charts</td><td>Grid fade-in</td><td class="mono">--motion-chart-grid-in</td><td>static</td></tr>
+      <tr><td>Charts</td><td>Tooltip enter</td><td class="mono">--motion-chart-tooltip-in</td><td>static</td></tr>
+      <tr><td>Charts</td><td>New-point flash</td><td class="mono">--motion-chart-new-point-flash</td><td>static at full size</td></tr>
+      <tr><td>Charts</td><td>SSE pulse (status dot)</td><td class="mono">--motion-chart-sse-pulse</td><td>static</td></tr>
+      <tr><td>Cross-surface</td><td>Theme switch</td><td class="mono">--motion-theme-switch</td><td>instant</td></tr>
+      <tr><td>Cross-surface</td><td>Chain-fail shake</td><td class="mono">--motion-shake-300</td><td>static strip</td></tr>
+      <tr><td>Map pane</td><td>Breach pin halo</td><td class="mono">pin-pulse 2000ms infinite</td><td>static halo</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================== -->
+<!-- §7 Motion budget per page                                       -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>§7 · Motion budget per page</h2>
+  <p class="caption">To prevent motion overload, each surface has a cap on simultaneous motion events. Coordinator queues overflow.</p>
+
+  <table class="token-table">
+    <thead><tr><th>Surface</th><th>Max simultaneous motion events</th></tr></thead>
+    <tbody>
+      <tr><td>Anjali mobile</td><td>2 (submit + ack, OR ack + new report)</td></tr>
+      <tr><td>Priya mobile</td><td>5 (heartbeat + flash + sensor pulse + SLA text + countdown)</td></tr>
+      <tr><td>Priya desktop</td><td>3 (row hover + modal enter + toast)</td></tr>
+      <tr><td>PHA pane</td><td>3 (tile flash + toast + diff dialog)</td></tr>
+      <tr><td>Charts</td><td>1 per chart (staggered by 200ms)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================== -->
+<!-- Sign-off                                                        -->
+<!-- ============================================================== -->
+<section class="section-block">
+  <h2>Sign-off</h2>
+  <p class="caption">dim 8 lockdown ready for review. 14 sections in <span class="mono">08-motion-lockdown.md</span> cover scope, principles, 14 motion tokens, 3 easings, 4 properties, 14 motion patterns (press, modal enter/exit, ack-pulse, new-data flash, new-row slide-in, T3 countdown, SSE heartbeat, chain-fail shake, theme switch, chart motion, loading, map pin halo), reduced-motion rules, motion budget per surface, z-index layer stack, print-mode rules, what was rejected, token consumption rules, hand-offs, verification. Companion preview HTML (this file) renders every pattern with side-by-side reduced-motion fallbacks.</p>
+
+  <div class="note">With dim 8 locked, all design-only surfaces are spec'd. dim 7 (sensor wire format) remains as the last engineering contract for Gate 0 close-out.</div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const root = document.documentElement;
+
+  // Theme
+  document.querySelectorAll('[data-theme-set]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const v = btn.getAttribute('data-theme-set');
+      root.setAttribute('data-theme', v);
+      document.querySelectorAll('[data-theme-set]').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+    });
+  });
+
+  // Reduced motion toggle
+  const rmBtn = document.getElementById('btn-rm');
+  rmBtn.addEventListener('click', () => {
+    const isRM = root.getAttribute('data-reduced-motion') === 'true';
+    root.setAttribute('data-reduced-motion', String(!isRM));
+    rmBtn.setAttribute('aria-pressed', String(!isRM));
+    rmBtn.textContent = !isRM ? 'On (motion suppressed)' : 'Off (motion allowed)';
+  });
+
+  // Print toggle
+  const printBtn = document.getElementById('btn-print');
+  printBtn.addEventListener('click', () => {
+    const isPrint = root.getAttribute('data-print') === 'true';
+    root.setAttribute('data-print', String(!isPrint));
+    printBtn.setAttribute('aria-pressed', String(!isPrint));
+    printBtn.textContent = !isPrint ? 'Print mode ON — toggle off' : 'Toggle data-print';
+    if (!isPrint) setTimeout(() => window.print(), 300);
+  });
+
+  // Replay helpers — re-trigger the animation by class removal + reflow
+  function replay(id, cls, dur) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove(cls);
+    void el.offsetWidth;
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), dur);
+  }
+
+  document.getElementById('btn-replay-modal').addEventListener('click', () => replay('modal-demo', 'is-toast', 250));
+  document.getElementById('btn-replay-toast').addEventListener('click', () => replay('toast-demo', 'is-toast', 250));
+  document.getElementById('btn-replay-ack').addEventListener('click', () => replay('ack-row', 'acked', 220));
+  document.getElementById('btn-replay-row').addEventListener('click', () => replay('flash-row', 'flash', 420));
+  document.getElementById('btn-replay-dot').addEventListener('click', () => replay('dot-pulse', 'pulse-anim', 420));
+  document.getElementById('btn-replay-new-row').addEventListener('click', () => replay('new-row', 'is-new', 260));
+  document.getElementById('btn-replay-shake').addEventListener('click', () => replay('shake-banner', 'is-shaking', 320));
+  document.getElementById('btn-replay-tooltip').addEventListener('click', () => replay('chart-tooltip', 'is-visible', 140));
+  document.getElementById('btn-replay-chart').addEventListener('click', () => {
+    // Re-trigger the chart new-point via class swap
+    const svg = document.querySelector('.chart-stage svg');
+    if (!svg) return;
+    const circles = svg.querySelectorAll('circle.new-point');
+    circles.forEach(c => {
+      c.classList.remove('new-point');
+      void c.getBoundingClientRect();
+      c.classList.add('new-point');
+    });
+  });
+
+  // Countdown ring replay — start the 5-second timer fresh
+  document.getElementById('btn-replay-countdown').addEventListener('click', () => {
+    const btn = document.getElementById('countdown-btn');
+    const circle = btn.querySelector('circle.deplete');
+    btn.classList.remove('is-running');
+    void btn.offsetWidth;
+    circle.style.animation = 'none';
+    void circle.getBoundingClientRect();
+    circle.style.animation = '';
+    btn.classList.add('is-running');
+    setTimeout(() => btn.classList.remove('is-running'), 5100);
+  });
+})();
+</script>
+
+</body>
+</html>

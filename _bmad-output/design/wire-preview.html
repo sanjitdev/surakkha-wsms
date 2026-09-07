@@ -1,0 +1,1249 @@
+<!doctype html>
+<html lang="en" data-locale="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Dim 7 — Wire Format Preview</title>
+<style>
+  /* Re-declare dim 1-5 tokens (subset) --------------------------------- */
+  :root {
+    --fg-default: #1A1A1A;
+    --fg-secondary: #444444;
+    --fg-tertiary: #6E6E6E;
+    --fg-quaternary: #9A9A9A;
+    --bg-base: #FFFFFF;
+    --bg-surface: #F7F7F5;
+    --bg-subtle: #EFEFEC;
+    --bg-inset: #E5E5E0;
+    --brand-500: #144A78;
+    --brand-400: #3A6B95;
+    --brand-600: #0E365A;
+    --success: #1E6E47;
+    --warning: #8A5A1A;
+    --danger:  #8E2E1E;
+    --info:    #2D5F8A;
+    --divider: #DCDCD6;
+    --band-high: #8E2E1E;
+    --band-medium: #8A5A1A;
+    --band-low: #4A6B82;
+
+    --space-2xs: 2px;
+    --space-xs:  4px;
+    --space-sm:  8px;
+    --space-md:  12px;
+    --space-lg:  16px;
+    --space-xl:  24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+
+    --family-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+    --family-sans: "Inter", system-ui, sans-serif;
+
+    --font-xs: 11px;
+    --font-sm: 12px;
+    --font-md: 13px;
+    --font-lg: 15px;
+    --font-xl: 18px;
+    --font-2xl: 22px;
+    --font-3xl: 28px;
+
+    --motion-press-120: 120ms;
+    --motion-pane-transition: 200ms;
+    --motion-flash-new-data: 800ms;
+    --motion-countdown-5000: 5000ms;
+    --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  [data-theme="dark"] {
+    --fg-default: #ECEAE4;
+    --fg-secondary: #BFBDB5;
+    --fg-tertiary: #8E8B82;
+    --fg-quaternary: #6B6860;
+    --bg-base: #161513;
+    --bg-surface: #1F1D1A;
+    --bg-subtle: #28261F;
+    --bg-inset: #34312A;
+    --brand-500: #5C9AD0;
+    --brand-400: #82B5DE;
+    --brand-600: #3A6B95;
+    --success: #5DB287;
+    --warning: #D6A865;
+    --danger:  #D8806E;
+    --info:    #82B5DE;
+    --divider: #34312A;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--family-sans);
+    font-size: var(--font-md);
+    color: var(--fg-default);
+    background: var(--bg-base);
+    line-height: 1.5;
+    transition: background var(--motion-pane-transition) var(--easing-out), color var(--motion-pane-transition) var(--easing-out);
+  }
+
+  /* layout -------------------------------------------------------------- */
+  .page {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-xl);
+  }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: var(--space-lg);
+    border-bottom: 1px solid var(--divider);
+    margin-bottom: var(--space-2xl);
+  }
+  .wordmark { font-size: var(--font-xl); font-weight: 600; color: var(--brand-500); }
+  .topbar-meta { font-size: var(--font-sm); color: var(--fg-tertiary); font-family: var(--family-mono); }
+
+  h1 { font-size: var(--font-2xl); font-weight: 600; margin-bottom: var(--space-xs); }
+  h2 { font-size: var(--font-xl); font-weight: 600; margin: var(--space-2xl) 0 var(--space-md); }
+  h3 { font-size: var(--font-lg); font-weight: 600; margin: var(--space-lg) 0 var(--space-sm); color: var(--fg-secondary); }
+  .lede { color: var(--fg-secondary); margin-bottom: var(--space-xl); }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-2xl);
+  }
+  .meta-card {
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: var(--bg-surface);
+  }
+  .meta-label { font-size: var(--font-xs); color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.04em; }
+  .meta-value { font-size: var(--font-md); font-family: var(--family-mono); margin-top: var(--space-2xs); }
+  .meta-value.pill { font-family: var(--family-sans); }
+
+  /* controls ------------------------------------------------------------ */
+  .controls {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+  }
+  .ctrl-btn {
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--divider);
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-size: var(--font-sm);
+    font-family: var(--family-sans);
+    cursor: pointer;
+    transition: background var(--motion-press-120) var(--easing-out);
+    min-height: 36px;
+  }
+  .ctrl-btn:hover { background: var(--bg-subtle); }
+  .ctrl-btn.active { background: var(--brand-500); color: #FFFFFF; border-color: var(--brand-500); }
+  .ctrl-label { font-size: var(--font-sm); color: var(--fg-tertiary); margin-right: var(--space-xs); }
+
+  /* code blocks --------------------------------------------------------- */
+  .code-block {
+    background: var(--bg-inset);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    font-family: var(--family-mono);
+    font-size: var(--font-sm);
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre;
+    margin-bottom: var(--space-md);
+    color: var(--fg-default);
+  }
+  [data-theme="dark"] .code-block {
+    background: #0E0D0B;
+  }
+  .code-block .k { color: var(--brand-500); }
+  [data-theme="dark"] .code-block .k { color: var(--brand-400); }
+  .code-block .s { color: var(--success); }
+  [data-theme="dark"] .code-block .s { color: var(--success); }
+  .code-block .n { color: var(--warning); }
+  .code-block .c { color: var(--fg-quaternary); font-style: italic; }
+  .code-block .d { color: var(--info); }
+  [data-theme="dark"] .code-block .d { color: var(--info); }
+
+  /* cards --------------------------------------------------------------- */
+  .card {
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    background: var(--bg-base);
+    margin-bottom: var(--space-md);
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  .card-title {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+  }
+  .card-meta { font-size: var(--font-sm); color: var(--fg-tertiary); margin-bottom: var(--space-md); }
+
+  /* inline badges ------------------------------------------------------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 2px var(--space-sm);
+    border-radius: 999px;
+    font-size: var(--font-xs);
+    font-family: var(--family-mono);
+    background: var(--bg-subtle);
+    color: var(--fg-secondary);
+  }
+  .badge.brand { background: var(--brand-500); color: #FFFFFF; }
+  .badge.danger { background: var(--danger); color: #FFFFFF; }
+  .badge.warn   { background: var(--warning); color: #FFFFFF; }
+  .badge.success { background: var(--success); color: #FFFFFF; }
+
+  /* table --------------------------------------------------------------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-sm);
+  }
+  th, td {
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--divider);
+    vertical-align: top;
+  }
+  th {
+    font-weight: 600;
+    color: var(--fg-secondary);
+    background: var(--bg-surface);
+    font-size: var(--font-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td.mono { font-family: var(--family-mono); font-size: var(--font-xs); }
+  td .small { font-size: var(--font-xs); color: var(--fg-tertiary); display: block; margin-top: 2px; }
+
+  /* transport demo ------------------------------------------------------ */
+  .transport-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+  }
+  .transport {
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    background: var(--bg-surface);
+  }
+  .transport-name {
+    font-size: var(--font-md);
+    font-weight: 600;
+    margin-bottom: var(--space-xs);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .transport-name .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--brand-500);
+  }
+  .transport-meta { font-size: var(--font-xs); color: var(--fg-tertiary); font-family: var(--family-mono); margin-bottom: var(--space-sm); }
+
+  /* HTTP demo ---------------------------------------------------------- */
+  .http {
+    background: var(--bg-inset);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+    line-height: 1.55;
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .http .verb {
+    color: var(--success);
+    font-weight: 600;
+  }
+  .http .status-201 { color: var(--success); }
+  .http .status-400 { color: var(--warning); }
+  .http .status-409 { color: var(--danger); }
+  .http .status-422 { color: var(--danger); }
+  .http .status-429 { color: var(--warning); }
+
+  /* SSE stream visualization ------------------------------------------ */
+  .sse-stream {
+    background: var(--bg-inset);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+    line-height: 1.55;
+    max-height: 360px;
+    overflow-y: auto;
+  }
+  .sse-line { padding: 2px 0; }
+  .sse-line.evt { color: var(--brand-500); }
+  [data-theme="dark"] .sse-line.evt { color: var(--brand-400); }
+  .sse-line.heartbeat { color: var(--fg-quaternary); }
+  .sse-line.rejected { color: var(--danger); }
+
+  /* timeline for dual-sig flow ---------------------------------------- */
+  .timeline {
+    position: relative;
+    padding-left: var(--space-xl);
+    margin-bottom: var(--space-lg);
+  }
+  .timeline-step {
+    position: relative;
+    padding-bottom: var(--space-lg);
+    padding-left: var(--space-md);
+    border-left: 2px solid var(--divider);
+  }
+  .timeline-step::before {
+    content: '';
+    position: absolute;
+    left: -7px;
+    top: 4px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--bg-base);
+    border: 2px solid var(--brand-500);
+  }
+  .timeline-step.success::before { background: var(--success); border-color: var(--success); }
+  .timeline-step.fail::before { background: var(--danger); border-color: var(--danger); }
+  .timeline-step-label {
+    font-weight: 600;
+    font-size: var(--font-md);
+    margin-bottom: var(--space-2xs);
+  }
+  .timeline-step-meta {
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+    color: var(--fg-tertiary);
+    margin-bottom: var(--space-sm);
+  }
+
+  /* state machine ------------------------------------------------------ */
+  .state-machine {
+    background: var(--bg-surface);
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+    line-height: 1.6;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* sensor status colors ---------------------------------------------- */
+  .status-chip {
+    display: inline-block;
+    padding: 1px var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+  }
+  .status-online_nominal { background: var(--success); color: #FFFFFF; }
+  .status-online_caution { background: var(--warning); color: #FFFFFF; }
+  .status-online_breach { background: var(--danger); color: #FFFFFF; }
+  .status-degraded { background: var(--fg-quaternary); color: #FFFFFF; }
+  .status-offline { background: var(--bg-inset); color: var(--fg-tertiary); }
+
+  /* actor role chips --------------------------------------------------- */
+  .role-chip {
+    display: inline-block;
+    padding: 1px var(--space-sm);
+    border-radius: 999px;
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+    border: 1px solid var(--divider);
+  }
+  .role-system { background: var(--bg-inset); color: var(--fg-tertiary); }
+  .role-phys { background: #FFF1E5; color: var(--warning); }
+  [data-theme="dark"] .role-phys { background: #3F2A12; }
+
+  /* rejection event list ---------------------------------------------- */
+  .rejection-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-sm);
+  }
+  .rejection-item {
+    border: 1px solid var(--divider);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm);
+    background: var(--bg-surface);
+  }
+  .rejection-item .reason {
+    font-family: var(--family-mono);
+    font-size: var(--font-xs);
+    color: var(--danger);
+    margin-bottom: var(--space-2xs);
+  }
+  .rejection-item .desc {
+    font-size: var(--font-sm);
+    color: var(--fg-secondary);
+  }
+
+  /* callout ------------------------------------------------------------ */
+  .callout {
+    border-left: 3px solid var(--brand-500);
+    padding: var(--space-md) var(--space-md);
+    background: var(--bg-surface);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    margin-bottom: var(--space-md);
+    font-size: var(--font-sm);
+    color: var(--fg-secondary);
+  }
+  .callout.danger { border-color: var(--danger); }
+  .callout.warning { border-color: var(--warning); }
+  .callout.success { border-color: var(--success); }
+  .callout strong { color: var(--fg-default); }
+
+  /* heatmap grid ------------------------------------------------------- */
+  .heat {
+    display: grid;
+    grid-template-columns: 32px repeat(24, 1fr);
+    gap: 2px;
+    font-size: 10px;
+    font-family: var(--family-mono);
+  }
+  .heat-label {
+    color: var(--fg-tertiary);
+    text-align: right;
+    padding-right: 2px;
+    align-self: center;
+  }
+  .heat-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: var(--bg-inset);
+    transition: background var(--motion-press-120) var(--easing-out);
+  }
+  .heat-cell:hover { outline: 1px solid var(--brand-500); }
+
+  /* chain hash display ------------------------------------------------ */
+  .chain-hash {
+    font-family: var(--family-mono);
+    font-size: var(--font-sm);
+    background: var(--bg-inset);
+    padding: var(--space-2xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    color: var(--brand-500);
+  }
+  [data-theme="dark"] .chain-hash { color: var(--brand-400); }
+
+  /* footer ------------------------------------------------------------- */
+  footer {
+    margin-top: var(--space-3xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--divider);
+    color: var(--fg-tertiary);
+    font-size: var(--font-xs);
+  }
+
+  /* motion (respect reduced-motion) ----------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+  [data-reduced-motion="true"] * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+</style>
+</head>
+<body data-theme="light">
+
+<div class="page">
+
+  <div class="topbar">
+    <div class="wordmark">Surakkha · Wire Format Preview</div>
+    <div class="topbar-meta">dim 7 · 2026-09-07 · v1 LOCKED</div>
+  </div>
+
+  <h1>Dimension 7 — Sensor Wire Format</h1>
+  <p class="lede">The network-side envelope, transports, and contracts that cross the audit-chain gateway. One envelope, three transports (HTTP write, SSE push, IndexedDB offline queue). 29 event types with discriminated-union payloads.</p>
+
+  <!-- meta grid ------------------------------------------------------- -->
+  <div class="meta-grid">
+    <div class="meta-card">
+      <div class="meta-label">Envelope base</div>
+      <div class="meta-value">10 fields</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Event types</div>
+      <div class="meta-value">29 (closed)</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Actor roles</div>
+      <div class="meta-value">8 (AD-12)</div>
+    </div>
+    <div class="meta-card">
+      <div class="meta-label">Transports</div>
+      <div class="meta-value">HTTP · SSE · IDB · NDJSON</div>
+    </div>
+  </div>
+
+  <!-- controls -------------------------------------------------------- -->
+  <div class="controls">
+    <span class="ctrl-label">Theme:</span>
+    <button class="ctrl-btn" id="themeLight">Light</button>
+    <button class="ctrl-btn" id="themeDark">Dark</button>
+    <span class="ctrl-label" style="margin-left: var(--space-lg);">Reduced motion:</span>
+    <button class="ctrl-btn" id="motionOn">On</button>
+    <button class="ctrl-btn" id="motionOff">Off</button>
+    <span class="ctrl-label" style="margin-left: var(--space-lg);">Section:</span>
+    <button class="ctrl-btn active" data-scroll="env">Envelope</button>
+    <button class="ctrl-btn" data-scroll="http">HTTP</button>
+    <button class="ctrl-btn" data-scroll="sse">SSE</button>
+    <button class="ctrl-btn" data-scroll="dual">Dual-sig</button>
+    <button class="ctrl-btn" data-scroll="sensor">Sensor FSM</button>
+  </div>
+
+  <!-- §3 universal envelope ----------------------------------------- -->
+  <h2 id="env">§3 — Universal envelope</h2>
+  <p class="lede">Every chain write — over every transport — carries the same <code>EnvelopeBase</code>. The gateway does not parse past <code>event_type</code> until the typed payload matches.</p>
+
+  <div class="card">
+    <div class="card-title">EnvelopeBase · TypeScript</div>
+    <div class="card-meta">The 10 mandatory fields. All chain events use this shape.</div>
+    <div class="code-block"><span class="k">interface</span> EnvelopeBase {
+  schema_version: <span class="n">number</span>;             <span class="c">// v1 = 1; bumped per AD-4</span>
+  tenant_id: <span class="n">string</span>;                  <span class="c">// 'dhaka' for v1</span>
+  event_type: EventType;              <span class="c">// see §4 for the closed enum</span>
+  event_id: ULID;                     <span class="c">// client-minted; AD-14 idempotency primitive</span>
+  occurred_at: ISOTimestamp;          <span class="c">// source-side time</span>
+  ingested_at: ISOTimestamp;          <span class="c">// gateway-set on accept</span>
+  actor_identity: ActorIdentity;      <span class="c">// {role, ref, display?}</span>
+  correlation_id: ULID | <span class="n">null</span>;
+  causation_id: ULID | <span class="n">null</span>;
+  payload: EventPayload;              <span class="c">// discriminated union on event_type</span>
+}</div>
+
+    <div class="card-title" style="margin-top: var(--space-lg);">Sample JSON · SensorReadingSubmitted</div>
+    <div class="card-meta">A sensor reading at pump station W with multi-radio cellular tier.</div>
+    <div class="code-block">{
+  <span class="d">"schema_version"</span>: <span class="s">1</span>,
+  <span class="d">"tenant_id"</span>: <span class="s">"dhaka"</span>,
+  <span class="d">"event_type"</span>: <span class="s">"SensorReadingSubmitted"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0A0"</span>,
+  <span class="d">"occurred_at"</span>: <span class="s">"2026-09-07T10:00:00.000Z"</span>,
+  <span class="d">"ingested_at"</span>: <span class="s">"2026-09-07T10:00:00.318Z"</span>,
+  <span class="d">"actor_identity"</span>: {
+    <span class="d">"role"</span>: <span class="s">"system"</span>,
+    <span class="d">"ref"</span>: <span class="s">"01J0SENSOR00000000000000001"</span>,
+    <span class="d">"display"</span>: <span class="s">"pump-station-W / cellular"</span>
+  },
+  <span class="d">"correlation_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0C00"</span>,
+  <span class="d">"causation_id"</span>: <span class="s">null</span>,
+  <span class="d">"payload"</span>: {
+    <span class="d">"sensor_id"</span>: <span class="s">"S1"</span>,
+    <span class="d">"ward_id"</span>: <span class="s">"W7"</span>,
+    <span class="d">"readings"</span>: {
+      <span class="d">"turbidity_ntu"</span>: <span class="s">6.8</span>,
+      <span class="d">"ph"</span>: <span class="s">7.2</span>,
+      <span class="d">"chlorine_ppm"</span>: <span class="s">0.4</span>,
+      <span class="d">"temperature_c"</span>: <span class="s">28.4</span>
+    },
+    <span class="d">"radio_tier"</span>: <span class="s">"cellular"</span>,
+    <span class="d">"battery_pct"</span>: <span class="s">87</span>,
+    <span class="d">"flags"</span>: [<span class="s">"spike"</span>]
+  }
+}</div>
+
+    <div class="callout">
+      <strong>Ingested_at is server-minted.</strong> The client never sets <code>ingested_at</code> — the gateway sets it on accept, before the row hits the chain. This prevents client-side clock skew from corrupting replay analytics. The 318ms gap above represents typical cellular RTT for that sensor.
+    </div>
+  </div>
+
+  <!-- event-type catalogue ----------------------------------------- -->
+  <h2>§4 — Event-type catalogue (29 types)</h2>
+  <p class="lede">Grouped by seam. Each entry is a discriminated-union branch on <code>event_type</code>.</p>
+
+  <table>
+    <thead><tr><th>Group</th><th>Event type</th><th>Emitted by</th><th>Dual-sig?</th></tr></thead>
+    <tbody>
+      <tr><td>Sensor</td><td class="mono">SensorReadingSubmitted</td><td>sensor via multi-radio adapter</td><td>—</td></tr>
+      <tr><td>Sensor</td><td class="mono">SensorSilenceObserved</td><td>sensor-silence monitor</td><td>—</td></tr>
+      <tr><td>Sensor</td><td class="mono">SensorStatusChanged</td><td>server-side state machine</td><td>—</td></tr>
+      <tr><td>Anjali</td><td class="mono">AnjaliReportSubmitted</td><td>Anjali-mobile</td><td>—</td></tr>
+      <tr><td>Anjali</td><td class="mono">AnjaliSentinelReadingSubmitted</td><td>Anjali-mobile</td><td>—</td></tr>
+      <tr><td>Anjali</td><td class="mono">AnjaliAcknowledgeDelivered</td><td>channel adapter (delivered confirmation)</td><td>—</td></tr>
+      <tr><td>Incident</td><td class="mono">IncidentCreated</td><td>Incident Aggregator (sole emitter)</td><td>—</td></tr>
+      <tr><td>Incident</td><td class="mono">IncidentEscalated</td><td>Priya-desktop</td><td>T3 only</td></tr>
+      <tr><td>Incident</td><td class="mono">IncidentResolved</td><td>Priya-desktop</td><td>—</td></tr>
+      <tr><td>Operator</td><td class="mono">PlaybookStepExecuted</td><td>Priya-desktop</td><td>—</td></tr>
+      <tr><td>Operator</td><td class="mono">DeviationCaptured</td><td>Priya-desktop</td><td>—</td></tr>
+      <tr><td>Operator</td><td class="mono">OverrideRecorded</td><td>Priya-desktop</td><td>—</td></tr>
+      <tr><td>Operator</td><td class="mono">ShiftCoverageActivated</td><td>Priya-desktop (utility_operator covering UMD)</td><td>—</td></tr>
+      <tr><td>Operator</td><td class="mono">ShiftCoverageEnded</td><td>Priya-desktop</td><td>—</td></tr>
+      <tr><td>Playbook</td><td class="mono">PlaybookVersionDrafted</td><td>playbook engine</td><td>—</td></tr>
+      <tr><td>Playbook</td><td class="mono">PlaybookVersionPublished</td><td>playbook engine</td><td><span class="badge danger">yes</span></td></tr>
+      <tr><td>Playbook</td><td class="mono">PlaybookVersionAbandoned</td><td>playbook engine</td><td>—</td></tr>
+      <tr><td>Playbook</td><td class="mono">PlaybookAmendmentApproved</td><td>PHA-pane</td><td>T3-boundary only</td></tr>
+      <tr><td>Consumer</td><td class="mono">PublicNoticeIssued</td><td>Priya-desktop (utility_message_desk)</td><td><span class="badge danger">yes</span></td></tr>
+      <tr><td>Consumer</td><td class="mono">PublicNoticeRetracted</td><td>Priya-desktop</td><td><span class="badge danger">yes</span></td></tr>
+      <tr><td>Consumer</td><td class="mono">CouncillorEndorsementRecorded</td><td>channel adapter (councillor voice)</td><td>—</td></tr>
+      <tr><td>Consumer</td><td class="mono">CouncillorRelayMissed</td><td>gateway SLA monitor</td><td>—</td></tr>
+      <tr><td>Consumer</td><td class="mono">CouncillorQualityFlagged</td><td>gateway SLA monitor</td><td>—</td></tr>
+      <tr><td>Consumer</td><td class="mono">CouncillorBypassActivated</td><td>SLA monitor or pha_approver (sole emitters)</td><td>—</td></tr>
+      <tr><td>Consumer</td><td class="mono">ChannelDeliveryFailed</td><td>channel adapter (post-commit partial failure)</td><td>—</td></tr>
+      <tr><td>Governance</td><td class="mono">SignatureAttestation</td><td>pha_approver / utility_message_desk / vendor</td><td><span class="c">(primitive)</span></td></tr>
+      <tr><td>Governance</td><td class="mono">CityConfigChanged</td><td>PHA-pane</td><td>single-sig</td></tr>
+      <tr><td>Governance</td><td class="mono">SchemaVersionBumped</td><td>schema-registry owner</td><td>vendor+pha</td></tr>
+      <tr><td>Auth</td><td class="mono">OperatorAuthenticated</td><td>auth service</td><td>—</td></tr>
+      <tr><td>Auth</td><td class="mono">OperatorAccessLogged</td><td>gateway (every read)</td><td>—</td></tr>
+      <tr><td>Monitor</td><td class="mono">ChainVerificationFailed</td><td>chain-integrity monitor</td><td>—</td></tr>
+      <tr><td>Errors</td><td class="mono">CommandRejected</td><td>gateway (every reject)</td><td>—</td></tr>
+      <tr><td>Errors</td><td class="mono">ProjectionFailed</td><td>projection rebuild</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <!-- §2.5 actor identity ------------------------------------------ -->
+  <h2>§2.5 — Actor identity (closed enum, AD-12)</h2>
+  <p class="lede">Eight roles, frozen 2026-09-07. The <code>ref</code> field is always a session-bound ULID; the gateway rejects non-resolvable refs.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-sm); margin-bottom: var(--space-lg);">
+    <div><span class="role-chip role-system">vendor</span></div>
+    <div><span class="role-chip role-phys">pha_approver</span></div>
+    <div><span class="role-chip role-system">utility_operator</span></div>
+    <div><span class="role-chip role-system">utility_message_desk</span></div>
+    <div><span class="role-chip role-system">anjali</span></div>
+    <div><span class="role-chip role-system">priya</span></div>
+    <div><span class="role-chip role-system">pha_viewer</span></div>
+    <div><span class="role-chip role-system">system</span></div>
+  </div>
+
+  <div class="code-block">{
+  <span class="d">"role"</span>: <span class="s">"pha_approver"</span>,
+  <span class="d">"ref"</span>:  <span class="s">"01J0PHA00000000000000001"</span>,   <span class="c">// session-bound ULID</span>
+  <span class="d">"display"</span>: <span class="s">"Dr. Mensah · DHAKA-PHA"</span>          <span class="c">// optional human-readable</span>
+}</div>
+
+  <div class="callout warning">
+    <strong>Single-character role enum expansion is structurally forbidden.</strong> A future "PHA_TEMP_REPLACEMENT" or "VENDOR_READONLY" is <strong>not</strong> a string append — it is an AD-12 amendment. Bumping the enum is a dual-signed <code>SchemaVersionBumped</code> event (AD-15).
+  </div>
+
+  <!-- §5 HTTP transport -------------------------------------------- -->
+  <h2 id="http">§5.1 — HTTP POST /v1/chain (canonical write)</h2>
+  <p class="lede">All chain writes go through one HTTP endpoint. The gateway enforces idempotency by <code>(tenant_id, event_id)</code> via SQLite uniqueness.</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-title">Request</div>
+      <div class="card-meta">Single Content-Type. Idempotency-Key header is the <code>event_id</code> ULID.</div>
+      <div class="http"><span class="verb">POST</span> /v1/chain HTTP/1.1
+<span class="d">Host:</span> gateway.surakkha.bd
+<span class="d">Content-Type:</span> application/json
+<span class="d">Authorization:</span> Bearer &lt;session_token&gt;
+<span class="d">Idempotency-Key:</span> 01J0A0A0A0A0A0A0A0A0A0A0A0
+
+&lt;request body = EnvelopeBase&gt;</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Response · 201 Created</div>
+      <div class="card-meta">Chain head advanced. Body returns the block hash anchors.</div>
+      <div class="http"><span class="status-201">201 Created</span>
+<span class="d">Content-Type:</span> application/json
+
+{
+  <span class="d">"block_hash"</span>: <span class="s">"0x7f3a9c2b4a8d6e1f0c5b9a7d3e2f8c4b1a6d9e0f2c5b3a8d7e1f4c9b6a2d"</span>,
+  <span class="d">"prev_block_hash"</span>: <span class="s">"0x4e8d2c1f9a3b7e6d0c5f8a2b1d4e9c0f7a3b6d2e8c5f1a4b9d0e2c7f3a6b8d"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0A0"</span>
+}</div>
+    </div>
+  </div>
+
+  <h3>HTTP status codes</h3>
+  <table>
+    <thead><tr><th>Code</th><th>Meaning</th><th>Triggers</th></tr></thead>
+    <tbody>
+      <tr><td class="mono"><span class="status-201">201</span></td><td>Accepted; chain head advanced.</td><td>Happy path.</td></tr>
+      <tr><td class="mono"><span style="color:var(--warning)">400</span></td><td>Typed <code>CommandRejected</code>.</td><td>role-not-in-enum, missing-tenant, malformed-payload, schema-version-unsupported.</td></tr>
+      <tr><td class="mono"><span style="color:var(--warning)">401</span></td><td>actor_ref not session-bound.</td><td>Token expired or forged. Ref resolves to no live session.</td></tr>
+      <tr><td class="mono"><span class="status-409">409</span></td><td><code>DuplicateEventRejected</code>.</td><td><code>(tenant_id, event_id)</code> pair already on chain (AD-14 idempotency).</td></tr>
+      <tr><td class="mono"><span style="color:var(--warning)">413</span></td><td>Payload &gt; 64 KiB.</td><td>Audio attachments should ride on signed URL, not in payload.</td></tr>
+      <tr><td class="mono"><span class="status-422">422</span></td><td><code>dual_signature_missing</code> or <code>attestation_triple_mismatch</code>.</td><td>AD-11 invariant: both attestations must already be on-chain.</td></tr>
+      <tr><td class="mono"><span class="status-429">429</span></td><td><code>public_notice_rate_limit_exceeded</code>.</td><td>5/hr/actor for issuance; <code>Retry-After</code> header present.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- §5.3 polling ------------------------------------------------ -->
+  <h2>§5.3 — HTTP GET /v1/chain (poll fallback)</h2>
+  <p class="lede">When SSE has fallen back (per dim 5d §F state machine), every surface polls. Default cadence 30 s ± 10% jitter.</p>
+
+  <div class="code-block"><span class="verb">GET</span> /v1/chain?cursor=01J0A0A0A0A0A0A0A0A0A0A0A0&limit=50 HTTP/1.1
+<span class="d">Host:</span> gateway.surakkha.bd
+<span class="d">Authorization:</span> Bearer &lt;session_token&gt;
+
+Response:
+200 OK
+{
+  <span class="d">"events"</span>: [&lt;EnvelopeBase&gt;, ...],
+  <span class="d">"next_cursor"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0F00"</span>,
+  <span class="d">"chain_head_event_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0F01"</span>,
+  <span class="d">"chain_head_hash"</span>: <span class="s">"0x7f3a·b9c2·4e8d·…"</span>,
+  <span class="d">"projection_lag_ms"</span>: <span class="s">312</span>
+}</div>
+
+  <div class="callout">
+    <strong>Cursor is strictly greater-than.</strong> Server returns events whose <code>event_id</code> lexicographically exceeds the cursor. ULID time-ordering means cursor-based paging is also time-ordered. <code>limit</code> default 50, max 200.
+  </div>
+
+  <h3>Polling jitter math</h3>
+  <div class="code-block"><span class="k">const</span> refreshIntervalMs = <span class="s">30000</span>;            <span class="c">// default cadence</span>
+<span class="k">const</span> jitter = <span class="s">0.9</span> + Math.random() * <span class="s">0.2</span>; <span class="c">// ±10% defeats thundering herd</span>
+<span class="k">const</span> actualInterval = refreshIntervalMs * jitter;</div>
+
+  <!-- §5.2 SSE ---------------------------------------------------- -->
+  <h2 id="sse">§5.2 — SSE /v1/stream (live push)</h2>
+  <p class="lede">One-way gateway → client. Browser-native <code>EventSource</code> handles reconnection. Heartbeat every 30 s carries <code>chain_head</code>.</p>
+
+  <div class="card">
+    <div class="card-title">SSE event stream (live demo)</div>
+    <div class="card-meta">Click "Push event" to append; "Tick heartbeat" advances the 30 s timer; "Trigger reject" injects a CommandRejected.</div>
+    <div class="controls" style="margin-bottom: var(--space-md);">
+      <button class="ctrl-btn" id="pushBtn">Push event</button>
+      <button class="ctrl-btn" id="tickBtn">Tick heartbeat</button>
+      <button class="ctrl-btn" id="rejBtn">Trigger reject</button>
+      <button class="ctrl-btn" id="clearBtn">Clear</button>
+    </div>
+    <div class="sse-stream" id="sseStream"></div>
+  </div>
+
+  <div class="callout">
+    <strong>SSE auth-header refresh.</strong> Tokens refresh mid-session per story 1.2. A <code>401 Unauthorized</code> on SSE causes the client to drop to <strong>poll mode</strong> (per dim 5d §F fallback) and emit a <code>ChartOnConnectionLost</code> toast.
+  </div>
+
+  <!-- §5.4 chain head --------------------------------------------- -->
+  <h2>§5.4 — Chain head endpoint</h2>
+  <p class="lede">The chain freshness clock on Priya-desktop (dim 5 §7.1) is a 5-second poll against this endpoint. Surfaces show "Last update 0.3s ago" or "Stale as of 14:08".</p>
+
+  <div class="code-block"><span class="verb">GET</span> /v1/chain/head/dhaka HTTP/1.1
+
+Response:
+200 OK
+{
+  <span class="d">"tenant_id"</span>: <span class="s">"dhaka"</span>,
+  <span class="d">"chain_head_event_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0A9"</span>,
+  <span class="d">"chain_head_hash"</span>: <span class="s">"0x7f3a·b9c2·4e8d·ac12"</span>,
+  <span class="d">"block_height"</span>: <span class="s">142857</span>,
+  <span class="d">"ingested_at"</span>: <span class="s">"2026-09-07T10:00:00.000Z"</span>,
+  <span class="d">"verified_at"</span>: <span class="s">"2026-09-07T10:00:00.000Z"</span>
+}</div>
+
+  <h3>Live chain head (mock)</h3>
+  <div class="card">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md);">
+      <div>
+        <div class="meta-label">Latest block hash</div>
+        <div class="chain-hash" id="liveHash">0x7f3a·b9c2·4e8d·ac12</div>
+      </div>
+      <div>
+        <div class="meta-label">Block height</div>
+        <div class="chain-hash" id="liveHeight">142857</div>
+      </div>
+      <div>
+        <div class="meta-label">Ingested at</div>
+        <div class="chain-hash" id="liveIngested">2026-09-07T10:00:00.000Z</div>
+      </div>
+      <div>
+        <div class="meta-label">Verified at</div>
+        <div class="chain-hash" id="liveVerified">2026-09-07T10:00:00.000Z</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- §6 chain hash ----------------------------------------------- -->
+  <h2>§6 — Chain reference format</h2>
+  <p class="lede">Content-addressed by <strong>one</strong> sha256. No merkle root. UI truncates to 4×3 + ellipsis; chain stores the full 64 hex chars.</p>
+
+  <div class="code-block">block_hash = sha256(
+  canonical_json({
+    prev_block_hash,
+    tenant_id,
+    schema_version,
+    event_type,
+    event_id,
+    occurred_at,
+    ingested_at,
+    actor_identity,
+    payload
+  })
+)
+
+<span class="c">// canonical_json = sorted-keys, no whitespace, stable UTF-8</span>
+<span class="c">// machine form:  "0x" + 64 lowercase hex chars</span>
+<span class="c">// UI form:      "0x7f3a · b9c2 · 4e8d · ac12"   (truncated visual)</span>
+<span class="c">// full form:    "0x7f3a9c2b4a8d6e1f0c5b9a7d3e2f8c4b1a6d9e0f2c5b3a8d7e1f4c9b6a2d"</span></div>
+
+  <div class="callout success">
+    <strong>Display rule.</strong> <code>chain_ref</code> always renders in mono (<code>--family-mono</code>) and is color-independent. Hover-to-reveal / long-press exposes the full 64 hex chars. UI truncation is a <strong>rendering choice, not a storage choice</strong>.
+  </div>
+
+  <!-- §7 dual-sig flow ------------------------------------------- -->
+  <h2 id="dual">§7 — Dual-signature wire flow (AD-11)</h2>
+  <p class="lede">Three events on the wire for every dual-sig command. The gateway rejects the underlying command if either <code>SignatureAttestation</code> is missing or the triple mismatches.</p>
+
+  <div class="timeline">
+    <div class="timeline-step success">
+      <div class="timeline-step-label">Step 1 · PHA attest</div>
+      <div class="timeline-step-meta">event_type: SignatureAttestation · role: pha_approver</div>
+      <div class="code-block">{
+  <span class="d">"event_type"</span>: <span class="s">"SignatureAttestation"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0P...PHA1"</span>,
+  <span class="d">"actor_identity"</span>: { <span class="d">"role"</span>: <span class="s">"pha_approver"</span>, <span class="d">"ref"</span>: <span class="s">"01J0PHA..."</span> },
+  <span class="d">"payload"</span>: {
+    <span class="d">"attestation_target_event_id"</span>: <span class="s">"01J0P...TARGET"</span>,
+    <span class="d">"attestation_target_payload_hash"</span>: <span class="s">"0xabc..."</span>,
+    <span class="d">"attestation_target_version_id"</span>: <span class="s">"01J0P...V3.3"</span>,
+    <span class="d">"attestation_kind"</span>: <span class="s">"pha_approver"</span>,
+    <span class="d">"signature_algorithm"</span>: <span class="s">"ed25519"</span>,
+    <span class="d">"signature"</span>: <span class="s">"0xd4f..."</span>
+  }
+}
+<span class="c">// → 201</span></div>
+    </div>
+
+    <div class="timeline-step success">
+      <div class="timeline-step-label">Step 2 · utility_message_desk co-attest</div>
+      <div class="timeline-step-meta">Same (event_id, payload_hash, version_id) triple as Step 1.</div>
+      <div class="code-block">{
+  <span class="d">"event_type"</span>: <span class="s">"SignatureAttestation"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0P...UMD1"</span>,
+  <span class="d">"actor_identity"</span>: { <span class="d">"role"</span>: <span class="s">"utility_message_desk"</span>, <span class="d">"ref"</span>: <span class="s">"01J0UMD..."</span> },
+  <span class="d">"payload"</span>: {
+    <span class="d">"attestation_target_event_id"</span>: <span class="s">"01J0P...TARGET"</span>,    <span class="c">// SAME</span>
+    <span class="d">"attestation_target_payload_hash"</span>: <span class="s">"0xabc..."</span>,           <span class="c">// SAME</span>
+    <span class="d">"attestation_target_version_id"</span>: <span class="s">"01J0P...V3.3"</span>,           <span class="c">// SAME</span>
+    <span class="d">"attestation_kind"</span>: <span class="s">"utility_message_desk"</span>,
+    <span class="d">"signature_algorithm"</span>: <span class="s">"ed25519"</span>,
+    <span class="d">"signature"</span>: <span class="s">"0x8a3..."</span>
+  }
+}
+<span class="c">// → 201</span></div>
+    </div>
+
+    <div class="timeline-step success">
+      <div class="timeline-step-label">Step 3 · Underlying command (PublicNoticeIssued)</div>
+      <div class="timeline-step-meta">Gateway verifies both attestations are on-chain with matching triples.</div>
+      <div class="code-block">{
+  <span class="d">"event_type"</span>: <span class="s">"PublicNoticeIssued"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0P...TARGET"</span>,
+  <span class="d">"payload"</span>: {
+    <span class="d">"attestation_event_ids"</span>: [<span class="s">"01J0P...PHA1"</span>, <span class="s">"01J0P...UMD1"</span>],
+    <span class="d">"notice_id"</span>: <span class="s">"01J0P...NOTICE"</span>,
+    <span class="d">"template_id"</span>: <span class="s">"boil_v1_bn"</span>,
+    <span class="d">"locale"</span>: <span class="s">"bn"</span>,
+    <span class="d">"recipient_ward_ids"</span>: [<span class="s">"W7"</span>],
+    <span class="d">"body_hash"</span>: <span class="s">"0xabc..."</span>,
+    <span class="d">"character_count"</span>: <span class="s">68</span>,
+    <span class="d">"character_budget_alphabet"</span>: <span class="s">"ucs2"</span>,
+    <span class="d">"verification_horizon_at"</span>: <span class="s">"2026-09-07T18:00:00.000Z"</span>,
+    <span class="d">"zone_label"</span>: <span class="s">"Ward 7"</span>,
+    <span class="d">"issuing_authority"</span>: <span class="s">"Dhaka PHA"</span>
+  }
+}
+<span class="c">// → 201 (both attestations already on chain with matching triple)</span></div>
+    </div>
+
+    <div class="timeline-step fail">
+      <div class="timeline-step-label">Failure mode · Triple mismatch</div>
+      <div class="timeline-step-meta">Step 3 lands against a typo-correction v2. Gateway rejects at write-time.</div>
+      <div class="code-block"><span class="status-422">422 Unprocessable Entity</span>
+{
+  <span class="d">"rejection_reason"</span>: <span class="s">"attestation_triple_mismatch"</span>,
+  <span class="d">"rejection_evidence"</span>: <span class="s">"Step-1 attestation references payload_hash 0xabc..., but current issuance payload hashes to 0xdef..."</span>
+}
+
+<span class="c">// A SECOND CommandRejected event is written for traceability</span>
+<span class="c">// NO chain event for the underlying command is written (per AD-11 tightened)</span></div>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <strong>No buffered admission window.</strong> Both attestations must already be on the chain at write-time of the underlying command. There is no "wait 5 minutes" or "post-hoc admission" path. A half-attested issuance attempt produces a typed <code>CommandRejected{reason: dual_signature_missing}</code> event and <strong>no chain event for the underlying command</strong> is written (per AD-11 post-review tightening).
+  </div>
+
+  <!-- §8 sensor state machine ------------------------------------ -->
+  <h2 id="sensor">§8 — Sensor status state machine</h2>
+  <p class="lede">The state machine lives server-side; the wire only carries <code>SensorStatusChanged</code> transitions. <code>SensorSilenceObserved</code> is monitor-emitted at the silence threshold (default 30 min).</p>
+
+  <div class="state-machine">   ┌──────────────┐  reading_window_ok
+   │   offline    │ ─────────────────▶ online_nominal
+   └──────────────┘                        │
+        ▲                                  │ reading_window_caution (N min borderline)
+        │                                  ▼
+        │                           online_caution
+   communication_lost                    │
+        ▲                                │ reading_window_breach (threshold crossed M min)
+        │                                ▼
+   ┌──────────────┐                online_breach
+   │   degraded   │ ◀───────────── low_battery
+   │              │ ◀───────────── low_battery (cascade)
+   └──────────────┘ ◀── tamper_detected
+        ▲           (auto-promotion to degraded)
+        │
+        │ battery_critical
+        ▼
+    (force offline within 24h)</div>
+
+  <h3>Sample SensorStatusChanged event</h3>
+  <div class="code-block">{
+  <span class="d">"event_type"</span>: <span class="s">"SensorStatusChanged"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0B0A0"</span>,
+  <span class="d">"actor_identity"</span>: { <span class="d">"role"</span>: <span class="s">"system"</span>, <span class="d">"ref"</span>: <span class="s">"01J0MONITOR0001"</span> },
+  <span class="d">"payload"</span>: {
+    <span class="d">"sensor_id"</span>: <span class="s">"S1"</span>,
+    <span class="d">"from_status"</span>: <span class="s">"online_nominal"</span>,
+    <span class="d">"to_status"</span>: <span class="s">"online_breach"</span>,
+    <span class="d">"reason"</span>: <span class="s">"reading_window_breach"</span>,
+    <span class="d">"observed_at"</span>: <span class="s">"2026-09-07T14:08:32.000Z"</span>
+  }
+}</div>
+
+  <h3>Sample SensorSilenceObserved event (monitor-emitted)</h3>
+  <div class="code-block">{
+  <span class="d">"event_type"</span>: <span class="s">"SensorSilenceObserved"</span>,
+  <span class="d">"event_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0B0B1"</span>,
+  <span class="d">"actor_identity"</span>: { <span class="d">"role"</span>: <span class="s">"system"</span>, <span class="d">"ref"</span>: <span class="s">"01J0MONITOR0002"</span> },
+  <span class="d">"payload"</span>: {
+    <span class="d">"sensor_id"</span>: <span class="s">"S3"</span>,
+    <span class="d">"last_observed_at"</span>: <span class="s">"2026-09-07T13:38:00.000Z"</span>,
+    <span class="d">"silent_since"</span>: <span class="s">"2026-09-07T14:08:00.000Z"</span>,
+    <span class="d">"threshold_minutes"</span>: <span class="s">30</span>
+  }
+}</div>
+
+  <h3>Detection windows (server-side, configurable per tenant)</h3>
+  <table>
+    <thead><tr><th>Transition</th><th>Trigger</th><th>Default</th></tr></thead>
+    <tbody>
+      <tr><td>nominal → caution</td><td>turbidity / pH / chlorine crosses <code>tier_low</code></td><td>≥ 5 min</td></tr>
+      <tr><td>caution → breach</td><td>crosses <code>tier_medium</code> (acute threshold)</td><td>≥ 2 min</td></tr>
+      <tr><td>any → offline</td><td>no SensorReadingSubmitted</td><td>≥ 30 min</td></tr>
+      <tr><td>any → degraded</td><td>battery &lt; 15% OR tamper detected</td><td>immediate</td></tr>
+      <tr><td>degraded → offline</td><td>battery &lt; 5% OR 24h degraded w/o fix</td><td>immediate / 24h</td></tr>
+    </tbody>
+  </table>
+
+  <!-- §9 server-aggregated heatmap ------------------------------- -->
+  <h2>§9 — Server-aggregated heatmap</h2>
+  <p class="lede">The 7×24 matrix is computed server-side, never client-side. Result: lower compute on operator-mobile; consistent bucket boundaries; one read per page-load.</p>
+
+  <div class="code-block"><span class="verb">GET</span> /v1/projections/activity-heatmap?from=2026-09-01T00:00:00Z&to=2026-09-08T00:00:00Z&actor_role_filter=operator
+
+Response:
+200 OK
+{
+  <span class="d">"cells"</span>: [
+    { <span class="d">"day"</span>: <span class="s">0</span>, <span class="d">"hour"</span>: <span class="s">9</span>, <span class="d">"count"</span>: <span class="s">14</span> },
+    { <span class="d">"day"</span>: <span class="s">1</span>, <span class="d">"hour"</span>: <span class="s">14</span>, <span class="d">"count"</span>: <span class="s">23</span> },
+    <span class="c">// ... 168 entries (7 days × 24 hours)</span>
+  ],
+  <span class="d">"total_count"</span>: <span class="s">847</span>,
+  <span class="d">"bucket_window_days"</span>: <span class="s">7</span>
+}</div>
+
+  <h3>Sample 7×24 matrix (mock)</h3>
+  <div class="card">
+    <div class="heat" id="heatmap"></div>
+    <div class="card-meta" style="margin-top: var(--space-md);">Heat scale: <span style="color:var(--fg-tertiary);">0</span> → <span style="color:var(--success);">5</span> → <span style="color:var(--warning);">15</span> → <span style="color:var(--danger);">30+</span> events/cell. Cell color derives from <code>--band-low/medium/high</code> tokens (dim 5b).</div>
+  </div>
+
+  <!-- §10 polling cadence --------------------------------------- -->
+  <h2>§10 — Polling cadence contract</h2>
+  <p class="lede">Polling kicks in when SSE has fallen back. Cadence lives in the chart component (dim 5b); dim 7 owns the wire contract.</p>
+
+  <div class="transport-grid">
+    <div class="transport">
+      <div class="transport-name"><div class="dot"></div>Cadence</div>
+      <div class="transport-meta">30s default · ±10% client-side jitter</div>
+      <div class="code-block">refreshIntervalMs * (0.9 + Math.random() * 0.2)</div>
+    </div>
+    <div class="transport">
+      <div class="transport-name"><div class="dot"></div>Fallback trigger</div>
+      <div class="transport-meta">3 consecutive SSE failures → poll mode</div>
+      <div class="code-block">3s → 6s → 12s → 30s (EventSource default cap)</div>
+    </div>
+    <div class="transport">
+      <div class="transport-name"><div class="dot"></div>Server hard limit</div>
+      <div class="transport-meta">200 req/min per session token</div>
+      <div class="code-block"><span style="color:var(--warning)">429 Too Many Requests</span>
+<span class="d">Retry-After:</span> 60</div>
+    </div>
+    <div class="transport">
+      <div class="transport-name"><div class="dot"></div>Backpressure</div>
+      <div class="transport-meta">Sliding-window maxPoints (client-side)</div>
+      <div class="code-block">time-series: <span class="n">200</span>
+sparklines:  <span class="n">30</span></div>
+    </div>
+  </div>
+
+  <!-- §5.5 offline IDB queue -------------------------------------- -->
+  <h2>§5.5 — IndexedDB offline queue (Anjali-mobile)</h2>
+  <p class="lede">Anjali's phone has unreliable network. The client mints <code>event_id</code> at user-acknowledged submit time; re-tries reuse the same <code>event_id</code>. Idempotency survives disconnect.</p>
+
+  <div class="code-block"><span class="k">interface</span> PendingEventRecord {
+  event_id: ULID;                 <span class="c">// primary key, generated at submit</span>
+  envelope: EnvelopeBase;         <span class="c">// serialized JSON</span>
+  submit_attempt_count: <span class="n">number</span>;
+  last_attempt_at: ISOTimestamp | <span class="n">null</span>;
+  last_response_code: <span class="n">number</span> | <span class="n">null</span>;
+  chain_ref: ULID | <span class="n">null</span>;     <span class="c">// populated on 201</span>
+  failure_reason: CommandRejected[<span class="d">'rejection_reason'</span>] | <span class="n">null</span>;
+}</div>
+
+  <h3>Sync algorithm (7 steps)</h3>
+  <ol style="padding-left: var(--space-xl); font-size: var(--font-sm); color: var(--fg-secondary); line-height: 1.7;">
+    <li>App startup → scan <code>pending-events</code> where <code>chain_ref is null AND submit_attempt_count &lt; 8</code>.</li>
+    <li>POST each to <code>/v1/chain</code>.</li>
+    <li>On <code>201</code>: set <code>chain_ref</code>, decrement "queued" badge.</li>
+    <li>On <code>409 DuplicateEventRejected</code>: set <code>chain_ref</code> (it landed earlier); no retry.</li>
+    <li>On <code>4xx</code> other: increment attempt count; pause until exponential backoff (3s, 6s, 12s, …, 30m cap).</li>
+    <li>On <code>5xx</code> / network error: same backoff.</li>
+    <li>After 8 attempts: surface <code>SubmissionFailed{Permanent}</code> toast; queue persists for human review.</li>
+  </ol>
+
+  <!-- §4.10 CommandRejected catalog ----------------------------- -->
+  <h2>§4.10 — CommandRejected catalogue (errors-are-events)</h2>
+  <p class="lede">Every reject emits a typed chain event with a plain-English reason. Operators see the chain-reference ID — never raw JSON (per EXPERIENCE.md §"Error state").</p>
+
+  <div class="rejection-list">
+    <div class="rejection-item"><div class="reason">missing_tenant_id</div><div class="desc">Request body missing <code>tenant_id</code>. Gateway rejects before any chain work.</div></div>
+    <div class="rejection-item"><div class="reason">missing_actor_identity</div><div class="desc">No <code>actor_identity</code> field. Session token not resolved.</div></div>
+    <div class="rejection-item"><div class="reason">role_not_in_enum</div><div class="desc"><code>role</code> outside the 8-entry AD-12 closed enum.</div></div>
+    <div class="rejection-item"><div class="reason">actor_ref_not_session_bound</div><div class="desc"><code>ref</code> did not resolve to a live auth-session reference. Token expired or forged.</div></div>
+    <div class="rejection-item"><div class="reason">duplicate_event_id</div><div class="desc"><code>(tenant_id, event_id)</code> pair already on chain. AD-14 idempotency trip.</div></div>
+    <div class="rejection-item"><div class="reason">cross_tenant_attempt</div><div class="desc">Session scoped to one tenant attempted cross-tenant read/write.</div></div>
+    <div class="rejection-item"><div class="reason">attestation_triple_mismatch</div><div class="desc">AD-11 invariant: payload_hash or version_id differs between attestations.</div></div>
+    <div class="rejection-item"><div class="reason">dual_signature_missing</div><div class="desc">Underlying command landed but one or both SignatureAttestation events are not on chain.</div></div>
+    <div class="rejection-item"><div class="reason">character_budget_exceeded</div><div class="desc">Filled template exceeds EN ≤160 GSM-7 or BN ≤70 UCS-2.</div></div>
+    <div class="rejection-item"><div class="reason">public_notice_rate_limit_exceeded</div><div class="desc">5/hr/actor issuance rate hit. <code>Retry-After</code> header present.</div></div>
+    <div class="rejection-item"><div class="reason">shift_coverage_missing_or_expired</div><div class="desc"><code>utility_operator</code> tried to issue without an active <code>ShiftCoverageActivated</code>.</div></div>
+    <div class="rejection-item"><div class="reason">retraction_target_not_on_chain</div><div class="desc"><code>PublicNoticeRetracted</code> referenced an event_id that does not exist on the chain.</div></div>
+    <div class="rejection-item"><div class="reason">malformed_payload</div><div class="desc">Payload failed discriminated-union match for the declared <code>event_type</code>.</div></div>
+    <div class="rejection-item"><div class="reason">unknown_event_type</div><div class="desc"><code>event_type</code> string not in the 29-entry closed enum.</div></div>
+    <div class="rejection-item"><div class="reason">schema_version_unsupported</div><div class="desc"><code>schema_version</code> higher than the gateway's current max version.</div></div>
+  </div>
+
+  <!-- §13.1 monitor events -------------------------------------- -->
+  <h2>§13.1 — Monitor-emitted events</h2>
+  <p class="lede">Chain-integrity failures are themselves chain events. The chain self-monitors; subsequent writes continue.</p>
+
+  <div class="code-block"><span class="c">// ChainVerificationFailed — emitted by chain_integrity_monitor every 60s</span>
+{
+  <span class="d">"event_type"</span>: <span class="s">"ChainVerificationFailed"</span>,
+  <span class="d">"actor_identity"</span>: { <span class="d">"role"</span>: <span class="s">"system"</span>, <span class="d">"ref"</span>: <span class="s">"01J0MONITOR0001"</span> },
+  <span class="d">"payload"</span>: {
+    <span class="d">"tenant_id"</span>: <span class="s">"dhaka"</span>,
+    <span class="d">"failed_at_block_id"</span>: <span class="s">"01J0A0A0A0A0A0A0A0A0A0A0C99"</span>,
+    <span class="d">"expected_hash"</span>: <span class="s">"0xabc..."</span>,
+    <span class="d">"computed_hash"</span>: <span class="s">"0xdef..."</span>,
+    <span class="d">"recompute_strategy"</span>: <span class="s">"forward_from_genesis"</span>,
+    <span class="d">"monitor_actor_ref"</span>: <span class="s">"01J0MONITOR0001"</span>
+  }
+}
+<span class="c">// Note: a high-severity alert also logs at ERROR level (per spec-1-1 §I/O matrix)</span></div>
+
+  <div class="callout warning">
+    <strong>CouncillorBypassActivated has two sole-emitters.</strong> The gateway SLA monitor (for <code>sla_breach</code> / <code>quality_flag</code>) or a PHA-pane <code>pha_approver</code> (for <code>manual</code>). No third emitter is permitted; the gateway rejects unauthorized emitters.
+  </div>
+
+  <!-- footer ---------------------------------------------------- -->
+  <footer>
+    <div style="display: flex; justify-content: space-between;">
+      <span>07-sensor-wire-format-lockdown.md · v1 LOCKED · 2026-09-07</span>
+      <span>29 event types · 8 actor roles · 4 transports</span>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // theme toggle -------------------------------------------------------
+  document.getElementById('themeLight').addEventListener('click', () => {
+    document.body.dataset.theme = 'light';
+  });
+  document.getElementById('themeDark').addEventListener('click', () => {
+    document.body.dataset.theme = 'dark';
+  });
+
+  // motion toggle ------------------------------------------------------
+  document.getElementById('motionOn').addEventListener('click', () => {
+    document.body.dataset.reducedMotion = 'true';
+  });
+  document.getElementById('motionOff').addEventListener('click', () => {
+    document.body.dataset.reducedMotion = 'false';
+  });
+
+  // section scroll ------------------------------------------------------
+  document.querySelectorAll('[data-scroll]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.scroll;
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // SSE stream demo -----------------------------------------------------
+  const stream = document.getElementById('sseStream');
+  const now = () => new Date().toISOString();
+  let blockHeight = 142857;
+
+  function append(text, cls) {
+    const div = document.createElement('div');
+    div.className = 'sse-line' + (cls ? ' ' + cls : '');
+    div.textContent = text;
+    stream.appendChild(div);
+    stream.scrollTop = stream.scrollHeight;
+    // cap at 50 lines
+    while (stream.children.length > 50) stream.removeChild(stream.firstChild);
+  }
+
+  const sampleEvents = [
+    {
+      event: 'SensorReadingSubmitted',
+      data: {
+        schema_version: 1,
+        tenant_id: 'dhaka',
+        event_id: '01J0A0A0A0A0A0A0A0A0A0B0C0',
+        actor_identity: { role: 'system', ref: '01J0SENSOR00000000000000001' },
+        payload: { sensor_id: 'S1', ward_id: 'W7', readings: { turbidity_ntu: 6.8, ph: 7.2 } }
+      }
+    },
+    {
+      event: 'IncidentEscalated',
+      data: {
+        schema_version: 1,
+        tenant_id: 'dhaka',
+        event_id: '01J0A0A0A0A0A0A0A0A0A0B0C1',
+        actor_identity: { role: 'priya', ref: '01J0PRIYA0000000000000001' },
+        payload: { incident_id: '01J0INC00000000000000001', from_tier: 'T2', to_tier: 'T3' }
+      }
+    },
+    {
+      event: 'AnjaliReportSubmitted',
+      data: {
+        schema_version: 1,
+        tenant_id: 'dhaka',
+        event_id: '01J0A0A0A0A0A0A0A0A0A0B0C2',
+        actor_identity: { role: 'anjali', ref: '01J0ANJALI0000000000001' },
+        payload: { anjali_id: 'anjali-W7-school', ward_id: 'W7', modalities: { free_text: 'Ward 7, school tap, chlorine smell' } }
+      }
+    },
+    {
+      event: 'PublicNoticeIssued',
+      data: {
+        schema_version: 1,
+        tenant_id: 'dhaka',
+        event_id: '01J0A0A0A0A0A0A0A0A0A0B0C3',
+        actor_identity: { role: 'utility_message_desk', ref: '01J0UMD0000000000000001' },
+        payload: { notice_id: '01J0NOTICE00000000000001', template_id: 'boil_v1_bn', locale: 'bn', recipient_ward_ids: ['W7'], character_count: 68, character_budget_alphabet: 'ucs2' }
+      }
+    },
+    {
+      event: 'CouncillorEndorsementRecorded',
+      data: {
+        schema_version: 1,
+        tenant_id: 'dhaka',
+        event_id: '01J0A0A0A0A0A0A0A0A0A0B0C4',
+        actor_identity: { role: 'system', ref: '01J0CHANCOUNCILLOR01' },
+        payload: { notice_event_id: '01J0A0A0A0A0A0A0A0A0A0B0C3', ward_id: 'W7' }
+      }
+    }
+  ];
+
+  let pushIdx = 0;
+  document.getElementById('pushBtn').addEventListener('click', () => {
+    const sample = sampleEvents[pushIdx % sampleEvents.length];
+    pushIdx++;
+    blockHeight++;
+    document.getElementById('liveHeight').textContent = blockHeight;
+    append('event: ' + sample.event, 'evt');
+    append('id: ' + sample.data.event_id);
+    append('data: ' + JSON.stringify(sample.data));
+    append('');
+  });
+
+  document.getElementById('tickBtn').addEventListener('click', () => {
+    append('event: heartbeat', 'heartbeat');
+    append('data: {"ts": "' + now() + '", "chain_head": "0x7f3a·b9c2·4e8d·ac12", "block_height": ' + blockHeight + '}');
+    append('');
+  });
+
+  document.getElementById('rejBtn').addEventListener('click', () => {
+    append('event: CommandRejected', 'rejected');
+    append('data: {"event_type":"CommandRejected","payload":{"rejection_reason":"dual_signature_missing","rejection_evidence":"PublicNoticeIssued requires both pha_approver + utility_message_desk SignatureAttestation events","rejected_at":"' + now() + '"}}');
+    append('');
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', () => {
+    stream.innerHTML = '';
+  });
+
+  // Live chain head ticker ---------------------------------------------
+  setInterval(() => {
+    document.getElementById('liveIngested').textContent = now();
+    document.getElementById('liveVerified').textContent = now();
+  }, 3000);
+
+  // Heatmap matrix ------------------------------------------------------
+  const heatmap = document.getElementById('heatmap');
+  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const heatmapData = [];
+  for (let d = 0; d < 7; d++) {
+    for (let h = 0; h < 24; h++) {
+      heatmapData.push({ d, h, count: Math.floor(Math.random() * 35) });
+    }
+  }
+  // label column
+  dayLabels.forEach(label => {
+    const cell = document.createElement('div');
+    cell.className = 'heat-label';
+    cell.textContent = label;
+    heatmap.appendChild(cell);
+    for (let h = 0; h < 24; h++) {
+      const c = document.createElement('div');
+      c.className = 'heat-cell';
+      const entry = heatmapData.find(e => e.d === dayLabels.indexOf(label) && e.h === h);
+      const count = entry.count;
+      // Map count to a color token (band-low/medium/high)
+      if (count === 0) {
+        c.style.background = 'var(--bg-inset)';
+      } else if (count < 6) {
+        c.style.background = 'rgba(74, 107, 130, 0.20)';
+      } else if (count < 16) {
+        c.style.background = 'rgba(138, 90, 26, 0.40)';
+      } else {
+        c.style.background = 'rgba(142, 46, 30, 0.55)';
+      }
+      c.title = `${label} ${h}:00 — ${count} events`;
+      heatmap.appendChild(c);
+    }
+  });
+</script>
+
+</body>
+</html>

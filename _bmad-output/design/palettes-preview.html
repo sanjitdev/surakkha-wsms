@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Color Palette Preview</title>
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     LIGHT THEME — default
+     ════════════════════════════════════════════════════════════════════ */
+  :root,
+  [data-theme="light"] {
+    /* Surfaces — warm neutral scale */
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --bg-inset:       #ECEBE7;
+
+    /* Text */
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --fg-disabled:    #B8BCC2;
+
+    /* Borders */
+    --border-subtle:  #E6E5E1;
+    --border-default: #D4D3CF;
+    --border-strong:  #9A9B98;
+
+    /* Brand */
+    --brand-600:      #0F3A5F;
+    --brand-500:      #144A78;
+    --brand-400:      #1F5E91;
+    --brand-200:      #C7D5E3;
+    --brand-100:      #E5EDF4;
+
+    /* Semantic — fg + tinted bg pairs */
+    --success:        #1E6E47;
+    --success-bg:     #E9F2ED;
+    --warning:        #8A5A1A;
+    --warning-bg:     #F4ECDD;
+    --danger:         #8E2E1E;
+    --danger-bg:      #F2E4E0;
+    --info:           #1F5E91;
+    --info-bg:        #E5EDF4;
+
+    /* Trust bands */
+    --band-high:      #1E6E47;
+    --band-medium:    #6B6F76;
+    --band-low:       #A8A9A4;
+
+    /* Reporter badges */
+    --badge-trusted:  #144A78;
+    --badge-new:      #6B6F76;
+    --badge-caution:  #8E2E1E;
+
+    /* Mode metadata */
+    color-scheme: light;
+  }
+
+  /* ════════════════════════════════════════════════════════════════════
+     DARK THEME — same tokens, recalibrated values
+     Strategy:
+       - Surfaces: cool-neutral dark (slight blue undertone), not pure black
+       - Text: high-contrast off-white, never #FFF (avoid glare)
+       - Borders: visible at low opacity, never pure black
+       - Brand: lift to lighter blue (desaturated + brightened)
+       - Semantic hues: brighter on dark, paired with dark-tinted bgs
+       - Trust bands: green/graphite/stone — all readable on dark
+     ════════════════════════════════════════════════════════════════════ */
+  [data-theme="dark"] {
+    /* Surfaces */
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --bg-inset:       #22272D;
+
+    /* Text */
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --fg-disabled:    #54585E;
+
+    /* Borders */
+    --border-subtle:  #23272D;
+    --border-default: #2E333A;
+    --border-strong:  #4A4F57;
+
+    /* Brand — lifted, still single hue */
+    --brand-600:      #4A8AC4;
+    --brand-500:      #5C9AD0;
+    --brand-400:      #76AEDF;
+    --brand-200:      #2B3E55;
+    --brand-100:      #1F2D3D;
+
+    /* Semantic — brighter fg, dark-tinted bg */
+    --success:        #5DB287;
+    --success-bg:     #1A2D24;
+    --warning:        #D6A865;
+    --warning-bg:     #2D2418;
+    --danger:         #D8806E;
+    --danger-bg:      #2D1F1B;
+    --info:           #76AEDF;
+    --info-bg:        #1F2D3D;
+
+    /* Trust bands — graphite gets lifted, stone gets darkened */
+    --band-high:      #3E9B6E;
+    --band-medium:    #8A8E94;
+    --band-low:       #5A5C60;
+
+    /* Reporter badges */
+    --badge-trusted:  #5C9AD0;
+    --badge-new:      #8A8E94;
+    --badge-caution:  #D8806E;
+
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 48px 56px;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01";
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  /* ───── Header bar with theme switcher ───── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  h1 {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  .lede {
+    color: var(--fg-secondary);
+    font-size: 13px;
+    margin: 0;
+    max-width: 680px;
+  }
+
+  .theme-switch {
+    display: inline-flex;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 2px;
+  }
+
+  .theme-switch button {
+    background: transparent;
+    border: none;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--fg-tertiary);
+    cursor: pointer;
+    border-radius: 3px;
+    font-family: inherit;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+
+  .theme-switch button.active {
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    box-shadow: 0 0 0 1px var(--border-default);
+  }
+
+  .theme-switch button:not(.active):hover {
+    color: var(--fg-default);
+  }
+
+  section {
+    margin-bottom: 56px;
+  }
+
+  h2 {
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--fg-secondary);
+  }
+
+  .section-meta {
+    color: var(--fg-tertiary);
+    font-size: 13px;
+    margin: 0 0 20px;
+    max-width: 680px;
+  }
+
+  /* ───── Color grid ───── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .swatch {
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--bg-surface);
+    transition: border-color 0.15s ease;
+  }
+
+  .swatch:hover {
+    border-color: var(--border-default);
+  }
+
+  .swatch-color {
+    height: 72px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .swatch-meta {
+    padding: 12px 14px;
+  }
+
+  .swatch-name {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    color: var(--fg-default);
+    font-family: "SF Mono", "Consolas", "Menlo", monospace;
+  }
+
+  .swatch-hex {
+    font-family: "SF Mono", "Consolas", "Menlo", monospace;
+    font-size: 11px;
+    color: var(--fg-tertiary);
+    margin-bottom: 8px;
+  }
+
+  .swatch-use {
+    font-size: 11px;
+    color: var(--fg-tertiary);
+    line-height: 1.45;
+  }
+
+  .text-light { color: rgba(255, 255, 255, 0.95); }
+  .text-dark  { color: var(--fg-default); }
+
+  /* ───── Component samples ───── */
+  .surfaces {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .surface-card {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .surface-header {
+    background: var(--bg-subtle);
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .surface-body {
+    padding: 24px;
+  }
+
+  /* ───── Buttons ───── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    margin-right: 8px;
+    margin-bottom: 8px;
+    font-family: inherit;
+    line-height: 1.2;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+  }
+
+  .btn-primary {
+    background: var(--brand-500);
+    color: white;
+  }
+  [data-theme="dark"] .btn-primary { color: #0E1013; }
+  .btn-primary:hover { background: var(--brand-600); }
+
+  .btn-secondary {
+    background: var(--bg-surface);
+    color: var(--fg-default);
+    border-color: var(--border-default);
+  }
+  .btn-secondary:hover { background: var(--bg-subtle); }
+
+  .btn-danger {
+    background: var(--bg-surface);
+    color: var(--danger);
+    border-color: var(--border-default);
+  }
+  .btn-danger:hover {
+    background: var(--danger-bg);
+    border-color: var(--danger);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--fg-secondary);
+  }
+  .btn-ghost:hover {
+    background: var(--bg-subtle);
+    color: var(--fg-default);
+  }
+
+  /* ───── Badges ───── */
+  .badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  [data-theme="dark"] .badge { color: #0E1013; }
+
+  .badge .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.9;
+  }
+
+  .badge-trusted { background: var(--badge-trusted); }
+  .badge-new     { background: var(--badge-new); }
+  .badge-caution { background: var(--badge-caution); }
+
+  /* ───── Trust bands ───── */
+  .bands {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+
+  .band {
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    padding: 18px 20px;
+    color: white;
+    background: var(--fg-default);
+  }
+  [data-theme="dark"] .band { color: #0E1013; }
+
+  .band-high   { background: var(--band-high); }
+  .band-medium { background: var(--band-medium); }
+  .band-low    { background: var(--band-low); }
+
+  .band-label-en {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .band-label-bn {
+    font-size: 17px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+
+  .band-desc {
+    font-size: 12px;
+    opacity: 0.85;
+    line-height: 1.4;
+  }
+
+  /* ───── Icon placeholder ───── */
+  .icon-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14px;
+    height: 14px;
+    border: 1px dashed currentColor;
+    border-radius: 2px;
+    opacity: 0.35;
+    margin-right: 6px;
+    vertical-align: -2px;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  /* ───── Inbox mock ───── */
+  .inbox-mock {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: var(--bg-surface);
+    overflow: hidden;
+  }
+
+  .inbox-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .inbox-row:last-child {
+    border-bottom: none;
+  }
+
+  .inbox-band-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 3px;
+    color: white;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    min-width: 76px;
+  }
+  [data-theme="dark"] .inbox-band-pill { color: #0E1013; }
+
+  .inbox-band-pill .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.9;
+  }
+
+  .inbox-band-pill.high   { background: var(--band-high); }
+  .inbox-band-pill.medium { background: var(--band-medium); }
+  .inbox-band-pill.low    { background: var(--band-low); }
+
+  .inbox-meta {
+    font-size: 13px;
+    color: var(--fg-default);
+    font-weight: 500;
+  }
+
+  .inbox-meta-sub {
+    font-size: 12px;
+    color: var(--fg-tertiary);
+    margin-top: 2px;
+    font-weight: 400;
+  }
+
+  .inbox-time {
+    font-size: 12px;
+    color: var(--fg-tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ───── Contrast check ───── */
+  .contrast-grid {
+    display: grid;
+    grid-template-columns: auto 1fr 1fr 110px;
+    gap: 12px;
+    align-items: center;
+    font-size: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .contrast-grid:last-child {
+    border-bottom: none;
+  }
+
+  .contrast-grid-head {
+    background: var(--bg-subtle);
+    font-weight: 600;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    padding: 8px 20px;
+  }
+
+  .contrast-swatch {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    border: 1px solid var(--border-subtle);
+  }
+
+  .contrast-sample {
+    padding: 12px;
+    border-radius: 3px;
+    font-weight: 500;
+    text-align: center;
+    font-size: 13px;
+  }
+
+  .ratio {
+    font-family: "SF Mono", "Consolas", "Menlo", monospace;
+    font-size: 11px;
+    color: var(--fg-secondary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  /* ───── Footer ───── */
+  footer {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--fg-tertiary);
+    font-size: 11px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  footer code {
+    font-family: "SF Mono", "Consolas", "Menlo", monospace;
+    color: var(--fg-secondary);
+  }
+
+  /* ───── Side-by-side comparison block ───── */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .compare-panel {
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .compare-panel.light {
+    background: #F7F7F5;
+    color: #111418;
+  }
+
+  .compare-panel.dark {
+    background: #0E1013;
+    color: #ECEDEE;
+    color-scheme: dark;
+  }
+
+  .compare-panel-header {
+    padding: 10px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+  }
+
+  .compare-panel.light .compare-panel-header {
+    background: #FFFFFF;
+    color: #7A8088;
+    border-bottom-color: #E6E5E1;
+  }
+
+  .compare-panel.dark .compare-panel-header {
+    background: #16191D;
+    color: #80858C;
+    border-bottom-color: #23272D;
+  }
+
+  .compare-panel-body {
+    padding: 20px;
+  }
+
+  .compare-panel.light .mini-swatch {
+    border: 1px solid #E6E5E1;
+    background: #FFFFFF;
+  }
+  .compare-panel.dark .mini-swatch {
+    border: 1px solid #23272D;
+    background: #16191D;
+  }
+
+  .compare-panel .mini-swatch-color {
+    height: 48px;
+    display: flex;
+    align-items: flex-end;
+    padding: 6px 8px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .compare-panel .mini-swatch-meta {
+    padding: 8px 10px;
+    font-family: "SF Mono", monospace;
+    font-size: 11px;
+  }
+
+  .compare-panel.light .mini-swatch-meta { color: #4A5159; }
+  .compare-panel.dark .mini-swatch-meta { color: #B5B9BF; }
+
+  .compare-panel.light .mini-swatch-hex { color: #7A8088; }
+  .compare-panel.dark .mini-swatch-hex { color: #80858C; }
+
+  /* Re-declare tokens inside .compare-panel.light so it doesn't rely on the root switch */
+  .compare-panel.light {
+    --bg-base:        #F7F7F5;
+    --bg-surface:     #FFFFFF;
+    --bg-subtle:      #F1F1EE;
+    --fg-default:     #111418;
+    --fg-secondary:   #4A5159;
+    --fg-tertiary:    #7A8088;
+    --border-subtle:  #E6E5E1;
+    --brand-500:      #144A78;
+  }
+
+  .compare-panel.dark {
+    --bg-base:        #0E1013;
+    --bg-surface:     #16191D;
+    --bg-subtle:      #1C2025;
+    --fg-default:     #ECEDEE;
+    --fg-secondary:   #B5B9BF;
+    --fg-tertiary:    #80858C;
+    --border-subtle:  #23272D;
+    --brand-500:      #5C9AD0;
+  }
+
+  /* ───── Icon deferral notice ───── */
+  .defer-note {
+    margin-top: 20px;
+    padding: 14px 18px;
+    border: 1px dashed var(--border-default);
+    border-radius: 4px;
+    background: var(--bg-subtle);
+    color: var(--fg-tertiary);
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .defer-note strong {
+    color: var(--fg-secondary);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<div class="topbar">
+  <div>
+    <h1>Surakkha v1 — Color Palette</h1>
+    <p class="lede">Light + dark theme tokens, side-by-side. Toggle in the top right. Same component, same tokens — only the values differ.</p>
+  </div>
+  <div class="theme-switch" role="tablist">
+    <button class="active" data-set-theme="light">Light</button>
+    <button data-set-theme="dark">Dark</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     COMPARISON BLOCK — both modes rendered statically for review
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>Side-by-side · Light vs Dark</h2>
+  <p class="section-meta">Static comparison. The active theme above drives the rest of the document via the same token names.</p>
+
+  <div class="compare">
+    <!-- LIGHT PANEL -->
+    <div class="compare-panel light">
+      <div class="compare-panel-header">Light · #F7F7F5 base</div>
+      <div class="compare-panel-body">
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#FFFFFF; color:#111418;">SURFACE</div>
+            <div class="mini-swatch-meta">
+              bg-surface
+              <div class="mini-swatch-hex">#FFFFFF</div>
+            </div>
+          </div>
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#144A78; color:white;">PRIMARY</div>
+            <div class="mini-swatch-meta">
+              brand-500
+              <div class="mini-swatch-hex">#144A78</div>
+            </div>
+          </div>
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#1E6E47; color:white;">SUCCESS</div>
+            <div class="mini-swatch-meta">
+              success
+              <div class="mini-swatch-hex">#1E6E47</div>
+            </div>
+          </div>
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#8E2E1E; color:white;">DANGER</div>
+            <div class="mini-swatch-meta">
+              danger
+              <div class="mini-swatch-hex">#8E2E1E</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DARK PANEL -->
+    <div class="compare-panel dark">
+      <div class="compare-panel-header">Dark · #0E1013 base</div>
+      <div class="compare-panel-body">
+        <div class="grid" style="grid-template-columns: 1fr 1fr;">
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#16191D; color:#ECEDEE;">SURFACE</div>
+            <div class="mini-swatch-meta">
+              bg-surface
+              <div class="mini-swatch-hex">#16191D</div>
+            </div>
+          </div>
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#5C9AD0; color:#0E1013;">PRIMARY</div>
+            <div class="mini-swatch-meta">
+              brand-500
+              <div class="mini-swatch-hex">#5C9AD0</div>
+            </div>
+          </div>
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#5DB287; color:#0E1013;">SUCCESS</div>
+            <div class="mini-swatch-meta">
+              success
+              <div class="mini-swatch-hex">#5DB287</div>
+            </div>
+          </div>
+          <div class="mini-swatch">
+            <div class="mini-swatch-color" style="background:#D8806E; color:#0E1013;">DANGER</div>
+            <div class="mini-swatch-meta">
+              danger
+              <div class="mini-swatch-hex">#D8806E</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     1. NEUTRALS — drives off current theme
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>1 · Neutrals</h2>
+  <p class="section-meta">Single warm-neutral scale (light) / cool-neutral scale (dark). Most of the UI is made of these.</p>
+
+  <div class="grid">
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--bg-base);">Surface</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">bg-base</div>
+        <div class="swatch-hex">L: #F7F7F5 / D: #0E1013</div>
+        <div class="swatch-use">App background</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--bg-surface);">Surface</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">bg-surface</div>
+        <div class="swatch-hex">L: #FFFFFF / D: #16191D</div>
+        <div class="swatch-use">Cards, modals</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--bg-subtle);">Surface</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">bg-subtle</div>
+        <div class="swatch-hex">L: #F1F1EE / D: #1C2025</div>
+        <div class="swatch-use">Headers, hover</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--bg-inset);">Surface</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">bg-inset</div>
+        <div class="swatch-hex">L: #ECEBE7 / D: #22272D</div>
+        <div class="swatch-use">Inputs, code</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--fg-default);">Text</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">fg-default</div>
+        <div class="swatch-hex">L: #111418 / D: #ECEDEE</div>
+        <div class="swatch-use">Primary text</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--fg-secondary);">Text</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">fg-secondary</div>
+        <div class="swatch-hex">L: #4A5159 / D: #B5B9BF</div>
+        <div class="swatch-use">Body text</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--fg-tertiary);">Text</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">fg-tertiary</div>
+        <div class="swatch-hex">L: #7A8088 / D: #80858C</div>
+        <div class="swatch-use">Labels</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--fg-disabled);">Text</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">fg-disabled</div>
+        <div class="swatch-hex">L: #B8BCC2 / D: #54585E</div>
+        <div class="swatch-use">Disabled</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--border-subtle);">Border</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">border-subtle</div>
+        <div class="swatch-hex">L: #E6E5E1 / D: #23272D</div>
+        <div class="swatch-use">Outlines</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--border-default);">Border</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">border-default</div>
+        <div class="swatch-hex">L: #D4D3CF / D: #2E333A</div>
+        <div class="swatch-use">Inputs</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--border-strong);">Border</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">border-strong</div>
+        <div class="swatch-hex">L: #9A9B98 / D: #4A4F57</div>
+        <div class="swatch-use">Strong</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     2. BRAND
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>2 · Brand</h2>
+  <p class="section-meta">Single hue, lifted in dark mode. Used for primary action, links, focus rings, trusted-reporter badge.</p>
+
+  <div class="grid">
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--brand-600);">Brand</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">brand-600</div>
+        <div class="swatch-hex">L: #0F3A5F / D: #4A8AC4</div>
+        <div class="swatch-use">Primary hover</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--brand-500);">Brand</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">brand-500</div>
+        <div class="swatch-hex">L: #144A78 / D: #5C9AD0</div>
+        <div class="swatch-use">Primary button</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--brand-400);">Brand</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">brand-400</div>
+        <div class="swatch-hex">L: #1F5E91 / D: #76AEDF</div>
+        <div class="swatch-use">Links, focus</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--brand-100);">Brand</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">brand-100</div>
+        <div class="swatch-hex">L: #E5EDF4 / D: #1F2D3D</div>
+        <div class="swatch-use">Tinted bg</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     3. SEMANTIC
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>3 · Semantic</h2>
+  <p class="section-meta">Brighter hues on dark, paired with dark-tinted backgrounds. One hue per state.</p>
+
+  <div class="grid">
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--success);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">success</div>
+        <div class="swatch-hex">L: #1E6E47 / D: #5DB287</div>
+        <div class="swatch-use">Verified, resolved</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--success-bg);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">success-bg</div>
+        <div class="swatch-hex">L: #E9F2ED / D: #1A2D24</div>
+        <div class="swatch-use">Success bg</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--warning);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">warning</div>
+        <div class="swatch-hex">L: #8A5A1A / D: #D6A865</div>
+        <div class="swatch-use">SLA, caution</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--warning-bg);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">warning-bg</div>
+        <div class="swatch-hex">L: #F4ECDD / D: #2D2418</div>
+        <div class="swatch-use">Warning bg</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--danger);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">danger</div>
+        <div class="swatch-hex">L: #8E2E1E / D: #D8806E</div>
+        <div class="swatch-use">Errors</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--danger-bg);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">danger-bg</div>
+        <div class="swatch-hex">L: #F2E4E0 / D: #2D1F1B</div>
+        <div class="swatch-use">Error bg</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-light" style="background: var(--info);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">info</div>
+        <div class="swatch-hex">L: #1F5E91 / D: #76AEDF</div>
+        <div class="swatch-use">Info</div>
+      </div>
+    </div>
+
+    <div class="swatch">
+      <div class="swatch-color text-dark" style="background: var(--info-bg);">Semantic</div>
+      <div class="swatch-meta">
+        <div class="swatch-name">info-bg</div>
+        <div class="swatch-hex">L: #E5EDF4 / D: #1F2D3D</div>
+        <div class="swatch-use">Info bg</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     4. COMPONENTS
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>4 · Components</h2>
+  <p class="section-meta">Same components, theme-aware via tokens. Toggle in the header to see live switching.</p>
+
+  <div class="surfaces">
+    <div class="surface-card">
+      <div class="surface-header">Buttons</div>
+      <div class="surface-body">
+        <button class="btn btn-primary">Verify incident</button>
+        <button class="btn btn-secondary">Save draft</button>
+        <button class="btn btn-danger">Reject</button>
+        <button class="btn btn-ghost">Cancel</button>
+      </div>
+    </div>
+
+    <div class="surface-card">
+      <div class="surface-header">Reporter badges</div>
+      <div class="surface-body">
+        <div class="badges">
+          <span class="badge badge-trusted"><span class="dot"></span>Trusted</span>
+          <span class="badge badge-new"><span class="dot"></span>New</span>
+          <span class="badge badge-caution"><span class="dot"></span>Caution</span>
+        </div>
+        <div style="margin-top:18px; font-size:12px; color:var(--fg-tertiary); line-height:1.5;">
+          Note: text on badges is white in light, near-black in dark — high contrast either way.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     5. TRUST BANDS + INBOX
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>5 · Trust bands</h2>
+  <p class="section-meta">Single-hue bands. On dark, green lifts, graphite lifts, stone darkens — all stay distinct from each other and from the page background.</p>
+
+  <div class="bands">
+    <div class="band band-high">
+      <div class="band-label-en">High</div>
+      <div class="band-label-bn">উচ্চ</div>
+      <div class="band-desc">Cluster match + sensor agreement</div>
+    </div>
+    <div class="band band-medium">
+      <div class="band-label-en">Medium</div>
+      <div class="band-label-bn">মধ্যম</div>
+      <div class="band-desc">Single signal or mixed corroboration</div>
+    </div>
+    <div class="band band-low">
+      <div class="band-label-en">Low</div>
+      <div class="band-label-bn">নিম্ন</div>
+      <div class="band-desc">Bulk-triage bucket, isolated</div>
+    </div>
+  </div>
+
+  <!-- Icon deferral notice -->
+  <div class="defer-note">
+    <strong>Iconography deferred to dimension 3.</strong> Dashed placeholders in band cards above and inbox row below mark where icons will land once the icon library is chosen. Candidates: Lucide, Phosphor, Heroicons, Tabler. No icon decision in this file — palette review stands alone.
+  </div>
+
+  <div class="inbox-mock" style="margin-top:24px;">
+    <div class="surface-header">Admin inbox</div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill high">
+        <span class="icon-placeholder">●</span>High
+      </span>
+      <div class="inbox-meta">
+        <span class="icon-placeholder">▢</span>Ward 12 · Mirpur
+        <div class="inbox-meta-sub">
+          <span class="icon-placeholder">⊕</span>Sensor + 3 Anjali reports · NTU 4.2 · 09:14
+        </div>
+      </div>
+      <span class="badge badge-trusted"><span class="dot"></span>Trusted</span>
+      <span class="inbox-time">2 min ago</span>
+    </div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill medium">
+        <span class="icon-placeholder">●</span>Medium
+      </span>
+      <div class="inbox-meta">
+        <span class="icon-placeholder">▢</span>Ward 04 · Dhanmondi
+        <div class="inbox-meta-sub">
+          <span class="icon-placeholder">⊕</span>1 Anjali report · "bad smell" · photo · 09:21
+        </div>
+      </div>
+      <span class="badge badge-new"><span class="dot"></span>New</span>
+      <span class="inbox-time">7 min ago</span>
+    </div>
+
+    <div class="inbox-row">
+      <span class="inbox-band-pill low">
+        <span class="icon-placeholder">●</span>Low
+      </span>
+      <div class="inbox-meta">
+        <span class="icon-placeholder">▢</span>Ward 18 · Uttara
+        <div class="inbox-meta-sub">
+          <span class="icon-placeholder">⊕</span>1 Anjali text-only · no GPS · 09:32
+        </div>
+      </div>
+      <span class="badge badge-caution"><span class="dot"></span>Caution</span>
+      <span class="inbox-time">12 min ago</span>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════
+     6. CONTRAST
+     ════════════════════════════════════════════════════════════════ -->
+<section>
+  <h2>6 · Contrast check</h2>
+  <p class="section-meta">Approximate ratios on the most-felt pairings. Numbers shift slightly between modes but stay above AA-Large (≥3:1) for all UI components.</p>
+
+  <div class="inbox-mock">
+    <div class="contrast-grid-head">Light theme</div>
+    <div class="contrast-grid contrast-grid-head">
+      <div></div>
+      <div>Combination</div>
+      <div>Sample</div>
+      <div style="text-align:right;">Ratio</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#111418;"></div>
+      <div>fg-default on bg-surface</div>
+      <div class="contrast-sample" style="background:#FFFFFF; color:#111418;">Body text</div>
+      <div class="ratio">18.4 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#4A5159;"></div>
+      <div>fg-secondary on bg-surface</div>
+      <div class="contrast-sample" style="background:#FFFFFF; color:#4A5159;">Body text</div>
+      <div class="ratio">8.5 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#7A8088;"></div>
+      <div>fg-tertiary on bg-surface</div>
+      <div class="contrast-sample" style="background:#FFFFFF; color:#7A8088;">Label</div>
+      <div class="ratio">4.6 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:white;"></div>
+      <div>white on brand-500</div>
+      <div class="contrast-sample" style="background:#144A78; color:white;">Verify</div>
+      <div class="ratio">8.6 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:white;"></div>
+      <div>white on band-high</div>
+      <div class="contrast-sample" style="background:#1E6E47; color:white;">High</div>
+      <div class="ratio">5.4 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:white;"></div>
+      <div>white on band-low</div>
+      <div class="contrast-sample" style="background:#A8A9A4; color:white;">Low</div>
+      <div class="ratio">2.7 : 1</div>
+    </div>
+  </div>
+
+  <div class="inbox-mock" style="margin-top:16px;">
+    <div class="contrast-grid-head">Dark theme</div>
+    <div class="contrast-grid contrast-grid-head">
+      <div></div>
+      <div>Combination</div>
+      <div>Sample</div>
+      <div style="text-align:right;">Ratio</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#ECEDEE;"></div>
+      <div>fg-default on bg-surface</div>
+      <div class="contrast-sample" style="background:#16191D; color:#ECEDEE;">Body text</div>
+      <div class="ratio">14.2 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#B5B9BF;"></div>
+      <div>fg-secondary on bg-surface</div>
+      <div class="contrast-sample" style="background:#16191D; color:#B5B9BF;">Body text</div>
+      <div class="ratio">8.4 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#80858C;"></div>
+      <div>fg-tertiary on bg-surface</div>
+      <div class="contrast-sample" style="background:#16191D; color:#80858C;">Label</div>
+      <div class="ratio">4.8 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#0E1013;"></div>
+      <div>near-black on brand-500</div>
+      <div class="contrast-sample" style="background:#5C9AD0; color:#0E1013;">Verify</div>
+      <div class="ratio">8.1 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#0E1013;"></div>
+      <div>near-black on band-high</div>
+      <div class="contrast-sample" style="background:#3E9B6E; color:#0E1013;">High</div>
+      <div class="ratio">7.2 : 1</div>
+    </div>
+
+    <div class="contrast-grid">
+      <div class="contrast-swatch" style="background:#0E1013;"></div>
+      <div>near-black on band-low</div>
+      <div class="contrast-sample" style="background:#5A5C60; color:#0E1013;">Low</div>
+      <div class="ratio">3.8 : 1</div>
+    </div>
+  </div>
+
+  <p class="section-meta" style="margin-top:14px;">
+    <strong>Dark note:</strong> the low band lifts from 2.7:1 to 3.8:1 because near-black on dark-mid-gray is more legible than white on light-mid-gray. Both fail AA-Body for body text — same mitigation applies: keep body text inside low-band surfaces on <code style="font-family:monospace;">bg-subtle</code> rather than on the band pill itself.
+  </p>
+</section>
+
+<footer>
+  <span>Surakkha v1 — color palette preview · 2026-09-07</span>
+  <span>Tokens → <code>app/frontend/tokens.css</code></span>
+</footer>
+
+<script>
+  // Theme switcher — pure DOM, no framework, no build step
+  (function () {
+    const root = document.body;
+    const buttons = document.querySelectorAll('[data-set-theme]');
+
+    function setTheme(name) {
+      root.setAttribute('data-theme', name);
+      buttons.forEach(b => {
+        b.classList.toggle('active', b.dataset.setTheme === name);
+      });
+      try { localStorage.setItem('surakkha-theme', name); } catch (e) {}
+    }
+
+    buttons.forEach(b => {
+      b.addEventListener('click', () => setTheme(b.dataset.setTheme));
+    });
+
+    // Restore preference
+    try {
+      const saved = localStorage.getItem('surakkha-theme');
+      if (saved === 'dark' || saved === 'light') setTheme(saved);
+    } catch (e) {}
+  })();
+</script>
+
+</body>
+</html>
