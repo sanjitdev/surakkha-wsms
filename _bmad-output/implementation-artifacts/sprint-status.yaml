@@ -1,5 +1,5 @@
-# generated: 2026-09-06
-# last_updated: 2026-09-06
+# generated: 2026-09-07
+# last_updated: 2026-09-07
 # project: Surakkha
 # project_key: NOKEY
 # tracking_system: file-system
@@ -39,60 +39,68 @@
 # - Developer typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; sprint-status surfaces open ones
+#
+# PHASE 1 SCOPE NOTE (regenerated 2026-09-07):
+# ============================================
+# Source: {project-root}/_bmad-output/planning-artifacts/epics.md (Phase 1 trim, status: final)
+# - 5 epics, 19 stories, 4 personas (Sensor, Anjali, Admin, Operator)
+# - Trust scoring pre-triage (cluster window + sensor cross-check + reporter-reputation)
+# - Citizen-confirmed closure loop (✅/❌ tap -> IncidentReopened branch)
+# - Companion: {project-root}/_bmad-output/planning-artifacts/workflow-phase1.html
+# - Architecture spine: {project-root}/_bmad-output/planning-artifacts/architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md
+# - Phase 2 deferred (PHA, public notice channel, dual-signature, simulator, multi-tenancy, multi-radio fallback, phone-as-network, hybrid incentive)
 
-generated: 2026-09-06
-last_updated: 2026-09-06
+generated: 2026-09-07
+last_updated: 2026-09-07
 project: Surakkha
 project_key: NOKEY
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
 
 development_status:
-  # Epic 1 — Trust Foundation (Audit Chain, RBAC, Multi-tenancy Seam)
-  # Foundational: every later epic writes through the gateway this epic creates.
+  # Epic 1 — Trust Foundation
+  # Single-gateway content-addressed chain + RBAC defense-in-depth + idempotency.
+  # Every later epic writes through the gateway this epic creates.
   epic-1: backlog
   1-1-single-gateway-content-addressed-chain-with-per-tenant-namespace: backlog
-  1-2-rbac-defense-in-depth-with-closed-role-enum-and-session-bound-actor-identity: backlog
-  1-3-two-person-rule-idempotency-rtbf-via-tombstones: backlog
+  1-2-rbac-defense-in-depth-with-closed-phase-1-role-enum: backlog
+  1-3-idempotency-by-tenant_id-event_id-and-sensor-silence-as-event: backlog
   epic-1-retrospective: optional
 
-  # Epic 2 — Heterogeneous Detection (Source-Fusion Engine)
-  # Sealed-contract fusion engine; v2 may swap to ML without changing the contract.
+  # Epic 2 — Source Ingestion & Trust Scoring
+  # Sensor + Anjali submit -> cluster window -> sensor cross-check -> reporter-reputation -> trust band -> IncidentCreated.
+  # The system does the triage; the admin does the override.
   epic-2: backlog
-  2-1-source-fusion-engine-sealed-contract-weighted-voting-city-configurable-weights: backlog
+  2-1-sensor-cellular-ingestion-path: backlog
+  2-2-anjali-submission-path-voice-photo-text-gps: backlog
+  2-3-5-minute-cluster-window-for-cross-report-corroboration: backlog
+  2-4-sensor-cross-check-co-witness-signal: backlog
+  2-5-reporter-reputation-lookup-and-trust-band-assignment: backlog
+  2-6-trust-banded-incident-creation-and-admin-inbox-routing: backlog
   epic-2-retrospective: optional
 
-  # Epic 3 — Codified Response (Playbook Lifecycle + Simulator + Deviation-to-Amendment)
-  # WHO-grounded templates + authoring + simulator + deviation cluster to amendment.
+  # Epic 3 — Admin Verification & Assignment
+  # Trust-band inbox (high/medium/low buckets) -> ack -> review-and-decide -> assign with structured due_at -> rework with failure_code.
+  # "Agree or override the trust band" — never re-triage from scratch.
   epic-3: backlog
-  3-1-playbook-authoring-content-addressed-versioning-via-event-stream: backlog
-  3-2-simulator-harness-non-persistent-reads-from-event-stream: backlog
-  3-3-deviation-capture-monthly-cluster-amendment-promotion-liability-split-codification: backlog
+  3-1-trust-band-inbox-with-bulk-triage-bucket: backlog
+  3-2-acknowledge-and-review-and-decide-override-the-trust-band: backlog
+  3-3-operator-assignment-with-structured-due_at-and-recommended-team-size: backlog
+  3-4-rework-request-with-structured-failure_code: backlog
   epic-3-retrospective: optional
 
-  # Epic 4 — Field Reporting (Anjali-mobile Trust-Bearing Interface)
-  # WhatsApp / voice / image / SMS in Bangla; offline-first; multi-radio.
+  # Epic 4 — Field Operator Execution
+  # Operator acknowledges with auto-escalation timer, dispatches field team (team_id + vehicle + ETA), submits resolution proof (photo + GPS + device-clock timestamp).
   epic-4: backlog
-  4-1-anjali-mobile-whatsapp-voice-image-sms-front-end-with-bangla-hybrid-incentive-public-acknowledgement: backlog
-  4-2-multi-radio-storage-and-forward-phone-as-network-for-ward-sentinels: backlog
+  4-1-operator-ack-receipt-with-auto-escalation-timer: backlog
+  4-2-field-team-dispatch-logging-with-team-id-vehicle-eta: backlog
+  4-3-resolution-proof-submission-with-photo-gps-timestamp: backlog
   epic-4-retrospective: optional
 
-  # Epic 5 — Operations Desk (Priya-desktop Ranked Action List)
-  # Ranked incident dashboard + playbook execution + deviation capture + handover / monthly report.
+  # Epic 5 — Admin Closure & Citizen Loop
+  # Verify resolution (photo + GPS + timestamp check) -> close + citizen ✅/❌ tap -> reopened branch (chained with parent) -> per-incident audit timeline (chain-hash anchored).
   epic-5: backlog
-  5-1-ranked-incident-dashboard-playbook-step-execution-deviation-capture: backlog
-  5-2-auto-generated-handover-brief-at-shift-change-auto-generated-pha-monthly-report: backlog
+  5-1-resolution-verify-photo-gps-timestamp-check: backlog
+  5-2-close-and-citizen-confirm-checkmark-rejection-mark-tap-reopened: backlog
+  5-3-per-incident-audit-timeline-chain-hash-anchored: backlog
   epic-5-retrospective: optional
-
-  # Epic 6 — Regulator Governance (PHA Pane + World Bank Evidence Export)
-  # Playbook amendment approval (dual signature) + threshold tuning + audit browser + WB export.
-  epic-6: backlog
-  6-1-playbook-amendment-approval-with-dual-signature-per-contaminant-class-threshold-tuning: backlog
-  6-2-read-only-audit-chain-browser-deviation-dashboard-wb-aligned-evidence-export: backlog
-  epic-6-retrospective: optional
-
-  # Epic 7 — Public Notice Channel (Ramesh-class Consumer Messaging)
-  # T3+ WhatsApp + SMS broadcast with two-person rule + councillor trust-bridging.
-  epic-7: backlog
-  7-1-t3-whatsapp-sms-broadcast-with-two-person-rule-councillor-trust-bridging: backlog
-  epic-7-retrospective: optional

@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Surakkha — Phase 1 Workflow</title>
+<style>
+  :root {
+    --surface: #FAF7F2;
+    --ink: #1B2026;
+    --ink-2: #4A5260;
+    --primary: #0F4C5C;
+    --primary-tint: #3F6E7C;
+    --amber: #B8801E;
+    --safe: #2F6E45;
+    --alert: #B23A2A;
+    --divider: #E1DDD4;
+    --anjali: #6B5B95;
+    --admin: #0F4C5C;
+    --operator: #B8801E;
+    --sensor: #5C6F73;
+    --bg-soft: #F2EFE7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--surface);
+    color: var(--ink);
+    font-family: 'Noto Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+  }
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #0a3540 100%);
+    color: var(--surface);
+    padding: 32px 48px 24px;
+    border-bottom: 4px solid var(--primary-tint);
+  }
+  header h1 {
+    margin: 0 0 4px;
+    font-size: 28px;
+    letter-spacing: -0.01em;
+  }
+  header .sub {
+    opacity: 0.85;
+    font-size: 14px;
+  }
+  header .badges {
+    margin-top: 12px;
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  header .badge {
+    background: rgba(250,247,242,0.15);
+    border: 1px solid rgba(250,247,242,0.3);
+    color: var(--surface);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 32px 48px 80px;
+  }
+  section {
+    margin-bottom: 48px;
+  }
+  h2 {
+    font-size: 20px;
+    color: var(--primary);
+    margin: 0 0 6px;
+    border-bottom: 2px solid var(--divider);
+    padding-bottom: 8px;
+  }
+  h3 {
+    font-size: 15px;
+    color: var(--ink);
+    margin: 24px 0 12px;
+  }
+  .lead {
+    color: var(--ink-2);
+    font-size: 14px;
+    margin: 0 0 24px;
+    max-width: 880px;
+  }
+
+  /* ============ LEGEND ============ */
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+    padding: 16px;
+    background: var(--bg-soft);
+    border-radius: 10px;
+    border: 1px solid var(--divider);
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px;
+  }
+  .swatch {
+    width: 18px; height: 18px; border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .swatch.anjali { background: var(--anjali); }
+  .swatch.admin { background: var(--admin); }
+  .swatch.operator { background: var(--operator); }
+  .swatch.sensor { background: var(--sensor); }
+  .swatch.system { background: var(--ink-2); }
+  .swatch.state {
+    border: 2px solid var(--primary);
+    background: var(--surface);
+    border-radius: 50%;
+  }
+  .swatch.event {
+    background: var(--surface);
+    border: 1px dashed var(--primary-tint);
+    border-radius: 999px;
+  }
+  .swatch.notification {
+    background: var(--amber);
+    border-radius: 0;
+    transform: rotate(45deg);
+  }
+
+  /* ============ SWIMLANE FLOW ============ */
+  .flow {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 20px;
+    overflow-x: auto;
+  }
+  .lane {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0;
+    border-bottom: 1px dashed var(--divider);
+    min-height: 110px;
+    position: relative;
+  }
+  .lane:last-child { border-bottom: none; }
+  .lane-header {
+    background: var(--bg-soft);
+    padding: 16px 12px;
+    border-right: 1px solid var(--divider);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+    border-left: 4px solid var(--ink-2);
+  }
+  .lane-header .swatch { width: 12px; height: 12px; }
+  .lane-header.anjali { border-left-color: var(--anjali); }
+  .lane-header.admin { border-left-color: var(--admin); }
+  .lane-header.operator { border-left-color: var(--operator); }
+  .lane-header.sensor { border-left-color: var(--sensor); }
+  .lane-header.system { border-left-color: var(--ink-2); }
+  .lane-track {
+    position: relative;
+    padding: 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 8px 10px;
+    min-width: 150px;
+    max-width: 200px;
+    font-size: 12px;
+    box-shadow: 0 1px 2px rgba(27,32,38,0.06);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .step:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(27,32,38,0.10);
+  }
+  .step .step-num {
+    font-size: 10px;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+  }
+  .step .step-title {
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .step .step-event {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--primary);
+    background: var(--bg-soft);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+  .step.alert { border-left: 3px solid var(--alert); }
+  .step.success { border-left: 3px solid var(--safe); }
+  .step.warning { border-left: 3px solid var(--amber); }
+  .step.info { border-left: 3px solid var(--primary); }
+
+  .arrow {
+    color: var(--ink-2);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* vertical cross-lane notification */
+  .cross {
+    position: absolute;
+    border: 1.5px dashed var(--amber);
+    background: rgba(184,128,30,0.06);
+    color: var(--ink);
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 500;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .cross .label { color: var(--amber); font-weight: 600; }
+
+  /* ============ STATE MACHINE ============ */
+  .state-machine {
+    background: var(--bg-soft);
+    border-radius: 12px;
+    padding: 24px;
+    border: 1px solid var(--divider);
+  }
+  .states {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .state {
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary);
+    text-align: center;
+    min-width: 90px;
+  }
+  .state.initial { background: var(--primary); color: var(--surface); }
+  .state.terminal { background: var(--safe); border-color: var(--safe); color: var(--surface); }
+  .state.rejected { background: var(--alert); border-color: var(--alert); color: var(--surface); }
+  .state-arrow {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-tint), var(--primary));
+    min-width: 14px;
+    position: relative;
+  }
+  .state-arrow::after {
+    content: "";
+    position: absolute;
+    right: -1px; top: -4px;
+    border-left: 7px solid var(--primary);
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+  .state-label {
+    flex-basis: 100%;
+    text-align: center;
+    font-size: 10px;
+    color: var(--ink-2);
+    margin-top: -4px;
+    margin-bottom: 4px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ============ EVENTS TABLE ============ */
+  .events-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .events-table th {
+    background: var(--bg-soft);
+    text-align: left;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--divider);
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .events-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--divider);
+    vertical-align: top;
+  }
+  .events-table tr:last-child td { border-bottom: none; }
+  .events-table tr:hover td { background: var(--bg-soft); }
+  .events-table .num {
+    font-weight: 600;
+    color: var(--primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .events-table .event-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--primary);
+  }
+  .role-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--surface);
+  }
+  .role-tag.admin { background: var(--admin); }
+  .role-tag.operator { background: var(--operator); }
+  .role-tag.anjali { background: var(--anjali); }
+  .role-tag.sensor { background: var(--sensor); }
+  .role-tag.system { background: var(--ink-2); }
+
+  /* ============ SLA TABLE ============ */
+  .sla-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .sla-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-left: 4px solid var(--amber);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .sla-card .label {
+    font-size: 11px;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .sla-card .value {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+  .sla-card .desc {
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-top: 4px;
+  }
+
+  /* ============ Mermaid styling ============ */
+  .mermaid {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    overflow-x: auto;
+  }
+
+  /* ============ Trust & Reliability ============ */
+  .trust-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+  }
+  .trust-card {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--primary);
+  }
+  .trust-card .t-id {
+    font-size: 11px;
+    color: var(--ink-2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .trust-card .t-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .trust-card .t-desc {
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.4;
+  }
+
+  .mechanism {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 4px solid var(--amber);
+    margin-bottom: 12px;
+  }
+  .mechanism .m-num {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    background: var(--amber);
+    color: var(--surface);
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+  }
+  .mechanism .m-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .mechanism .m-desc {
+    font-size: 13px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  .antitrust {
+    background: var(--surface);
+    border: 1px solid var(--divider);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 4px solid var(--alert);
+  }
+  .antitrust .a-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .antitrust .a-desc {
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  .band-chip {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .band-chip.high { background: var(--safe); color: var(--surface); }
+  .band-chip.medium { background: var(--amber); color: var(--surface); }
+  .band-chip.low { background: var(--ink-2); color: var(--surface); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Surakkha v1 — Phase 1 Workflow</h1>
+  <div class="sub">Beautifully orchestrated incident lifecycle · 5 epics · ~17 stories · 15 chain events · trust scoring pre-triage</div>
+  <div class="badges">
+    <span class="badge">Phase 1 MVP</span>
+    <span class="badge">Single-city Dhaka</span>
+    <span class="badge">Three personas: Admin / Operator / Anjali-Sensor</span>
+    <span class="badge">Audit chain as state</span>
+  </div>
+</header>
+
+<main>
+
+<section>
+  <h2>1. At a glance</h2>
+  <p class="lead">
+    Three personas, eleven core chain events (plus four trust-system events), twelve states. The incident's
+    lifecycle is <em>derived from the chain</em>, not stored in a status column. Every notification is a chain
+    event. Every SLA is on a timer. Every gate (verify, assign, dispatch, resolve) emits an event before the
+    next one fires. <strong>The system pre-triages; the admin overrides.</strong> The chain is the audit
+    trail; the projection is what each persona sees.
+  </p>
+</section>
+
+<section>
+  <h2>2. Swimlane flow</h2>
+  <p class="lead">Each lane is a persona. Cross-lane dashed lines are notifications (also chain events). Solid arrows are sequential steps in the same lane.</p>
+
+  <div class="flow">
+    <!-- SENSOR LANE -->
+    <div class="lane">
+      <div class="lane-header sensor">
+        <span class="swatch sensor"></span>Sensor
+      </div>
+      <div class="lane-track">
+        <div class="step info" title="Sensor detects contamination above threshold">
+          <div class="step-num">Step 1a</div>
+          <div class="step-title">Detect contamination</div>
+          <div class="step-event">SensorReadingSubmitted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ANJALI LANE -->
+    <div class="lane">
+      <div class="lane-header anjali">
+        <span class="swatch anjali"></span>Anjali (source)
+      </div>
+      <div class="lane-track">
+        <div class="step info" title="Submit report with optional photo / voice / location. Reporter-rep badge surfaces next to the form: 🟢 trusted / ⚪ new / 🟡 caution.">
+          <div class="step-num">Step 1b</div>
+          <div class="step-title">Submit report (voice / photo / text + GPS) <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#2F6E45;color:#FAF7F2;font-size:9px;">🟢 trusted</span></div>
+          <div class="step-event">AnjaliReportSubmitted</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM LANE -->
+    <div class="lane">
+      <div class="lane-header system">
+        <span class="swatch system"></span>System (trust)
+      </div>
+      <div class="lane-track">
+        <div class="step warning" title="5-min cluster window: hold and watch for matching reports in same ward. Real incidents cluster; fakes don't.">
+          <div class="step-num">Step 2a</div>
+          <div class="step-title">Cluster window (5 min) — watch for sibling reports</div>
+          <div class="step-event">(internal — no chain event)</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step warning" title="Cross-check the new report's ward + GPS + timestamp against the latest sensor reading. Tag as agrees_with_sensor, disagrees_with_sensor, or no_signal.">
+          <div class="step-num">Step 2b</div>
+          <div class="step-title">Sensor cross-check (co-witness)</div>
+          <div class="step-event">SensorCrossCheckComputed</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step warning" title="Look up reporter's history: prior verified-true / verified-false counts. Tags the report with trust_band: high / medium / low.">
+          <div class="step-num">Step 2c</div>
+          <div class="step-title">Reporter reputation lookup</div>
+          <div class="step-event">ReporterReputationQueried</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step" title="Auto-create the incident from the source event + computed trust signals; auto-notify admins in scope.">
+          <div class="step-num">Step 2d</div>
+          <div class="step-title">Create incident (with trust_band) · auto-notify admins</div>
+          <div class="step-event">IncidentCreated · NotificationSent</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN LANE -->
+    <div class="lane">
+      <div class="lane-header admin">
+        <span class="swatch admin"></span>Admin
+      </div>
+      <div class="lane-track">
+        <div class="step info" title="Pull incident detail; lock to this admin">
+          <div class="step-num">Step 3</div>
+          <div class="step-title">Acknowledge</div>
+          <div class="step-event">IncidentAcknowledged</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step warning" title="Review pre-triaged incident — system has already clustered, cross-checked, and rated reporter. Admin's job: agree with or override the trust band.">
+          <div class="step-num">Step 4</div>
+          <div class="step-title">Review &amp; decide (override the trust band, not re-triage)</div>
+          <div class="step-event">IncidentVerified / IncidentRejected</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step info" title="Pick operator from on-call roster">
+          <div class="step-num">Step 5</div>
+          <div class="step-title">Assign operator + due_by</div>
+          <div class="step-event">OperatorAssigned</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step success" title="Verify proof of resolution">
+          <div class="step-num">Step 9</div>
+          <div class="step-title">Verify resolution</div>
+          <div class="step-event">ResolutionVerified</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step success" title="Mark closed; auto-notify source with ✅/❌ tap for citizen confirm">
+          <div class="step-num">Step 10</div>
+          <div class="step-title">Close incident + notify source (citizen-confirmed loop)</div>
+          <div class="step-event">IncidentClosed · NotificationSent</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OPERATOR LANE -->
+    <div class="lane">
+      <div class="lane-header operator">
+        <span class="swatch operator"></span>Operator
+      </div>
+      <div class="lane-track">
+        <div class="step warning" title="Auto-escalate if not acked in SLA">
+          <div class="step-num">Step 6</div>
+          <div class="step-title">Acknowledge receipt</div>
+          <div class="step-event">OperatorAckReceived</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step info" title="Team ID, vehicle, ETA">
+          <div class="step-num">Step 7</div>
+          <div class="step-title">Dispatch team</div>
+          <div class="step-event">TeamDispatched</div>
+        </div>
+        <span class="arrow">→</span>
+        <div class="step success" title="Required: photo proof + note">
+          <div class="step-num">Step 8</div>
+          <div class="step-title">Submit resolution proof</div>
+          <div class="step-event">ResolutionSubmitted</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>3. State machine (derived from chain)</h2>
+  <p class="lead">The state of an incident is the projection of its event stream — never a column on a row. Every transition is a chain event. Every transition is auditable.</p>
+  <div class="state-machine">
+    <div class="states">
+
+      <div class="state initial">submitted</div>
+      <span class="state-arrow"></span>
+      <div class="state">acknowledged</div>
+      <span class="state-arrow"></span>
+      <div class="state">verified</div>
+      <span class="state-arrow"></span>
+      <div class="state">assigned</div>
+      <span class="state-arrow"></span>
+      <div class="state">acknowledged_by_operator</div>
+      <span class="state-arrow"></span>
+      <div class="state">dispatched</div>
+      <span class="state-arrow"></span>
+      <div class="state">resolved_pending_verification</div>
+      <span class="state-arrow"></span>
+      <div class="state">resolved</div>
+      <span class="state-arrow"></span>
+      <div class="state terminal">closed</div>
+
+    </div>
+
+    <div class="states" style="margin-top: 24px;">
+      <div class="state">verified</div>
+      <span class="state-arrow"></span>
+      <div class="state">in_progress</div>
+      <span class="state-arrow"></span>
+      <div class="state">resolved_pending_verification</div>
+      <div style="flex: 1; visibility: hidden;"></div>
+      <div class="state rejected">rejected_false_alarm</div>
+      <div style="flex: 1; visibility: hidden;"></div>
+      <div class="state rejected">rework_requested</div>
+    </div>
+
+    <div class="states" style="margin-top: 24px;">
+      <div class="state terminal">closed</div>
+      <span class="state-arrow"></span>
+      <div class="state rejected">reopened</div>
+      <span class="state-arrow"></span>
+      <div class="state">acknowledged</div>
+      <div style="flex: 0 0 24px;"></div>
+      <div style="font-size: 11px; color: var(--ink-2); align-self: center; padding: 6px 12px; background: var(--bg-soft); border-radius: 6px; border: 1px dashed var(--alert);">
+        Citizen taps ❌ on the closure notification → citizen-confirmed loop catches the gap and reopens.
+      </div>
+    </div>
+
+    <p style="margin-top: 16px; font-size: 12px; color: var(--ink-2); text-align: center;">
+      Four terminal branches: <strong style="color: var(--safe);">closed</strong> (success),
+      <strong style="color: var(--alert);">rejected_false_alarm</strong> (admin rejects the report),
+      <strong style="color: var(--alert);">rework_requested</strong> (admin sends back to operator),
+      <strong style="color: var(--alert);">reopened</strong> (citizen-disagrees-with-closure — back to <code>acknowledged</code>).
+    </p>
+  </div>
+</section>
+
+<section>
+  <h2>4. Chain events (the spine)</h2>
+  <p class="lead">Fifteen first-class event types. Eleven gate events + four trust-system events. Every state transition emits exactly one. The order in the chain is the order they happened; the projection reads them in order to derive state.</p>
+
+  <table class="events-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Event</th>
+        <th>Actor</th>
+        <th>Trigger</th>
+        <th>State transition</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num">1</td>
+        <td><span class="event-name">AnjaliReportSubmitted</span></td>
+        <td><span class="role-tag anjali">anjali</span></td>
+        <td>Anjali taps submit on the form (Bangla / voice / photo / text).</td>
+        <td>— (source event)</td>
+      </tr>
+      <tr>
+        <td class="num">1</td>
+        <td><span class="event-name">SensorReadingSubmitted</span></td>
+        <td><span class="role-tag sensor">sensor</span></td>
+        <td>Sensor reading crosses threshold (or admin manually injects for demo).</td>
+        <td>— (source event)</td>
+      </tr>
+      <tr>
+        <td class="num">1c</td>
+        <td><span class="event-name">SensorCrossCheckComputed</span></td>
+        <td><span class="role-tag system">system</span></td>
+        <td>After cluster window: cross-check report GPS + ward + time against nearest sensor reading. Payload: <code>{agreement: agrees_with_sensor | disagrees_with_sensor | no_signal, sensor_id, reading_ntu, age_seconds}</code>.</td>
+        <td>(trust signal)</td>
+      </tr>
+      <tr>
+        <td class="num">1d</td>
+        <td><span class="event-name">ReporterReputationQueried</span></td>
+        <td><span class="role-tag system">system</span></td>
+        <td>Look up reporter history. Payload: <code>{prior_total, prior_verified_true, prior_verified_false, trust_band: high | medium | low, badge: trusted | new | caution}</code>.</td>
+        <td>(trust signal)</td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td><span class="event-name">IncidentCreated</span></td>
+        <td><span class="role-tag system">system</span></td>
+        <td>System correlates source event → creates incident; severity auto-tiered.</td>
+        <td>→ <strong>submitted</strong></td>
+      </tr>
+      <tr>
+        <td class="num">2</td>
+        <td><span class="event-name">NotificationSent</span></td>
+        <td><span class="role-tag system">system</span></td>
+        <td>Auto-notify all admins in scope (ward-level + city-level).</td>
+        <td>(parallel notification)</td>
+      </tr>
+      <tr>
+        <td class="num">3</td>
+        <td><span class="event-name">IncidentAcknowledged</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin opens the incident detail. Locks it to this admin.</td>
+        <td>submitted → <strong>acknowledged</strong></td>
+      </tr>
+      <tr>
+        <td class="num">4a</td>
+        <td><span class="event-name">IncidentVerified</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin reviews source evidence, confirms real issue.</td>
+        <td>acknowledged → <strong>verified</strong></td>
+      </tr>
+      <tr>
+        <td class="num">4b</td>
+        <td><span class="event-name">IncidentRejected</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin rejects. Payload: <code>{reason_category: false_alarm | duplicate | already_resolved | out_of_scope, note (min 30 chars)}</code>. Note is stored immutably on the chain so the reporter can later see why.</td>
+        <td>acknowledged → <strong>rejected_false_alarm</strong></td>
+      </tr>
+      <tr>
+        <td class="num">5</td>
+        <td><span class="event-name">OperatorAssigned</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin picks operator. Payload: <code>{operator_id, due_at ISO8601, recommended_team_size (from tier)}</code>. Sets an explicit due time so dispatch SLA is measurable.</td>
+        <td>verified → <strong>assigned</strong></td>
+      </tr>
+      <tr>
+        <td class="num">6</td>
+        <td><span class="event-name">OperatorAckReceived</span></td>
+        <td><span class="role-tag operator">operator</span></td>
+        <td>Operator confirms receipt. SLA timer starts; auto-escalation on breach.</td>
+        <td>assigned → <strong>acknowledged_by_operator</strong></td>
+      </tr>
+      <tr>
+        <td class="num">7</td>
+        <td><span class="event-name">TeamDispatched</span></td>
+        <td><span class="role-tag operator">operator</span></td>
+        <td>Operator logs: team ID, vehicle, ETA. Notifies source if Anjali.</td>
+        <td>acknowledged_by_operator → <strong>dispatched</strong></td>
+      </tr>
+      <tr>
+        <td class="num">8</td>
+        <td><span class="event-name">ResolutionSubmitted</span></td>
+        <td><span class="role-tag operator">operator</span></td>
+        <td>Operator uploads photo proof + note. Marks resolved.</td>
+        <td>dispatched → <strong>resolved_pending_verification</strong></td>
+      </tr>
+      <tr>
+        <td class="num">9a</td>
+        <td><span class="event-name">ResolutionVerified</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin reviews resolution proof; confirms it is real.</td>
+        <td>resolved_pending_verification → <strong>resolved</strong></td>
+      </tr>
+      <tr>
+        <td class="num">9b</td>
+        <td><span class="event-name">ReworkRequested</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin rejects resolution proof. Payload: <code>{failure_code: photo_too_dark | note_unclear | wrong_site | insufficient_evidence, note}</code>. Operator sees the exact reason in the rework pane.</td>
+        <td>resolved_pending_verification → <strong>in_progress</strong></td>
+      </tr>
+      <tr>
+        <td class="num">10</td>
+        <td><span class="event-name">IncidentClosed</span></td>
+        <td><span class="role-tag admin">admin</span></td>
+        <td>Admin marks closed; auto-notifies source; moves to archive.</td>
+        <td>resolved → <strong>closed</strong></td>
+      </tr>
+      <tr>
+        <td class="num">11</td>
+        <td><span class="event-name">IncidentReopened</span></td>
+        <td><span class="role-tag anjali">anjali</span></td>
+        <td>Citizen taps ❌ on the closure notification ("still seeing the problem"). Payload: <code>{parent_incident_id, citizen_note}</code>. Auto-links the reopened chain to the parent so the audit timeline shows the full story.</td>
+        <td>closed → <strong>reopened</strong> → re-enters at <strong>acknowledged</strong></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>5. SLA budget per step</h2>
+  <p class="lead">Every step has a deadline. Every SLA breach emits a chain event. Auto-escalation is wired at the gateway.</p>
+
+  <div class="sla-grid">
+    <div class="sla-card">
+      <div class="label">Admin acknowledge</div>
+      <div class="value">5 min</div>
+      <div class="desc">After NotificationSent. On breach: re-notify ward admin + flag in PHA tile (Phase 2).</div>
+    </div>
+    <div class="sla-card">
+      <div class="label">Admin verify / reject</div>
+      <div class="value">15 min</div>
+      <div class="desc">After acknowledgment. On breach: re-notify admin + escalation queue.</div>
+    </div>
+    <div class="sla-card">
+      <div class="label">Operator ack receipt</div>
+      <div class="value">10 min</div>
+      <div class="desc">After OperatorAssigned. On breach: auto-escalate to backup operator + alert admin.</div>
+    </div>
+    <div class="sla-card">
+      <div class="label">Team dispatch</div>
+      <div class="value">30 min</div>
+      <div class="desc">After operator ack. On breach: flag in incident timeline, no auto-escalation.</div>
+    </div>
+    <div class="sla-card">
+      <div class="label">Resolution submission</div>
+      <div class="value">configurable / per incident</div>
+      <div class="desc">Set when operator acks. Admin-side timer starts on ResolutionSubmitted.</div>
+    </div>
+    <div class="sla-card">
+      <div class="label">Admin verify resolution</div>
+      <div class="value">10 min</div>
+      <div class="desc">After ResolutionSubmitted. On breach: flag for next-shift admin handoff.</div>
+    </div>
+    <div class="sla-card">
+      <div class="label">Admin close</div>
+      <div class="value">5 min</div>
+      <div class="desc">After ResolutionVerified. On breach: still moves to archive on next admin login.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>6. Notification map</h2>
+  <p class="lead">Notifications are first-class chain events — never silent. The table below shows who hears what, and when.</p>
+
+  <table class="events-table">
+    <thead>
+      <tr>
+        <th>Trigger event</th>
+        <th>Notifies</th>
+        <th>Channel (Phase 1)</th>
+        <th>Notification event on chain</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="event-name">IncidentCreated</span></td>
+        <td>All admins in scope (ward-level + city-level)</td>
+        <td>Admin UI inbox (real-time)</td>
+        <td><span class="event-name">NotificationSent</span> (one per recipient)</td>
+      </tr>
+      <tr>
+        <td><span class="event-name">OperatorAssigned</span></td>
+        <td>The assigned operator</td>
+        <td>Operator UI inbox + browser notification</td>
+        <td><span class="event-name">NotificationSent</span></td>
+      </tr>
+      <tr>
+        <td><span class="event-name">OperatorAckReceived</span></td>
+        <td>Admin who assigned</td>
+        <td>Admin UI tile update</td>
+        <td>(implicit — chain projection updates)</td>
+      </tr>
+      <tr>
+        <td><span class="event-name">TeamDispatched</span></td>
+        <td>Anjali (if applicable) + admin</td>
+        <td>Anjali-mobile status feed</td>
+        <td><span class="event-name">NotificationSent</span></td>
+      </tr>
+      <tr>
+        <td><span class="event-name">ResolutionSubmitted</span></td>
+        <td>Admin who assigned</td>
+        <td>Admin UI tile update</td>
+        <td>(implicit — chain projection updates)</td>
+      </tr>
+      <tr>
+        <td><span class="event-name">ResolutionVerified</span></td>
+        <td>Operator who submitted</td>
+        <td>Operator UI tile update</td>
+        <td>(implicit)</td>
+      </tr>
+      <tr>
+        <td><span class="event-name">ReworkRequested</span></td>
+        <td>Operator + Anjali (if applicable)</td>
+        <td>Operator UI + Anjali status feed</td>
+        <td><span class="event-name">NotificationSent</span></td>
+      </tr>
+      <tr>
+        <td><span class="event-name">IncidentClosed</span></td>
+        <td>Anjali (if applicable) + operator + admin</td>
+        <td>Anjali-mobile status feed + UIs</td>
+        <td><span class="event-name">NotificationSent</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>7. Phase 1 epic structure</h2>
+  <p class="lead">5 epics, ~14 stories. Each persona appears on stage. Nothing in code beyond what the demo demands.</p>
+
+  <div class="state-machine">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+
+      <div style="background: var(--surface); border: 1px solid var(--divider); border-radius: 8px; padding: 16px; border-left: 4px solid var(--primary);">
+        <div style="font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em;">Epic 1</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--primary); margin: 4px 0;">Trust Foundation</div>
+        <div style="font-size: 12px; color: var(--ink-2); margin-bottom: 12px;">Single-gateway chain, RBAC, idempotency</div>
+        <ul style="font-size: 12px; margin: 0; padding-left: 18px; color: var(--ink);">
+          <li>1.1 Content-addressed chain writes</li>
+          <li>1.2 RBAC + closed role enum (5 entries)</li>
+          <li>1.3 Idempotency by (tenant_id, event_id)</li>
+        </ul>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--divider); border-radius: 8px; padding: 16px; border-left: 4px solid var(--sensor);">
+        <div style="font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em;">Epic 2</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--sensor); margin: 4px 0;">Source Ingestion &amp; Trust Scoring</div>
+        <div style="font-size: 12px; color: var(--ink-2); margin-bottom: 12px;">Sensor + Anjali submit → cluster → cross-check → trust band → incident</div>
+        <ul style="font-size: 12px; margin: 0; padding-left: 18px; color: var(--ink);">
+          <li>2.1 Sensor ingestion path (cellular)</li>
+          <li>2.2 Anjali submission path (form + photo + GPS)</li>
+          <li>2.3 5-minute cluster window (corroboration)</li>
+          <li>2.4 Sensor cross-check (co-witness signal)</li>
+          <li>2.5 Reporter-reputation lookup &amp; badge</li>
+          <li>2.6 Trust-banded incident creation + admin notification</li>
+        </ul>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--divider); border-radius: 8px; padding: 16px; border-left: 4px solid var(--admin);">
+        <div style="font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em;">Epic 3</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--admin); margin: 4px 0;">Admin Verification &amp; Assignment</div>
+        <div style="font-size: 12px; color: var(--ink-2); margin-bottom: 12px;">Trust-band inbox → ack → decide (override, not re-triage) → assign</div>
+        <ul style="font-size: 12px; margin: 0; padding-left: 18px; color: var(--ink);">
+          <li>3.1 Trust-band inbox (high / medium / low buckets)</li>
+          <li>3.2 Acknowledge + review-and-decide (override the band)</li>
+          <li>3.3 Bulk-triage bucket for low-confidence reports</li>
+          <li>3.4 Operator assignment + SLA + due_at</li>
+          <li>3.5 Rework request with structured failure code</li>
+        </ul>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--divider); border-radius: 8px; padding: 16px; border-left: 4px solid var(--operator);">
+        <div style="font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em;">Epic 4</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--operator); margin: 4px 0;">Field Operator Execution</div>
+        <div style="font-size: 12px; color: var(--ink-2); margin-bottom: 12px;">Acknowledge → dispatch → resolve with proof</div>
+        <ul style="font-size: 12px; margin: 0; padding-left: 18px; color: var(--ink);">
+          <li>4.1 Operator ack receipt (with escalation)</li>
+          <li>4.2 Dispatch team logging</li>
+          <li>4.3 Resolution proof submission</li>
+        </ul>
+      </div>
+
+      <div style="background: var(--surface); border: 1px solid var(--divider); border-radius: 8px; padding: 16px; border-left: 4px solid var(--safe);">
+        <div style="font-size: 11px; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.05em;">Epic 5</div>
+        <div style="font-size: 16px; font-weight: 600; color: var(--safe); margin: 4px 0;">Admin Closure &amp; Citizen Loop</div>
+        <div style="font-size: 12px; color: var(--ink-2); margin-bottom: 12px;">Verify resolution → close → citizen confirms / disputes → audit timeline</div>
+        <ul style="font-size: 12px; margin: 0; padding-left: 18px; color: var(--ink);">
+          <li>5.1 Verify resolution (photo + GPS + timestamp check)</li>
+          <li>5.2 Close + auto-notify source (with ✅/❌ tap)</li>
+          <li>5.3 IncidentReopened handling (citizen-disputes-closure)</li>
+          <li>5.4 Per-incident audit timeline (chain-hash anchored)</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>8. Phase 2 — what we are NOT building (deliberately deferred)</h2>
+  <p class="lead">Documented here so the boundary is explicit. Any requirement in these lists is out of Phase 1 code.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Personas</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">PHA regulator, citizen Ramesh, councillor</div>
+      <div class="desc">Phase 1 has admin / operator / anjali / sensor / system only.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Dual-signature attestation</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">AD-11, pha_approver + utility_message_desk</div>
+      <div class="desc">Phase 1 is single-actor per gate. Two-person rule is Phase 2.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Public-notice channel</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">FR-7.*, AD-17, WhatsApp+SMS broadcast</div>
+      <div class="desc">No consumer messaging in Phase 1. Closure notification to source is internal only.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Simulator harness</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">FR-3.3, FR-3.7, AD-13</div>
+      <div class="desc">No "what would have happened" dry-run in Phase 1.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Multi-tenancy &amp; WB export</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">FR-6.6, AD-5, NFR-M1.*</div>
+      <div class="desc">Single-city Dhaka only; no WB evidence export tooling.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Multi-radio fallback</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">AD-8 LPWAN / SD-card tiers</div>
+      <div class="desc">Phase 1 is cellular + manual entry. LPWAN / SD-card store-and-forward is Phase 2.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Phone-as-network</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">NFR-N1.2 ward sentinel sync</div>
+      <div class="desc">Anjali-mobile is a manual submission surface in Phase 1, not a network endpoint for sentinels.</div>
+    </div>
+    <div class="sla-card" style="border-left-color: var(--ink-2);">
+      <div class="label">Hybrid incentive</div>
+      <div class="value" style="color: var(--ink); font-size: 14px;">FR-4.6 stipend + ICDDR,B credential</div>
+      <div class="desc">Operational incentive is a back-office concern, not on the demo path.</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>9. Trust &amp; Reliability — making reports trustworthy in Dhaka traffic</h2>
+  <p class="lead">
+    The hard problem: a report comes in. You can't send someone to verify it. How do you decide which reports to trust,
+    which to dispatch teams to, and which to bulk-reject — without ever leaving the office? Answer: <strong>the phone
+    captures trust signals automatically before the admin ever sees the report</strong>. Eleven signals, five user-facing
+    mechanisms, three anti-abuse guards. The system pre-triages; the admin overrides.
+  </p>
+
+  <h3>9.1 — Trust signals (the 11 things the phone captures automatically)</h3>
+  <div class="trust-grid">
+
+    <div class="trust-card">
+      <div class="t-id">T1</div>
+      <div class="t-name">GPS pin → reverse-geocoded ward + nearest sensor_id</div>
+      <div class="t-desc">Is this in the same ward as an active sensor? Did that sensor already report?</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T2</div>
+      <div class="t-name">Distance from last sensor reading</div>
+      <div class="t-desc">Report 50m from a sensor that read clean 30 minutes ago → suspicious.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T3</div>
+      <div class="t-name">Multiple reports from independent sources within a window</div>
+      <div class="t-desc">Two unrelated Anjalis in the same ward reporting the same hour → high signal.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T4</div>
+      <div class="t-name">Reporter's own history</div>
+      <div class="t-desc">First-time reporter = medium trust. Reporter with 5 prior verified-true = high. Reporter with 2 prior verified-false = low.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T5</div>
+      <div class="t-name">Photo of the water</div>
+      <div class="t-desc">A photo is harder to fake than text. Required for priority-queue routing.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T6</div>
+      <div class="t-name">Photo EXIF (now + this device + this location)</div>
+      <div class="t-desc">Catches reused / downloaded photos. Reads GPS, timestamp, device from the image header.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T7</div>
+      <div class="t-name">Voice note transcript</div>
+      <div class="t-desc">Natural language ("water is brown and smells bad") is harder to invent than a typed sentence. Recording adds liveness.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T8</div>
+      <div class="t-name">Self-classified severity category</div>
+      <div class="t-desc">Bad smell / discoloration / sick person / visible contamination / pipe burst. Compared against photo + language — mismatch is a signal.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T9</div>
+      <div class="t-name">Time of day</div>
+      <div class="t-desc">3 AM from a new user at a far-from-anything location = noise. 7 AM from a known school operator = gold.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T10</div>
+      <div class="t-name">Recent activity at the exact GPS pin</div>
+      <div class="t-desc">Pin reported 6 hours ago and closed false-alarm → new report starts at low trust.</div>
+    </div>
+    <div class="trust-card">
+      <div class="t-id">T11</div>
+      <div class="t-name">Reporter phone number reputation</div>
+      <div class="t-desc">Same number reported 4 verified-false in 30 days → flagged (soft version, not Aadhaar).</div>
+    </div>
+
+  </div>
+
+  <h3>9.2 — Five mechanisms that ride on top of the workflow</h3>
+
+  <div class="mechanism">
+    <span class="m-num">M1</span>
+    <div class="m-name">Smart pre-triage — admin sees a trust band, not a raw report</div>
+    <div class="m-desc">
+      <span class="band-chip high">high</span><span class="band-chip medium">medium</span><span class="band-chip low">low</span>
+      High-confidence reports (T3 + T4 + T5/T6) go amber-first. Low-confidence (first-timer + no photo + 3 AM + near recent false-alarm) lands in the
+      <strong>bulk-triage bucket</strong> for 30-second sweeps, not mixed with real ones. Admin's verify step becomes a 5-second "agree or override the band" decision
+      instead of a 5-minute triage from scratch.
+    </div>
+  </div>
+
+  <div class="mechanism">
+    <span class="m-num">M2</span>
+    <div class="m-name">Auto-acknowledge with credibility-weighted ETA</div>
+    <div class="m-desc">
+      Anjali gets back: <em>"Got it. We're treating this as <strong>high priority</strong> — a field team will be dispatched within ~30 minutes."</em>
+      vs. <em>"Got it. We have your report. Because this is your first report and we don't have other matching signals, an admin will review it shortly."</em>
+      Honest expectations; rewards good reporters.
+    </div>
+  </div>
+
+  <div class="mechanism">
+    <span class="m-num">M3</span>
+    <div class="m-name">Reporter-reputation badge visible to admin</div>
+    <div class="m-desc">
+      <span class="band-chip high">🟢 trusted</span><span class="band-chip medium">⚪ new</span><span class="band-chip low">🟡 caution</span>
+      Small badge next to the report in the verification pane. <em>Not</em> for auto-routing — admin still has the final say — but to focus attention.
+    </div>
+  </div>
+
+  <div class="mechanism">
+    <span class="m-num">M4</span>
+    <div class="m-name">Geo-proximity cross-check with sensor reading</div>
+    <div class="m-desc">
+      If the report's ward sensor last read clean 10 minutes ago, the verification pane shows:
+      <em>"Note: Ward 12 sensor last read <strong>normal</strong> 10 minutes ago. Reading was 0.21 NTU, threshold is 1.0."</em>
+      The sensor is the <strong>co-witness</strong> when it can be. Same UI when it agrees — the admin has the sensor + the human report pointing the same way → high confidence.
+    </div>
+  </div>
+
+  <div class="mechanism">
+    <span class="m-num">M5</span>
+    <div class="m-name">5-minute hold-and-cluster window</div>
+    <div class="m-desc">
+      Before notifying admins, the system holds the report for 5 minutes and watches for matching reports in the same ward. If 2+ reports cluster → confidence high → notify admins immediately with <em>"2 matching reports in last 5 minutes"</em> tag.
+      Real incidents cluster; fakes don't. <strong>Cheap, powerful filter.</strong>
+    </div>
+  </div>
+
+  <h3>9.3 — Three anti-abuse guards (proportionate, explainable)</h3>
+  <div class="trust-grid">
+
+    <div class="antitrust">
+      <div class="a-name">A1 — One-strike soft throttle</div>
+      <div class="a-desc">After 2 verified-false reports in 30 days, the user's reports go straight to the bulk-triage bucket, not the priority queue. Still allowed to report, just not prioritised.</div>
+    </div>
+    <div class="antitrust">
+      <div class="a-name">A2 — Report-with-evidence minimum</div>
+      <div class="a-desc">To qualify for the priority queue, the report must carry at least one of: photo, voice note, or self-classified category matching the EXIF location. Bare text still goes through — to the bulk-triage bucket.</div>
+    </div>
+    <div class="antitrust">
+      <div class="a-name">A3 — Verified-closure feedback loop (citizen confirms)</div>
+      <div class="a-desc">When Anjali gets the closure notification, she taps ✅ or ❌. ❌ triggers <code>IncidentReopened{parent}</code> on the chain — the closure is reversed, not silently lost. ✅ adds +1 to the verified-true count, raising future reputation.</div>
+    </div>
+
+  </div>
+
+  <h3>9.4 — The architectural unlock</h3>
+  <p class="lead">
+    With these trust signals in place, the admin's verify step becomes much simpler. Today the verify step says
+    "review source evidence, confirm real issue" — that's heavy cognitive load. With the trust band + sensor cross-check + reputation badge,
+    <strong>the system does the triage; the admin does the override</strong>. High-band reports are 5-second decisions.
+    Low-band reports in the bulk-triage bucket are 30-second sweeps. Medium-band reports get the focused review.
+    The admin's role is unchanged — they still own the verify — but their time is spent where it matters.
+  </p>
+</section>
+
+<section>
+  <h2>10. Legend</h2>
+  <div class="legend">
+    <div class="legend-item"><span class="swatch anjali"></span>Anjali (source)</div>
+    <div class="legend-item"><span class="swatch admin"></span>Admin (verifies, assigns, closes)</div>
+    <div class="legend-item"><span class="swatch operator"></span>Field Operator (resolves)</div>
+    <div class="legend-item"><span class="swatch sensor"></span>Sensor (auto-detects)</div>
+    <div class="legend-item"><span class="swatch system"></span>System (auto-routing)</div>
+    <div class="legend-item"><span class="swatch state"></span>State (derived from chain)</div>
+    <div class="legend-item"><span class="swatch event"></span>Chain event (audit log)</div>
+    <div class="legend-item"><span class="swatch notification"></span>Notification (also a chain event)</div>
+  </div>
+</section>
+
+</main>
+
+</body>
+</html>
