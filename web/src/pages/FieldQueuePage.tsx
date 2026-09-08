@@ -18,7 +18,7 @@
 
 import { useEffect, useState } from 'react';
 
-import '../mockups/01-priya/dashboard.css';
+import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 
 import { getSession, type SessionRow } from '../mocks/idb';
