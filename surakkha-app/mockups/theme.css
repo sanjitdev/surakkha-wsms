@@ -140,6 +140,7 @@
 /* ── Base resets ─────────────────────────────────────────────────── */
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
+a { text-decoration: none; color: inherit; }
 
 body {
   background: var(--bg-base);
