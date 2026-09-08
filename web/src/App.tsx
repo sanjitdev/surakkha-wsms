@@ -24,7 +24,7 @@
  *                   → <ComingSoonPage />  for the matching role
  *   *                → <LoginPage /> if no session, else <Navigate to landing>
  */
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   BrowserRouter,
   Navigate,
@@ -32,14 +32,13 @@ import {
   Routes,
   useLocation,
 } from 'react-router-dom';
-
 import { LoginPage } from './pages/LoginPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { FieldQueuePage } from './pages/FieldQueuePage';
 import { OperatorDashboard } from './pages/OperatorDashboard';
 import { StyleguidePage } from './pages/StyleguidePage';
 import { InboxList } from './pages/InboxList';
-import { getSession, type SessionRow } from './mocks/idb';
+import { type SessionRow, getSession } from './mocks/idb';
 import { SESSION_CHANGED_EVENT } from './mocks/session-bus';
 import { useTheme } from './hooks/useTheme';
 import { useLocale } from './hooks/useLocale';
@@ -51,7 +50,6 @@ function AppShell({ children }: { children: ReactNode }) {
   useLocation();
   return <>{children}</>;
 }
-
 /** Persona-aware gate. Wraps the role branches in <RoutedSurface>. */
 function RoutedSurface() {
   const [session, setSession] = useState<SessionRow | null>(null);
@@ -59,6 +57,7 @@ function RoutedSurface() {
 
   const refresh = useCallback(async () => {
     const row = await getSession();
+
     setSession(row ?? null);
     setLoaded(true);
   }, []);
@@ -67,8 +66,9 @@ function RoutedSurface() {
     void refresh();
     // Listen for cross-component session changes (login/logout).
     const onChange = () => { void refresh(); };
+
     window.addEventListener(SESSION_CHANGED_EVENT, onChange);
-    return () => window.removeEventListener(SESSION_CHANGED_EVENT, onChange);
+    return () => { window.removeEventListener(SESSION_CHANGED_EVENT, onChange); };
   }, [refresh]);
 
   // First render — IndexedDB hasn't returned yet. Show nothing to avoid
@@ -160,7 +160,6 @@ function RoutedSurface() {
     </Routes>
   );
 }
-
 /** Derive the default landing URL for a given session role. */
 function landingFor(session: SessionRow): string {
   switch (session.role) {
@@ -174,12 +173,10 @@ function landingFor(session: SessionRow): string {
     default: return '/';
   }
 }
-
 /** Role → path match check for the placeholder routes. */
 function roleMatchesLanding(role: string, path: string): boolean {
   return landingFor({ role } as SessionRow) === path;
 }
-
 export function App() {
   return (
     <BrowserRouter>

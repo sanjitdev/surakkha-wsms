@@ -11,18 +11,18 @@ function readInitial(): Locale {
   if (typeof window === 'undefined') return Locale.En;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
+
     if (stored === Locale.En || stored === Locale.Bn) return stored;
   } catch {
     return Locale.En;
   }
   return Locale.En;
 }
-
 export function useLocale(): {
   locale: Locale;
   setLocale: (next: Locale) => void;
   toggle: () => void;
-} {
+  } {
   const [locale, setLocaleState] = useState<Locale>(readInitial);
 
   useEffect(() => {

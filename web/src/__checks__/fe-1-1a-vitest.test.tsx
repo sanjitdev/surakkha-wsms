@@ -18,7 +18,6 @@ import { useState } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
 import { Modal } from '../components/ui/Modal';
 import { Toast } from '../components/ui/Toast';
 import { Input, SearchInput } from '../components/ui/Input';
@@ -38,34 +37,34 @@ import { ContainerWidth, Locale, Theme, ToastVariant } from '../types/domain';
  */
 function ThemeProbe() {
   const { theme, setTheme, toggle } = useTheme();
+
   return (
     <div>
       <span data-testid="probe-theme">{theme}</span>
-      <button data-testid="probe-toggle" onClick={() => toggle()}>
+      <button data-testid="probe-toggle" onClick={() => { toggle(); }}>
         toggle
       </button>
-      <button data-testid="probe-set-dark" onClick={() => setTheme(Theme.Dark)}>
+      <button data-testid="probe-set-dark" onClick={() => { setTheme(Theme.Dark); }}>
         set-dark
       </button>
     </div>
   );
 }
-
 function LocaleProbe() {
   const { locale, setLocale, toggle } = useLocale();
+
   return (
     <div>
       <span data-testid="probe-locale">{locale}</span>
-      <button data-testid="probe-set-en" onClick={() => setLocale(Locale.En)}>
+      <button data-testid="probe-set-en" onClick={() => { setLocale(Locale.En); }}>
         set-en
       </button>
-      <button data-testid="probe-toggle-locale" onClick={() => toggle()}>
+      <button data-testid="probe-toggle-locale" onClick={() => { toggle(); }}>
         toggle-locale
       </button>
     </div>
   );
 }
-
 /**
  * Stable Toast wrapper that lets the test re-render with a fresh
  * `onDismiss` identity (simulating consumer-side churn) WITHOUT
@@ -73,9 +72,10 @@ function LocaleProbe() {
  */
 function ToastWrapper(props: { message: string }) {
   const [onDismissTick, setTick] = useState(0);
+
   return (
     <div>
-      <button data-testid="bump-dismiss" onClick={() => setTick((n) => n + 1)}>
+      <button data-testid="bump-dismiss" onClick={() => { setTick((n) => n + 1); }}>
         bump
       </button>
       <Toast
@@ -183,9 +183,10 @@ describe('MODAL_ESCAPE + AC-3 (Modal stability + Esc)', () => {
      */
     function ModalWrapper() {
       const [, force] = useState(0);
+
       return (
         <>
-          <button data-testid="rerender" onClick={() => force((n) => n + 1)}>
+          <button data-testid="rerender" onClick={() => { force((n) => n + 1); }}>
             rerender
           </button>
           <Modal open onClose={() => calls++}>
@@ -194,7 +195,6 @@ describe('MODAL_ESCAPE + AC-3 (Modal stability + Esc)', () => {
         </>
       );
     }
-
     render(<ModalWrapper />);
 
     // Force several re-renders with a fresh onClose identity each time.
@@ -232,7 +232,7 @@ describe('MODAL_ESCAPE + AC-3 (Modal stability + Esc)', () => {
 
     // Pre-focus the trigger.
     act(() => {
-      (screen.getByTestId('trigger') as HTMLButtonElement).focus();
+      (screen.getByTestId('trigger')).focus();
     });
     expect(document.activeElement).toBe(screen.getByTestId('trigger'));
 
@@ -252,11 +252,11 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
     vi.stubGlobal(
       'requestAnimationFrame',
       (cb: FrameRequestCallback) =>
-        setTimeout(() => cb(performance.now()), 0) as unknown as number,
+        setTimeout(() => { cb(performance.now()); }, 0) as unknown as number,
     );
     vi.stubGlobal(
       'cancelAnimationFrame',
-      (id: number) => clearTimeout(id as unknown as ReturnType<typeof setTimeout>),
+      (id: number) => { clearTimeout(id as unknown as ReturnType<typeof setTimeout>); },
     );
   });
 
@@ -274,6 +274,7 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
 
     const toast = screen.getByRole('status');
     const progress = toast.querySelector('.toast__progress') as HTMLElement;
+
     expect(progress).not.toBeNull();
 
     // Initial state: width 100%.
@@ -285,11 +286,13 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
     });
 
     const midWidth = progress.style.width;
+
     expect(midWidth).not.toBe('100%');
     // 2 s elapsed of 4 s total → 50% remaining. RAF callbacks may batch a
     // few ms extra; assert the value is in (40%, 60%) — definitely less
     // than initial 100% and not yet at 0%.
     const midPct = parseFloat(midWidth);
+
     expect(midPct).toBeGreaterThan(40);
     expect(midPct).toBeLessThan(60);
 
@@ -315,6 +318,7 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
     // owns its own RAF independent of consumer churn.
     const newToast = screen.getByRole('status');
     const newProgress = newToast.querySelector('.toast__progress') as HTMLElement;
+
     expect(newProgress.style.width).toBe('100%');
 
     // Advance 2s on the new instance → ~50%.
@@ -322,6 +326,7 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
       vi.advanceTimersByTime(2000);
     });
     const newMidPct = parseFloat(newProgress.style.width);
+
     expect(newMidPct).toBeGreaterThan(40);
     expect(newMidPct).toBeLessThan(60);
   });
@@ -340,6 +345,7 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
       vi.advanceTimersByTime(1000);
     });
     const beforePause = parseFloat(progress.style.width);
+
     expect(beforePause).toBeGreaterThan(70);
     expect(beforePause).toBeLessThan(80);
 
@@ -362,6 +368,7 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
       vi.advanceTimersByTime(3000);
     });
     const afterResume = parseFloat(progress.style.width);
+
     expect(afterResume).toBeLessThan(5);
   });
 });
@@ -381,6 +388,7 @@ describe('CONTAINER_MOBILE + AC-7 (Container mobile floor)', () => {
     );
 
     const el = screen.getByTestId('container-bangla');
+
     expect(el.className).toContain('container');
     expect(el.className).toContain('container--bangla');
   });
@@ -396,8 +404,10 @@ describe('CONTAINER_MOBILE + AC-7 (Container mobile floor)', () => {
 
     // Find the media block and assert .container is overridden inside it.
     const match = css.match(/@media\s*\(max-width:\s*767px\)\s*\{([\s\S]*?)\n\}/);
+
     expect(match).not.toBeNull();
     const mediaBlock = match![1];
+
     expect(mediaBlock).toContain('.container');
     expect(mediaBlock).toContain('max-width: 100%');
     // The mobile floor also pins --space-md padding-inline per the I/O Matrix.
@@ -438,10 +448,11 @@ describe('AC-9 (Input testid decoupling + SearchInput forwarding)', () => {
         placeholder="Search"
       />,
     );
-    const input = screen.getByTestId('input-search-md') as HTMLInputElement;
+    const input = screen.getByTestId('input-search-md');
+
     expect(input).not.toBeNull();
     expect(input.tagName).toBe('INPUT');
-    expect(input.disabled).toBe(true);
+    expect((input as HTMLInputElement).disabled).toBe(true);
     expect(input.getAttribute('aria-label')).toBe('Search');
   });
 });
@@ -456,6 +467,7 @@ describe('AC-10 (Card default + EmptyState heading level)', () => {
   it('AC-10: Card (no modifier) renders root with className === "card"', () => {
     render(<Card>x</Card>);
     const el = screen.getByTestId('card');
+
     expect(el.className).toBe('card');
     expect(el.className).not.toContain('card--compact');
     expect(el.className).not.toContain('card--with-heading');
@@ -473,8 +485,10 @@ describe('AC-10 (Card default + EmptyState heading level)', () => {
       </Card>,
     );
     const el = screen.getByTestId('card');
+
     expect(el.className).toContain('card--with-heading');
     const heading = el.querySelector('h3');
+
     expect(heading).not.toBeNull();
     expect(heading?.textContent).toBe('h');
   });
@@ -482,6 +496,7 @@ describe('AC-10 (Card default + EmptyState heading level)', () => {
   it('AC-10: Card heading="h" without modifier renders <h3> but does NOT add card--with-heading class', () => {
     render(<Card heading="h">body</Card>);
     const el = screen.getByTestId('card');
+
     expect(el.className).not.toContain('card--with-heading');
     expect(el.querySelector('h3')?.textContent).toBe('h');
   });
@@ -507,7 +522,7 @@ describe('AC-11 (Sidebar duplicate-href safety)', () => {
     if (!('matchMedia' in window)) {
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
-        value: (query: string) => ({
+        value: (query: string) => {return {
           matches: false,
           media: query,
           onchange: null,
@@ -516,7 +531,7 @@ describe('AC-11 (Sidebar duplicate-href safety)', () => {
           addEventListener: () => {},
           removeEventListener: () => {},
           dispatchEvent: () => false,
-        }),
+        }},
       });
     }
     // Spy on console.error so React's duplicate-key warning is captured.
@@ -533,6 +548,7 @@ describe('AC-11 (Sidebar duplicate-href safety)', () => {
       { label: 'A', href: '/x', icon: null },
       { label: 'B', href: '/x', icon: null },
     ];
+
     // Sidebar renders react-router-dom <Link>s, which require a Router ancestor.
     render(
       <MemoryRouter>
@@ -545,9 +561,12 @@ describe('AC-11 (Sidebar duplicate-href safety)', () => {
     expect(screen.getByTestId('sidebar-link-b')).not.toBeNull();
 
     // No React "Encountered two children with the same key" warning.
+    // args[0] is the React error message string — narrow to string before
+    // .includes so we never render `[object Object]` from a non-string err.
     const duplicateKeyWarnings = (errorSpy?.mock.calls ?? []).filter((args) =>
-      String(args[0] ?? '').includes('two children with the same key'),
+      (typeof args[0] === 'string' ? args[0] : '').includes('two children with the same key'),
     );
+
     expect(duplicateKeyWarnings).toHaveLength(0);
   });
 });

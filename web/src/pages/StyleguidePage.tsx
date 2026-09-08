@@ -17,9 +17,7 @@
  */
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-
 import '../styles/styleguide.css';
-
 import { Button } from '../components/ui/Button';
 import { Input, SearchInput } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
@@ -30,7 +28,6 @@ import { Container } from '../components/layout/Container';
 import { EmptyState } from '../components/layout/EmptyState';
 import { TopChrome } from '../components/layout/TopChrome';
 import { Sidebar, type SidebarNavItem } from '../components/layout/Sidebar';
-
 import { Band, ContainerWidth, ToastVariant } from '../types/domain';
 import { useTheme } from '../hooks/useTheme';
 import { useLocale } from '../hooks/useLocale';
@@ -62,7 +59,6 @@ function Section({
     </section>
   );
 }
-
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="sg-row">
@@ -71,9 +67,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
     </div>
   );
 }
-
 /* ──────────────────────── icons (text) ───────────────────── */
-
 const ICON_DASH = '▦';
 const ICON_INBOX = '✉';
 const ICON_FIELD = '⚙';
@@ -114,28 +108,28 @@ export function StyleguidePage() {
           <Button
             variant={containerWidth === ContainerWidth.Narrow ? 'primary' : 'secondary'}
             size="sm"
-            onClick={() => setContainerWidth(ContainerWidth.Narrow)}
+            onClick={() => { setContainerWidth(ContainerWidth.Narrow); }}
           >
             Narrow (720)
           </Button>
           <Button
             variant={containerWidth === ContainerWidth.Bangla ? 'primary' : 'secondary'}
             size="sm"
-            onClick={() => setContainerWidth(ContainerWidth.Bangla)}
+            onClick={() => { setContainerWidth(ContainerWidth.Bangla); }}
           >
             Bangla (1080)
           </Button>
           <Button
             variant={containerWidth === ContainerWidth.Wide ? 'primary' : 'secondary'}
             size="sm"
-            onClick={() => setContainerWidth(ContainerWidth.Wide)}
+            onClick={() => { setContainerWidth(ContainerWidth.Wide); }}
           >
             Wide (1280)
           </Button>
           <Button
             variant={containerWidth === 'full' ? 'primary' : 'secondary'}
             size="sm"
-            onClick={() => setContainerWidth('full')}
+            onClick={() => { setContainerWidth('full'); }}
           >
             Full bleed
           </Button>
@@ -177,12 +171,12 @@ export function StyleguidePage() {
         blurb="Default testid is `input-md`. With icon: `input-icon-md`. SearchInput always renders `input-search-md` and forwards size/disabled."
       >
         <Row label="plain">
-          <Input value={inputValue} onChange={(e) => setInputValue(e.target.value)} placeholder="Type something…" />
+          <Input value={inputValue} onChange={(e) => { setInputValue(e.target.value); }} placeholder="Type something…" />
         </Row>
         <Row label="with icon (search-shaped)">
           <Input
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => { setInputValue(e.target.value); }}
             placeholder="Search incidents…"
             icon={<span aria-hidden="true">⌕</span>}
           />
@@ -190,7 +184,7 @@ export function StyleguidePage() {
         <Row label="SearchInput variant">
           <SearchInput
             value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
+            onChange={(e) => { setSearchValue(e.target.value); }}
             placeholder="Filter queue…"
             size="lg"
             disabled={false}
@@ -225,19 +219,19 @@ export function StyleguidePage() {
         blurb="Esc to close. Tab cycles inside dialog. Focus returns to trigger on close. Accessible name via aria-label / aria-labelledby."
       >
         <Row label="open / close">
-          <Button variant="primary" size="md" onClick={() => setModalOpen(true)}>
+          <Button variant="primary" size="md" onClick={() => { setModalOpen(true); }}>
             Open modal
           </Button>
           <Modal
             open={modalOpen}
-            onClose={() => setModalOpen(false)}
+            onClose={() => { setModalOpen(false); }}
             ariaLabel="Confirm rejection"
           >
             <h3 style={{ marginTop: 0 }}>Confirm rejection</h3>
             <p>This incident will be marked as rejected and signed on chain.</p>
             <div style={{ display: 'flex', gap: 'var(--space-md)', justifyContent: 'flex-end', marginTop: 'var(--space-lg)' }}>
-              <Button variant="ghost" size="md" onClick={() => setModalOpen(false)}>Cancel</Button>
-              <Button variant="danger" size="md" onClick={() => setModalOpen(false)}>Reject incident</Button>
+              <Button variant="ghost" size="md" onClick={() => { setModalOpen(false); }}>Cancel</Button>
+              <Button variant="danger" size="md" onClick={() => { setModalOpen(false); }}>Reject incident</Button>
             </div>
           </Modal>
         </Row>
@@ -248,10 +242,10 @@ export function StyleguidePage() {
         blurb="4 variants. 4 s auto-dismiss. Hover the toast to pause the progress bar; un-hover to resume from where it paused."
       >
         <Row label="fire">
-          <Button variant="primary" size="sm" onClick={() => fireToast(ToastVariant.Success)}>success</Button>
-          <Button variant="secondary" size="sm" onClick={() => fireToast(ToastVariant.Warning)}>warning</Button>
-          <Button variant="danger" size="sm" onClick={() => fireToast(ToastVariant.Danger)}>danger</Button>
-          <Button variant="ghost" size="sm" onClick={() => fireToast(ToastVariant.Info)}>info</Button>
+          <Button variant="primary" size="sm" onClick={() => { fireToast(ToastVariant.Success); }}>success</Button>
+          <Button variant="secondary" size="sm" onClick={() => { fireToast(ToastVariant.Warning); }}>warning</Button>
+          <Button variant="danger" size="sm" onClick={() => { fireToast(ToastVariant.Danger); }}>danger</Button>
+          <Button variant="ghost" size="sm" onClick={() => { fireToast(ToastVariant.Info); }}>info</Button>
         </Row>
         <Row label="live">
           <Toast

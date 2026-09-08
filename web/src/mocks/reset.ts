@@ -18,7 +18,7 @@
  * stays in the bundle but its exports are only invoked when VITE_USE_MOCKS=true.
  */
 
-import { wipeAll, getAllBlocks, appendBlock, setChainHead, getChainHead } from './idb';
+import { appendBlock, getAllBlocks, getChainHead, setChainHead, wipeAll } from './idb';
 import { seedIfEmpty } from './fixtures';
 import { ulid } from './canonical';
 
@@ -28,18 +28,17 @@ export async function resetEverything(): Promise<void> {
   // Reload so all MSW-cached state (Auth, React Query cache) is cleared.
   window.location.reload();
 }
-
 /** Clear the chain only (keep session) and reseed genesis + 10 follow-on blocks. */
 export async function reseedChain(): Promise<boolean> {
   // Wipe only chain_blocks + chain_head, leave session + meta alone.
   // But our wipeAll() does all four — so we save session first.
   const session = (await import('./idb')).getSession;
   const savedSession = await session();
+
   await wipeAll();
   if (savedSession) await (await import('./idb')).setSession(savedSession);
   return seedIfEmpty();
 }
-
 /**
  * Tamper with block N — flip a single character of its block_hash so the
  * chain head fails verification on next /api/chain/head fetch. The tamper
@@ -53,15 +52,17 @@ export async function tamperBlock(blockIndex: number = 1): Promise<{ block_hash:
   const all = await getAllBlocks();
   const sorted = all.sort((a, b) => a.height - b.height);
   const target = sorted[blockIndex];
+
   if (!target) return null;
 
   // Replace the block with a hash-mismatched twin at the same key — this
   // makes the verified head pointer's `next_block` traversal fail.
   const corrupted = {
     ...target,
-    block_hash: '0x' + 'f'.repeat(64),  // obvious corruption
+    block_hash: `0x${ 'f'.repeat(64)}`, // obvious corruption
   };
-  await appendBlock(corrupted as typeof target);
+
+  await appendBlock(corrupted);
   // Re-establish head to the corrupted block so the next /chain/head fetch
   // returns it. (Production would NOT do this — the gateway would refuse to
   // advance. The mock simulates the operator-UI state where the head
@@ -73,20 +74,21 @@ export async function tamperBlock(blockIndex: number = 1): Promise<{ block_hash:
   });
   return { block_hash: corrupted.block_hash };
 }
-
 /** Emit a fresh ChainVerificationFailed event (separate from tamperBlock
  * — useful for triggering the demo toast without modifying storage). */
 export async function simulateChainVerificationFailed(reason: string = 'tamper-detected'): Promise<void> {
   const head = await getChainHead();
+
   if (!head) return;
   const event_id = ulid();
   const occurred_at = new Date().toISOString();
   const ingested_at = new Date().toISOString();
+
   // We just record it inline without recomputing the hash for the chain
   // extension — the demo only needs the toast to fire. In production, the
   // gateway would refuse to advance past a failed-verification point.
   await appendBlock({
-    block_hash: '0x' + Math.floor(Math.random() * 1e16).toString(16).padStart(16, '0').repeat(4).slice(0, 64),
+    block_hash: `0x${ Math.floor(Math.random() * 1e16).toString(16).padStart(16, '0').repeat(4).slice(0, 64)}`,
     height: head.height + 1,
     prev_block_hash: head.block_hash,
     tenant_id: 'dhaka',
@@ -102,7 +104,6 @@ export async function simulateChainVerificationFailed(reason: string = 'tamper-d
     },
   });
 }
-
 /** Demo-controls button labels — pure presentational. */
 export const DEMO_CONTROLS = [
   { id: 'reset', label: 'Reset everything', action: resetEverything, kind: 'destructive' },

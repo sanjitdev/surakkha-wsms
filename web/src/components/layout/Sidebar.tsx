@@ -6,14 +6,12 @@ export interface SidebarNavItem {
   href: string;
   icon: ReactNode;
 }
-
 export interface SidebarProps {
   navItems: SidebarNavItem[];
   currentPath: string;
   brand?: string;
   testId?: string;
 }
-
 export function Sidebar({ navItems, currentPath, brand, testId }: SidebarProps) {
   return (
     <aside className="sidebar" data-testid={testId ?? 'sidebar'}>
@@ -21,6 +19,7 @@ export function Sidebar({ navItems, currentPath, brand, testId }: SidebarProps) 
       <nav className="sidebar__nav" aria-label="Primary">
         {navItems.map((item, i) => {
           const active = item.href === currentPath;
+
           return (
             <Link
               key={`${item.href}:${i}`}

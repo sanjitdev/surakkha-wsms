@@ -18,15 +18,13 @@
  *   - read returns `undefined` if absent → handlers fall back to a default
  */
 
-import { createStore, get, set, del, keys, values } from 'idb-keyval';
-import type { UseStore } from 'idb-keyval';
+import { type UseStore, createStore, del, get, keys, set, values } from 'idb-keyval';
 
 const DB_NAME = 'surakkha-mock';
 
 function makeStore(name: string): UseStore {
   return createStore(DB_NAME, name);
 }
-
 const stores = {
   chain_blocks: makeStore('chain_blocks'),
   chain_head: makeStore('chain_head'),
@@ -37,79 +35,62 @@ const stores = {
 // ───────────────────────────────────────────────────────── chain_blocks ──
 
 export async function getAllBlocks() {
-  return (await values(stores.chain_blocks)) as ChainBlock[];
+  return (values(stores.chain_blocks));
 }
-
 export async function getBlock(hash: string): Promise<ChainBlock | undefined> {
-  return (await get(hash, stores.chain_blocks)) as ChainBlock | undefined;
+  return (get(hash, stores.chain_blocks));
 }
-
 export async function appendBlock(block: ChainBlock): Promise<void> {
   await set(block.block_hash, block, stores.chain_blocks);
 }
-
 // ───────────────────────────────────────────────────────── chain_head ─────
-
 export interface ChainHead {
   block_hash: string;
   height: number;
   ingested_at: string;
 }
-
 export async function getChainHead(): Promise<ChainHead | undefined> {
-  return (await get('head', stores.chain_head)) as ChainHead | undefined;
+  return (get('head', stores.chain_head));
 }
-
 export async function setChainHead(head: ChainHead): Promise<void> {
   await set('head', head, stores.chain_head);
 }
-
 // ───────────────────────────────────────────────────────── session ────────
-
 export interface SessionRow {
   actor_id: string;
-  actor_ref: string;        // dim 7 ActorIdentity.ref — ULID
+  actor_ref: string; // dim 7 ActorIdentity.ref — ULID
   display_name: string;
-  role: string;             // closed enum per dim 7 §2.5
-  token: string;            // opaque, server-minted in prod; mock mints locally
+  role: string; // closed enum per dim 7 §2.5
+  token: string; // opaque, server-minted in prod; mock mints locally
   logged_in_at: string;
   tenant_id: string;
 }
-
 export async function getSession(): Promise<SessionRow | undefined> {
-  return (await get('current', stores.session)) as SessionRow | undefined;
+  return (get('current', stores.session));
 }
-
 export async function setSession(session: SessionRow): Promise<void> {
   await set('current', session, stores.session);
 }
-
 export async function clearSession(): Promise<void> {
   await del('current', stores.session);
 }
-
 // ───────────────────────────────────────────────────────── meta ────────────
-
 export async function getMeta(key: string): Promise<unknown> {
-  return await get(key, stores.meta);
+  return get(key, stores.meta);
 }
-
 export async function setMeta(key: string, value: unknown): Promise<void> {
   await set(key, value, stores.meta);
 }
-
 // ───────────────────────────────────────────────────────── reset ───────────
-
 /** Wipe the entire DB. Used by reset.ts on the demo "Reset mock data" button. */
 export async function wipeAll(): Promise<void> {
   for (const store of Object.values(stores)) {
     const allKeys = await keys(store);
+
     await Promise.all(allKeys.map((k) => del(k, store)));
   }
 }
-
 // ───────────────────────────────────────────────────────── shared types ────
-
 export interface ChainBlock {
   block_hash: string;
   height: number;

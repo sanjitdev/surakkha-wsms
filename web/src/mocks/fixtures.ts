@@ -30,13 +30,13 @@
  * always looks "fresh" regardless of when the demo is opened.
  */
 
-import { ulid, blockHash, GENESIS_PREV_HASH } from './canonical';
+import { GENESIS_PREV_HASH, blockHash, ulid } from './canonical';
 import {
+  type ChainBlock,
   appendBlock,
+  getMeta,
   setChainHead,
   setMeta,
-  getMeta,
-  type ChainBlock,
 } from './idb';
 
 const SEED_VERSION = 3;
@@ -60,6 +60,7 @@ const ACTORS = {
 /** Seed only when meta.seed_version is missing or stale. */
 export async function seedIfEmpty(): Promise<boolean> {
   const current = await getMeta('seed_version');
+
   if (current === SEED_VERSION) return false;
 
   const t0 = Date.now();
@@ -72,18 +73,20 @@ export async function seedIfEmpty(): Promise<boolean> {
     event_type: 'SchemaVersionBumped',
     event_id: ulid(t0),
     occurred_at: NOW(),
-    actor_identity: ACTORS.system,
+    actor_identity: ACTORS.sensor,
     payload: { from: 0, to: SCHEMA_VERSION, reason: 'genesis' },
   });
+
   await write(genesis);
   prevHash = genesis.block_hash;
   height = 1;
 
   // ── 5 sensor readings (one sensor, 6h apart, last reading 5 min ago) ──
   const sensorId = '01J0SENSOR0WARD0000000000000A';
+
   for (let i = 0; i < 5; i++) {
-    const t = t0 - (5 - i) * 90 * 60 * 1000;  // 90 min apart, 5..1
-    const value = 7.2 + i * 0.1;              // gentle upward drift
+    const t = t0 - (5 - i) * 90 * 60 * 1000; // 90 min apart, 5..1
+    const value = 7.2 + i * 0.1; // gentle upward drift
     const block: ChainBlock = await buildBlock({
       prev_block_hash: prevHash,
       event_type: 'SensorReadingSubmitted',
@@ -100,6 +103,7 @@ export async function seedIfEmpty(): Promise<boolean> {
         ingestion_window_id: `iw-${Math.floor(t / 900000)}`,
       },
     });
+
     await write(block);
     prevHash = block.block_hash;
     height++;
@@ -111,13 +115,14 @@ export async function seedIfEmpty(): Promise<boolean> {
     event_type: 'SensorSilenceObserved',
     event_id: ulid(t0 + 1000),
     occurred_at: NOW(),
-    actor_identity: ACTORS.system,
+    actor_identity: ACTORS.sensor,
     payload: {
       sensor_id: sensorId,
       expected_period_seconds: 300,
       last_reading_at: new Date(t0 - 8 * 60 * 1000).toISOString(),
     },
   });
+
   await write(silence);
   prevHash = silence.block_hash;
   height++;
@@ -139,6 +144,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       captured_at: NOW(),
     },
   });
+
   await write(anjaliReport);
   prevHash = anjaliReport.block_hash;
   height++;
@@ -161,9 +167,13 @@ export async function seedIfEmpty(): Promise<boolean> {
       ],
     },
   });
+
   await write(incident);
   prevHash = incident.block_hash;
   height++;
+  // Typed alias so subsequent buildBlock payloads can read fields off
+  // incident.payload without re-casting `unknown` at every call site.
+  const incidentPayload = incident.payload as { incident_id: string };
 
   // ── incident escalated ───────────────────────────────────────────────
   const escalated: ChainBlock = await buildBlock({
@@ -173,12 +183,13 @@ export async function seedIfEmpty(): Promise<boolean> {
     occurred_at: NOW(),
     actor_identity: ACTORS.priya,
     payload: {
-      incident_id: incident.payload.incident_id,
+      incident_id: incidentPayload.incident_id,
       from_severity: 'medium',
       to_severity: 'high',
       reason: 'Cluster shows 3+ sensors drifting upward simultaneously.',
     },
   });
+
   await write(escalated);
   prevHash = escalated.block_hash;
   height++;
@@ -193,10 +204,11 @@ export async function seedIfEmpty(): Promise<boolean> {
     payload: {
       playbook_version_id: '01J0PLAYBOOKVERSION00000000A',
       step_id: 'flush-hydrant-line',
-      incident_id: incident.payload.incident_id,
+      incident_id: incidentPayload.incident_id,
       notes: 'Flushed hydrant line 12 for 8 minutes; pH trending down.',
     },
   });
+
   await write(playbookStep);
   prevHash = playbookStep.block_hash;
   height++;
@@ -210,14 +222,15 @@ export async function seedIfEmpty(): Promise<boolean> {
     actor_identity: ACTORS.priya,
     payload: {
       notice_id: ulid(t0 + 6001),
-      incident_id: incident.payload.incident_id,
+      incident_id: incidentPayload.incident_id,
       locale: 'bn',
       character_count: 138,
       channel_targets: ['sms', 'whatsapp', 'local-radio'],
-      attestation_event_ids: [],  // production: [phasingULID, messageDeskULID]
+      attestation_event_ids: [], // production: [phasingULID, messageDeskULID]
       body_summary: 'Ward dhanmondi — flush taps before use until noon.',
     },
   });
+
   await write(notice);
   prevHash = notice.block_hash;
   height++;
@@ -238,6 +251,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       signature: 'mock-sig-placeholder',
     },
   });
+
   await write(attestation);
   prevHash = attestation.block_hash;
   height++;
@@ -255,6 +269,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       client_kind: 'web',
     },
   });
+
   await write(login);
   prevHash = login.block_hash;
   height++;
@@ -267,7 +282,7 @@ export async function seedIfEmpty(): Promise<boolean> {
   // story (incident → escalation → notice → fix → resolved).
 
   const technicianId = ACTORS.karim.ref;
-  const incidentId = incident.payload.incident_id;
+  const incidentId = incidentPayload.incident_id;
   const workOrderEventId = ulid(t0 + 9000);
 
   const techAssigned: ChainBlock = await buildBlock({
@@ -287,6 +302,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       work_order_event_id: workOrderEventId,
     },
   });
+
   await write(techAssigned);
   prevHash = techAssigned.block_hash;
   height++;
@@ -306,6 +322,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       correlation_id: techAssigned.event_id,
     },
   });
+
   await write(techArrived);
   prevHash = techArrived.block_hash;
   height++;
@@ -326,6 +343,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       correlation_id: techArrived.event_id,
     },
   });
+
   await write(diagnosis);
   prevHash = diagnosis.block_hash;
   height++;
@@ -351,6 +369,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       correlation_id: diagnosis.event_id,
     },
   });
+
   await write(fix);
   prevHash = fix.block_hash;
   height++;
@@ -368,11 +387,12 @@ export async function seedIfEmpty(): Promise<boolean> {
       fix_summary_payload_hash: 'mock-fix-summary-hash-not-checked-in-phase-1',
       after_photo_sha256: 'mock-photo-resealed-sha256',
       before_photo_sha256: 'mock-photo-broken-seal-sha256',
-      resolution_latency_seconds: 22 * 60,  // arrived 13min after dispatch, closed 22min later
+      resolution_latency_seconds: 22 * 60, // arrived 13min after dispatch, closed 22min later
       correlation_id: fix.event_id,
       causation_id: fix.event_id,
     },
   });
+
   await write(resolved);
   prevHash = resolved.block_hash;
   height++;
@@ -386,7 +406,7 @@ export async function seedIfEmpty(): Promise<boolean> {
   // diverges per row (operator vs technician vs citizen vs system vs vendor)
   // so the right-rail severity counts and the filter-chip "Awaiting sigs"
   // count derive correctly from the kind:actor ref.
-  type InboxFixture = {
+  interface InboxFixture {
     severity: 'high' | 'medium' | 'low' | 'none';
     ward: string;
     sensor_id: string;
@@ -402,7 +422,7 @@ export async function seedIfEmpty(): Promise<boolean> {
     isDraft: boolean;
     isCitizen: boolean;
     isAwaitingSig: boolean;
-  };
+  }
   const inboxFixtures: InboxFixture[] = [
     {
       severity: 'high',
@@ -524,6 +544,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       isAwaitingSig: false,
     },
   ];
+
   for (const f of inboxFixtures) {
     const ev: ChainBlock = await buildBlock({
       prev_block_hash: prevHash,
@@ -553,6 +574,7 @@ export async function seedIfEmpty(): Promise<boolean> {
         },
       },
     });
+
     await write(ev);
     prevHash = ev.block_hash;
     height++;
@@ -560,7 +582,7 @@ export async function seedIfEmpty(): Promise<boolean> {
 
   // ── chain head + meta ────────────────────────────────────────────────
   await setChainHead({
-    block_hash: prevHash!,
+    block_hash: prevHash,
     height,
     ingested_at: NOW(),
   });
@@ -569,9 +591,7 @@ export async function seedIfEmpty(): Promise<boolean> {
 
   return true;
 }
-
 // ───────────────────────────────────────────────────────── helpers ───────
-
 async function buildBlock(input: {
   prev_block_hash: string | null;
   event_type: string;
@@ -592,6 +612,7 @@ async function buildBlock(input: {
     actor_identity: input.actor_identity,
     payload: input.payload,
   });
+
   return {
     block_hash,
     height: 0, // set by caller via write()
@@ -605,10 +626,9 @@ async function buildBlock(input: {
     actor_identity: input.actor_identity,
     payload: input.payload,
   };
-}
-
-async function write(block: ChainBlock): Promise<void> {
+}async function write(block: ChainBlock): Promise<void> {
   const head = await import('./idb').then((m) => m.getChainHead());
+
   block.height = (head?.height ?? 0) + 1;
   await appendBlock(block);
   await setChainHead({

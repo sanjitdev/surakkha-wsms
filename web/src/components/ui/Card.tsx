@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { type ReactNode, useId } from 'react';
 
 export interface CardProps {
   children: ReactNode;
@@ -6,10 +6,10 @@ export interface CardProps {
   modifier?: 'with-heading' | 'compact';
   testId?: string;
 }
-
 export function Card({ children, heading, modifier, testId }: CardProps) {
   const modifierClass = modifier ? ` card--${modifier}` : '';
   const headingId = useId();
+
   return (
     <section
       className={`card${modifierClass}`}

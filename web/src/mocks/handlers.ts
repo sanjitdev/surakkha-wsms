@@ -35,15 +35,15 @@
  * only via CommandRejected or ChainVerificationFailed events).
  */
 
-import { http, HttpResponse, delay } from 'msw';
-import { ulid, blockHash, GENESIS_PREV_HASH } from './canonical';
+import { HttpResponse, delay, http } from 'msw';
+import { GENESIS_PREV_HASH, blockHash, ulid } from './canonical';
 import {
+  type ChainBlock,
+  appendBlock,
   getAllBlocks,
   getChainHead,
-  setChainHead,
-  appendBlock,
   getSession,
-  type ChainBlock,
+  setChainHead,
 } from './idb';
 import { PERSONAS, loginAs, logout } from './session';
 
@@ -58,11 +58,13 @@ const authHandlers = [
   http.post('/api/auth/login', async ({ request }) => {
     await delay(LATENCY_MS());
     const body = (await request.json()) as { persona_id?: string };
+
     if (!body.persona_id) {
       return HttpResponse.json({ error: 'persona_id required' }, { status: 400 });
     }
     try {
       const session = await loginAs(body.persona_id);
+
       return HttpResponse.json(session);
     } catch (err) {
       return HttpResponse.json({ error: String(err) }, { status: 404 });
@@ -76,8 +78,9 @@ const authHandlers = [
   }),
 
   http.get('/api/auth/me', async () => {
-    await delay(LATENCY_MS() / 2);  // faster — header check, not data fetch
+    await delay(LATENCY_MS() / 2); // faster — header check, not data fetch
     const session = await getSession();
+
     if (!session) return HttpResponse.json({ error: 'unauthenticated' }, { status: 401 });
     return HttpResponse.json(session);
   }),
@@ -94,6 +97,7 @@ const chainHandlers = [
   http.get('/api/chain/head', async () => {
     await delay(LATENCY_MS() / 2);
     const head = await getChainHead();
+
     if (!head) return HttpResponse.json({ error: 'chain empty' }, { status: 404 });
     return HttpResponse.json(head);
   }),
@@ -105,6 +109,7 @@ const chainHandlers = [
     const limit = Number(url.searchParams.get('limit') ?? '50');
     const all = await getAllBlocks();
     const sorted = all.sort((a, b) => a.height - b.height);
+
     return HttpResponse.json({
       total: sorted.length,
       offset,
@@ -127,6 +132,7 @@ const chainHandlers = [
   http.post('/api/events', async ({ request }) => {
     await delay(LATENCY_MS());
     const session = await getSession();
+
     if (!session) return HttpResponse.json({ error: 'unauthenticated' }, { status: 401 });
 
     const envelope = (await request.json()) as Partial<ChainBlock> & {
@@ -153,6 +159,7 @@ const chainHandlers = [
       'OperatorAuthenticated', 'OperatorAccessLogged',
       'ChainVerificationFailed', 'CommandRejected', 'ProjectionFailed',
     ];
+
     if (!ALLOWED.includes(envelope.event_type)) {
       return HttpResponse.json(
         {
@@ -172,6 +179,7 @@ const chainHandlers = [
     // Idempotency: scan existing blocks for (tenant_id, event_id).
     const all = await getAllBlocks();
     const existing = all.find((b) => b.event_id === event_id);
+
     if (existing) {
       return HttpResponse.json({ ...existing, deduplicated: true }, { status: 200 });
     }
@@ -210,6 +218,7 @@ const chainHandlers = [
       },
       payload: envelope.payload,
     };
+
     await appendBlock(block);
     await setChainHead({
       block_hash: block.block_hash,
@@ -229,17 +238,20 @@ const chainHandlers = [
 
     const all = await getAllBlocks();
     let filtered = all;
+
     if (event_type) filtered = filtered.filter((b) => b.event_type === event_type);
     if (ward_id) {
       filtered = filtered.filter((b) => {
         const payload = b.payload as { ward_id?: string };
-        return payload?.ward_id === ward_id;
+
+        return payload.ward_id === ward_id;
       });
     }
     const sorted = filtered.sort((a, b) => a.height - b.height).slice(0, limit);
+
     return HttpResponse.json({
       total: filtered.length,
-      events: sorted.map((b) => ({
+      events: sorted.map((b) => {return {
         event_id: b.event_id,
         event_type: b.event_type,
         occurred_at: b.occurred_at,
@@ -248,7 +260,7 @@ const chainHandlers = [
         payload: b.payload,
         block_hash: b.block_hash,
         height: b.height,
-      })),
+      }}),
     });
   }),
 ];
@@ -261,9 +273,11 @@ const sensorHandlers = [
     const all = await getAllBlocks();
     const readings = all.filter((b) => b.event_type === 'SensorReadingSubmitted');
     const bySensor = new Map<string, { sensor_id: string; ward_id: string; parameter: string; last_value: number; last_at: string }>();
+
     for (const b of readings) {
       const p = b.payload as { sensor_id: string; ward_id: string; parameter: string; value: number };
       const prev = bySensor.get(p.sensor_id);
+
       if (!prev || prev.last_at < b.occurred_at) {
         bySensor.set(p.sensor_id, {
           sensor_id: p.sensor_id,
@@ -288,11 +302,12 @@ const sensorHandlers = [
       .filter((b) => (b.payload as { sensor_id: string }).sensor_id === params.id)
       .filter((b) => new Date(b.occurred_at).getTime() >= sinceTs)
       .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))
-      .map((b) => ({
+      .map((b) => {return {
         t: b.occurred_at,
         value: (b.payload as { value: number }).value,
         seriesId: (b.payload as { sensor_id: string }).sensor_id,
-      }));
+      }});
+
     return HttpResponse.json(readings);
   }),
 
@@ -301,7 +316,8 @@ const sensorHandlers = [
     await delay(LATENCY_MS());
     const body = (await request.json()) as { value: number; captured_at?: string };
     const session = await getSession();
-    if (!session || session.role !== 'vendor') {
+
+    if (session?.role !== 'vendor') {
       return HttpResponse.json({ error: 'vendor role required' }, { status: 403 });
     }
     // Forward to /api/events handler logic via reuse:
@@ -357,6 +373,7 @@ const sensorHandlers = [
         ingestion_window_id: `iw-${Math.floor(Date.now() / 900000)}`,
       },
     };
+
     await appendBlock(block);
     await setChainHead({
       block_hash: block.block_hash,
@@ -377,10 +394,13 @@ const incidentHandlers = [
       ['IncidentCreated', 'IncidentEscalated', 'IncidentResolved'].includes(b.event_type),
     );
     const byIncident = new Map<string, { id: string; latest: ChainBlock }>();
+
     for (const b of incidentEvents) {
       const p = b.payload as { incident_id?: string };
+
       if (!p.incident_id) continue;
       const prev = byIncident.get(p.incident_id);
+
       if (!prev || prev.latest.height < b.height) {
         byIncident.set(p.incident_id, { id: p.incident_id, latest: b });
       }
@@ -388,14 +408,15 @@ const incidentHandlers = [
     return HttpResponse.json(
       Array.from(byIncident.values()).map(({ id, latest }) => {
         const p = latest.payload as Record<string, unknown>;
+
         return {
           incident_id: id,
           status:
             latest.event_type === 'IncidentResolved'
               ? 'resolved'
               : latest.event_type === 'IncidentEscalated'
-              ? 'escalated'
-              : 'open',
+                ? 'escalated'
+                : 'open',
           severity: p.severity ?? p.to_severity ?? 'unknown',
           ward_id: p.ward_id,
           last_block_height: latest.height,
@@ -420,12 +441,15 @@ const heatmapHandlers = [
     await delay(LATENCY_MS());
     const all = await getAllBlocks();
     const cells: { day: number; hour: number; count: number }[] = [];
+
     for (let day = 0; day < 7; day++) {
       for (let hour = 0; hour < 24; hour++) {
         const count = all.filter((b) => {
           const d = new Date(b.occurred_at);
+
           return d.getUTCDay() === day && d.getUTCHours() === hour;
         }).length;
+
         cells.push({ day, hour, count });
       }
     }

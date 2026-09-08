@@ -1,4 +1,4 @@
-import { createElement, useId, type ReactNode } from 'react';
+import { type ReactNode, createElement, useId } from 'react';
 
 export interface EmptyStateProps {
   icon: ReactNode;
@@ -9,7 +9,6 @@ export interface EmptyStateProps {
   headingLevel?: 2 | 3 | 4;
   testId?: string;
 }
-
 export function EmptyState({
   icon,
   heading,
@@ -20,6 +19,7 @@ export function EmptyState({
   testId,
 }: EmptyStateProps) {
   const headingId = useId();
+
   return (
     <section
       className="empty-state card card--with-heading"
@@ -28,12 +28,12 @@ export function EmptyState({
     >
       <div className="empty-state__icon" aria-hidden="true">{icon}</div>
       {createElement(
-        `h${headingLevel}` as 'h2' | 'h3' | 'h4',
+        `h${headingLevel}`,
         { className: 'empty-state__title', id: headingId },
         heading,
       )}
       {body ? <p className="empty-state__sub">{body}</p> : null}
-      {(primaryCta || secondaryCta) && (
+      {(primaryCta !== undefined || secondaryCta !== undefined) && (
         <div className="empty-state__ctas">
           {primaryCta}
           {secondaryCta}

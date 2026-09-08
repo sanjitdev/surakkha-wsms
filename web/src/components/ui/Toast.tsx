@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ToastVariant } from '../../types/domain';
+import type { ToastVariant } from '../../types/domain';
 
 export interface ToastProps {
   variant: ToastVariant;
@@ -7,7 +7,6 @@ export interface ToastProps {
   onDismiss?: () => void;
   testId?: string;
 }
-
 const DURATION_MS = 4000;
 
 export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
@@ -37,8 +36,10 @@ export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
         return;
       }
       const elapsed = Date.now() - startRef.current;
+
       consumedRef.current = elapsed;
       const pct = Math.max(0, 100 - (elapsed / DURATION_MS) * 100);
+
       setProgress(pct);
       if (elapsed >= DURATION_MS) {
         onDismissRef.current?.();
@@ -53,13 +54,17 @@ export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
   }, [paused]);
 
   const variantKey = variant.toLowerCase() as 'success' | 'warning' | 'danger' | 'info';
+
   return (
+    // role=status is the right ARIA semantics; the auto-dismiss pause on
+    // hover is a quality-of-life enhancement, not a primary interaction.
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
     <div
       className={`toast toast--${variantKey}`}
       role="status"
       aria-live="polite"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => { setPaused(true); }}
+      onMouseLeave={() => { setPaused(false); }}
       data-testid={testId ?? `toast-${variantKey}`}
     >
       <span className="toast__message">{message}</span>

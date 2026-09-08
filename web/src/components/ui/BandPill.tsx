@@ -4,7 +4,6 @@ export interface BandPillProps {
   band: Band;
   testId?: string;
 }
-
 const ICONS: Record<Band, string> = {
   [Band.High]: '\u26A0',
   [Band.Medium]: '\u2296',
@@ -13,7 +12,8 @@ const ICONS: Record<Band, string> = {
 
 export function BandPill({ band, testId }: BandPillProps) {
   const className = band.toLowerCase();
-  const icon = ICONS[band] ?? '\u2022';
+  const icon = ICONS[band];
+
   return (
     <span
       className={`band-pill band-pill--${className}`}

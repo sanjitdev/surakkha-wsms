@@ -8,7 +8,6 @@ export interface TopChromeProps {
   navSlot?: ReactNode;
   testId?: string;
 }
-
 export function TopChrome({
   personaLabel,
   brand = 'Surakkha',

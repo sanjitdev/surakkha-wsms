@@ -36,7 +36,6 @@ export function ComingSoonPage({ persona, landing, description }: ComingSoonPage
     notifySessionChanged();
     navigate('/', { replace: true });
   }
-
   return (
     <div className="app-shell">
       <div className="main">

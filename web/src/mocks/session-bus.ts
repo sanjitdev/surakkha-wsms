@@ -17,7 +17,6 @@
  */
 
 export const SESSION_CHANGED_EVENT = 'surakkha:session-changed';
-
 export function notifySessionChanged(): void {
   window.dispatchEvent(new CustomEvent(SESSION_CHANGED_EVENT));
 }

@@ -47,29 +47,32 @@ export function LoginPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
+    const cancelledRef = { current: false };
+
     void (async () => {
       try {
         const res = await fetch('/api/chain/head');
+
         // 404 is expected before the chain is seeded (first boot before
         // MSW finishes). Show "pending" rather than "error".
         if (res.status === 404) {
-          if (cancelled) return;
+          if (cancelledRef.current) return;
           setStatus('pending');
           return;
         }
         if (!res.ok) throw new Error(`status ${res.status}`);
         const body = (await res.json()) as ChainStatus;
-        if (cancelled) return;
+
+        if (cancelledRef.current) return;
         setChainHeight(body.height);
         setStatus('ready');
       } catch {
-        if (cancelled) return;
+        if (cancelledRef.current) return;
         setStatus('error');
       }
     })();
     return () => {
-      cancelled = true;
+      cancelledRef.current = true;
     };
   }, []);
 
@@ -91,7 +94,6 @@ export function LoginPage() {
       setIsLoggingIn(false);
     }
   }
-
   return (
     <div className="login-shell">
       <aside className="brand-panel">
@@ -118,12 +120,12 @@ export function LoginPage() {
         <div className="picker-panel__inner">
           <div
             className={
-              'picker-status ' +
-              (status === 'ready'
-                ? 'picker-status--ready'
-                : status === 'error'
-                  ? 'picker-status--error'
-                  : 'picker-status--pending')
+              `picker-status ${
+                status === 'ready'
+                  ? 'picker-status--ready'
+                  : status === 'error'
+                    ? 'picker-status--error'
+                    : 'picker-status--pending'}`
             }
           >
             <span className="picker-status__dot" aria-hidden="true"></span>
@@ -132,43 +134,44 @@ export function LoginPage() {
 
           <h2 className="picker-panel__heading">Sign in</h2>
 
-          <ul className="picker-list" role="radiogroup" aria-label="Persona picker">
+          <div className="picker-list" role="radiogroup" aria-label="Persona picker">
             {PERSONAS.map((p) => {
               const isSel = p.id === selected.id;
+
               return (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={isSel}
-                    className={'persona' + (isSel ? ' persona--selected' : '')}
-                    onClick={() => setSelected(p)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        const idx = PERSONAS.findIndex((q) => q.id === selected.id);
-                        const nextIdx = e.key === 'ArrowDown'
-                          ? (idx + 1) % PERSONAS.length
-                          : (idx - 1 + PERSONAS.length) % PERSONAS.length;
-                        setSelected(PERSONAS[nextIdx]);
-                      }
-                    }}
-                  >
-                    <div className="persona__avatar" aria-hidden="true">
-                      {PERSONA_INITIALS[p.id] ?? p.display_name.charAt(0)}
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={isSel}
+                  className={`persona${ isSel ? ' persona--selected' : ''}`}
+                  onClick={() => { setSelected(p); }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      const idx = PERSONAS.findIndex((q) => q.id === selected.id);
+                      const nextIdx = e.key === 'ArrowDown'
+                        ? (idx + 1) % PERSONAS.length
+                        : (idx - 1 + PERSONAS.length) % PERSONAS.length;
+
+                      setSelected(PERSONAS[nextIdx]);
+                    }
+                  }}
+                >
+                  <div className="persona__avatar" aria-hidden="true">
+                    {PERSONA_INITIALS[p.id] ?? p.display_name.charAt(0)}
+                  </div>
+                  <div>
+                    <div className="persona__name">{p.display_name}</div>
+                    <div className="persona__hint" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--fg-tertiary)' }}>
+                      {p.hint}
                     </div>
-                    <div>
-                      <div className="persona__name">{p.display_name}</div>
-                      <div className="persona__hint" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--fg-tertiary)' }}>
-                        {p.hint}
-                      </div>
-                    </div>
-                    <div className="persona__check" aria-hidden="true"></div>
-                  </button>
-                </li>
+                  </div>
+                  <div className="persona__check" aria-hidden="true"></div>
+                </button>
               );
             })}
-          </ul>
+          </div>
 
           <div className="picker-actions">
             <button

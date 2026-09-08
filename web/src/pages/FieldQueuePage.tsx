@@ -17,11 +17,9 @@
  */
 
 import { useEffect, useState } from 'react';
-
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
-
-import { getSession, type SessionRow } from '../mocks/idb';
+import { type SessionRow, getSession } from '../mocks/idb';
 
 type Filter = 'all' | 'P1' | 'P2' | 'P3' | 'enroute' | 'onsite';
 
@@ -58,7 +56,8 @@ export function FieldQueuePage() {
   useEffect(() => {
     void (async () => {
       const row = await getSession();
-      if (!row || row.role !== 'field_technician') {
+
+      if (row?.role !== 'field_technician') {
         window.history.pushState({}, '', '/');
         window.location.reload();
         return;
@@ -77,8 +76,10 @@ export function FieldQueuePage() {
           fetch('/api/events?event_type=IncidentResolved&limit=100').then((r) => r.json()) as Promise<{ events: ChainEventLite[] }>,
           fetch('/api/chain/head').then((r) => r.ok ? r.json() as Promise<{ ingested_at: string }> : null),
         ]);
+
         if (head) {
           const age = Math.max(0, Math.round((Date.now() - new Date(head.ingested_at).getTime()) / 100) / 10);
+
           setChainFresh(age);
         }
         setRows(buildRows(session.actor_ref, assigned.events, resolved.events));
@@ -108,8 +109,8 @@ export function FieldQueuePage() {
     if (filter === 'all') return true;
     if (filter === 'P1' || filter === 'P2' || filter === 'P3') return r.priority === filter;
     if (filter === 'enroute') return r.status === 'enroute';
-    if (filter === 'onsite') return r.status === 'onsite';
-    return true;
+    // filter is `'onsite'` here — TS exhaustively narrowed via prior returns
+    return r.status === 'onsite';
   });
 
   const chipCounts: Record<Filter, number> = {
@@ -240,8 +241,8 @@ export function FieldQueuePage() {
               <button
                 key={f}
                 type="button"
-                className={'tech-chip' + (filter === f ? ' is-on' : '')}
-                onClick={() => setFilter(f)}
+                className={`tech-chip${ filter === f ? ' is-on' : ''}`}
+                onClick={() => { setFilter(f); }}
               >
                 {chipFilterLabel[f]} <span className="tech-chip__count">{chipCounts[f]}</span>
               </button>
@@ -260,7 +261,7 @@ export function FieldQueuePage() {
               </div>
             )}
             {visible.map((r) => (
-              <a key={r.id} href={`/field/incident-detail?work_order=${r.id}`} className={'tech-job' + (r.isActive ? ' is-active' : '') + (r.isDone ? ' is-done' : '')}>
+              <a key={r.id} href={`/field/incident-detail?work_order=${r.id}`} className={`tech-job${ r.isActive ? ' is-active' : '' }${r.isDone ? ' is-done' : ''}`}>
                 <span className={`tech-job__priority tech-job__priority--${r.priority.toLowerCase()}`}>{r.priority}</span>
                 <div>
                   <div className="tech-job__row1">
@@ -272,7 +273,7 @@ export function FieldQueuePage() {
                 </div>
                 <div className="tech-job__time">
                   <div className="tech-job__time-label">{r.timeLabel}</div>
-                  <div className={'tech-job__time-val' + (r.timeIsOverdue ? ' is-overdue' : '')}>{r.timeVal}</div>
+                  <div className={`tech-job__time-val${ r.timeIsOverdue ? ' is-overdue' : ''}`}>{r.timeVal}</div>
                 </div>
                 <span style={{ fontFamily: 'var(--font-family-mono)', color: r.isActive ? 'var(--brand-500)' : 'var(--fg-tertiary)' }}>{r.isDone ? '↗' : '→'}</span>
               </a>
@@ -283,9 +284,7 @@ export function FieldQueuePage() {
     </div>
   );
 }
-
 // ────────────────────────────────────────────── helpers ──────────────
-
 async function logout(): Promise<void> {
   try {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -293,15 +292,13 @@ async function logout(): Promise<void> {
     console.error('[surakkha] logout failed', err);
   }
 }
-
 function pillLabel(status: WorkOrderRow['status'], timeVal: string): string {
   if (status === 'assigned') return timeVal.endsWith('ago') ? `Assigned · ${timeVal}` : 'Assigned';
   if (status === 'enroute') return 'En route';
   if (status === 'onsite') return 'On site';
-  if (status === 'resolved') return `Resolved · ${timeVal}`;
-  return status;
+  // status is `'resolved'` here — TS exhaustively narrowed via prior returns
+  return `Resolved · ${timeVal}`;
 }
-
 function buildRows(
   technicianId: string,
   assigned: ChainEventLite[],
@@ -318,6 +315,7 @@ function buildRows(
       eta_target_minutes?: number;
       work_order_summary?: string;
     };
+
     if (p.technician_id !== technicianId) continue;
 
     const priority = p.priority ?? 'P3';
@@ -331,9 +329,9 @@ function buildRows(
     out.push({
       id: e.event_id,
       priority,
-      status: ageMin < 8 ? 'assigned' : 'enroute',   // fresh dispatch = assigned; older = en route heuristic
+      status: ageMin < 8 ? 'assigned' : 'enroute', // fresh dispatch = assigned; older = en route heuristic
       ticket,
-      title: `Incident ${p.incident_id?.slice(-6) ?? '?'} — ${summary.split('—').pop()?.trim() || summary}`,
+      title: `Incident ${p.incident_id?.slice(-6) ?? '?'} — ${summary.split('—').pop()?.trim() ?? summary}`,
       subtitle: `priority ${priority} · ETA ${p.eta_target_minutes ?? '?'} min · ${ageMin}m since dispatch`,
       timeLabel: overdue ? 'SLA' : 'Window',
       timeVal: overdue ? `+${ageMin - (p.eta_target_minutes ?? 30)}m overdue` : `${ageMin}m ago`,
@@ -350,6 +348,7 @@ function buildRows(
       fix_summary?: string;
       resolution_latency_seconds?: number;
     };
+
     if (p.technician_id !== technicianId) continue;
 
     const ticket = `evt_${e.event_id.slice(-6)}`;
@@ -357,10 +356,10 @@ function buildRows(
 
     out.push({
       id: e.event_id,
-      priority: 'P3',                  // resolved rows show ✓ instead of P#
+      priority: 'P3', // resolved rows show ✓ instead of P#
       status: 'resolved',
       ticket,
-      title: p.fix_summary?.split('—')[0]?.trim() || 'Resolved',
+      title: p.fix_summary?.split('—')[0]?.trim() ?? 'Resolved',
       subtitle: p.fix_summary ?? '',
       timeLabel: 'Closed',
       timeVal: minutes > 0 ? `${minutes} min` : '—',
@@ -372,6 +371,7 @@ function buildRows(
 
   // mark the first non-resolved row as active for the visual cue
   const firstActive = out.find((r) => !r.isDone);
+
   if (firstActive) firstActive.isActive = true;
 
   return out;

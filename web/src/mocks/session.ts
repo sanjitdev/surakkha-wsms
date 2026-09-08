@@ -25,12 +25,12 @@
  */
 
 import { ulid } from './canonical';
-import { getSession, setSession, clearSession, type SessionRow } from './idb';
+import { type SessionRow, clearSession, getSession, setSession } from './idb';
 
 export interface Persona {
   id: string;
   display_name: string;
-  role: SessionRow['role'];     // dim 7 §2.5 closed enum
+  role: SessionRow['role']; // dim 7 §2.5 closed enum
   /** Default landing route after login — dim 5 grid stack. */
   landing: string;
   /** Visual treatment on the picker. Pure CSS; not on the wire. */
@@ -38,7 +38,6 @@ export interface Persona {
   /** Short label rendered in the top-chrome persona chip. Optional — falls back to `display_name`. */
   chip_label?: string;
 }
-
 /**
  * 5 personas — minimum needed to drive every dim 5 template.
  * Role values are EXACTLY the dim 7 §2.5 enum strings. Do not invent.
@@ -88,15 +87,14 @@ export const PERSONAS: Persona[] = [
     chip_label: 'Karim · field tech · NE zone',
   },
 ];
-
 /** Bearer token style — opaque to mock; production mints server-side. */
 function mintToken(personaId: string): string {
   return `mock.${personaId}.${ulid()}`;
 }
-
 /** Log in as a persona. Idempotent — re-calling refreshes the token. */
 export async function loginAs(personaId: string): Promise<SessionRow> {
   const persona = PERSONAS.find((p) => p.id === personaId);
+
   if (!persona) throw new Error(`Unknown persona: ${personaId}`);
 
   const row: SessionRow = {
@@ -108,16 +106,16 @@ export async function loginAs(personaId: string): Promise<SessionRow> {
     logged_in_at: new Date().toISOString(),
     tenant_id: 'dhaka',
   };
+
   await setSession(row);
   return row;
 }
-
 /** Read current session, or null if not logged in. */
 export async function currentSession(): Promise<SessionRow | null> {
   const row = await getSession();
+
   return row ?? null;
 }
-
 export async function logout(): Promise<void> {
   await clearSession();
 }

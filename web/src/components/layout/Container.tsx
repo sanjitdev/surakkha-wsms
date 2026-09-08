@@ -6,7 +6,6 @@ export interface ContainerProps {
   children: ReactNode;
   testId?: string;
 }
-
 const WIDTH_CLASS: Record<ContainerWidth, string> = {
   [ContainerWidth.Narrow]: 'container--narrow',
   [ContainerWidth.Bangla]: 'container--bangla',

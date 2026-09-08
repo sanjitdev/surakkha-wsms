@@ -17,7 +17,6 @@ export interface FilterChipProps {
   onClick: () => void;
   testId?: string;
 }
-
 export function FilterChip({ label, count, dotColor, active, onClick, testId }: FilterChipProps) {
   return (
     <button

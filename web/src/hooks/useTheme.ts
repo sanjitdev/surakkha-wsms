@@ -11,19 +11,20 @@ function readInitial(): Theme {
   if (typeof window === 'undefined') return Theme.Light;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
+
     if (stored === Theme.Light || stored === Theme.Dark) return stored;
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
     return prefersDark ? Theme.Dark : Theme.Light;
   } catch {
     return Theme.Light;
   }
 }
-
 export function useTheme(): {
   theme: Theme;
   setTheme: (next: Theme) => void;
   toggle: () => void;
-} {
+  } {
   const [theme, setThemeState] = useState<Theme>(readInitial);
 
   useEffect(() => {

@@ -17,7 +17,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useState } from 'react';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-
 import { InboxRow } from '../components/pages/InboxRow';
 import { FilterChip } from '../components/pages/FilterChip';
 import type { InboxRow as InboxRowType } from '../types/inbox';
@@ -48,7 +47,7 @@ function buildRow(overrides: Partial<InboxRowType> = {}): InboxRowType {
 // ─── (1) InboxRow renders title + meta + T3 badge ────────────────────
 
 describe('FE-1.3a · InboxRow', () => {
-  afterEach(() => cleanup());
+  afterEach(() => { cleanup(); });
 
   it('(1) renders the row title, meta line, and a T3 priority pill', () => {
     render(
@@ -60,6 +59,7 @@ describe('FE-1.3a · InboxRow', () => {
     );
 
     const row = screen.getByTestId('inbox-row');
+
     expect(row).not.toBeNull();
     expect(row.getAttribute('data-priority')).toBe('t3');
     expect(row.querySelector('strong')?.textContent).toBe('Ward 7 chlorination spike');
@@ -80,6 +80,7 @@ describe('FE-1.3a · InboxRow', () => {
     );
 
     const link = screen.getByRole('link', { name: /Ward 7 chlorination spike/ });
+
     expect(link.getAttribute('href')).toBe('/inbox-detail');
   });
 
@@ -101,7 +102,8 @@ describe('FE-1.3a · InboxRow', () => {
     // Both the title link and the action link point at /inbox-detail;
     // the action link includes "Edit →" as the anchor text.
     const links = screen.getAllByRole('link');
-    const editLink = links.find((a) => a.textContent?.startsWith('Edit'));
+    const editLink = links.find((a) => a.textContent?.includes('Edit'));
+
     expect(editLink).not.toBeUndefined();
     expect(editLink?.getAttribute('href')).toBe('/inbox-detail?edit=1');
   });
@@ -114,16 +116,16 @@ describe('FE-1.3a · FilterChip', () => {
     if (!('matchMedia' in window)) {
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
-        value: (q: string) => ({
+        value: (q: string) => {return {
           matches: false, media: q, onchange: null,
           addListener: () => {}, removeListener: () => {},
           addEventListener: () => {}, removeEventListener: () => {},
           dispatchEvent: () => false,
-        }),
+        }},
       });
     }
   });
-  afterEach(() => cleanup());
+  afterEach(() => { cleanup(); });
 
   // ─── (4) FilterChip aria-selected flips on click ────────────────────
 
@@ -131,6 +133,7 @@ describe('FE-1.3a · FilterChip', () => {
     function Wrapper() {
       const [active, setActive] = useState(false);
       const clickSpy = vi.fn();
+
       return (
         <FilterChip
           label="All"
@@ -142,6 +145,7 @@ describe('FE-1.3a · FilterChip', () => {
     }
     render(<Wrapper />);
     const chip = screen.getByTestId('chip-all');
+
     expect(chip.getAttribute('aria-selected')).toBe('false');
     act(() => { chip.click(); });
     expect(chip.getAttribute('aria-selected')).toBe('true');
@@ -150,6 +154,7 @@ describe('FE-1.3a · FilterChip', () => {
   it('(4b) when rendered with active=true, aria-selected="true" + is-active class', () => {
     render(<FilterChip label="T3 urgent" active={true} onClick={() => {}} testId="chip-t3" />);
     const chip = screen.getByTestId('chip-t3');
+
     expect(chip.getAttribute('aria-selected')).toBe('true');
     expect(chip.className).toContain('is-active');
   });
@@ -163,8 +168,10 @@ describe('FE-1.3a · FilterChip', () => {
 
   it('(5b) does NOT render a count chip when count is 0 or undefined', () => {
     const { container: c1 } = render(<FilterChip label="All" count={0} active={false} onClick={() => {}} />);
+
     expect(c1.querySelectorAll('.filter-chip__count')).toHaveLength(0);
     const { container: c2 } = render(<FilterChip label="Other" active={false} onClick={() => {}} />);
+
     expect(c2.querySelectorAll('.filter-chip__count')).toHaveLength(0);
   });
 
@@ -172,6 +179,7 @@ describe('FE-1.3a · FilterChip', () => {
 
   it('(6) data-active="true" when active; "false" when not', () => {
     const { rerender } = render(<FilterChip label="All" active={false} onClick={() => {}} testId="chip-x" />);
+
     expect(screen.getByTestId('chip-x').getAttribute('data-active')).toBe('false');
     rerender(<FilterChip label="All" active={true} onClick={() => {}} testId="chip-x" />);
     expect(screen.getByTestId('chip-x').getAttribute('data-active')).toBe('true');
@@ -181,6 +189,7 @@ describe('FE-1.3a · FilterChip', () => {
 
   it('(4c) onClick fires once per click event', () => {
     const handler = vi.fn();
+
     render(<FilterChip label="X" active={false} onClick={handler} testId="chip-y" />);
     act(() => { fireEvent.click(screen.getByTestId('chip-y')); });
     act(() => { fireEvent.click(screen.getByTestId('chip-y')); });

@@ -24,21 +24,18 @@ export interface InboxRowProps {
   onToggle: () => void;
   testId?: string;
 }
-
 function severityClass(severity: InboxRow['severity']): string {
   if (severity === 'T3') return 't3';
   if (severity === 'T2') return 't2';
   if (severity === 'T1') return 't1';
   return 't0';
 }
-
 function severityDotColor(severity: InboxRow['severity']): string {
   if (severity === 'T3') return 'var(--danger)';
   if (severity === 'T2') return 'var(--warning)';
   if (severity === 'T1') return 'var(--info)';
   return 'var(--band-medium)';
 }
-
 function ownerColor(kind: InboxRow['ownerKind']): string {
   if (kind === 'reporter') return 'var(--success)';
   if (kind === 'tech') return 'var(--brand-500)';
@@ -46,11 +43,11 @@ function ownerColor(kind: InboxRow['ownerKind']): string {
   if (kind === 'vendor') return 'var(--warning)';
   return 'var(--brand-500)';
 }
-
 export function InboxRow({ row, selected, onToggle, testId }: InboxRowProps) {
   const sev = severityClass(row.severity);
   const isUrgent = row.isUrgent;
   const rowClasses = ['data-table--inbox__tr'];
+
   if (isUrgent) rowClasses.push('row-urgent');
   if (selected) rowClasses.push('is-selected');
   return (

@@ -7,11 +7,21 @@
  */
 
 import type {
-  InboxRow as InboxRowType,
   InboxRowStatus,
+  InboxRow as InboxRowType,
   IncidentSeverity,
 } from '../types/inbox';
 
+/**
+ * Convert an unknown wire-payload field to a string. Rejects objects so we
+ * never accidentally render `[object Object]`. Strings/numbers pass through;
+ * everything else falls back to the default.
+ */
+function toStr(value: unknown, fallback: string): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'bigint') return String(value);
+  return fallback;
+}
 export interface ChainEventLite {
   event_id: string;
   event_type: string;
@@ -19,20 +29,17 @@ export interface ChainEventLite {
   actor_identity: { kind: string; ref: string; display?: string };
   payload: Record<string, unknown>;
 }
-
 export interface RecentDecision {
   time: string;
   verb: string;
   target: string;
 }
-
 export const SEVERITY_FROM_WIRE: Record<string, IncidentSeverity> = {
   high: 'T3',
   medium: 'T2',
   low: 'T1',
   none: 'T0',
 };
-
 export const STATUS_FROM_WIRE: Record<string, InboxRowStatus> = {
   awaiting_ack: 'awaiting_ack',
   awaiting_sig: 'awaiting_sig',
@@ -41,12 +48,11 @@ export const STATUS_FROM_WIRE: Record<string, InboxRowStatus> = {
   chain_verify: 'chain_verify',
   info: 'info',
 };
-
 export function fmtTime(iso: string): string {
   const d = new Date(iso);
+
   return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
 }
-
 export function actionLabelFor(status: InboxRowStatus): string {
   if (status === 'awaiting_draft') return 'Edit';
   if (status === 'chain_verify') return 'Inspect';
@@ -54,27 +60,28 @@ export function actionLabelFor(status: InboxRowStatus): string {
   if (status === 'citizen_report') return 'Review';
   return 'Open';
 }
-
 export function buildRows(events: ChainEventLite[]): InboxRowType[] {
   return events.map((e) => {
-    const p = e.payload as Record<string, unknown>;
+    const p = e.payload;
     const inbox = (p.inbox ?? {}) as Record<string, unknown>;
-    const severity = SEVERITY_FROM_WIRE[String(p.severity ?? 'low')] ?? 'T1';
-    const status = STATUS_FROM_WIRE[String(inbox.status ?? 'info')] ?? 'info';
-    const ward = String(p.ward_id ?? '');
-    const sensorId = String(
+    const severity = SEVERITY_FROM_WIRE[toStr(p.severity, 'low')] ?? 'T1';
+    const status = STATUS_FROM_WIRE[toStr(inbox.status, 'info')] ?? 'info';
+    const ward = toStr(p.ward_id, '');
+    const sensorId = toStr(
       (p.sensor_snapshot as { sensor_id?: string }[] | undefined)?.[0]?.sensor_id ?? '—',
+      '—',
     );
-    const ownerKind = (inbox.owner_kind as InboxRowType['ownerKind']) ?? 'system';
-    const actionHref = String(inbox.href ?? '/inbox-detail');
+    const ownerKind = (inbox.owner_kind as InboxRowType['ownerKind']);
+    const actionHref = toStr(inbox.href, '/inbox-detail');
+
     return {
       id: e.event_id,
       severity,
-      title: String(inbox.title ?? 'Untitled incident'),
-      meta: String(inbox.summary ?? ''),
+      title: toStr(inbox.title, 'Untitled incident'),
+      meta: toStr(inbox.summary, ''),
       where: ward.startsWith('ward') ? `ward ${ward.slice(5)}` : ward,
       whereSub: sensorId,
-      ownerName: String(inbox.owner_display ?? 'System'),
+      ownerName: toStr(inbox.owner_display, 'System'),
       ownerKind,
       status,
       action: { label: actionLabelFor(status), href: actionHref },
@@ -88,7 +95,6 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
     };
   });
 }
-
 export function mergeRecentDecisions(
   bcast: ChainEventLite[],
   esc: ChainEventLite[],
@@ -96,14 +102,14 @@ export function mergeRecentDecisions(
   rev: ChainEventLite[],
 ): RecentDecision[] {
   const items: RecentDecision[] = [
-    ...bcast.map((e) => ({ time: fmtTime(e.occurred_at), verb: 'Broadcast', target: 'ward 7 notice' })),
-    ...esc.map((e) => ({ time: fmtTime(e.occurred_at), verb: 'Escalated', target: 'block #12' })),
-    ...csig.map((e) => ({ time: fmtTime(e.occurred_at), verb: 'Countersigned', target: 'ward 5' })),
-    ...rev.map((e) => ({ time: fmtTime(e.occurred_at), verb: 'Reviewed', target: 'ward 12 draft' })),
+    ...bcast.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Broadcast', target: 'ward 7 notice' }}),
+    ...esc.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Escalated', target: 'block #12' }}),
+    ...csig.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Countersigned', target: 'ward 5' }}),
+    ...rev.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Reviewed', target: 'ward 12 draft' }}),
   ];
+
   return items.sort((a, b) => b.time.localeCompare(a.time)).slice(0, 4);
 }
-
 export interface ChipCounts {
   all: number;
   T3: number;
@@ -112,7 +118,6 @@ export interface ChipCounts {
   citizen: number;
   resolved: number;
 }
-
 export function countByFilter(rows: InboxRowType[]): ChipCounts {
   return {
     all: rows.length,

@@ -15,7 +15,6 @@ export interface InputProps {
   disabled?: boolean;
   'aria-label'?: string;
 }
-
 export function Input({
   value,
   onChange,
@@ -59,12 +58,10 @@ export function Input({
     />
   );
 }
-
 export type SearchInputProps = Pick<
   InputProps,
   'value' | 'onChange' | 'placeholder' | 'size' | 'disabled' | 'icon' | 'testId' | 'type'
 >;
-
 export function SearchInput({
   value,
   onChange,

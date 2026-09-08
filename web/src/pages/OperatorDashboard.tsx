@@ -17,10 +17,8 @@
  */
 
 import { useEffect, useState } from 'react';
-
 import '../../mockups/01-priya/dashboard.css';
-
-import { getSession, type SessionRow } from '../mocks/idb';
+import { type SessionRow, getSession } from '../mocks/idb';
 
 type Layout = 'a' | 'b' | 'c';
 type Tab = 'overview' | 'sensors' | 'wards';
@@ -48,7 +46,10 @@ interface ChainEventLite {
   occurred_at: string;
   payload: Record<string, unknown>;
 }
-interface ThreadRow { incident_id: string; ward_id?: string; severity: string; status: string; last_occurred_at: string; }
+// ThreadRow is reserved for the planned threads-of-discussion panel;
+// the panel itself ships in a follow-up story. Comment kept so the
+// shape contract is preserved in the next iteration of this page.
+// type ThreadRow { incident_id: string; ward_id?: string; severity: string; status: string; last_occurred_at: string; }
 
 const LAYOUT_STORAGE_KEY = 'surakkha.layout';
 
@@ -65,7 +66,8 @@ export function OperatorDashboard() {
   useEffect(() => {
     void (async () => {
       const row = await getSession();
-      if (!row || row.role !== 'utility_operator') {
+
+      if (row?.role !== 'utility_operator') {
         window.history.pushState({}, '', '/');
         window.location.reload();
         return;
@@ -78,6 +80,7 @@ export function OperatorDashboard() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
+
       if (saved === 'a' || saved === 'b' || saved === 'c') setLayout(saved);
     } catch { /* ignore */ }
   }, []);
@@ -88,7 +91,8 @@ export function OperatorDashboard() {
 
   // 3. data fetch
   useEffect(() => {
-    let cancelled = false;
+    const cancelled = { current: false };
+
     void (async () => {
       try {
         const [headRes, incRes, senRes, evtRes] = await Promise.all([
@@ -97,19 +101,21 @@ export function OperatorDashboard() {
           fetch('/api/sensors').then((r) => r.json()) as Promise<SensorRow[]>,
           fetch('/api/events?limit=20').then((r) => r.json()) as Promise<{ events: ChainEventLite[] }>,
         ]);
-        if (cancelled) return;
+
+        if (cancelled.current) return;
         if (headRes) {
           const age = Math.max(0, Math.round((Date.now() - new Date(headRes.ingested_at).getTime()) / 100) / 10);
+
           setChainFresh(age);
         }
-        setIncidents(incRes ?? []);
-        setSensors(senRes ?? []);
-        setRecent(evtRes?.events ?? []);
+        setIncidents(incRes);
+        setSensors(senRes);
+        setRecent(evtRes.events);
       } catch (err) {
         console.error('[surakkha] dashboard fetch failed', err);
       }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled.current = true; };
   }, []);
 
   // chain freshness polling — top chrome updates every 5s per dim 7 §5.3.1
@@ -118,14 +124,17 @@ export function OperatorDashboard() {
       void (async () => {
         try {
           const head = await fetch('/api/chain/head').then((r) => r.ok ? r.json() as Promise<ChainHead> : null);
+
           if (head) {
             const age = Math.max(0, Math.round((Date.now() - new Date(head.ingested_at).getTime()) / 100) / 10);
+
             setChainFresh(age);
           }
         } catch { /* ignore */ }
       })();
     }, 5000);
-    return () => window.clearInterval(id);
+
+    return () => { window.clearInterval(id); };
   }, []);
 
   if (session === undefined) return null;
@@ -218,8 +227,8 @@ export function OperatorDashboard() {
                   type="button"
                   role="radio"
                   aria-checked={layout === opt}
-                  className={'layout-toggle__btn' + (layout === opt ? ' is-active' : '')}
-                  onClick={() => setLayout(opt)}
+                  className={`layout-toggle__btn${ layout === opt ? ' is-active' : ''}`}
+                  onClick={() => { setLayout(opt); }}
                 >
                   {opt.toUpperCase()} · {opt === 'a' ? 'grid' : opt === 'b' ? 'editorial' : 'status-board'}
                 </button>
@@ -233,8 +242,8 @@ export function OperatorDashboard() {
             type="button"
             role="tab"
             aria-selected={tab === 'overview'}
-            className={'tab' + (tab === 'overview' ? ' active' : '')}
-            onClick={() => setTab('overview')}
+            className={`tab${ tab === 'overview' ? ' active' : ''}`}
+            onClick={() => { setTab('overview'); }}
           >
             Overview
           </button>
@@ -242,8 +251,8 @@ export function OperatorDashboard() {
             type="button"
             role="tab"
             aria-selected={tab === 'sensors'}
-            className={'tab' + (tab === 'sensors' ? ' active' : '')}
-            onClick={() => setTab('sensors')}
+            className={`tab${ tab === 'sensors' ? ' active' : ''}`}
+            onClick={() => { setTab('sensors'); }}
           >
             Sensors
           </button>
@@ -251,8 +260,8 @@ export function OperatorDashboard() {
             type="button"
             role="tab"
             aria-selected={tab === 'wards'}
-            className={'tab' + (tab === 'wards' ? ' active' : '')}
-            onClick={() => setTab('wards')}
+            className={`tab${ tab === 'wards' ? ' active' : ''}`}
+            onClick={() => { setTab('wards'); }}
           >
             Wards
           </button>
@@ -262,7 +271,7 @@ export function OperatorDashboard() {
 
           {/* ── TAB: OVERVIEW ── */}
           <section
-            className={'tab-panel' + (tab === 'overview' ? ' active' : '')}
+            className={`tab-panel${ tab === 'overview' ? ' active' : ''}`}
             data-tab="overview"
             role="tabpanel"
             hidden={tab !== 'overview'}
@@ -348,7 +357,7 @@ export function OperatorDashboard() {
                           <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
                           <td>{summarizeEvent(e)}</td>
                           <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
-                          <td className="col-status"><span className={'badge badge--' + statusBadgeClass(e.event_type)}>{statusBadgeLabel(e.event_type)}</span></td>
+                          <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
                         </tr>
                       ))}
                       {recent.length === 0 && (
@@ -382,7 +391,7 @@ export function OperatorDashboard() {
                           <td>{i.ward_id ?? '—'} incident</td>
                           <td>{i.status}</td>
                           <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
-                          <td className="col-status"><span className={'badge badge--' + severityBadgeClass(i.severity)}>{i.severity}</span></td>
+                          <td className="col-status"><span className={`badge badge--${ severityBadgeClass(i.severity)}`}>{i.severity}</span></td>
                           <td className="col-action"><a href="/inbox">Open →</a></td>
                         </tr>
                       ))}
@@ -419,7 +428,7 @@ export function OperatorDashboard() {
                           <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
                           <td>{summarizeEvent(e)}</td>
                           <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
-                          <td className="col-status"><span className={'badge badge--' + statusBadgeClass(e.event_type)}>{statusBadgeLabel(e.event_type)}</span></td>
+                          <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
                         </tr>
                       ))}
                     </tbody>
@@ -475,7 +484,7 @@ export function OperatorDashboard() {
                             <td className="col-warn"><span className="row-severity-dot" style={{ background: severityColor(i.severity) }}></span></td>
                             <td>{i.ward_id ?? '—'} incident</td>
                             <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
-                            <td className="col-status"><span className={'badge badge--' + severityBadgeClass(i.severity)}>{i.severity}</span></td>
+                            <td className="col-status"><span className={`badge badge--${ severityBadgeClass(i.severity)}`}>{i.severity}</span></td>
                             <td className="col-action"><a href="/inbox">Open →</a></td>
                           </tr>
                         ))}
@@ -491,7 +500,7 @@ export function OperatorDashboard() {
                           <tr key={e.event_id}>
                             <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
                             <td>{summarizeEvent(e)}</td>
-                            <td className="col-status"><span className={'badge badge--' + statusBadgeClass(e.event_type)}>{statusBadgeLabel(e.event_type)}</span></td>
+                            <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
                           </tr>
                         ))}
                       </tbody>
@@ -514,12 +523,12 @@ export function OperatorDashboard() {
                   <div className="chart-card__body">
                     <svg viewBox="0 0 800 220" width="100%" height="100%" aria-label="24h multi-sensor time series">
                       <g stroke="var(--border-subtle)" strokeWidth="1">
-                        <line x1="0" y1="40"  x2="800" y2="40" />
+                        <line x1="0" y1="40" x2="800" y2="40" />
                         <line x1="0" y1="100" x2="800" y2="100" />
                         <line x1="0" y1="160" x2="800" y2="160" />
                       </g>
                       <g fontFamily="var(--font-family-mono)" fontSize="10" fill="var(--fg-tertiary)">
-                        <text x="0"   y="218">00:00</text>
+                        <text x="0" y="218">00:00</text>
                         <text x="200" y="218">06:00</text>
                         <text x="400" y="218">12:00</text>
                         <text x="600" y="218">18:00</text>
@@ -548,9 +557,9 @@ export function OperatorDashboard() {
                   </div>
                   <div className="chart-card__body donut-body">
                     <svg viewBox="0 0 200 200" width="180" height="180" aria-label="Band distribution donut">
-                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-low)"     strokeWidth="32" strokeDasharray="254.5 439.8" transform="rotate(-90 100 100)" />
-                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-medium)"  strokeWidth="32" strokeDasharray="79.2 615.1"  strokeDashoffset="-254.5" transform="rotate(-90 100 100)" />
-                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-high)"   strokeWidth="32" strokeDasharray="105.6 588.7" strokeDashoffset="-333.7" transform="rotate(-90 100 100)" />
+                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-low)" strokeWidth="32" strokeDasharray="254.5 439.8" transform="rotate(-90 100 100)" />
+                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-medium)" strokeWidth="32" strokeDasharray="79.2 615.1" strokeDashoffset="-254.5" transform="rotate(-90 100 100)" />
+                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-high)" strokeWidth="32" strokeDasharray="105.6 588.7" strokeDashoffset="-333.7" transform="rotate(-90 100 100)" />
                       <text x="100" y="96" textAnchor="middle" fontSize="var(--font-size-display)" fontWeight="var(--font-weight-bold)" fill="var(--fg-default)" fontFamily="var(--font-family-sans)">{recent.length * 12}</text>
                       <text x="100" y="118" textAnchor="middle" fontSize="var(--font-size-xs)" fill="var(--fg-tertiary)" fontFamily="var(--font-family-sans)">readings</text>
                     </svg>
@@ -587,19 +596,16 @@ export function OperatorDashboard() {
     </div>
   );
 }
-
 // ────────────────────────────────────────────── helpers ──────────────
-
 async function logout(): Promise<void> {
   try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (err) { console.error('[surakkha] logout failed', err); }
 }
-
 function computePHAvg(sensors: SensorRow[]): number | null {
   const ph = sensors.filter((s) => s.parameter.toLowerCase() === 'ph' && typeof s.last_value === 'number');
+
   if (ph.length === 0) return null;
   return ph.reduce((sum, s) => sum + s.last_value, 0) / ph.length;
 }
-
 function summarizeEvent(e: ChainEventLite): string {
   switch (e.event_type) {
     case 'SensorReadingSubmitted': return `Sensor reading · ${(e.payload as { parameter?: string }).parameter ?? '—'}`;
@@ -623,7 +629,6 @@ function summarizeEvent(e: ChainEventLite): string {
     default: return e.event_type.replace(/([A-Z])/g, ' $1').trim();
   }
 }
-
 function statusBadgeClass(eventType: string): string {
   if (eventType.includes('Resolved') || eventType.includes('Issued') || eventType.includes('Acknowledge')) return 'resolved';
   if (eventType.includes('Escalated') || eventType === 'ChainVerificationFailed' || eventType === 'DeviationCaptured') return 't3';
@@ -631,7 +636,6 @@ function statusBadgeClass(eventType: string): string {
   if (eventType === 'PlaybookStepExecuted') return 'tier';
   return 't1';
 }
-
 function statusBadgeLabel(eventType: string): string {
   if (eventType.includes('Resolved') || eventType.includes('Retracted')) return 'done';
   if (eventType.includes('Notice') || eventType.includes('Acknowledge')) return 'broadcast';
@@ -648,29 +652,26 @@ function statusBadgeLabel(eventType: string): string {
   if (eventType === 'FixSubmitted') return 'fix';
   return eventType.replace(/([A-Z])/g, ' $1').trim().toLowerCase();
 }
-
 function severityColor(sev: string): string {
   if (sev === 'T3' || sev === 't3') return 'var(--danger)';
   if (sev === 'T2' || sev === 't2') return 'var(--warning)';
   if (sev === 'T1' || sev === 't1') return 'var(--info)';
   return 'var(--fg-tertiary)';
 }
-
 function severityBadgeClass(sev: string): string {
   if (sev === 'T3' || sev === 't3') return 't3';
   if (sev === 'T2' || sev === 't2') return 't2';
   if (sev === 'T1' || sev === 't1') return 't1';
   return 'tier';
 }
-
 function relativeTime(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
+
   if (ms < 60_000) return 'just now';
   if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m ago`;
   if (ms < 86_400_000) return `${Math.round(ms / 3_600_000)}h ago`;
   return `${Math.round(ms / 86_400_000)}d ago`;
 }
-
 // Renders the dim 5b §14 HorizontalBar chart for the Wards tab.
 // Synthesises a ranking from incident data so the chart populates with
 // whatever the chain has — falls back to the locked static layout if
@@ -678,15 +679,17 @@ function relativeTime(iso: string): string {
 function WardRanking({ incidents }: { incidents: IncidentRow[] }) {
   // group incidents by ward_id and count by severity
   const byWard = new Map<string, { count: number; weighted: number }>();
+
   for (const i of incidents) {
     const w = i.ward_id ?? 'unknown';
     const prev = byWard.get(w) ?? { count: 0, weighted: 0 };
     const weight = i.severity === 'T3' ? 3 : i.severity === 'T2' ? 2 : 1;
+
     byWard.set(w, { count: prev.count + 1, weighted: prev.weighted + weight });
   }
 
   const ranked = Array.from(byWard.entries())
-    .map(([ward, { count, weighted }]) => ({ ward, count, score: weighted }))
+    .map(([ward, { count, weighted }]) => {return { ward, count, score: weighted }})
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
@@ -705,11 +708,13 @@ function WardRanking({ incidents }: { incidents: IncidentRow[] }) {
   }
 
   const max = ranked[0]?.score ?? 1;
+
   return (
     <>
       {ranked.map((r) => {
         const width = Math.round((r.score / max) * 78);
         const bg = r.score >= max * 0.66 ? 'var(--danger)' : r.score >= max * 0.33 ? 'var(--warning)' : 'var(--success)';
+
         return (
           <div key={r.ward} className="hbar-row">
             <span className="hbar-label">{r.ward}</span>
