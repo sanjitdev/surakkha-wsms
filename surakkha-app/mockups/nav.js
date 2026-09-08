@@ -3,11 +3,10 @@
  *
  * Surakkha mockups live in per-persona subfolders:
  *   mockups/00-login/login.html
- *   mockups/01-priya/*.html
- *   mockups/02-anjali/submit.html
- *   mockups/03-pha-approver/approve.html
- *   mockups/04-pha-viewer/audit-log.html  (also serves viewer)
- *   mockups/05-vendor/vendor.html
+ *   mockups/01-priya/*.html      (operator)
+ *   mockups/02-anjali/*.html     (citizen)
+ *   mockups/04-technician/*.html (field tech — utility's own, dispatched by Priya)
+ *   mockups/05-vendor/*.html     (sensor vendor — Acme Sensors)
  *
  * Wires:
  *   - Persona picker on login.html → writes selected persona to localStorage
@@ -15,6 +14,8 @@
  *   - Top-chrome nav: rebuilt from persona's allowed chrome links
  *   - Active-state highlighting per current page
  *   - Logout button (data-action="logout") → clears persona, returns to login
+ *
+ * Phase 1 personas: priya, anjali, ramesh, vendor. PHA roles deferred to Phase 2.
  */
 
 (function () {
@@ -46,49 +47,36 @@
     anjali: {
       id: 'anjali',
       display: 'Anjali',
-      role: 'anjali',
-      landing: '../02-anjali/submit.html',
-      chrome: ['Submit', 'Your reports'],
+      role: 'citizen',
+      landing: '../02-anjali/home.html',
+      chrome: ['Home', 'Submit', 'Your reports'],
       chromeLinks: {
+        'Home':         '../02-anjali/home.html',
         'Submit':       '../02-anjali/submit.html',
-        'Your reports': '../02-anjali/submit.html',
+        'Your reports': '../02-anjali/home.html',
       },
     },
-    pha_approver: {
-      id: 'pha_approver',
-      display: 'Dr. Karim',
-      role: 'pha_approver',
-      landing: '../03-pha-approver/approve.html',
-      chrome: ['Approve', 'Inbox', 'Audit', 'Settings'],
+    ramesh: {
+      id: 'ramesh',
+      display: 'Ramesh',
+      role: 'field_tech',
+      landing: '../04-technician/work-queue.html',
+      chrome: ['Work queue', 'My day', 'History'],
       chromeLinks: {
-        Approve:  '../03-pha-approver/approve.html',
-        Inbox:    '../01-priya/inbox-list.html',
-        Audit:    '../01-priya/audit-log.html',
-        Settings: '../01-priya/settings.html',
-      },
-    },
-    pha_viewer: {
-      id: 'pha_viewer',
-      display: 'PHA Viewer',
-      role: 'pha_viewer',
-      landing: '../04-pha-viewer/audit-log.html',
-      chrome: ['Audit', 'Inbox', 'Settings'],
-      chromeLinks: {
-        Audit:    '../01-priya/audit-log.html',
-        Inbox:    '../01-priya/inbox-list.html',
-        Settings: '../01-priya/settings.html',
+        'Work queue': '../04-technician/work-queue.html',
+        'My day':     '../04-technician/my-day.html',
+        'History':    '../04-technician/history.html',
       },
     },
     vendor: {
       id: 'vendor',
       display: 'Acme Sensors',
       role: 'vendor',
-      landing: '../05-vendor/vendor.html',
-      chrome: ['Fleet', 'Submit batch', 'Settings'],
+      landing: '../05-vendor/fleet.html',
+      chrome: ['Fleet', 'Submit batch'],
       chromeLinks: {
-        'Fleet':        '../05-vendor/vendor.html',
-        'Submit batch': '../05-vendor/vendor.html',
-        Settings:       '../01-priya/settings.html',
+        'Fleet':        '../05-vendor/fleet.html',
+        'Submit batch': '../05-vendor/submit-batch.html',
       },
     },
   };
@@ -109,8 +97,8 @@
     var continueBtn = document.querySelector('.button--primary');
     if (!radios.length || !continueBtn) return;
 
-    // Order matches the HTML ordering: priya, anjali, pha_approver, pha_viewer, vendor
-    var ids = ['priya', 'anjali', 'pha_approver', 'pha_viewer', 'vendor'];
+    // Order matches the HTML ordering in login.html: priya, anjali, vendor, ramesh
+    var ids = ['priya', 'anjali', 'vendor', 'ramesh'];
     radios.forEach(function (r, i) {
       r.dataset.persona = ids[i];
     });

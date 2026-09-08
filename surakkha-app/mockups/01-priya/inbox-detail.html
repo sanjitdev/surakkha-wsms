@@ -75,7 +75,7 @@
             </div>
             <div class="thread-head__row1">
               <span class="badge badge--t3">T3 urgent</span>
-              <span class="badge badge--open">dual-sig pending</span>
+              <span class="badge badge--open">citizen ack pending</span>
               <span class="badge badge--escalated">escalated 14:01</span>
             </div>
             <h1>Ward 7 chlorination spike</h1>
@@ -84,10 +84,10 @@
           <div class="thread-head__cta">
             <button class="button button--primary" type="button" id="openIssuanceBtn">
               <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
-              Issue public notice
+              Request citizen ack →
             </button>
-            <button class="button button--secondary" type="button">Request PHA sign-off</button>
-            <button class="button button--secondary" type="button">Assign colleague</button>
+            <button class="button button--secondary" type="button">Assign field tech</button>
+            <button class="button button--secondary" type="button">Issue stand-down (later)</button>
           </div>
         </div>
       </div>
@@ -105,26 +105,18 @@
           </div>
           <div class="signature-step signature-step--active">
             <div class="signature-step__num">Step 2</div>
-            <div class="signature-step__role">PHA approver</div>
+            <div class="signature-step__role">Citizen countersig</div>
             <div class="signature-step__status">
               <span class="signature-step__dot"></span>
-              Awaiting Dr. Karim
+              Awaiting Anjali (ward 7)
             </div>
           </div>
           <div class="signature-step signature-step--pending">
             <div class="signature-step__num">Step 3</div>
-            <div class="signature-step__role">Vendor countersig</div>
-            <div class="signature-step__status">
-              <span class="signature-step__dot"></span>
-              Awaiting Acme Sensors
-            </div>
-          </div>
-          <div class="signature-step signature-step--pending">
-            <div class="signature-step__num">Step 4</div>
             <div class="signature-step__role">Broadcast</div>
             <div class="signature-step__status">
               <span class="signature-step__dot"></span>
-              SMS · WhatsApp · radio
+              SMS · WhatsApp · radio · auto on Step 2 ack
             </div>
           </div>
         </div>
@@ -144,7 +136,7 @@
                   <div class="timeline__meta">Priya · ward 7 template · draft id dn-3318</div>
                   <div class="timeline__chips">
                     <span class="badge badge--tier">draft</span>
-                    <span class="badge badge--escalated">dual-sig required</span>
+                    <span class="badge badge--escalated">citizen ack required</span>
                   </div>
                 </li>
                 <li class="tl-done">
@@ -287,14 +279,9 @@
               <table class="data-table" style="font-size: var(--font-size-xs);">
                 <tbody>
                   <tr>
-                    <td><span class="avatar-dot" style="background: var(--brand-500);">K</span></td>
-                    <td><strong style="font-size:var(--font-size-sm);">Dr. Karim</strong><div class="row-sub">PHA approver · ward 7</div></td>
+                    <td><span class="avatar-dot" style="background: var(--brand-500);">A</span></td>
+                    <td><strong style="font-size:var(--font-size-sm);">Anjali</strong><div class="row-sub">citizen · ward 7 · original reporter</div></td>
                     <td class="col-action"><span class="badge badge--escalated" style="font-size: 10px;">pending</span></td>
-                  </tr>
-                  <tr>
-                    <td><span class="avatar-dot" style="background: var(--warning);">Acme</span></td>
-                    <td><strong style="font-size:var(--font-size-sm);">Acme Sensors</strong><div class="row-sub">vendor · SN-2208 owner</div></td>
-                    <td class="col-action"><span class="badge badge--tier" style="font-size: 10px;">queued</span></td>
                   </tr>
                   <tr>
                     <td><span class="avatar-dot" style="background: var(--brand-500);">P</span></td>
@@ -337,19 +324,20 @@
   </div>
 
   <!-- ════════════════════════════════════════════════════════════
-       T3 ISSUANCE MODAL — two-tap dual-sig
-       Operator compose → PHA + vendor countersign → broadcast
-       Tap 1: PHA confirm · Tap 2: Vendor confirm · Both armed → broadcast ready
+       T3 ISSUANCE MODAL — citizen countersig handoff
+       Operator compose → Anjali (citizen) countersigns → broadcast auto-fires
+       Tap once: send ack request to Anjali → she taps twice on her side →
+       AnjaliAcknowledged lands on chain → PublicNoticeIssued auto → broadcast.
        ════════════════════════════════════════════════════════════ -->
   <div class="modal-backdrop" id="issuanceModal" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal__head">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm);">
-          <span class="badge badge--t3">T3 urgent · dual-sig</span>
+          <span class="badge badge--t3">T3 urgent · citizen countersig</span>
           <span class="data-card__meta">dn-3318 · draft v1</span>
         </div>
-        <h2 id="modalTitle">Confirm &amp; broadcast — ward 7 notice</h2>
-        <p>Both PHA approver and the SN-2208 vendor must countersign before this notice is broadcast to 312 households. Tap each box to confirm the signature trail is correct.</p>
+        <h2 id="modalTitle">Send ack request — ward 7 notice</h2>
+        <p>Anjali (the citizen who reported the original incident) will be asked to acknowledge this notice as her countersignature. Once her <code>AnjaliAcknowledged</code> event lands on chain, <code>PublicNoticeIssued</code> auto-fires and broadcasts to 412 households.</p>
       </div>
 
       <div class="modal__body">
@@ -360,50 +348,42 @@
             <div class="signature-step__status"><span class="signature-step__dot"></span>signed 14:02</div>
           </div>
           <div class="signature-step signature-step--active" id="step2">
-            <div class="signature-step__num">2 · PHA</div>
-            <div class="signature-step__role">Dr. Karim</div>
+            <div class="signature-step__num">2 · citizen</div>
+            <div class="signature-step__role">Anjali</div>
             <div class="signature-step__status" id="step2status">
               <span class="signature-step__dot"></span>
-              <span id="step2text">Awaiting your tap</span>
+              <span id="step2text">Awaiting citizen ack</span>
             </div>
           </div>
           <div class="signature-step signature-step--pending" id="step3">
-            <div class="signature-step__num">3 · vendor</div>
-            <div class="signature-step__role">Acme Sensors</div>
-            <div class="signature-step__status" id="step3status">
-              <span class="signature-step__dot"></span>
-              <span id="step3text">Awaiting your tap</span>
-            </div>
-          </div>
-          <div class="signature-step signature-step--pending" id="step4">
-            <div class="signature-step__num">4 · broadcast</div>
+            <div class="signature-step__num">3 · broadcast</div>
             <div class="signature-step__role">All channels</div>
             <div class="signature-step__status">
               <span class="signature-step__dot"></span>
-              <span id="step4text">Pending</span>
+              <span id="step3text">Auto on Anjali ack</span>
             </div>
           </div>
         </div>
 
         <div class="two-tap">
-          <button class="two-tap__btn" type="button" id="tap1" data-tap="pha">
+          <button class="two-tap__btn" type="button" id="tap1">
             <span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 1</span>
-            <span>PHA countersign</span>
+            <span>Send ack request to Anjali</span>
           </button>
-          <button class="two-tap__btn" type="button" id="tap2" data-tap="vendor">
-            <span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 2</span>
-            <span>Vendor countersign</span>
+          <button class="two-tap__btn" type="button" id="tap2" disabled style="opacity: 0.5;">
+            <span style="display:block; font-size:9px; letter-spacing:0.1em;">Simulate Anjali ack</span>
+            <span style="font-size: 9px; opacity: 0.7;">demo only · real ack comes from her device</span>
           </button>
         </div>
 
         <div id="receipts"></div>
 
         <button class="two-tap__broadcast" type="button" id="broadcastBtn" disabled>
-          Broadcast to 312 households · 4 channels
+          Broadcast to 412 households · 4 channels
         </button>
 
         <p style="font-size: var(--font-size-xs); color: var(--fg-tertiary); margin-top: var(--space-md); line-height: var(--line-height-body);">
-          Both signatures will be appended to block #13 with hash <span class="mono" style="color: var(--fg-secondary);">0x4f8a…b21e</span>. The broadcast event will be visible on chain within 4 seconds. Recipients can verify any notice by scanning its QR code.
+          The ack request is signed at <span class="mono" style="color: var(--fg-secondary);">0x4f8a…b21e</span>. When <code>AnjaliAcknowledged</code> lands on chain, <code>PublicNoticeIssued</code> fires automatically within 4 seconds. Recipients can verify any notice by scanning its QR code.
         </p>
       </div>
 
@@ -419,7 +399,10 @@
 
   <script src="../nav.js"></script>
   <script>
-    // ── T3 issuance modal: two-tap dual-sig pattern
+    // ── T3 issuance modal: citizen-ack handoff
+    // Tap 1 = send ack request to Anjali → step 2 shows "awaiting"
+    // Tap 2 = demo simulate Anjali's two-tap ack → AnjaliAcknowledged lands
+    // Then step 3 (broadcast) arms automatically → PublicNoticeIssued fires
     (function () {
       var openBtn = document.getElementById('openIssuanceBtn');
       var modal = document.getElementById('issuanceModal');
@@ -430,63 +413,63 @@
       var receipts = document.getElementById('receipts');
       var step2 = document.getElementById('step2');
       var step3 = document.getElementById('step3');
-      var step4 = document.getElementById('step4');
       var step2text = document.getElementById('step2text');
       var step3text = document.getElementById('step3text');
-      var step4text = document.getElementById('step4text');
       if (!openBtn || !modal) return;
 
-      var armed = { pha: false, vendor: false };
+      var state = 'idle'; // idle → requested → acked → broadcast-ready
 
-      function update() {
-        if (armed.pha) {
+      function setState(next) {
+        state = next;
+
+        if (state === 'idle') {
+          tap1.disabled = false;
+          tap1.classList.remove('is-armed', 'is-done');
+          tap1.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 1</span><span>Send ack request to Anjali</span>';
+          tap2.disabled = true;
+          tap2.style.opacity = '0.5';
+          tap2.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Simulate Anjali ack</span><span style="font-size: 9px; opacity: 0.7;">demo only · real ack comes from her device</span>';
+          step2.classList.remove('signature-step--done');
+          step2.classList.add('signature-step--active');
+          step3.classList.remove('signature-step--active');
+          step3.classList.add('signature-step--pending');
+          step2text.textContent = 'Awaiting citizen ack';
+          step3text.textContent = 'Auto on Anjali ack';
+          broadcastBtn.classList.remove('is-ready');
+          broadcastBtn.disabled = true;
+          receipts.innerHTML = '';
+        }
+        if (state === 'requested') {
           tap1.classList.remove('is-armed');
           tap1.classList.add('is-done');
           tap1.disabled = true;
-          tap1.textContent = 'PHA countersign · ✓';
-          step2.classList.remove('signature-step--active');
-          step2.classList.add('signature-step--done');
-          step2text.textContent = 'PHA · sig 0xa3…19f';
-        } else {
-          tap1.classList.add('is-armed');
+          tap1.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Sent</span><span>✓ Ack request sent</span>';
+          tap2.disabled = false;
+          tap2.style.opacity = '1';
+          step2text.textContent = 'awaiting Anjali…';
+          addReceipt('AckRequestSent');
         }
-        if (armed.vendor) {
+        if (state === 'acked') {
           tap2.classList.remove('is-armed');
           tap2.classList.add('is-done');
           tap2.disabled = true;
-          tap2.textContent = 'Vendor countersign · ✓';
+          tap2.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Anjali</span><span>✓ AnjaliAcknowledged · 0x4d…c2e</span>';
+          step2.classList.remove('signature-step--active');
+          step2.classList.add('signature-step--done');
+          step2text.textContent = 'Anjali · sig 0x4d…c2e';
           step3.classList.remove('signature-step--pending');
-          step3.classList.add('signature-step--done');
-          step3text.textContent = 'Vendor · sig 0xb7…4cd';
-        } else {
-          tap2.classList.add('is-armed');
-        }
-        if (armed.pha && armed.vendor) {
-          step4.classList.remove('signature-step--pending');
-          step4.classList.add('signature-step--active');
-          step4text.textContent = 'Ready';
+          step3.classList.add('signature-step--active');
+          step3text.textContent = 'PublicNoticeIssued ready · 4 channels';
           broadcastBtn.classList.add('is-ready');
           broadcastBtn.disabled = false;
+          addReceipt('AnjaliAcknowledged');
         }
       }
 
-      function openModal() { modal.removeAttribute('hidden'); }
+      function openModal() { modal.removeAttribute('hidden'); setState('idle'); }
       function closeModal() {
         modal.setAttribute('hidden', '');
-        // reset for re-open
-        armed = { pha: false, vendor: false };
-        tap1.classList.remove('is-armed','is-done'); tap1.disabled = false;
-        tap1.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 1</span><span>PHA countersign</span>';
-        tap2.classList.remove('is-armed','is-done'); tap2.disabled = false;
-        tap2.innerHTML = '<span style="display:block; font-size:9px; letter-spacing:0.1em;">Tap 2</span><span>Vendor countersign</span>';
-        step2.classList.remove('signature-step--done'); step2.classList.add('signature-step--active');
-        step3.classList.remove('signature-step--done'); step3.classList.add('signature-step--pending');
-        step4.classList.remove('signature-step--active'); step4.classList.add('signature-step--pending');
-        step2text.textContent = 'Awaiting your tap';
-        step3text.textContent = 'Awaiting your tap';
-        step4text.textContent = 'Pending';
-        broadcastBtn.classList.remove('is-ready'); broadcastBtn.disabled = true;
-        receipts.innerHTML = '';
+        setState('idle');
       }
 
       function addReceipt(which) {
@@ -494,7 +477,7 @@
         d.className = 'tap-receipt';
         var now = new Date();
         var ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
-        d.textContent = which + ' countersignature appended to block #13 at ' + ts;
+        d.textContent = which + ' · block #13 at ' + ts;
         receipts.appendChild(d);
       }
 
@@ -505,25 +488,22 @@
       });
 
       tap1.addEventListener('click', function () {
-        if (armed.pha) return;
-        armed.pha = true;
-        addReceipt('PHA');
-        update();
+        if (state !== 'idle') return;
+        setState('requested');
       });
       tap2.addEventListener('click', function () {
-        if (armed.vendor) return;
-        armed.vendor = true;
-        addReceipt('Vendor');
-        update();
+        if (state !== 'requested') return;
+        setState('acked');
       });
       broadcastBtn.addEventListener('click', function () {
-        if (!armed.pha || !armed.vendor) return;
+        if (state !== 'acked') return;
         broadcastBtn.textContent = 'Broadcasting…';
         broadcastBtn.disabled = true;
         setTimeout(function () {
-          broadcastBtn.textContent = '✓ Broadcast · block #13 sealed';
+          broadcastBtn.textContent = '✓ Broadcast · block #13 sealed · PublicNoticeIssued';
           broadcastBtn.style.background = 'var(--success)';
           broadcastBtn.style.borderColor = 'var(--success)';
+          addReceipt('PublicNoticeIssued');
         }, 800);
       });
 
