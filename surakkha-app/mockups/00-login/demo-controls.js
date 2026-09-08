@@ -578,4 +578,61 @@
 
   // Initial state refresh on load
   updateChainMeta();
+
+  // ─────────────────────────────────────────────────────────────────
+  // Sim widget (floating demo control panel)
+  // ─────────────────────────────────────────────────────────────────
+
+  (function () {
+    var fab = document.getElementById('simFab');
+    var panel = document.getElementById('simPanel');
+    if (!fab || !panel) return;
+
+    function setOpen(open) {
+      if (open) { panel.removeAttribute('hidden'); fab.setAttribute('hidden', ''); }
+      else      { panel.setAttribute('hidden', ''); fab.removeAttribute('hidden'); }
+    }
+
+    document.querySelectorAll('[data-action="sim-toggle"]').forEach(function (el) {
+      el.addEventListener('click', function (e) { e.preventDefault(); setOpen(panel.hasAttribute('hidden')); });
+    });
+
+    // Map sim triggers to existing demo-chip actions where possible
+    var SIM_MAP = {
+      'tampering':    { chipAction: 'tamper', label: 'Tamper fired — block #5 corrupted' },
+      'reset-chain':  { chipAction: 'reset',  label: 'Reset fired — chain reseeded' },
+    };
+
+    panel.querySelectorAll('.sim-trigger').forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        e.preventDefault();
+        var on = t.classList.toggle('is-on');
+        var sim = t.dataset.sim;
+
+        if (!on) {
+          toast({ kind: 'info', icon: '·', title: sim + ' cleared', meta: 'state returned to normal' });
+          return;
+        }
+
+        // Map to existing demo chip where applicable
+        var mapping = SIM_MAP[sim];
+        if (mapping) {
+          var chip = document.querySelector('.demo-chip[data-action="' + mapping.chipAction + '"]');
+          if (chip) {
+            chip.click();  // re-uses confirm modal + toast
+            return;
+          }
+        }
+
+        // Visual-only sim triggers for Phase 1 (would drive MSW in production)
+        var label = t.querySelector('span:last-child').textContent;
+        toast({
+          kind: 'warning',
+          icon: '◐',
+          title: label + ' — simulated',
+          meta: 'visual state only · MSW wiring deferred',
+        });
+      });
+    });
+  })();
 })();

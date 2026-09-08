@@ -373,6 +373,112 @@
     gap: var(--space-md);
   }
 
+  /* ── Simulation control widget (demo only) ──────────────── */
+  .sim-panel {
+    position: fixed;
+    bottom: var(--space-md);
+    left: var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-modal);
+    z-index: 100;
+    min-width: 280px;
+  }
+  .sim-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sim-panel__title {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0;
+  }
+  .sim-panel__close {
+    background: transparent;
+    border: none;
+    color: var(--fg-tertiary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    padding: 0;
+    line-height: 1;
+  }
+  .sim-panel__close:hover { color: var(--fg-default); }
+  .sim-panel__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .sim-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    background: var(--bg-base);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-xs);
+    color: var(--fg-default);
+    text-align: left;
+    width: 100%;
+    transition: all 120ms ease-out;
+  }
+  .sim-trigger:hover {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .sim-trigger:hover { background: var(--brand-200); }
+  .sim-trigger.is-on {
+    border-color: var(--warning);
+    background: var(--warning-bg);
+    color: var(--warning);
+  }
+  .sim-trigger__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--fg-tertiary);
+    flex-shrink: 0;
+  }
+  .sim-trigger.is-on .sim-trigger__dot {
+    background: var(--warning);
+    box-shadow: 0 0 0 3px var(--warning-bg);
+  }
+  .sim-fab {
+    position: fixed;
+    bottom: var(--space-md);
+    left: var(--space-md);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    z-index: 99;
+    box-shadow: var(--shadow-modal);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+  .sim-fab__dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success-bg);
+  }
+
   /* ── Theme toggle ──────────────────────────────────────────── */
   .theme-toggle {
     position: fixed;
@@ -482,6 +588,44 @@
       </div>
     </main>
 
+  </div>
+
+  <!-- ── Simulation control widget (demo only) ── -->
+  <button class="sim-fab" data-action="sim-toggle" id="simFab">
+    <span class="sim-fab__dot"></span>
+    <span>sim controls</span>
+  </button>
+  <div class="sim-panel" id="simPanel" hidden>
+    <div class="sim-panel__head">
+      <h3 class="sim-panel__title">simulation controls</h3>
+      <button class="sim-panel__close" data-action="sim-toggle" aria-label="Close">✕</button>
+    </div>
+    <div class="sim-panel__body">
+      <button class="sim-trigger" data-sim="network-lag">
+        <span class="sim-trigger__dot"></span>
+        <span>Network lag · 3s slow</span>
+      </button>
+      <button class="sim-trigger" data-sim="chain-stale">
+        <span class="sim-trigger__dot"></span>
+        <span>Chain stale · 5min old</span>
+      </button>
+      <button class="sim-trigger" data-sim="anjali-pending">
+        <span class="sim-trigger__dot"></span>
+        <span>Anjali ack pending</span>
+      </button>
+      <button class="sim-trigger" data-sim="sensor-offline">
+        <span class="sim-trigger__dot"></span>
+        <span>Sensor offline · w7-ph-04</span>
+      </button>
+      <button class="sim-trigger" data-sim="tampering">
+        <span class="sim-trigger__dot"></span>
+        <span>Tampering flag · injection</span>
+      </button>
+      <button class="sim-trigger" data-sim="reset-chain">
+        <span class="sim-trigger__dot"></span>
+        <span>Reset chain · reseed</span>
+      </button>
+    </div>
   </div>
 
   <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">

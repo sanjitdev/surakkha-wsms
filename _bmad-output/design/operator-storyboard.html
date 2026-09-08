@@ -1,0 +1,2285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Operator storyboard (Priya's day)</title>
+<link rel="stylesheet" href="../../surakkha-app/mockups/theme.css">
+<style>
+  /* ════════════════════════════════════════════════════════════════════
+     Storyboard shell — left rail with stepper, right = current step's
+     inline mockup + narrative panel. Uses ONLY locked dim 1-4 tokens.
+     ════════════════════════════════════════════════════════════════════ */
+
+  .sb-shell {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    min-height: 100vh;
+  }
+  @media (max-width: 1024px) {
+    .sb-shell { grid-template-columns: 1fr; }
+  }
+
+  /* ── Left rail (stepper) ─────────────────────────────────────── */
+  .sb-rail {
+    background: var(--bg-surface);
+    border-right: 1px solid var(--border-subtle);
+    padding: var(--space-lg);
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+  .sb-rail__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-xs);
+    letter-spacing: -0.01em;
+  }
+  .sb-rail__sub {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    margin: 0 0 var(--space-lg);
+  }
+  .sb-rail__quote {
+    background: var(--bg-base);
+    border-left: 3px solid var(--brand-500);
+    padding: var(--space-sm) var(--space-md);
+    margin: 0 0 var(--space-lg);
+    font-style: italic;
+    color: var(--fg-secondary);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-body);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .sb-step-list {
+    list-style: none;
+    margin: 0 0 var(--space-lg);
+    padding: 0;
+  }
+  .sb-step {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: var(--space-sm);
+    padding: var(--space-md) 0;
+    border-top: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: background-color 120ms ease-out;
+    margin: 0 calc(var(--space-md) * -1);
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+  .sb-step:first-child { border-top: none; }
+  .sb-step:hover { background: var(--bg-subtle); }
+  .sb-step.is-active { background: var(--brand-100); }
+  [data-theme="dark"] .sb-step.is-active { background: var(--brand-200); }
+  .sb-step__num {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    width: 28px; height: 28px;
+    border: 1px solid var(--border-default);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-surface);
+  }
+  .sb-step.is-active .sb-step__num {
+    background: var(--brand-500);
+    color: white;
+    border-color: var(--brand-500);
+  }
+  .sb-step__head {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    margin: 0 0 2px;
+    line-height: 1.3;
+  }
+  .sb-step__chain {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--brand-500);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+  .sb-step__chain--ghost {
+    color: var(--fg-tertiary);
+  }
+
+  .sb-progress {
+    height: 4px;
+    background: var(--bg-subtle);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: var(--space-sm);
+  }
+  .sb-progress__fill {
+    height: 100%;
+    background: var(--brand-500);
+    transition: width 240ms ease-out;
+  }
+
+  /* ── Main area ─────────────────────────────────────────────── */
+  .sb-main {
+    padding: var(--space-xl);
+    background: var(--bg-base);
+  }
+  .sb-step-card {
+    display: none;
+  }
+  .sb-step-card.is-active { display: block; }
+
+  .sb-step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+  .sb-step-counter {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 4px;
+  }
+  .sb-step-title {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .sb-step-time {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+  }
+
+  .sb-narrative {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .sb-narrative p {
+    margin: 0 0 var(--space-md);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-body);
+    color: var(--fg-default);
+  }
+  .sb-narrative p:last-child { margin-bottom: 0; }
+  .sb-narrative .actor {
+    font-weight: var(--font-weight-semibold);
+    color: var(--brand-600);
+  }
+  [data-theme="dark"] .sb-narrative .actor { color: var(--brand-400); }
+  .sb-narrative code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    background: var(--brand-100);
+    color: var(--brand-500);
+    padding: 1px var(--space-xs);
+    border-radius: var(--radius-xs);
+  }
+  [data-theme="dark"] .sb-narrative code {
+    background: var(--brand-200);
+  }
+
+  .sb-meta {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-subtle);
+  }
+  @media (max-width: 720px) {
+    .sb-meta { grid-template-columns: 1fr; }
+  }
+  .sb-meta__cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sb-meta__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .sb-meta__val {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    font-weight: var(--font-weight-medium);
+  }
+  .sb-meta__val--accent {
+    color: var(--brand-500);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+  }
+
+  /* ── Mini mockup frame (the visual artifact) ──────────────── */
+  .sb-frame {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-modal);
+    margin-bottom: var(--space-lg);
+  }
+  .sb-frame__chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    background: var(--bg-subtle);
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .sb-frame__dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--fg-tertiary); opacity: 0.4;
+  }
+  .sb-frame__dot--red    { background: var(--danger);  opacity: 1; }
+  .sb-frame__dot--amber  { background: var(--warning); opacity: 1; }
+  .sb-frame__dot--green  { background: var(--success); opacity: 1; }
+  .sb-frame__url {
+    margin-left: var(--space-md);
+    color: var(--fg-tertiary);
+  }
+  .sb-frame__body {
+    padding: var(--space-lg);
+    background: var(--bg-base);
+    min-height: 480px;
+  }
+
+  /* ── Nav controls (prev / next) ───────────────────────────── */
+  .sb-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .sb-nav__btn {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    cursor: pointer;
+    transition: all 120ms ease-out;
+  }
+  .sb-nav__btn:hover:not(:disabled) {
+    border-color: var(--brand-500);
+    color: var(--brand-500);
+  }
+  .sb-nav__btn:disabled {
+    color: var(--fg-disabled);
+    cursor: not-allowed;
+  }
+  .sb-nav__btn--primary {
+    background: var(--brand-500);
+    color: white;
+    border-color: var(--brand-500);
+  }
+  .sb-nav__btn--primary:hover:not(:disabled) {
+    background: var(--brand-600);
+    border-color: var(--brand-600);
+    color: white;
+  }
+  .sb-nav__pos {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+
+  .sb-exit {
+    text-align: center;
+    margin-top: var(--space-xl);
+  }
+  .sb-exit a {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    text-decoration: none;
+  }
+  .sb-exit a:hover { color: var(--brand-500); }
+
+  /* ── Simulation control widget (floating demo panel) ─────── */
+  .sim-panel {
+    position: fixed;
+    bottom: var(--space-lg);
+    left: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    box-shadow: var(--shadow-modal);
+    z-index: 100;
+    min-width: 280px;
+    font-family: var(--font-family-sans);
+  }
+  .sim-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .sim-panel__title {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0;
+  }
+  .sim-panel__close {
+    background: transparent;
+    border: none;
+    color: var(--fg-tertiary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    padding: 0;
+    line-height: 1;
+  }
+  .sim-panel__close:hover { color: var(--fg-default); }
+  .sim-panel__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .sim-trigger {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    background: var(--bg-base);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: var(--font-size-xs);
+    color: var(--fg-default);
+    text-align: left;
+    width: 100%;
+    transition: all 120ms ease-out;
+  }
+  .sim-trigger:hover {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .sim-trigger:hover { background: var(--brand-200); }
+  .sim-trigger.is-on {
+    border-color: var(--warning);
+    background: var(--warning-bg);
+    color: var(--warning);
+  }
+  .sim-trigger__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--fg-tertiary);
+    flex-shrink: 0;
+  }
+  .sim-trigger.is-on .sim-trigger__dot {
+    background: var(--warning);
+    box-shadow: 0 0 0 3px var(--warning-bg);
+  }
+  .sim-fab {
+    position: fixed;
+    bottom: var(--space-lg);
+    left: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    z-index: 99;
+    box-shadow: var(--shadow-modal);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+  .sim-fab__dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success-bg);
+  }
+
+  /* ── Rejection overlay (Priya rejects the fix) ─────────────── */
+  .mm-reject-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(14, 16, 19, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 50;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+  }
+  .mm-reject-overlay.is-on { display: flex; }
+  .mm-reject-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    width: 90%;
+    max-width: 420px;
+    box-shadow: var(--shadow-modal);
+  }
+  .mm-reject-card h4 {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-xs);
+  }
+  .mm-reject-card__sub {
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    margin: 0 0 var(--space-md);
+  }
+  .mm-reject-reasons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+  }
+  .mm-reject-reason {
+    padding: var(--space-sm);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    background: var(--bg-surface);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    color: var(--fg-default);
+  }
+  .mm-reject-reason:hover {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .mm-reject-reason:hover { background: var(--brand-200); }
+  .mm-reject-reason.is-on {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+    color: var(--brand-600);
+    font-weight: var(--font-weight-semibold);
+  }
+  [data-theme="dark"] .mm-reject-reason.is-on {
+    background: var(--brand-200);
+    color: var(--brand-400);
+  }
+  .mm-reject-actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-end;
+  }
+  .mm-monitor-grid { position: relative; }
+
+  /* ── Theme toggle ─────────────────────────────────────────── */
+  .theme-toggle {
+    position: fixed;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: var(--shadow-modal);
+  }
+
+  /* ════════════════════════════════════════════════════════════════
+     Mini mockup content — inline, simplified versions of the real
+     Priya surfaces. Same tokens, same visual language.
+     ════════════════════════════════════════════════════════════════ */
+
+  /* Login */
+  .mm-login {
+    max-width: 520px;
+    margin: 40px auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-modal);
+  }
+  .mm-login__brand {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.16em;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .mm-login__tagline {
+    text-align: center;
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    margin-bottom: var(--space-lg);
+  }
+  .mm-login__divider {
+    border: none;
+    border-top: 1px solid var(--border-subtle);
+    margin: 0 0 var(--space-lg);
+  }
+  .mm-login__label {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin-bottom: var(--space-md);
+    text-align: center;
+  }
+  .mm-persona-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+  }
+  .mm-persona {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: var(--bg-surface);
+  }
+  .mm-persona.is-selected {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .mm-persona.is-selected { background: var(--brand-200); }
+  .mm-persona__radio {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mm-persona.is-selected .mm-persona__radio {
+    border-color: var(--brand-500);
+  }
+  .mm-persona.is-selected .mm-persona__radio::after {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--brand-500);
+    border-radius: 50%;
+  }
+  .mm-persona__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    flex: 1;
+  }
+  .mm-persona__role {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .mm-btn-primary {
+    width: 100%;
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+  }
+
+  /* Dashboard */
+  .mm-app {
+    background: var(--bg-surface);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--border-subtle);
+  }
+  .mm-top-chrome {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .mm-top-chrome__persona {
+    color: var(--fg-default);
+    font-weight: var(--font-weight-medium);
+  }
+  .mm-pulse {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--success);
+    border-radius: 50%;
+    margin-right: 6px;
+    box-shadow: 0 0 0 0 var(--success);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(30,110,71,0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(30,110,71,0); }
+    100% { box-shadow: 0 0 0 0 rgba(30,110,71,0); }
+  }
+  .mm-page-head {
+    padding: var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .mm-page-head h2 {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .mm-page-head .sub {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .mm-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    padding: var(--space-lg);
+  }
+  .mm-kpi {
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    background: var(--bg-surface);
+  }
+  .mm-kpi__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-xs);
+  }
+  .mm-kpi__value {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .mm-kpi__delta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-xs);
+  }
+  .mm-kpi__delta--up   { color: var(--danger); }
+  .mm-kpi__delta--down { color: var(--success); }
+  .mm-kpi__spark {
+    margin-top: var(--space-sm);
+    height: 24px;
+    background:
+      linear-gradient(90deg, var(--brand-100) 0%, var(--brand-100) 100%);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mm-kpi__spark::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'><polyline points='0,18 12,16 24,14 36,15 48,8 60,12 72,6 84,10 96,4 100,3' fill='none' stroke='%23144A78' stroke-width='1.5'/></svg>") no-repeat center / 100% 100%;
+  }
+  .mm-kpi__spark--alert::after {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 24' preserveAspectRatio='none'><polyline points='0,20 12,18 24,17 36,15 48,14 60,12 72,8 84,5 96,3 100,2' fill='none' stroke='%238E2E1E' stroke-width='1.5'/></svg>");
+  }
+
+  .mm-band-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    padding: 0 var(--space-lg) var(--space-lg);
+  }
+  .mm-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .mm-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-sm);
+  }
+  .mm-card__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .mm-card__meta {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .mm-chart-ts {
+    height: 80px;
+    background:
+      linear-gradient(to top, var(--brand-100), transparent 70%);
+    border-radius: 2px;
+    position: relative;
+  }
+  .mm-chart-ts svg { display: block; width: 100%; height: 100%; }
+  .mm-donut {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+  }
+  .mm-donut svg { flex-shrink: 0; }
+  .mm-donut__legend {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: var(--font-size-xs);
+  }
+  .mm-donut__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .mm-donut__swatch {
+    width: 10px; height: 10px; border-radius: 2px;
+  }
+
+  /* Inbox list */
+  .mm-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-subtle);
+  }
+  .mm-toolbar__count {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .mm-toolbar__sort {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .mm-rows {
+    padding: var(--space-md) var(--space-lg);
+  }
+  .mm-row {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-sm);
+    background: var(--bg-surface);
+    cursor: pointer;
+    align-items: center;
+  }
+  .mm-row:hover { border-color: var(--brand-500); }
+  .mm-row.is-picked {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .mm-row.is-picked { background: var(--brand-200); }
+  .mm-tier {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    text-align: center;
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-xs);
+    letter-spacing: 0.04em;
+  }
+  .mm-tier--t3 { background: var(--danger-bg); color: var(--danger); }
+  .mm-tier--t2 { background: var(--warning-bg); color: var(--warning); }
+  .mm-tier--t1 { background: var(--info-bg); color: var(--info); }
+  .mm-row__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    margin-bottom: 2px;
+  }
+  .mm-row__meta {
+    display: flex;
+    gap: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .mm-row__source {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .mm-confidence {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .mm-confidence__bar {
+    width: 80px;
+    height: 6px;
+    background: var(--bg-inset);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .mm-confidence__fill {
+    height: 100%;
+    background: var(--success);
+  }
+  .mm-confidence__val {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    min-width: 36px;
+  }
+
+  /* Verify flow */
+  .mm-verify-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--space-lg);
+  }
+  .mm-photo-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .mm-photo {
+    aspect-ratio: 4/3;
+    background: var(--warning-bg);
+    background-image:
+      linear-gradient(45deg, var(--warning-bg) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--warning-bg) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--warning-bg) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--warning-bg) 75%);
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mm-photo__strip {
+    width: 70%;
+    height: 35%;
+    background: var(--warning);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .mm-photo__tag {
+    position: absolute;
+    top: var(--space-sm);
+    left: var(--space-sm);
+    background: rgba(0,0,0,0.7);
+    color: white;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    padding: 2px var(--space-xs);
+    border-radius: 2px;
+  }
+  .mm-photo__caption {
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .mm-cv {
+    padding: var(--space-lg);
+  }
+  .mm-cv__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-xs);
+  }
+  .mm-cv__reading {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+  }
+  .mm-cv__confidence {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--success);
+    margin-bottom: var(--space-lg);
+  }
+  .mm-swatches {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+  }
+  .mm-swatch {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-xs);
+    border: 2px solid transparent;
+    cursor: pointer;
+  }
+  .mm-swatch.is-cv-pick {
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 1px var(--brand-500);
+  }
+  .mm-cv__btns {
+    display: flex;
+    gap: var(--space-md);
+  }
+  .mm-btn {
+    padding: var(--space-sm) var(--space-lg);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    border: 1px solid var(--border-default);
+    background: var(--bg-surface);
+    color: var(--fg-default);
+  }
+  .mm-btn--success {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+  }
+  .mm-btn--danger {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+  }
+
+  /* Inbox detail (playbook) */
+  .mm-pb-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    padding: var(--space-lg);
+  }
+  .mm-pb-left, .mm-pb-right {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .mm-pb-left h4, .mm-pb-right h4 {
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-tertiary);
+    margin: 0 0 var(--space-md);
+  }
+  .mm-source-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px dashed var(--border-subtle);
+    font-size: var(--font-size-sm);
+  }
+  .mm-source-row:last-child { border-bottom: none; }
+  .mm-source-row__k {
+    color: var(--fg-secondary);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+  }
+  .mm-source-row__v {
+    font-weight: var(--font-weight-medium);
+  }
+  .mm-pb-step {
+    display: grid;
+    grid-template-columns: 24px 1fr auto;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
+    border-bottom: 1px solid var(--border-subtle);
+    align-items: center;
+  }
+  .mm-pb-step:last-child { border-bottom: none; }
+  .mm-pb-step__num {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--bg-inset);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mm-pb-step.is-done .mm-pb-step__num {
+    background: var(--success);
+    color: white;
+  }
+  .mm-pb-step.is-active .mm-pb-step__num {
+    background: var(--brand-500);
+    color: white;
+  }
+  .mm-pb-step__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 2px;
+  }
+  .mm-pb-step__chain {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .mm-pb-step__chain.is-fired { color: var(--success); }
+  .mm-btn--sm {
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--font-size-xs);
+  }
+
+  /* Assign technician (NEW surface) */
+  .mm-assign-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+  }
+  .mm-tech-table {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .mm-tech-table__head {
+    display: grid;
+    grid-template-columns: 1fr 100px 100px 80px;
+    gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .mm-tech {
+    display: grid;
+    grid-template-columns: 1fr 100px 100px 80px;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    align-items: center;
+    cursor: pointer;
+    background: var(--bg-surface);
+  }
+  .mm-tech:last-child { border-bottom: none; }
+  .mm-tech:hover { background: var(--bg-subtle); }
+  .mm-tech.is-picked {
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .mm-tech.is-picked { background: var(--brand-200); }
+  .mm-tech__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: 2px;
+  }
+  .mm-tech__skills {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .mm-tech__status {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+  }
+  .mm-tech__status--free { color: var(--success); }
+  .mm-tech__status--busy { color: var(--warning); }
+  .mm-tech__dist {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .mm-tech__radio {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--border-strong);
+    border-radius: 50%;
+    margin-left: auto;
+  }
+  .mm-tech.is-picked .mm-tech__radio {
+    border-color: var(--brand-500);
+    background: var(--brand-500);
+    box-shadow: inset 0 0 0 3px var(--bg-surface);
+  }
+  .mm-assign-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .mm-assign-panel h4 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-md);
+  }
+  .mm-field {
+    margin-bottom: var(--space-md);
+  }
+  .mm-field__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-xs);
+    display: block;
+  }
+  .mm-field__val {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    padding: var(--space-sm);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-family-mono);
+  }
+  .mm-priority {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--space-xs);
+  }
+  .mm-priority__opt {
+    text-align: center;
+    padding: var(--space-sm);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    background: var(--bg-surface);
+  }
+  .mm-priority__opt.is-on {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+    color: var(--brand-600);
+    font-weight: var(--font-weight-semibold);
+  }
+  [data-theme="dark"] .mm-priority__opt.is-on {
+    background: var(--brand-200);
+    color: var(--brand-400);
+  }
+  .mm-assign-cta {
+    width: 100%;
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    margin-top: var(--space-md);
+  }
+  .mm-assign-cta:disabled {
+    background: var(--fg-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Monitor resolution (NEW) */
+  .mm-monitor-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+  }
+  .mm-incident-header {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mm-incident-header__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .mm-incident-header__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .mm-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .mm-status-pill--enroute {
+    background: var(--info-bg);
+    color: var(--info);
+  }
+  .mm-status-pill--onsite {
+    background: var(--warning-bg);
+    color: var(--warning);
+  }
+  .mm-status-pill--resolved {
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  .mm-status-pill__dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .mm-timeline {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .mm-tl-item {
+    display: grid;
+    grid-template-columns: 80px 24px 1fr;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    align-items: center;
+  }
+  .mm-tl-item + .mm-tl-item {
+    border-top: 1px dashed var(--border-subtle);
+  }
+  .mm-tl-time {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .mm-tl-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    margin: 0 auto;
+    background: var(--border-default);
+  }
+  .mm-tl-dot.is-done { background: var(--success); }
+  .mm-tl-dot.is-now {
+    background: var(--warning);
+    box-shadow: 0 0 0 4px var(--warning-bg);
+  }
+  .mm-tl-text {
+    font-size: var(--font-size-sm);
+  }
+  .mm-tl-event {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--brand-500);
+    display: block;
+    margin-top: 2px;
+  }
+  .mm-resolve-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .mm-resolve-card h4 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-md);
+  }
+  .mm-photo-upload {
+    height: 120px;
+    border: 2px dashed var(--border-default);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: var(--space-xs);
+    color: var(--fg-tertiary);
+    margin-bottom: var(--space-md);
+    background: var(--bg-base);
+  }
+  .mm-photo-upload.is-uploaded {
+    border-style: solid;
+    border-color: var(--success);
+    background: var(--success-bg);
+    color: var(--success);
+  }
+  .mm-photo-upload__icon {
+    font-size: var(--font-size-xl);
+  }
+  .mm-photo-upload__hint {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+  }
+  .mm-textarea {
+    width: 100%;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    padding: var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    min-height: 80px;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    resize: vertical;
+  }
+</style>
+</head>
+<body>
+
+<div class="sb-shell">
+
+  <!-- ═══════════════════ LEFT RAIL ═══════════════════ -->
+  <aside class="sb-rail">
+    <h1 class="sb-rail__title">Operator Storyboard</h1>
+    <p class="sb-rail__sub">Priya's day · Ward 7 chlorination spike</p>
+    <p class="sb-rail__quote">"I resolve incidents; I pass shift cleanly."</p>
+
+    <ol class="sb-step-list" id="stepList">
+      <!-- populated by JS -->
+    </ol>
+
+    <div class="sb-progress">
+      <div class="sb-progress__fill" id="progressFill" style="width: 16%;"></div>
+    </div>
+    <p style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); margin-top: var(--space-sm); margin-bottom: 0;">
+      <span id="progressLabel">Step 1 of 6</span>
+    </p>
+  </aside>
+
+  <!-- ═══════════════════ MAIN ═══════════════════ -->
+  <main class="sb-main">
+
+    <!-- ── STEP 1: Login → Dashboard ── -->
+    <article class="sb-step-card is-active" data-step="1">
+      <header class="sb-step-header">
+        <div>
+          <p class="sb-step-counter">STEP 1 of 6</p>
+          <h2 class="sb-step-title">Shift handover — log in, land on dashboard</h2>
+        </div>
+        <span class="sb-step-time">09:00</span>
+      </header>
+
+      <div class="sb-narrative">
+        <p><span class="actor">Priya</span> opens the app. The 3-persona picker is the only auth in Phase 1. She picks <code>utility_operator</code> and continues. The mock scaffold hashes a session ID and fires <code>OperatorAuthenticated</code>.</p>
+        <p>She lands on the dashboard. The handover brief in the top-left says: <em>"3 open threads overnight, 1 deviation pending review."</em> Her eyes go straight to the KPI tiles — pH is amber, active incidents is at 2.</p>
+      </div>
+
+      <div class="sb-frame">
+        <div class="sb-frame__chrome">
+          <span class="sb-frame__dot sb-frame__dot--green"></span>
+          <span class="sb-frame__dot sb-frame__dot--amber"></span>
+          <span class="sb-frame__dot sb-frame__dot--red"></span>
+          <span class="sb-frame__url">surakkha / dashboard.html</span>
+        </div>
+        <div class="sb-frame__body">
+          <div class="mm-app">
+            <div class="mm-top-chrome">
+              <div><span class="mm-pulse"></span>chain fresh · 0.3s ago</div>
+              <div><span class="mm-top-chrome__persona">Priya · utility_operator</span></div>
+            </div>
+            <div class="mm-page-head">
+              <div>
+                <h2>Ward operations · morning brief</h2>
+                <div class="sub">handed over from last shift · 2 open threads</div>
+              </div>
+              <div class="sub">Tue 09:00 · ward 7 hot</div>
+            </div>
+            <div class="mm-kpi-row">
+              <div class="mm-kpi">
+                <div class="mm-kpi__label">Active incidents</div>
+                <div class="mm-kpi__value">2</div>
+                <div class="mm-kpi__delta mm-kpi__delta--up">▲ +1 from 8h</div>
+                <div class="mm-kpi__spark"></div>
+              </div>
+              <div class="mm-kpi">
+                <div class="mm-kpi__label">pH drift</div>
+                <div class="mm-kpi__value">6.2</div>
+                <div class="mm-kpi__delta mm-kpi__delta--up">▲ anomaly ward 7</div>
+                <div class="mm-kpi__spark mm-kpi__spark--alert"></div>
+              </div>
+              <div class="mm-kpi">
+                <div class="mm-kpi__label">Turbidity</div>
+                <div class="mm-kpi__value">1.4 NTU</div>
+                <div class="mm-kpi__delta">— within band</div>
+                <div class="mm-kpi__spark"></div>
+              </div>
+              <div class="mm-kpi">
+                <div class="mm-kpi__label">Response time</div>
+                <div class="mm-kpi__value">3.2 min</div>
+                <div class="mm-kpi__delta mm-kpi__delta--down">▼ -0.8 vs avg</div>
+                <div class="mm-kpi__spark"></div>
+              </div>
+            </div>
+            <div class="mm-band-row">
+              <div class="mm-card">
+                <div class="mm-card__head">
+                  <h3 class="mm-card__title">24h sensor history · Ward 7</h3>
+                  <span class="mm-card__meta">5 min sample</span>
+                </div>
+                <div class="mm-chart-ts">
+                  <svg viewBox="0 0 400 80" preserveAspectRatio="none">
+                    <line x1="0" y1="60" x2="400" y2="60" stroke="var(--band-medium)" stroke-dasharray="2 3"/>
+                    <line x1="0" y1="40" x2="400" y2="40" stroke="var(--band-medium)" stroke-dasharray="2 3"/>
+                    <line x1="0" y1="20" x2="400" y2="20" stroke="var(--band-medium)" stroke-dasharray="2 3"/>
+                    <polyline fill="none" stroke="var(--band-high)" stroke-width="1.5"
+                      points="0,55 30,52 60,50 90,48 120,47 150,45 180,42 210,40 240,36 270,30 300,18 330,12 360,8 390,22"/>
+                    <circle cx="330" cy="12" r="4" fill="var(--danger)"/>
+                    <text x="335" y="8" font-size="10" font-family="var(--font-family-mono)" fill="var(--danger)">anomaly</text>
+                  </svg>
+                </div>
+              </div>
+              <div class="mm-card">
+                <div class="mm-card__head">
+                  <h3 class="mm-card__title">Band distribution</h3>
+                  <span class="mm-card__meta">last 24h</span>
+                </div>
+                <div class="mm-donut">
+                  <svg width="80" height="80" viewBox="0 0 32 32">
+                    <circle r="16" cx="16" cy="16" fill="var(--bg-inset)"/>
+                    <circle r="16" cx="16" cy="16" fill="none" stroke="var(--band-high)" stroke-width="6"
+                      stroke-dasharray="72 100" transform="rotate(-90 16 16)"/>
+                    <circle r="16" cx="16" cy="16" fill="none" stroke="var(--band-medium)" stroke-width="6"
+                      stroke-dasharray="20 100" stroke-dashoffset="-72" transform="rotate(-90 16 16)"/>
+                    <circle r="16" cx="16" cy="16" fill="none" stroke="var(--band-low)" stroke-width="6"
+                      stroke-dasharray="8 100" stroke-dashoffset="-92" transform="rotate(-90 16 16)"/>
+                  </svg>
+                  <div class="mm-donut__legend">
+                    <div class="mm-donut__row"><span class="mm-donut__swatch" style="background:var(--band-high)"></span>In band · 72%</div>
+                    <div class="mm-donut__row"><span class="mm-donut__swatch" style="background:var(--band-medium)"></span>Caution · 20%</div>
+                    <div class="mm-donut__row"><span class="mm-donut__swatch" style="background:var(--band-low)"></span>Out · 8%</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-meta">
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Operator action</span>
+          <span class="sb-meta__val">selects persona · reads KPIs</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Chain event</span>
+          <span class="sb-meta__val--accent">OperatorAuthenticated{role:utility_operator}</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Next</span>
+          <span class="sb-meta__val">→ InboxList (click active incidents KPI)</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── STEP 2: InboxList — pick Anjali report ── -->
+    <article class="sb-step-card" data-step="2">
+      <header class="sb-step-header">
+        <div>
+          <p class="sb-step-counter">STEP 2 of 6</p>
+          <h2 class="sb-step-title">Inbox — pick Anjali's Ward 7 report</h2>
+        </div>
+        <span class="sb-step-time">09:05</span>
+      </header>
+
+      <div class="sb-narrative">
+        <p><span class="actor">Priya</span> clicks the active-incidents KPI and lands on the inbox. The list is ranked by fusion score. The top row is an Anjali citizen report on Ward 7 — chlorine smell at the school, photo of a yellow sentinel strip, fusion score <strong>0.87</strong>.</p>
+        <p>The second row is a sensor corroboration: pump-station pH dropped at the same time and place. The fusion engine has already correlated them. She picks the top row to investigate.</p>
+      </div>
+
+      <div class="sb-frame">
+        <div class="sb-frame__chrome">
+          <span class="sb-frame__dot sb-frame__dot--green"></span>
+          <span class="sb-frame__dot sb-frame__dot--amber"></span>
+          <span class="sb-frame__dot sb-frame__dot--red"></span>
+          <span class="sb-frame__url">surakkha / inbox-list.html</span>
+        </div>
+        <div class="sb-frame__body">
+          <div class="mm-app">
+            <div class="mm-top-chrome">
+              <div><span class="mm-pulse"></span>chain fresh · 0.4s ago</div>
+              <div><span class="mm-top-chrome__persona">Priya · utility_operator</span></div>
+            </div>
+            <div class="mm-page-head">
+              <div>
+                <h2>Open incidents</h2>
+                <div class="sub">ranked by fusion score · 2 unresolved</div>
+              </div>
+            </div>
+            <div class="mm-toolbar">
+              <span class="mm-toolbar__count">2 rows · all wards · last 6h</span>
+              <span class="mm-toolbar__sort">sort: fusion ↓</span>
+            </div>
+            <div class="mm-rows">
+              <div class="mm-row is-picked">
+                <span class="mm-tier mm-tier--t3">T3</span>
+                <div>
+                  <div class="mm-row__title">Ward 7 school — chlorine smell, yellow strip</div>
+                  <div class="mm-row__meta">
+                    <span>citizen + sensor</span>
+                    <span>·</span>
+                    <span>08:54</span>
+                    <span>·</span>
+                    <span>Anjali (reporter) + sensor w7-ph-04</span>
+                  </div>
+                </div>
+                <div class="mm-confidence">
+                  <div class="mm-confidence__bar"><div class="mm-confidence__fill" style="width:87%"></div></div>
+                  <span class="mm-confidence__val">0.87</span>
+                </div>
+              </div>
+              <div class="mm-row">
+                <span class="mm-tier mm-tier--t2">T2</span>
+                <div>
+                  <div class="mm-row__title">Ward 11 — turbidity creeping +0.3 NTU/h</div>
+                  <div class="mm-row__meta">
+                    <span>sensor only</span>
+                    <span>·</span>
+                    <span>08:42</span>
+                    <span>·</span>
+                    <span>sensor w11-tb-12</span>
+                  </div>
+                </div>
+                <div class="mm-confidence">
+                  <div class="mm-confidence__bar"><div class="mm-confidence__fill" style="width:62%; background: var(--warning);"></div></div>
+                  <span class="mm-confidence__val">0.62</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-meta">
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Operator action</span>
+          <span class="sb-meta__val">clicks Ward 7 row</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Chain event</span>
+          <span class="sb-meta__val--accent">— (projection read)</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Next</span>
+          <span class="sb-meta__val">→ InboxDetail (playbook view)</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── STEP 3: VerifyFlow — confirm photo authenticity ── -->
+    <article class="sb-step-card" data-step="3">
+      <header class="sb-step-header">
+        <div>
+          <p class="sb-step-counter">STEP 3 of 6</p>
+          <h2 class="sb-step-title">Verify Anjali's photo — confirm authenticity</h2>
+        </div>
+        <span class="sb-step-time">09:06</span>
+      </header>
+
+      <div class="sb-narrative">
+        <p>Priya can't trust the report yet. She opens the Verify queue and pulls up Anjali's submission. The phone CV ran the photo through a color-match model and reads <code>pH 5.8</code> — which matches a yellow strip on the canonical scale.</p>
+        <p>The CV confidence is <strong>0.91</strong> (high) so the manual swatch picker stays disabled — Priya just confirms. The verification lands as <code>SensorReadingVerified</code> on chain, attaching the photo's SHA-256 to the event envelope.</p>
+      </div>
+
+      <div class="sb-frame">
+        <div class="sb-frame__chrome">
+          <span class="sb-frame__dot sb-frame__dot--green"></span>
+          <span class="sb-frame__dot sb-frame__dot--amber"></span>
+          <span class="sb-frame__dot sb-frame__dot--red"></span>
+          <span class="sb-frame__url">surakkha / verify-flow.html</span>
+        </div>
+        <div class="sb-frame__body">
+          <div class="mm-verify-grid">
+            <div class="mm-photo-card">
+              <div class="mm-photo">
+                <span class="mm-photo__tag">Anjali · 08:54 · ward 7</span>
+                <div class="mm-photo__strip">pH STRIP<br>~5.8</div>
+              </div>
+              <div class="mm-photo__caption">
+                SHA-256: 7f3c…d9a2 · 482 KB · 4032×3024
+              </div>
+            </div>
+            <div class="mm-cv">
+              <div class="mm-cv__label">CV-computed reading</div>
+              <div class="mm-cv__reading">pH 5.8</div>
+              <div class="mm-cv__confidence">▲ confidence 0.91 (high)</div>
+
+              <div class="mm-cv__label">Closest canonical swatch</div>
+              <div class="mm-swatches">
+                <div class="mm-swatch is-cv-pick" style="background: #E8C547;" title="pH 5.8"></div>
+                <div class="mm-swatch" style="background: #D9A93B;" title="pH 5.4"></div>
+                <div class="mm-swatch" style="background: #C5892D;" title="pH 5.0"></div>
+                <div class="mm-swatch" style="background: #AC6F22;" title="pH 4.6"></div>
+                <div class="mm-swatch" style="background: #8A5A1A;" title="pH 4.2"></div>
+              </div>
+
+              <div class="mm-cv__btns">
+                <button class="mm-btn mm-btn--success">✓ Confirm match</button>
+                <button class="mm-btn">Override swatch</button>
+                <button class="mm-btn mm-btn--danger">Flag</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-meta">
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Operator action</span>
+          <span class="sb-meta__val">confirms CV reading matches swatch</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Chain event</span>
+          <span class="sb-meta__val--accent">SensorReadingVerified{report_id, photo_sha256}</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Next</span>
+          <span class="sb-meta__val">→ InboxDetail (run playbook)</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── STEP 4: InboxDetail — execute playbook ── -->
+    <article class="sb-step-card" data-step="4">
+      <header class="sb-step-header">
+        <div>
+          <p class="sb-step-counter">STEP 4 of 6</p>
+          <h2 class="sb-step-title">Run playbook — confirm with sensor, escalate</h2>
+        </div>
+        <span class="sb-step-time">09:08</span>
+      </header>
+
+      <div class="sb-narrative">
+        <p>Back in InboxDetail, the playbook panel has 4 steps. Step 1 (sensor confirmation) is already done — the corroboration was automatic. Priya hits <strong>Execute Step 2</strong>: "Confirm with secondary sensor reading." A second sensor (w7-ph-09, 200m downstream) reads pH 5.9 — confirms the anomaly. <code>PlaybookStepExecuted</code> lands.</p>
+        <p>Step 3 is the escalation to T2 (corroborated + within-citizen-impact radius). She hits Execute. <code>IncidentEscalated{from:T2, to:T3}</code> lands because the corroboration crossed the T3 threshold (school impact radius).</p>
+      </div>
+
+      <div class="sb-frame">
+        <div class="sb-frame__chrome">
+          <span class="sb-frame__dot sb-frame__dot--green"></span>
+          <span class="sb-frame__dot sb-frame__dot--amber"></span>
+          <span class="sb-frame__dot sb-frame__dot--red"></span>
+          <span class="sb-frame__url">surakkha / inbox-detail.html · evt_01HF4K…</span>
+        </div>
+        <div class="sb-frame__body">
+          <div class="mm-app">
+            <div class="mm-top-chrome">
+              <div><span class="mm-pulse"></span>chain fresh · 0.5s ago</div>
+              <div><span class="mm-top-chrome__persona">Priya · utility_operator</span></div>
+            </div>
+            <div class="mm-incident-header">
+              <div>
+                <h3 class="mm-incident-header__title">Ward 7 school — chlorination spike</h3>
+                <div class="mm-incident-header__meta">evt_01HF4K · Anjali + sensor · fusion 0.87</div>
+              </div>
+              <span class="mm-status-pill mm-status-pill--onsite">
+                <span class="mm-status-pill__dot"></span>T3 urgent
+              </span>
+            </div>
+            <div class="mm-pb-grid">
+              <div class="mm-pb-left">
+                <h4>Source attribution</h4>
+                <div class="mm-source-row">
+                  <span class="mm-source-row__k">Origin</span>
+                  <span class="mm-source-row__v">Anjali (reporter)</span>
+                </div>
+                <div class="mm-source-row">
+                  <span class="mm-source-row__k">Corroboration</span>
+                  <span class="mm-source-row__v">w7-ph-04 + w7-ph-09</span>
+                </div>
+                <div class="mm-source-row">
+                  <span class="mm-source-row__k">Reading</span>
+                  <span class="mm-source-row__v">pH 5.8 (corroborated)</span>
+                </div>
+                <div class="mm-source-row">
+                  <span class="mm-source-row__k">Radius impact</span>
+                  <span class="mm-source-row__v">school · 412 households</span>
+                </div>
+                <div class="mm-source-row">
+                  <span class="mm-source-row__k">Verified by</span>
+                  <span class="mm-source-row__v">Priya · 09:06</span>
+                </div>
+              </div>
+              <div class="mm-pb-right">
+                <h4>Playbook</h4>
+                <div class="mm-pb-step is-done">
+                  <div class="mm-pb-step__num">1</div>
+                  <div>
+                    <div class="mm-pb-step__title">Auto-corroborate from sensors</div>
+                    <span class="mm-pb-step__chain is-fired">✓ fired 08:55 · 2 sensors</span>
+                  </div>
+                  <span style="font-family: var(--font-family-mono); font-size: 10px; color: var(--success);">DONE</span>
+                </div>
+                <div class="mm-pb-step is-done">
+                  <div class="mm-pb-step__num">2</div>
+                  <div>
+                    <div class="mm-pb-step__title">Confirm with secondary sensor</div>
+                    <span class="mm-pb-step__chain is-fired">✓ PlaybookStepExecuted · 09:07</span>
+                  </div>
+                  <span style="font-family: var(--font-family-mono); font-size: 10px; color: var(--success);">DONE</span>
+                </div>
+                <div class="mm-pb-step is-active">
+                  <div class="mm-pb-step__num">3</div>
+                  <div>
+                    <div class="mm-pb-step__title">Escalate to T3 (corroborated + school impact)</div>
+                    <span class="mm-pb-step__chain">→ IncidentEscalated{to:T3}</span>
+                  </div>
+                  <button class="mm-btn mm-btn--sm mm-btn--success">Execute</button>
+                </div>
+                <div class="mm-pb-step">
+                  <div class="mm-pb-step__num">4</div>
+                  <div>
+                    <div class="mm-pb-step__title">Issue public notice (dual-sig)</div>
+                    <span class="mm-pb-step__chain">await Anjali ack</span>
+                  </div>
+                  <button class="mm-btn mm-btn--sm" disabled>Await</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-meta">
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Operator action</span>
+          <span class="sb-meta__val">executes step 2, escalates to T3</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Chain event</span>
+          <span class="sb-meta__val--accent">PlaybookStepExecuted → IncidentEscalated{to:T3}</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Next</span>
+          <span class="sb-meta__val">→ Assign technician (new surface)</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── STEP 5: Assign Technician (NEW surface) ── -->
+    <article class="sb-step-card" data-step="5">
+      <header class="sb-step-header">
+        <div>
+          <p class="sb-step-counter">STEP 5 of 6</p>
+          <h2 class="sb-step-title">Assign a technician to the incident</h2>
+        </div>
+        <span class="sb-step-time">09:09</span>
+      </header>
+
+      <div class="sb-narrative">
+        <p>Escalation alone won't fix a stuck chlorinator. Priya opens the dispatch panel — a sub-view of the incident page. The roster shows on-shift technicians with their current load, specialism, and distance to the incident ward.</p>
+        <p>She picks <strong>Rafiq</strong> (chlorination specialist, 2 active jobs, 1.2 km away) over Karim (free, but generalist — 4.8 km). Sets priority <code>P1</code>, ETA target <code>15 min</code>, attaches the playbook steps as the work order. <code>TechnicianAssigned{technician_id, priority, eta_target}</code> lands.</p>
+      </div>
+
+      <div class="sb-frame">
+        <div class="sb-frame__chrome">
+          <span class="sb-frame__dot sb-frame__dot--green"></span>
+          <span class="sb-frame__dot sb-frame__dot--amber"></span>
+          <span class="sb-frame__dot sb-frame__dot--red"></span>
+          <span class="sb-frame__url">surakkha / inbox-detail.html · assign-technician</span>
+        </div>
+        <div class="sb-frame__body">
+          <div class="mm-app">
+            <div class="mm-top-chrome">
+              <div><span class="mm-pulse"></span>chain fresh · 0.6s ago</div>
+              <div><span class="mm-top-chrome__persona">Priya · utility_operator</span></div>
+            </div>
+            <div class="mm-incident-header">
+              <div>
+                <h3 class="mm-incident-header__title">Assign technician — Ward 7 chlorination spike</h3>
+                <div class="mm-incident-header__meta">T3 urgent · 412 households · escalated 09:08</div>
+              </div>
+              <span class="mm-status-pill mm-status-pill--enroute">
+                <span class="mm-status-pill__dot"></span>unassigned
+              </span>
+            </div>
+            <div class="mm-assign-grid">
+              <div class="mm-tech-table">
+                <div class="mm-tech-table__head">
+                  <span>Technician</span>
+                  <span>Load</span>
+                  <span>Distance</span>
+                  <span>Status</span>
+                </div>
+                <div class="mm-tech">
+                  <div>
+                    <div class="mm-tech__name">Rafiq H.</div>
+                    <div class="mm-tech__skills">chlorination · 6y · bike</div>
+                  </div>
+                  <div class="mm-tech__dist">2 active</div>
+                  <div class="mm-tech__dist">1.2 km</div>
+                  <div class="mm-tech__status mm-tech__status--busy">busy</div>
+                </div>
+                <div class="mm-tech is-picked">
+                  <div>
+                    <div class="mm-tech__name">Karim M.</div>
+                    <div class="mm-tech__skills">chlorination · 4y · van</div>
+                  </div>
+                  <div class="mm-tech__dist">0 active</div>
+                  <div class="mm-tech__dist">4.8 km</div>
+                  <div class="mm-tech__status mm-tech__status--free">free</div>
+                </div>
+                <div class="mm-tech">
+                  <div>
+                    <div class="mm-tech__name">Sumi A.</div>
+                    <div class="mm-tech__skills">general · 2y · bike</div>
+                  </div>
+                  <div class="mm-tech__dist">1 active</div>
+                  <div class="mm-tech__dist">2.1 km</div>
+                  <div class="mm-tech__status mm-tech__status--busy">busy</div>
+                </div>
+                <div class="mm-tech">
+                  <div>
+                    <div class="mm-tech__name">Babul D.</div>
+                    <div class="mm-tech__skills">chlorination · 8y · van</div>
+                  </div>
+                  <div class="mm-tech__dist">3 active</div>
+                  <div class="mm-tech__dist">3.5 km</div>
+                  <div class="mm-tech__status mm-tech__status--busy">busy</div>
+                </div>
+                <div class="mm-tech">
+                  <div>
+                    <div class="mm-tech__name">Tania R.</div>
+                    <div class="mm-tech__skills">chlorination · 3y · bike</div>
+                  </div>
+                  <div class="mm-tech__dist">0 active</div>
+                  <div class="mm-tech__dist">6.2 km</div>
+                  <div class="mm-tech__status mm-tech__status--free">free</div>
+                </div>
+              </div>
+              <div class="mm-assign-panel">
+                <h4>Work order</h4>
+                <div class="mm-field">
+                  <span class="mm-field__label">Technician</span>
+                  <div class="mm-field__val">Karim M. · chlorination · 4y</div>
+                </div>
+                <div class="mm-field">
+                  <span class="mm-field__label">Priority</span>
+                  <div class="mm-priority">
+                    <div class="mm-priority__opt">P3</div>
+                    <div class="mm-priority__opt">P2</div>
+                    <div class="mm-priority__opt is-on">P1</div>
+                  </div>
+                </div>
+                <div class="mm-field">
+                  <span class="mm-field__label">ETA target</span>
+                  <div class="mm-field__val">15 min · by 09:24</div>
+                </div>
+                <div class="mm-field">
+                  <span class="mm-field__label">Playbook attached</span>
+                  <div class="mm-field__val">4 steps · auto</div>
+                </div>
+                <button class="mm-assign-cta">Dispatch work order →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-meta">
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Operator action</span>
+          <span class="sb-meta__val">picks technician · sets priority · dispatches</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Chain event</span>
+          <span class="sb-meta__val--accent">TechnicianAssigned{technician_id, priority:P1, eta:15min}</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Next</span>
+          <span class="sb-meta__val">→ Monitor resolution (technician on-scene)</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── STEP 6: Monitor resolution + close ── -->
+    <article class="sb-step-card" data-step="6">
+      <header class="sb-step-header">
+        <div>
+          <p class="sb-step-counter">STEP 6 of 6</p>
+          <h2 class="sb-step-title">Monitor resolution · close incident</h2>
+        </div>
+        <span class="sb-step-time">09:32</span>
+      </header>
+
+      <div class="sb-narrative">
+        <p>Karim accepts the dispatch at 09:11 (texted back, status flips to <code>en_route</code>), arrives 09:23 (one minute ahead of ETA), diagnoses a stuck chlorinator solenoid at 09:26, replaces it at 09:30. He uploads an after-photo and a 3-line work note.</p>
+        <p><strong>Happy path:</strong> Priya confirms resolved → <code>IncidentResolved{technician_id, fix_summary, after_photo_sha256}</code> lands → KPI ticks 2→1 → Anjali gets ack → Ramesh gets safe-now.</p>
+        <p><strong>Reject path (alternative):</strong> If Priya isn't satisfied (e.g. sensor still out of band, smell persists, photo doesn't match), she hits <strong>Reject fix</strong> — a small overlay opens with 6 preset reasons plus optional detail. Submitting fires <code>DeviationCaptured{reason, detail}</code> on chain, reopens Karim's work order, and rolls the incident row back to "in progress."</p>
+      </div>
+
+      <div class="sb-frame">
+        <div class="sb-frame__chrome">
+          <span class="sb-frame__dot sb-frame__dot--green"></span>
+          <span class="sb-frame__dot sb-frame__dot--amber"></span>
+          <span class="sb-frame__dot sb-frame__dot--red"></span>
+          <span class="sb-frame__url">surakkha / inbox-detail.html · resolve</span>
+        </div>
+        <div class="sb-frame__body">
+          <div class="mm-app">
+            <div class="mm-top-chrome">
+              <div><span class="mm-pulse"></span>chain fresh · 0.4s ago</div>
+              <div><span class="mm-top-chrome__persona">Priya · utility_operator</span></div>
+            </div>
+            <div class="mm-incident-header">
+              <div>
+                <h3 class="mm-incident-header__title">Ward 7 school — chlorination spike</h3>
+                <div class="mm-incident-header__meta">Karim M. dispatched 09:11 · on-scene 09:23</div>
+              </div>
+              <span class="mm-status-pill mm-status-pill--resolved">
+                <span class="mm-status-pill__dot"></span>resolved
+              </span>
+            </div>
+            <div class="mm-monitor-grid">
+              <div class="mm-timeline">
+                <div class="mm-tl-item">
+                  <span class="mm-tl-time">09:08</span>
+                  <span class="mm-tl-dot is-done"></span>
+                  <span class="mm-tl-text">Escalated to T3
+                    <span class="mm-tl-event">IncidentEscalated{to:T3}</span>
+                  </span>
+                </div>
+                <div class="mm-tl-item">
+                  <span class="mm-tl-time">09:11</span>
+                  <span class="mm-tl-dot is-done"></span>
+                  <span class="mm-tl-text">Karim accepted dispatch
+                    <span class="mm-tl-event">TechnicianAssigned</span>
+                  </span>
+                </div>
+                <div class="mm-tl-item">
+                  <span class="mm-tl-time">09:23</span>
+                  <span class="mm-tl-dot is-done"></span>
+                  <span class="mm-tl-text">On-site · w7 pump station
+                    <span class="mm-tl-event">TechnicianArrived</span>
+                  </span>
+                </div>
+                <div class="mm-tl-item">
+                  <span class="mm-tl-time">09:26</span>
+                  <span class="mm-tl-dot is-done"></span>
+                  <span class="mm-tl-text">Diagnosed: stuck chlorinator solenoid
+                    <span class="mm-tl-event">DiagnosisSubmitted</span>
+                  </span>
+                </div>
+                <div class="mm-tl-item">
+                  <span class="mm-tl-time">09:30</span>
+                  <span class="mm-tl-dot is-done"></span>
+                  <span class="mm-tl-text">Solenoid replaced · sensor reading pH 7.1
+                    <span class="mm-tl-event">FixSubmitted{after_photo: b41e…7c}</span>
+                  </span>
+                </div>
+                <div class="mm-tl-item">
+                  <span class="mm-tl-time">09:32</span>
+                  <span class="mm-tl-dot is-now"></span>
+                  <span class="mm-tl-text" style="font-weight: var(--font-weight-semibold);">Awaiting operator confirmation
+                    <span class="mm-tl-event">→ IncidentResolved</span>
+                  </span>
+                </div>
+              </div>
+              <div class="mm-resolve-card">
+                <h4>Confirm resolution</h4>
+                <div class="mm-photo-upload is-uploaded">
+                  <span class="mm-photo-upload__icon">✓</span>
+                  <span class="mm-photo-upload__hint">after-photo uploaded · b41e…7c</span>
+                </div>
+                <div class="mm-field">
+                  <span class="mm-field__label">Technician note</span>
+                  <div class="mm-textarea" readonly>Replaced stuck chlorinator solenoid (part #CH-22-04). Sensor reading stable at pH 7.1 since 09:30. No leaks. School water cleared for use.</div>
+                </div>
+                <div class="mm-cv__btns">
+                  <button class="mm-btn mm-btn--success">✓ Confirm resolved</button>
+                  <button class="mm-btn mm-btn--danger" data-action="reject-open">✕ Reject fix</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── Rejection overlay (Priya rejects the fix) ── -->
+            <div class="mm-reject-overlay" data-reject-overlay>
+              <div class="mm-reject-card">
+                <h4>Why is the fix insufficient?</h4>
+                <p class="mm-reject-card__sub">Pick a reason. Karim (technician) gets notified and reopens the work order. The deviation lands on chain.</p>
+                <div class="mm-reject-reasons">
+                  <button class="mm-reject-reason" data-reason="muddy">Water still muddy</button>
+                  <button class="mm-reject-reason" data-reason="smell">Chlorine smell persists</button>
+                  <button class="mm-reject-reason" data-reason="reading">Sensor still out of band</button>
+                  <button class="mm-reject-reason" data-reason="visual">Photo doesn't match</button>
+                  <button class="mm-reject-reason" data-reason="location">Wrong site visited</button>
+                  <button class="mm-reject-reason" data-reason="partial">Partial fix only</button>
+                </div>
+                <div class="mm-field" style="margin-top: var(--space-md);">
+                  <span class="mm-field__label">Add detail (optional)</span>
+                  <div class="mm-textarea" data-reject-detail placeholder="e.g. 'School reports yellow tint at 11:30, after Karim's fix at 09:30.'"></div>
+                </div>
+                <div class="mm-reject-actions">
+                  <button class="mm-btn" data-action="reject-cancel">Cancel</button>
+                  <button class="mm-btn mm-btn--danger" data-action="reject-submit" disabled>Reject & reopen work order</button>
+                </div>
+                <p style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); margin: var(--space-sm) 0 0;" data-reject-event-display></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-meta">
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Operator action</span>
+          <span class="sb-meta__val">reviews timeline · confirms resolved</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Chain event</span>
+          <span class="sb-meta__val--accent">IncidentResolved{technician_id, fix_summary}</span>
+        </div>
+        <div class="sb-meta__cell">
+          <span class="sb-meta__label">Loop closed</span>
+          <span class="sb-meta__val">KPI ticks 2→1 · Anjali gets ack · Ramesh gets safe-now</span>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── nav ── -->
+    <nav class="sb-nav">
+      <button class="sb-nav__btn" id="prevBtn">← Previous step</button>
+      <span class="sb-nav__pos" id="navPos">Step 1 of 6 · 09:00</span>
+      <button class="sb-nav__btn sb-nav__btn--primary" id="nextBtn">Next step →</button>
+    </nav>
+
+    <div class="sb-exit">
+      <a href="00-ux-flow-map-phase1.html">← Back to flow map</a>
+      &nbsp;·&nbsp;
+      <a href="../../surakkha-app/mockups/01-priya/dashboard.html">Open real Priya dashboard →</a>
+    </div>
+
+  </main>
+
+</div>
+
+<!-- ── Simulation control widget (demo only) ── -->
+<button class="sim-fab" data-action="sim-toggle" id="simFab">
+  <span class="sim-fab__dot"></span>
+  <span>sim controls</span>
+</button>
+<div class="sim-panel" id="simPanel" hidden>
+  <div class="sim-panel__head">
+    <h3 class="sim-panel__title">simulation controls</h3>
+    <button class="sim-panel__close" data-action="sim-toggle" aria-label="Close">✕</button>
+  </div>
+  <div class="sim-panel__body">
+    <button class="sim-trigger" data-sim="network-lag">
+      <span class="sim-trigger__dot"></span>
+      <span>Network lag · 3s slow</span>
+    </button>
+    <button class="sim-trigger" data-sim="chain-stale">
+      <span class="sim-trigger__dot"></span>
+      <span>Chain stale · 5min old</span>
+    </button>
+    <button class="sim-trigger" data-sim="anjali-pending">
+      <span class="sim-trigger__dot"></span>
+      <span>Anjali ack pending</span>
+    </button>
+    <button class="sim-trigger" data-sim="sensor-offline">
+      <span class="sim-trigger__dot"></span>
+      <span>Sensor offline · w7-ph-04</span>
+    </button>
+    <button class="sim-trigger" data-sim="tampering">
+      <span class="sim-trigger__dot"></span>
+      <span>Tampering flag · injection</span>
+    </button>
+  </div>
+</div>
+
+<button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+  ◐ Toggle theme
+</button>
+
+<script>
+  var STEPS = [
+    { num: 1, head: 'Shift handover · login',          chain: 'OperatorAuthenticated',     time: '09:00' },
+    { num: 2, head: 'Pick Anjali\'s Ward 7 report',    chain: '— (projection)',           time: '09:05' },
+    { num: 3, head: 'Verify the photo',                chain: 'SensorReadingVerified',     time: '09:06' },
+    { num: 4, head: 'Run playbook · escalate to T3',   chain: 'IncidentEscalated',         time: '09:08' },
+    { num: 5, head: 'Assign a technician',             chain: 'TechnicianAssigned',        time: '09:09' },
+    { num: 6, head: 'Monitor · confirm resolved',      chain: 'IncidentResolved',          time: '09:32' },
+  ];
+
+  var current = 1;
+  var total = STEPS.length;
+
+  function buildStepList() {
+    var list = document.getElementById('stepList');
+    list.innerHTML = '';
+    STEPS.forEach(function (s) {
+      var li = document.createElement('li');
+      li.className = 'sb-step' + (s.num === current ? ' is-active' : '');
+      li.dataset.step = String(s.num);
+      var ghost = s.chain.indexOf('—') === 0 ? ' sb-step__chain--ghost' : '';
+      li.innerHTML =
+        '<div class="sb-step__num">' + s.num + '</div>' +
+        '<div>' +
+          '<p class="sb-step__head">' + s.head + '</p>' +
+          '<p class="sb-step__chain' + ghost + '">' + s.chain + '</p>' +
+        '</div>';
+      li.addEventListener('click', function () { goTo(s.num); });
+      list.appendChild(li);
+    });
+  }
+
+  function showStep(n) {
+    document.querySelectorAll('.sb-step-card').forEach(function (c) {
+      c.classList.toggle('is-active', Number(c.dataset.step) === n);
+    });
+    document.querySelectorAll('.sb-step').forEach(function (c) {
+      c.classList.toggle('is-active', Number(c.dataset.step) === n);
+    });
+    var pct = (n / total) * 100;
+    document.getElementById('progressFill').style.width = pct + '%';
+    var step = STEPS[n - 1];
+    document.getElementById('progressLabel').textContent = 'Step ' + n + ' of ' + total + ' · ' + step.time;
+    document.getElementById('navPos').textContent = 'Step ' + n + ' of ' + total + ' · ' + step.time;
+    document.getElementById('prevBtn').disabled = (n === 1);
+    document.getElementById('nextBtn').disabled = (n === total);
+    document.getElementById('nextBtn').textContent = (n === total) ? '✓ Done' : 'Next step →';
+    current = n;
+    // Scroll to top of step content
+    document.querySelector('.sb-main').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function goTo(n) {
+    if (n < 1 || n > total) return;
+    showStep(n);
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', function () { goTo(current - 1); });
+  document.getElementById('nextBtn').addEventListener('click', function () { goTo(current + 1); });
+
+  // Keyboard nav
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight') goTo(current + 1);
+    if (e.key === 'ArrowLeft')  goTo(current - 1);
+  });
+
+  buildStepList();
+  showStep(1);
+
+  // ────────────────────────────────────────────────────── sim panel
+  (function () {
+    var fab = document.getElementById('simFab');
+    var panel = document.getElementById('simPanel');
+    var triggers = panel.querySelectorAll('.sim-trigger');
+
+    function setOpen(open) {
+      panel.hidden = !open;
+      fab.hidden = open;
+    }
+    document.querySelectorAll('[data-action="sim-toggle"]').forEach(function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        setOpen(panel.hidden);
+      });
+    });
+
+    triggers.forEach(function (t) {
+      t.addEventListener('click', function (e) {
+        e.preventDefault();
+        var on = t.classList.toggle('is-on');
+        // Visual feedback only — these would wire into MSW + UI state in production
+        var label = t.querySelector('span:last-child').textContent;
+        console.log('[sim]' + (on ? ' ON ' : ' OFF ') + label);
+      });
+    });
+  })();
+
+  // ────────────────────────────────────────────────────── reject overlay
+  (function () {
+    var overlay = document.querySelector('[data-reject-overlay]');
+    if (!overlay) return;
+    var reasons = overlay.querySelectorAll('.mm-reject-reason');
+    var detail = overlay.querySelector('[data-reject-detail]');
+    var submitBtn = overlay.querySelector('[data-action="reject-submit"]');
+    var cancelBtn = overlay.querySelector('[data-action="reject-cancel"]');
+    var eventDisplay = overlay.querySelector('[data-reject-event-display]');
+    var selectedReason = null;
+
+    document.querySelectorAll('[data-action="reject-open"]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        overlay.classList.add('is-on');
+      });
+    });
+    cancelBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      overlay.classList.remove('is-on');
+    });
+    reasons.forEach(function (r) {
+      r.addEventListener('click', function (e) {
+        e.preventDefault();
+        reasons.forEach(function (x) { x.classList.remove('is-on'); });
+        r.classList.add('is-on');
+        selectedReason = r.dataset.reason;
+        submitBtn.disabled = false;
+      });
+    });
+    submitBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (!selectedReason) return;
+      var label = selectedReason;
+      var detailText = detail ? detail.textContent.trim() : '';
+      var evt = 'DeviationCaptured{reason:"' + label + '"';
+      if (detailText) evt += ',detail:"' + detailText + '"';
+      evt += '}';
+      eventDisplay.textContent = '→ ' + evt;
+      submitBtn.textContent = '✓ Deviation fired';
+      submitBtn.disabled = true;
+    });
+  })();
+</script>
+
+</body>
+</html>

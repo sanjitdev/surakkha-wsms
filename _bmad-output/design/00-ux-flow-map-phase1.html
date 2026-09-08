@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — UX Flow Map (Phase 1 scope)</title>
+<link rel="stylesheet" href="../../surakkha-app/mockups/theme.css">
+<style>
+  /* ── Page-level layout ─────────────────────────────────────── */
+  .flowmap-shell {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-xl);
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    min-height: 100vh;
+  }
+  @media (max-width: 1100px) {
+    .flowmap-shell { grid-template-columns: 1fr; }
+  }
+  .flowmap-head {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-xl) 0;
+  }
+  .flowmap-head h1 {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-xs);
+  }
+  .flowmap-head__sub {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+  .flowmap-head__meta {
+    margin-top: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .phase-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 2px var(--space-sm);
+    background: var(--brand-100);
+    color: var(--brand-600);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: var(--font-weight-semibold);
+  }
+  [data-theme="dark"] .phase-pill {
+    background: var(--brand-200);
+    color: var(--brand-400);
+  }
+
+  /* ── Diagram panel (left) ──────────────────────────────────── */
+  .diagram-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    overflow: hidden;
+  }
+  .diagram-panel__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .diagram-panel__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .diagram-panel__legend {
+    display: flex;
+    gap: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .diagram-panel__legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-swatch {
+    width: 10px; height: 10px; border-radius: 2px;
+    background: var(--brand-500);
+  }
+  .legend-swatch--accent { background: var(--warning); }
+  .legend-swatch--ghost { background: var(--fg-tertiary); opacity: 0.4; }
+
+  .diagram-wrap {
+    overflow: auto;
+    border-radius: var(--radius-sm);
+    background: var(--bg-base);
+  }
+
+  /* SVG node + edge styles */
+  .diagram-wrap svg { display: block; }
+  .diagram-wrap text {
+    font-family: var(--font-family-sans);
+    fill: var(--fg-default);
+  }
+  .diagram-wrap .node-rect {
+    fill: var(--bg-surface);
+    stroke: var(--border-default);
+    stroke-width: 1;
+    rx: 4;
+    transition: fill 120ms ease-out, stroke 120ms ease-out;
+  }
+  .diagram-wrap .node-label {
+    font-size: 13px;
+    font-weight: 500;
+    text-anchor: middle;
+    dominant-baseline: middle;
+    pointer-events: none;
+  }
+  .diagram-wrap .node-sub {
+    font-size: 10px;
+    fill: var(--fg-tertiary);
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-family: var(--font-family-mono);
+    pointer-events: none;
+  }
+  .diagram-wrap .node-group { cursor: pointer; }
+  .diagram-wrap .node-group:hover .node-rect { stroke: var(--brand-500); stroke-width: 2; }
+  .diagram-wrap .node-group.is-active .node-rect {
+    fill: var(--brand-100);
+    stroke: var(--brand-500);
+    stroke-width: 2;
+  }
+  [data-theme="dark"] .diagram-wrap .node-group.is-active .node-rect {
+    fill: var(--brand-200);
+  }
+  .diagram-wrap .node-group.is-dimmed { opacity: 0.25; }
+
+  .diagram-wrap .node-role {
+    font-size: 9px;
+    fill: var(--brand-500);
+    text-anchor: middle;
+    dominant-baseline: middle;
+    font-family: var(--font-family-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    pointer-events: none;
+  }
+  .diagram-wrap .node-ghost .node-rect { fill: var(--bg-subtle); stroke-dasharray: 4 3; }
+  .diagram-wrap .node-ghost .node-label { fill: var(--fg-tertiary); }
+
+  .diagram-wrap .edge {
+    fill: none;
+    stroke: var(--border-default);
+    stroke-width: 1.5;
+  }
+  .diagram-wrap .edge--accent { stroke: var(--warning); stroke-width: 2; }
+  .diagram-wrap .edge-label {
+    font-size: 9px;
+    fill: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    text-anchor: middle;
+  }
+  .diagram-wrap .edge-group.is-dimmed { opacity: 0.15; }
+
+  /* ── Persona panel (right) ─────────────────────────────────── */
+  .persona-panel {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    min-width: 0;
+  }
+  .persona-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2px;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 2px;
+    margin-bottom: var(--space-md);
+  }
+  .persona-tab {
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    transition: background-color 120ms ease-out, color 120ms ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+  }
+  .persona-tab:hover { color: var(--fg-default); }
+  .persona-tab.is-active {
+    background: var(--bg-surface);
+    color: var(--brand-600);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  [data-theme="dark"] .persona-tab.is-active {
+    background: var(--bg-surface);
+    color: var(--brand-400);
+  }
+  .persona-tab__role {
+    font-family: var(--font-family-mono);
+    font-size: 9px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .persona-pane { display: none; }
+  .persona-pane.is-active { display: block; }
+
+  .persona-pane__quote {
+    background: var(--bg-base);
+    border-left: 3px solid var(--brand-500);
+    padding: var(--space-md) var(--space-lg);
+    margin: 0 0 var(--space-lg);
+    font-style: italic;
+    color: var(--fg-secondary);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  }
+
+  .persona-pane__section-title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: var(--space-lg) 0 var(--space-sm);
+    padding-bottom: var(--space-xs);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .persona-pane__section-title:first-of-type { margin-top: 0; }
+
+  /* journey table */
+  .journey-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+  }
+  .journey-table th {
+    text-align: left;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fg-tertiary);
+    padding: var(--space-xs) var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .journey-table td {
+    padding: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+    vertical-align: top;
+    color: var(--fg-default);
+  }
+  .journey-table tr:last-child td { border-bottom: none; }
+  .journey-table td:first-child {
+    font-family: var(--font-family-mono);
+    color: var(--fg-tertiary);
+    font-size: var(--font-size-xs);
+    width: 28px;
+  }
+  .journey-table .chain-event {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--brand-500);
+    background: var(--brand-100);
+    padding: 2px var(--space-xs);
+    border-radius: var(--radius-xs);
+    display: inline-block;
+  }
+  [data-theme="dark"] .journey-table .chain-event {
+    background: var(--brand-200);
+    color: var(--brand-400);
+  }
+  .journey-table .chain-event--ghost {
+    color: var(--fg-tertiary);
+    background: var(--bg-subtle);
+  }
+
+  /* narrative */
+  .narrative-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .narrative-list li {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-top: 1px solid var(--border-subtle);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-body);
+  }
+  .narrative-list li:first-child { border-top: none; }
+  .narrative-list .time {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .narrative-list code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    background: var(--bg-subtle);
+    padding: 1px var(--space-xs);
+    border-radius: var(--radius-xs);
+    color: var(--fg-default);
+  }
+
+  /* callouts */
+  .callout {
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--warning);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    padding: var(--space-md) var(--space-lg);
+    margin: 0 0 var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-body);
+  }
+  .callout strong { color: var(--fg-default); }
+
+  /* decisions list */
+  .decisions-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .decisions-list li {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: var(--space-sm);
+    padding: var(--space-sm) 0;
+    border-top: 1px solid var(--border-subtle);
+    align-items: baseline;
+  }
+  .decisions-list li:first-child { border-top: none; }
+  .decisions-list .check {
+    color: var(--success);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-md);
+    line-height: 1;
+  }
+  .decisions-list .label {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--brand-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-right: var(--space-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+  .decisions-list .body {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    line-height: var(--line-height-body);
+  }
+
+  /* ── Theme toggle ──────────────────────────────────────────── */
+  .theme-toggle {
+    position: fixed;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    z-index: 100;
+    box-shadow: var(--shadow-modal);
+  }
+</style>
+</head>
+<body>
+
+<header class="flowmap-head">
+  <h1>UX Flow Map — Phase 1 scope</h1>
+  <p class="flowmap-head__sub">Cut from <span class="mono">00-ux-flow-map.md</span> for Phase 1 build. Priya + Anjali + Vendor land in v1; PHA surfaces are deferred to v1.1. Click a diagram node to focus that screen · click a persona tab to see their day + locked decisions.</p>
+  <div class="flowmap-head__meta">
+    <span class="phase-pill">Phase 1</span>
+    <span>3 personas (Priya · Anjali · Vendor)</span>
+    <span>·</span>
+    <span>7 Priya routes</span>
+    <span>·</span>
+    <span>2 Anjali surfaces</span>
+    <span>·</span>
+    <span>2 Vendor surfaces</span>
+    <span>·</span>
+    <span>Ramesh channel (no UI, template strings only)</span>
+    <span>·</span>
+    <span>DRAFT 2026-09-08</span>
+  </div>
+</header>
+
+<main class="flowmap-shell">
+
+  <!-- ─────────────────────────── LEFT: Diagram ─────────── -->
+  <section class="diagram-panel" aria-label="Screen transition diagram">
+    <div class="diagram-panel__head">
+      <h2 class="diagram-panel__title">Cross-screen transition diagram</h2>
+      <div class="diagram-panel__legend">
+        <span><span class="legend-swatch"></span>Phase 1 surface</span>
+        <span><span class="legend-swatch legend-swatch--accent"></span>T3 issuance path</span>
+        <span><span class="legend-swatch legend-swatch--ghost"></span>v1.1 / deferred</span>
+      </div>
+    </div>
+
+    <div class="diagram-wrap" id="diagramWrap">
+      <!-- SVG injected by JS so it stays editable as one block -->
+    </div>
+  </section>
+
+  <!-- ─────────────────────────── RIGHT: Persona panel ─────── -->
+  <section class="persona-panel" aria-label="Persona narratives">
+
+    <div class="persona-tabs" role="tablist" aria-label="Persona">
+      <button class="persona-tab is-active" role="tab" aria-selected="true" data-persona="priya">
+        Priya <span class="persona-tab__role">util op</span>
+      </button>
+      <button class="persona-tab" role="tab" aria-selected="false" data-persona="anjali">
+        Anjali <span class="persona-tab__role">citizen</span>
+      </button>
+      <button class="persona-tab" role="tab" aria-selected="false" data-persona="vendor">
+        Vendor <span class="persona-tab__role">fleet</span>
+      </button>
+    </div>
+
+    <!-- ─────────── PRIYA ─────────── -->
+    <div class="persona-pane is-active" data-persona="priya">
+      <div class="persona-pane__quote">"I resolve incidents; I pass shift cleanly."</div>
+
+      <div class="callout">
+        <strong>T3 issuance rethought without PHA.</strong> The dual-sig was Priya+PHA, vendor remote. Phase 1 drops PHA, so the dual-sig becomes <strong>Priya signs → Anjali countersigns</strong> ("your report mattered" ack acts as the citizen countersignature). Both attestations land on chain before <code>PublicNoticeIssued</code> fires. Hypothetical, needs lock — see §open.
+      </div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.3 · Phase 1)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        All 7 Priya page templates: <span class="mono">Login · Dashboard · InboxList · InboxDetail · VerifyFlow · AuditLog · Settings</span>
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.3 · Phase 1)</h3>
+      <table class="journey-table">
+        <thead>
+          <tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>Opens app</td><td>Login</td><td>Picks persona (Priya / Anjali / Vendor)</td><td><span class="chain-event">OperatorAuthenticated</span></td></tr>
+          <tr><td>2</td><td>Login success</td><td>Dashboard</td><td>Reads KPIs + 24h sensor history</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>3</td><td>Anomalous KPI</td><td>InboxList</td><td>Reads ranked incident rows</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>4</td><td>Picks incident</td><td>InboxDetail</td><td>Reads source + fusion score</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>5</td><td>Confirm playbook step</td><td>InboxDetail</td><td>Executes Step 1 (sensor reading)</td><td><span class="chain-event">PlaybookStepExecuted</span></td></tr>
+          <tr><td>6</td><td>Crosses T2 threshold</td><td>InboxDetail</td><td>Escalates to T2</td><td><span class="chain-event">IncidentEscalated</span></td></tr>
+          <tr><td>7</td><td>Issue T3 public notice</td><td>InboxDetail</td><td>Two-tap confirm (Priya signs; awaits Anjali ack on the originating report)</td><td><span class="chain-event">MessageIssuanceConfirmed → (await) AnjaliAcknowledged → PublicNoticeIssued</span></td></tr>
+          <tr><td>8</td><td>Deviates from playbook</td><td>InboxDetail</td><td>Captures override-with-reasoning</td><td><span class="chain-event">DeviationCaptured</span></td></tr>
+          <tr><td>9</td><td>Approves sensor reading</td><td>VerifyFlow</td><td>Confirms photo matches reading</td><td><span class="chain-event">SensorReadingVerified</span></td></tr>
+          <tr><td>10</td><td>Reviews the week</td><td>AuditLog</td><td>Filters by ward/time/actor</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>11</td><td>Shift change</td><td>Dashboard (handover)</td><td>Reads handover brief</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>12</td><td>Tweak preferences</td><td>Settings</td><td>Flips a toggle</td><td><span class="chain-event">AuditEntry{setting_changed}</span></td></tr>
+          <tr><td>13</td><td>Logout</td><td>Login</td><td>—</td><td><span class="chain-event">OperatorAccessLogged</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">Priya's day (§12.1 · Phase 1)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">09:00</span><span>Login → Dashboard. Sees 2 open incidents from overnight.</span></li>
+        <li><span class="time">09:05</span><span>InboxList → InboxDetail on the chlorination-spike row.</span></li>
+        <li><span class="time">09:06</span><span>Execute "Confirm with sensor reading" → <code>PlaybookStepExecuted</code>.</span></li>
+        <li><span class="time">09:08</span><span>Sensor confirms; escalate to T2 → <code>IncidentEscalated</code>.</span></li>
+        <li><span class="time">09:13</span><span>Origin report was Anjali's. Two-tap confirm → <code>MessageIssuanceConfirmed</code>. Notice queued; waits for Anjali's ack on her report (the citizen countersignature).</span></li>
+        <li><span class="time">09:14</span><span>Anjali taps ack on her report → <code>AnjaliAcknowledged</code>. Both attestations on chain → <code>PublicNoticeIssued</code> auto-fires. Ramesh gets notice in WhatsApp + SMS.</span></li>
+        <li><span class="time">09:25</span><span>Sensor normalizes; safe-now issued.</span></li>
+        <li><span class="time">09:30</span><span>Dashboard's handover brief is clean.</span></li>
+        <li><span class="time">17:30</span><span>Slight pH drift on Ward 12. Captures deviation; sets a follow-up note for next operator.</span></li>
+        <li><span class="time">17:55</span><span>Handovers to night's operator via the same handover brief.</span></li>
+        <li><span class="time">18:00</span><span>Settings → flip "auto-acknowledge Anjali reports" on. Audit entry lands.</span></li>
+        <li><span class="time">18:01</span><span>Logout. <code>OperatorAccessLogged{type:logout}</code>.</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Locked decisions (§13)</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.1</span><span class="body">Login: persona-picker only — no username/password fields in Phase 1. 3 personas (Priya/Anjali/Vendor); 5-persona picker returns in v1.1 with PHA added.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.2</span><span class="body">T3 two-tap modal: two entry points — incident row "Issue" button AND top-chrome notification badge. Same modal opens from both. (Phase 1: badge signals "Anjali-pending ack" instead of "PHA-pending sig".)</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">App shell: shared Priya chrome. Anjali and Vendor render as role-variants of the same chrome (Anjali shows only Submit + Ack feed; Vendor shows only Fleet + Submit batch).</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.5</span><span class="body">Anjali acknowledgement: feed + passive notification. Feed now doubles as the citizen countersignature that closes the T3 loop.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.6</span><span class="body">Settings persist to IndexedDB; each change emits <code>AuditEntry{setting_changed}</code>.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.7</span><span class="body">Demo controls visible on Login + Settings Danger zone; each gated by confirm modal.</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ─────────── ANJALI ─────────── -->
+    <div class="persona-pane" data-persona="anjali">
+      <div class="persona-pane__quote">"I report fast, my reports matter, my effort earns status."</div>
+
+      <div class="callout">
+        <strong>Phase 1 scope change.</strong> Anjali is in v1 — the "Submit a report" card + acknowledgement feed render as real surfaces (not a Phase-2 preview). The T3 issuance loop is closed by her <code>AnjaliAcknowledged</code> event on her report, replacing the dropped PHA countersignature.
+      </div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.2 · Phase 1)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        2 surfaces, role-variant of Priya chrome:<br>
+        <span class="mono">Anjali submit</span> (3-modality input — voice 8s + sentinel-strip photo + optional text) · <span class="mono">Anjali ack feed</span> (chronological report lifecycle)<br>
+        <span style="color: var(--fg-tertiary);">Phase 2 adds: full Anjali-mobile (native, voice-first, offline queue) per dim 5c.</span>
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.2 · Phase 1)</h3>
+      <table class="journey-table">
+        <thead><tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Notification / opens app</td><td>Anjali home</td><td>Sees Report card + ack feed below</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>2</td><td>Taps Report</td><td>Anjali submit</td><td>Voice 8s + photo + optional text</td><td><span class="chain-event chain-event--ghost">draft</span></td></tr>
+          <tr><td>3</td><td>Taps Submit</td><td>Anjali submit (submitting)</td><td>Spinner → "report received" pulse</td><td><span class="chain-event">AnjaliReportSubmitted</span></td></tr>
+          <tr><td>4</td><td>Network returns</td><td>— (background)</td><td>Queue drains, replayed same event_id (AD-14)</td><td><span class="chain-event">AnjaliReportSubmitted</span></td></tr>
+          <tr><td>5</td><td>Report triggers action</td><td>Anjali home (ack feed)</td><td>Reads "your report triggered action X"</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>6</td><td>Priya issues T3 on her report</td><td>Anjali submit (banner)</td><td>Taps "Acknowledge — my report is the source"</td><td><span class="chain-event">AnjaliAcknowledged</span></td></tr>
+          <tr><td>7</td><td>Both attestations on chain</td><td>— (background)</td><td>Public notice broadcasts to Ramesh</td><td><span class="chain-event">PublicNoticeIssued</span></td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">Anjali's flow · Tuesday (§12.2 · Phase 1)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">14:00</span><span>Opens app. Sees Report card + (empty) ack feed.</span></li>
+        <li><span class="time">14:01</span><span>Taps Report. Voice: "Ward 7 school, chlorine smell, kids about to drink." (8s) + photo of sentinel strip (yellow).</span></li>
+        <li><span class="time">14:01</span><span>Submit. "Report received" pulse. Lands <code>AnjaliReportSubmitted</code>.</span></li>
+        <li><span class="time">14:01</span><span>Closes app.</span></li>
+        <li><span class="time">17:25</span><span>Banner: "Your report on Ward 7 is being issued as a public notice. Acknowledge to broadcast." Taps Acknowledge → <code>AnjaliAcknowledged</code>.</span></li>
+        <li><span class="time">17:26</span><span>Banner collapses; feed row flips to "broadcast ✓". <code>PublicNoticeIssued</code> auto-fires; Ramesh gets WhatsApp + SMS.</span></li>
+        <li><span class="time">Friday</span><span>Councillor cites her at the school (passive notification path).</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Relevant decisions</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">Chrome renders as a slim Anjali variant — only Submit + Ack feed visible. No operator chrome (sidebar, KPI, audit) leaks.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">13.5</span><span class="body">Belt-and-suspenders: feed + passive WhatsApp notification when her report triggers action.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">new</span><span class="body">Anjali's ack is a real chain event (<code>AnjaliAcknowledged</code>) that closes the T3 loop in lieu of the dropped PHA countersignature.</span></span></li>
+      </ul>
+    </div>
+
+    <!-- ─────────── VENDOR ─────────── -->
+    <div class="persona-pane" data-persona="vendor">
+      <div class="persona-pane__quote">"My readings are accepted, my sensors stay calibrated, my retail relationship is healthy."</div>
+
+      <div class="callout">
+        <strong>Phase 1 scope:</strong> renders as 2 sub-pages inside Priya chrome with role switch (no new dim-5 template yet). The full Vendor dashboard lockdown is a v1.1 hand-off per §9 of the source flow-map; Phase 1 ships the shapes needed to exercise the sensor-readings chain path end-to-end.
+      </div>
+
+      <h3 class="persona-pane__section-title">Surfaces used (§1.6 · Phase 1)</h3>
+      <p style="font-size: var(--font-size-sm); color: var(--fg-secondary); margin: 0 0 var(--space-md);">
+        2 surfaces, role-variant of Priya chrome:<br>
+        <span class="mono">Vendor fleet</span> (per-sensor status table — 5 states from dim 7 §8) · <span class="mono">Vendor submit batch</span> (modal: parameter + value + captured_at + Submit)<br>
+        <span style="color: var(--fg-tertiary);">Phase 2 / v1.1: dedicated dim-5 page template, push-config flow, OTA firmware.</span>
+      </p>
+
+      <h3 class="persona-pane__section-title">Journey (§1.6 · Phase 1)</h3>
+      <table class="journey-table">
+        <thead><tr><th>#</th><th>Trigger</th><th>Screen</th><th>Action</th><th>Chain event</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Login as vendor</td><td>Login → /vendor</td><td>Persona picker → submit</td><td><span class="chain-event">OperatorAuthenticated{role:vendor}</span></td></tr>
+          <tr><td>2</td><td>Lands</td><td>Vendor fleet</td><td>Sees per-sensor status (5 states)</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>3</td><td>Picks sensor</td><td>Vendor sensor detail</td><td>Reads readings + metadata + cal date</td><td><span class="chain-event chain-event--ghost">projection</span></td></tr>
+          <tr><td>4</td><td>Submits batch</td><td>Vendor submit batch</td><td>Picks param + value + captured_at</td><td><span class="chain-event">SensorReadingSubmitted</span></td></tr>
+          <tr><td>5</td><td>Replay (same event_id)</td><td>Vendor submit batch (success)</td><td>—</td><td><span class="chain-event">deduplicated: true</span> (AD-14)</td></tr>
+        </tbody>
+      </table>
+
+      <h3 class="persona-pane__section-title">Vendor's flow · Monday (§12.5 · Phase 1)</h3>
+      <ol class="narrative-list">
+        <li><span class="time">08:00</span><span>Login as vendor → Vendor fleet.</span></li>
+        <li><span class="time">08:01</span><span>Sees fleet: 18 online, 2 late, 1 offline. (The offline is Ward 5 pump station.)</span></li>
+        <li><span class="time">08:05</span><span>Picks the offline. Re-calibrates on-device. Submits new batch of readings from last 24h.</span></li>
+        <li><span class="time">08:06</span><span>Submits: <code>SensorReadingSubmitted</code> × 96 (24h × 4 readings/hour).</span></li>
+        <li><span class="time">08:07</span><span>Last batch lands as <code>deduplicated: true</code> (same <code>event_id</code> replayed by re-sync). No double-write.</span></li>
+        <li><span class="time">08:10</span><span>Logs out.</span></li>
+      </ol>
+
+      <h3 class="persona-pane__section-title">Relevant decisions</h3>
+      <ul class="decisions-list">
+        <li><span class="check">✓</span><span><span class="label">13.3</span><span class="body">Chrome hides Dashboard / Inbox / Verify / Audit. Home is Vendor fleet; secondary is Submit batch modal.</span></span></li>
+        <li><span class="check">✓</span><span><span class="label">deferred</span><span class="body">Sensor config changes (<code>SensorConfigChanged</code>) and OTA firmware deferred to v1.1 — no surface needed in Phase 1.</span></span></li>
+      </ul>
+    </div>
+
+  </section>
+
+</main>
+
+<button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+  ◐ Toggle theme
+</button>
+
+<script>
+  // ────────────────────────────────────────────────────── diagram
+  // Nodes are positioned on a 4-row × 3-col grid.
+  // Each node: { id, label, sub, role, x, y, ghost? }
+  // Edges: { from, to, label?, accent?, ghost?, reverse?, dim? }
+
+  var NODES = [
+    // col 0 — Priya primary
+    { id: 'login',         label: 'Login',              sub: '3-persona picker',     role: 'all',     x: 0, y: 0 },
+    { id: 'dashboard',     label: 'Dashboard',          sub: 'KPIs + handover',       role: 'priya',   x: 0, y: 1 },
+    { id: 'handover',      label: 'Handover',           sub: 'shift brief',           role: 'priya',   x: 0, y: 2 },
+    { id: 'settings',      label: 'Settings',           sub: 'preferences',           role: 'priya',   x: 0, y: 3 },
+
+    // col 1 — Priya hot path + Anjali
+    { id: 'inbox_list',    label: 'InboxList',          sub: 'ranked queue',          role: 'priya',   x: 1, y: 1 },
+    { id: 'inbox_detail',  label: 'InboxDetail',        sub: 'playbook + T3 modal',   role: 'priya',   x: 1, y: 2 },
+    { id: 'anjali_home',   label: 'Anjali home',        sub: 'report + ack feed',     role: 'anjali',  x: 1, y: 3 },
+    { id: 'anjali_submit', label: 'Anjali submit',      sub: 'voice + photo + text',  role: 'anjali',  x: 1, y: 4 },
+
+    // col 2 — Audit + Vendor
+    { id: 'verify',        label: 'VerifyFlow',         sub: 'photo + reading',       role: 'priya',   x: 2, y: 0 },
+    { id: 'audit',         label: 'AuditLog',           sub: 'event stream',          role: 'priya',   x: 2, y: 1 },
+    { id: 'vendor_fleet',  label: 'Vendor fleet',       sub: 'sensor status',         role: 'vendor',  x: 2, y: 2 },
+    { id: 'vendor_submit', label: 'Vendor submit',      sub: 'batch readings',        role: 'vendor',  x: 2, y: 3 },
+
+    // Ramesh channel — ghost (no UI; message-template strings)
+    { id: 'ramesh',        label: 'WhatsApp / SMS',     sub: 'no UI · templates',     role: 'ramesh',  x: 0, y: 4, ghost: true },
+
+    // v1.1 deferred
+    { id: 'pha_phase2',    label: 'PHA — v1.1',         sub: 'approver + viewer',     role: 'pha',     x: 2, y: 4, ghost: true },
+  ];
+
+  var EDGES = [
+    // Login landings
+    { from: 'login', to: 'dashboard',     label: 'priya' },
+    { from: 'login', to: 'anjali_home',   label: 'anjali' },
+    { from: 'login', to: 'vendor_fleet',  label: 'vendor' },
+
+    // Priya primary path
+    { from: 'dashboard',    to: 'inbox_list',   label: 'KPI click' },
+    { from: 'inbox_list',   to: 'inbox_detail', label: 'pick row' },
+    { from: 'inbox_detail', to: 'inbox_list',   label: 'back', reverse: true },
+
+    // Priya side routes
+    { from: 'dashboard',  to: 'verify' },
+    { from: 'dashboard',  to: 'audit' },
+    { from: 'dashboard',  to: 'settings' },
+    { from: 'inbox_list', to: 'verify' },
+    { from: 'inbox_list', to: 'audit' },
+    { from: 'inbox_list', to: 'settings' },
+    { from: 'verify',     to: 'settings', reverse: true },
+    { from: 'audit',      to: 'settings', reverse: true },
+
+    // Anjali flow
+    { from: 'anjali_home',   to: 'anjali_submit', label: 'tap report' },
+    { from: 'anjali_submit', to: 'anjali_home',   label: 'submit · ack feed', reverse: true },
+
+    // T3 loop accent: InboxDetail → Anjali submit (ack prompt) → PublicNoticeIssued → Ramesh
+    { from: 'inbox_detail',  to: 'anjali_submit', label: 'await Anjali ack', accent: true },
+    { from: 'anjali_submit', to: 'ramesh',        label: 'PublicNoticeIssued', accent: true, ghost: true },
+    { from: 'inbox_detail',  to: 'ramesh',        label: 'PublicNoticeIssued', accent: true, ghost: true },
+
+    // Vendor flow
+    { from: 'vendor_fleet',  to: 'vendor_submit', label: 'pick sensor' },
+    { from: 'vendor_submit', to: 'vendor_fleet',  label: 'back', reverse: true },
+
+    // v1.1 ghost: PHA Approver queue would feed the T3 loop in v1.1
+    { from: 'pha_phase2', to: 'inbox_detail', label: 'v1.1 countersig', ghost: true },
+
+    // Logout
+    { from: 'dashboard',    to: 'login', label: 'logout', reverse: true, dim: true },
+    { from: 'anjali_home',  to: 'login', label: 'logout', reverse: true, dim: true },
+    { from: 'vendor_fleet', to: 'login', label: 'logout', reverse: true, dim: true },
+  ];
+
+  // Layout math
+  var COL_W = 200, ROW_H = 100, PAD_X = 30, PAD_Y = 30;
+  var NODE_W = 160, NODE_H = 64;
+
+  function px(n) { return PAD_X + n.x * (COL_W); }
+  function py(n) { return PAD_Y + n.y * (ROW_H); }
+  function nodeCenter(n, axis) {
+    if (axis === 'x') return px(n) + NODE_W / 2;
+    if (axis === 'y') return py(n) + NODE_H / 2;
+  }
+
+  function buildSvg() {
+    var cols = 3;
+    var rows = 5;
+    var w = PAD_X * 2 + cols * COL_W + NODE_W - COL_W;
+    var h = PAD_Y * 2 + rows * ROW_H + NODE_H - ROW_H;
+    var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h + '">';
+
+    // Arrow marker
+    svg += '<defs>';
+    svg += '<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker>';
+    svg += '<marker id="arrow-accent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--warning)"/></marker>';
+    svg += '</defs>';
+
+    // Edges first (under nodes)
+    svg += '<g class="edges">';
+    EDGES.forEach(function (e) {
+      var a = NODES.find(function (n) { return n.id === e.from; });
+      var b = NODES.find(function (n) { return n.id === e.to; });
+      if (!a || !b) return;
+      if (a.x === b.x && a.y === b.y) return;
+
+      var x1, y1, x2, y2;
+      if (a.x < b.x) {
+        x1 = px(a) + NODE_W; y1 = nodeCenter(a, 'y');
+        x2 = px(b);         y2 = nodeCenter(b, 'y');
+      } else if (a.x > b.x) {
+        x1 = px(a);         y1 = nodeCenter(a, 'y');
+        x2 = px(b) + NODE_W; y2 = nodeCenter(b, 'y');
+      } else if (a.y < b.y) {
+        x1 = nodeCenter(a, 'x'); y1 = py(a) + NODE_H;
+        x2 = nodeCenter(b, 'x'); y2 = py(b);
+      } else {
+        x1 = nodeCenter(a, 'x'); y1 = py(a);
+        x2 = nodeCenter(b, 'x'); y2 = py(b) + NODE_H;
+      }
+
+      var cls = 'edge';
+      if (e.accent) cls += ' edge--accent';
+      var marker = e.accent ? 'url(#arrow-accent)' : 'url(#arrow)';
+      var color = e.accent ? 'var(--warning)' : (e.dim ? 'var(--border-subtle)' : 'var(--border-default)');
+      svg += '<g class="edge-group' + (e.ghost ? ' is-dimmed' : '') + '" data-from="' + e.from + '" data-to="' + e.to + '">';
+      svg += '<line class="' + cls + '" x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" style="color:' + color + ';stroke:currentColor;" marker-end="' + marker + '"/>';
+      if (e.label) {
+        var mx = (x1 + x2) / 2;
+        var my = (y1 + y2) / 2;
+        if (a.x === b.x) mx += 8;
+        svg += '<text class="edge-label" x="' + mx + '" y="' + (my - 4) + '">' + e.label + '</text>';
+      }
+      svg += '</g>';
+    });
+    svg += '</g>';
+
+    // Nodes
+    svg += '<g class="nodes">';
+    NODES.forEach(function (n) {
+      var cls = 'node-group';
+      if (n.ghost) cls += ' node-ghost';
+      svg += '<g class="' + cls + '" data-node="' + n.id + '">';
+      svg += '<rect class="node-rect" x="' + px(n) + '" y="' + py(n) + '" width="' + NODE_W + '" height="' + NODE_H + '"/>';
+      svg += '<text class="node-label" x="' + nodeCenter(n, 'x') + '" y="' + (py(n) + 22) + '">' + n.label + '</text>';
+      svg += '<text class="node-sub" x="' + nodeCenter(n, 'x') + '" y="' + (py(n) + 40) + '">' + n.sub + '</text>';
+      svg += '<text class="node-role" x="' + nodeCenter(n, 'x') + '" y="' + (py(n) + 56) + '">' + n.role + '</text>';
+      svg += '</g>';
+    });
+    svg += '</g>';
+
+    svg += '</svg>';
+    document.getElementById('diagramWrap').innerHTML = svg;
+  }
+
+  // ────────────────────────────────────────────────────── persona tabs
+  function wireTabs() {
+    var tabs = document.querySelectorAll('.persona-tab');
+    var panes = document.querySelectorAll('.persona-pane');
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var key = tab.dataset.persona;
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.classList.toggle('is-active', on);
+          t.setAttribute('aria-selected', String(on));
+        });
+        panes.forEach(function (p) {
+          var on = p.dataset.persona === key;
+          p.classList.toggle('is-active', on);
+        });
+      });
+    });
+  }
+
+  // ────────────────────────────────────────────────────── node click
+  function wireNodes() {
+    var nodes = document.querySelectorAll('.node-group');
+    var edges = document.querySelectorAll('.edge-group');
+    nodes.forEach(function (g) {
+      g.addEventListener('click', function () {
+        var id = g.dataset.node;
+        var active = g.classList.contains('is-active');
+
+        nodes.forEach(function (n) { n.classList.remove('is-active'); });
+        if (!active) g.classList.add('is-active');
+
+        edges.forEach(function (e) {
+          var touches = e.dataset.from === id || e.dataset.to === id;
+          e.classList.toggle('is-dimmed', !active && !touches);
+        });
+        nodes.forEach(function (n) {
+          if (n === g) return;
+          var touches = n.dataset.node === id;
+          if (!active && !touches) {
+            var hasEdge = false;
+            edges.forEach(function (e) {
+              if ((e.dataset.from === id && e.dataset.to === n.dataset.node) ||
+                  (e.dataset.to   === id && e.dataset.from === n.dataset.node)) hasEdge = true;
+            });
+            n.classList.toggle('is-dimmed', !hasEdge);
+          } else {
+            n.classList.remove('is-dimmed');
+          }
+        });
+      });
+    });
+    document.getElementById('diagramWrap').addEventListener('click', function (e) {
+      if (e.target === this || e.target.tagName === 'svg') {
+        nodes.forEach(function (n) { n.classList.remove('is-active', 'is-dimmed'); });
+        edges.forEach(function (e) { e.classList.remove('is-dimmed'); });
+      }
+    });
+  }
+
+  buildSvg();
+  wireTabs();
+  wireNodes();
+</script>
+
+</body>
+</html>
