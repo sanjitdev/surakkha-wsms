@@ -1,0 +1,254 @@
+/* ════════════════════════════════════════════════════════════════════
+   app.css — React-app-specific styles layered on top of theme.css.
+   theme.css (in mockups/) owns ALL tokens; this file just composes
+   React-component classes that reference those tokens.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Lockdown tokens are loaded from ../mockups/theme.css via main.tsx.
+   This file should never define a new color, font, or spacing value. */
+
+/* ── Login shell (mirrors 00-login/login.html layout) ────────── */
+.login-shell {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+  .login-shell { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+}
+
+/* ── Brand panel (left half) ─────────────────────────────────── */
+.brand-panel {
+  background: var(--brand-600);
+  color: #f5f7fa;
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  background-image:
+    radial-gradient(at top left, color-mix(in srgb, var(--brand-500) 60%, transparent) 0%, transparent 55%),
+    radial-gradient(at bottom right, color-mix(in srgb, var(--brand-400) 25%, transparent) 0%, transparent 60%);
+}
+
+[data-theme="dark"] .brand-panel {
+  background: linear-gradient(160deg, #0b1a2a 0%, #0f2236 100%);
+  background-image:
+    linear-gradient(160deg, #0b1a2a 0%, #0f2236 100%),
+    radial-gradient(at top left, color-mix(in srgb, var(--brand-500) 30%, transparent) 0%, transparent 55%),
+    radial-gradient(at bottom right, color-mix(in srgb, var(--brand-400) 14%, transparent) 0%, transparent 60%);
+}
+
+.brand-panel__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-md);
+  position: relative;
+  z-index: 1;
+}
+
+.brand-panel__mark-glyph {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid #f5f7fa;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: #f5f7fa;
+}
+
+.brand-panel__mark-text {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+  color: #f5f7fa;
+}
+
+.brand-panel__title {
+  font-size: 1.875rem;
+  line-height: 1.1;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.03em;
+  margin: 0;
+  color: #ffffff;
+  max-width: 16ch;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-panel__live {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: color-mix(in srgb, #f5f7fa 75%, transparent);
+  font-family: var(--font-family-mono);
+}
+
+.brand-panel__live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: login-pulse 1600ms ease-out infinite;
+}
+
+@keyframes login-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-panel__live-dot { animation: none; }
+}
+
+/* ── Picker panel (right half) ───────────────────────────────── */
+.picker-panel {
+  background: var(--bg-base);
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.picker-panel__inner {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.picker-panel__heading {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  color: var(--fg-default);
+  margin: 0 0 var(--space-2xl);
+}
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.persona {
+  display: grid;
+  grid-template-columns: 36px 1fr 20px;
+  gap: var(--space-md);
+  align-items: center;
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--fg-default);
+  transition: border-color 160ms ease-out, background-color 160ms ease-out;
+}
+
+.persona:hover { border-color: var(--border-strong); }
+
+.persona:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 2px;
+}
+
+.persona--selected {
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px var(--brand-100);
+}
+
+[data-theme="dark"] .persona--selected {
+  background: color-mix(in srgb, var(--brand-500) 6%, var(--bg-surface));
+  box-shadow: 0 0 0 3px var(--brand-200);
+}
+
+.persona__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-secondary);
+}
+
+.persona--selected .persona__avatar {
+  background: var(--brand-500);
+  color: var(--bg-surface);
+}
+
+.persona__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-default);
+  line-height: 1.3;
+}
+
+.persona__check {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-default);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bg-surface);
+  font-size: 10px;
+}
+
+.persona--selected .persona__check {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+}
+
+.persona--selected .persona__check::after { content: '✓'; }
+
+.picker-actions {
+  margin-top: var(--space-xl);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ── Status strip (top-right of picker) ──────────────────────── */
+.picker-status {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+  margin-bottom: var(--space-md);
+}
+
+.picker-status__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-tertiary);
+  margin-right: var(--space-xs);
+}
+
+.picker-status--ready .picker-status__dot { background: var(--success); }
+.picker-status--pending .picker-status__dot { background: var(--warning); }
+.picker-status--error .picker-status__dot { background: var(--danger); }

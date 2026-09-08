@@ -1,0 +1,32 @@
+{
+  "name": "surakkha-app",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Surakkha civic water-safety app — React shell on lockdown CSS, MSW mocks for Phase 1.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --noEmit",
+    "mocks:init": "msw init public/ --save"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "idb-keyval": "^6.2.1",
+    "msw": "^2.6.6",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  }
+}
