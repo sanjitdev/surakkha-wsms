@@ -6,15 +6,22 @@
  * visual treatment matches the mockup exactly because both consume
  * mockups/theme.css tokens.
  *
- * Behaviour mirrors the mockup:
+ * Behaviour:
  *   - Click a persona card → selected state
- *   - Click Continue → POST /api/auth/login (via MSW) → redirect to landing
- *   - Live status strip in the picker shows chain height + last-block age
+ *   - Click Continue → POST /api/auth/login (via MSW) → write session
+ *     into IndexedDB → emit `surakkha:session-changed` → `<RoutedSurface>`
+ *     re-reads session + Routes naturally lands on `selected.landing`
+ *     via `<Navigate>`.
+ *   - Live status strip in the picker shows chain height + last-block age.
  *
- * When Story 5 wires Priya's Inbox, "Continue" navigates there.
+ * The chain status is purely informational. The Continue button is
+ * always enabled once a persona is selected — the user shouldn't be
+ * locked out by a slow MSW seed or a transient /api/chain/head 404.
  */
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PERSONAS, type Persona, loginAs } from '../mocks/session';
+import { notifySessionChanged } from '../mocks/session-bus';
 
 const PERSONA_INITIALS: Record<string, string> = {
   priya: 'P',
@@ -22,6 +29,7 @@ const PERSONA_INITIALS: Record<string, string> = {
   pha_approver: 'K',
   pha_viewer: 'V',
   vendor: 'S',
+  karim: 'F', // field technician (avoids clash with pha_approver: K)
 };
 
 interface ChainStatus {
@@ -31,10 +39,12 @@ interface ChainStatus {
 }
 
 export function LoginPage() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<Persona>(PERSONAS[0]);
   const [status, setStatus] = useState<'pending' | 'ready' | 'error'>('pending');
   const [chainHeight, setChainHeight] = useState<number | null>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,15 +76,18 @@ export function LoginPage() {
   async function handleContinue() {
     if (isLoggingIn) return;
     setIsLoggingIn(true);
+    setLoginError(null);
     try {
       await loginAs(selected.id);
-      // Phase 2: real router lands on `selected.landing`. For Phase 1,
-      // the route is unchanged because we have one screen — but we still
-      // push the path so a future router picks it up.
-      window.history.pushState({}, '', selected.landing);
-      window.location.reload(); // simplest way for now to re-evaluate route
+      // Notify <RoutedSurface> to re-read session + navigate to landing.
+      // No window.location.reload — the Routes tree handles the
+      // transition via <Navigate> from the `session ? landing : loginPage>`
+      // element on the `/` route.
+      notifySessionChanged();
+      navigate(selected.landing, { replace: true });
     } catch (err) {
       console.error('[surakkha] login failed', err);
+      setLoginError(err instanceof Error ? err.message : 'login failed');
       setIsLoggingIn(false);
     }
   }
@@ -162,10 +175,15 @@ export function LoginPage() {
               type="button"
               className="button button--primary"
               onClick={handleContinue}
-              disabled={isLoggingIn || status !== 'ready'}
+              disabled={isLoggingIn}
             >
               {isLoggingIn ? 'Signing in…' : 'Continue →'}
             </button>
+            {loginError ? (
+              <div role="alert" className="picker-status picker-status--error" style={{ marginTop: 'var(--space-sm)' }}>
+                {loginError}
+              </div>
+            ) : null}
           </div>
         </div>
       </main>
