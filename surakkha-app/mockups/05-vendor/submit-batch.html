@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Vendor submit batch</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--vendor .sidebar { width: 200px; }
+
+  .vendor-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .vendor-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+  .vendor-sidebar__role { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .vendor-submit {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  .vendor-submit__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--space-xs);
+  }
+  .vendor-submit__sub {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 0 0 var(--space-xl);
+  }
+
+  /* Stepper */
+  .vendor-stepper {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .vendor-step {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    background: var(--bg-surface);
+  }
+  .vendor-step__num {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--bg-inset);
+    color: var(--fg-secondary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-semibold);
+  }
+  .vendor-step.is-on {
+    border-color: var(--brand-500);
+    color: var(--brand-600);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .vendor-step.is-on { background: var(--brand-200); color: var(--brand-400); }
+  .vendor-step.is-on .vendor-step__num {
+    background: var(--brand-500);
+    color: white;
+  }
+  .vendor-step.is-done {
+    border-color: var(--success);
+    color: var(--success);
+    background: var(--success-bg);
+  }
+  .vendor-step.is-done .vendor-step__num {
+    background: var(--success);
+    color: white;
+  }
+  .vendor-step-sep {
+    flex: 1;
+    height: 1px;
+    background: var(--border-subtle);
+    max-width: 24px;
+  }
+
+  /* Reading rows */
+  .vendor-rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-lg);
+  }
+  .vendor-row-edit {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md) var(--space-lg);
+    display: grid;
+    grid-template-columns: 110px 110px 100px 1fr 140px 32px;
+    gap: var(--space-md);
+    align-items: end;
+  }
+  .vendor-row-edit__field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .vendor-row-edit__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .vendor-row-edit__input {
+    width: 100%;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    padding: var(--space-xs) var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    background: var(--bg-base);
+    color: var(--fg-default);
+  }
+  .vendor-row-edit__input:focus {
+    outline: 2px solid var(--brand-400);
+    outline-offset: 1px;
+    border-color: var(--brand-500);
+  }
+  .vendor-row-edit__remove {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    color: var(--fg-tertiary);
+    border-radius: var(--radius-xs);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .vendor-row-edit__remove:hover { color: var(--danger); border-color: var(--danger); }
+
+  .vendor-row-add {
+    background: transparent;
+    border: 1px dashed var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    text-align: center;
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    width: 100%;
+  }
+  .vendor-row-add:hover { border-color: var(--brand-500); color: var(--brand-600); }
+
+  /* Photos block */
+  .vendor-photos {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .vendor-photos__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+  }
+  .vendor-photos__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .vendor-photos__hint {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .vendor-photos__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+  }
+  @media (max-width: 700px) { .vendor-photos__grid { grid-template-columns: repeat(2, 1fr); } }
+  .vendor-photo {
+    aspect-ratio: 4/3;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    cursor: pointer;
+  }
+  .vendor-photo:hover { border-color: var(--brand-500); color: var(--fg-secondary); }
+  .vendor-photo.is-before { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
+  .vendor-photo.is-after  { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+  .vendor-photo__tag {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Sign block — cryptographic sig before submit */
+  .vendor-sign {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-lg);
+    align-items: center;
+  }
+  .vendor-sign__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-xs);
+  }
+  .vendor-sign__sub {
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .vendor-sign__preview {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    padding: var(--space-sm);
+    margin-top: var(--space-sm);
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  /* Submit bar */
+  .vendor-submit-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: var(--space-md);
+    align-items: center;
+    box-shadow: var(--shadow-modal);
+  }
+  .vendor-submit-bar__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    line-height: 1.5;
+  }
+  .vendor-submit-bar__meta strong { color: var(--fg-default); }
+  .vendor-submit-bar__save {
+    background: transparent;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    color: var(--fg-secondary);
+  }
+  .vendor-submit-bar__cta {
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-md) var(--space-xl);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+  }
+  .vendor-submit-bar__cta:disabled {
+    background: var(--fg-disabled);
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--vendor">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="fleet.html">SURAKKHA</a>
+      <div class="vendor-sidebar__welcome">
+        <div class="vendor-sidebar__name">Acme Sensors</div>
+        <div class="vendor-sidebar__role">vendor · 18 sensors</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="fleet.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg>
+          </span>
+          <span>Fleet</span>
+        </a>
+        <a href="submit-batch.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+          </span>
+          <span>Submit batch</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <a href="fleet.html" style="font-size: var(--font-size-xs); color: var(--fg-secondary); text-decoration: none;">← Back to fleet</a>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Acme Sensors · vendor</span>
+        </div>
+      </header>
+
+      <main class="vendor-submit">
+
+        <h1 class="vendor-submit__title">Submit readings batch</h1>
+        <p class="vendor-submit__sub">Add one row per (sensor, parameter) reading. Captured-at timestamps must be within 30 min of submission. Photos are optional and only required if you're reporting a fix.</p>
+
+        <!-- Stepper -->
+        <div class="vendor-stepper">
+          <span class="vendor-step is-done"><span class="vendor-step__num">1</span> Sensor</span>
+          <span class="vendor-step-sep"></span>
+          <span class="vendor-step is-on"><span class="vendor-step__num">2</span> Reading</span>
+          <span class="vendor-step-sep"></span>
+          <span class="vendor-step">Photos</span>
+          <span class="vendor-step-sep"></span>
+          <span class="vendor-step">Sign &amp; submit</span>
+        </div>
+
+        <!-- Reading rows -->
+        <div class="vendor-rows">
+
+          <div class="vendor-row-edit">
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Sensor</label>
+              <input class="vendor-row-edit__input" value="w7-ph-04" readonly>
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Parameter</label>
+              <input class="vendor-row-edit__input" value="pH" readonly>
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Value</label>
+              <input class="vendor-row-edit__input" value="7.1">
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Notes</label>
+              <input class="vendor-row-edit__input" value="school kitchen tap, post-chlorination">
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Captured at</label>
+              <input class="vendor-row-edit__input" value="14:08:22">
+            </div>
+            <button class="vendor-row-edit__remove" title="Remove row">×</button>
+          </div>
+
+          <div class="vendor-row-edit">
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Sensor</label>
+              <input class="vendor-row-edit__input" value="w7-tb-09" readonly>
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Parameter</label>
+              <input class="vendor-row-edit__input" value="turbidity" readonly>
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Value</label>
+              <input class="vendor-row-edit__input" value="3.8 NTU">
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Notes</label>
+              <input class="vendor-row-edit__input" value="reservoir 09, post-flush">
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Captured at</label>
+              <input class="vendor-row-edit__input" value="14:09:51">
+            </div>
+            <button class="vendor-row-edit__remove" title="Remove row">×</button>
+          </div>
+
+          <div class="vendor-row-edit">
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Sensor</label>
+              <input class="vendor-row-edit__input" value="w3-ph-01" readonly>
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Parameter</label>
+              <input class="vendor-row-edit__input" value="pH" readonly>
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Value</label>
+              <input class="vendor-row-edit__input" value="7.2">
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Notes</label>
+              <input class="vendor-row-edit__input" value="main pump, in-spec">
+            </div>
+            <div class="vendor-row-edit__field">
+              <label class="vendor-row-edit__label">Captured at</label>
+              <input class="vendor-row-edit__input" value="14:11:03">
+            </div>
+            <button class="vendor-row-edit__remove" title="Remove row">×</button>
+          </div>
+
+        </div>
+
+        <button class="vendor-row-add">+ Add another reading</button>
+
+        <!-- Before / After Photos (per earlier AD-OPT — placeholder thumbnails) -->
+        <div class="vendor-photos">
+          <div class="vendor-photos__head">
+            <h3 class="vendor-photos__title">Before / After photos <span style="font-weight: var(--font-weight-regular); color: var(--fg-tertiary); font-size: var(--font-size-xs);">— optional, only if reporting a fix</span></h3>
+            <span class="vendor-photos__hint">2 of 4 used</span>
+          </div>
+          <div class="vendor-photos__grid">
+            <div class="vendor-photo is-before">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <span class="vendor-photo__tag">before</span>
+              <span>w11-ph-03 housing</span>
+            </div>
+            <div class="vendor-photo is-after">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>
+              <span class="vendor-photo__tag">after</span>
+              <span>w11-ph-03 resealed</span>
+            </div>
+            <div class="vendor-photo">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              <span>tap to add</span>
+            </div>
+            <div class="vendor-photo">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              <span>tap to add</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sign block (signature preview) -->
+        <div class="vendor-sign">
+          <div>
+            <h3 class="vendor-sign__title">Cryptographic signature</h3>
+            <p class="vendor-sign__sub">Your device's vendor key will sign each row. The chain records the signature alongside the reading — operators verify it on ingest. If you change a value above, the signature recomputes on submit.</p>
+            <div class="vendor-sign__preview">sig_preview: 0x4f8a…c2e3 · ed25519 · device key fingerprint acme-12-2024Q4</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em;">device</div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">field-tablet-07</div>
+          </div>
+        </div>
+
+        <!-- Submit bar -->
+        <div class="vendor-submit-bar">
+          <span class="vendor-submit-bar__meta">
+            <strong>3 readings</strong> · 2 photos · ready to sign · chain head 0x9f1a…4e7
+          </span>
+          <button class="vendor-submit-bar__save">Save as draft</button>
+          <button class="vendor-submit-bar__cta">Sign &amp; submit batch →</button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Add-row stub — append a new empty edit row
+    document.querySelector('.vendor-row-add').addEventListener('click', function (e) {
+      e.preventDefault();
+      var list = document.querySelector('.vendor-rows');
+      var newRow = document.querySelector('.vendor-row-edit').cloneNode(true);
+      newRow.querySelectorAll('input').forEach(function (i, idx) {
+        if (idx < 2) return; // keep sensor + param
+        i.value = '';
+      });
+      list.appendChild(newRow);
+    });
+
+    // Remove-row stub
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('.vendor-row-edit__remove');
+      if (!btn) return;
+      btn.closest('.vendor-row-edit').remove();
+    });
+  </script>
+</body>
+</html>

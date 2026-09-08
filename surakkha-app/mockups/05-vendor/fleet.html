@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Vendor fleet (sensor status)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--vendor .sidebar { width: 200px; }
+
+  .vendor-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .vendor-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+  .vendor-sidebar__role { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Fleet KPI row */
+  .vendor-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  @media (max-width: 1100px) { .vendor-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+  .vendor-kpi {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+  }
+  .vendor-kpi__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+  .vendor-kpi__dot { width: 8px; height: 8px; border-radius: 50%; }
+  .vendor-kpi__val {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .vendor-kpi__sub {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+
+  /* Filter pills */
+  .vendor-filters {
+    display: flex;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .vendor-filter {
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--bg-surface);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    cursor: pointer;
+    color: var(--fg-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .vendor-filter.is-active {
+    background: var(--brand-100);
+    border-color: var(--brand-500);
+    color: var(--brand-600);
+    font-weight: var(--font-weight-semibold);
+  }
+  [data-theme="dark"] .vendor-filter.is-active { background: var(--brand-200); color: var(--brand-400); }
+  .vendor-filter__count {
+    background: var(--bg-inset);
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    min-width: 18px;
+    text-align: center;
+  }
+  .vendor-filter.is-active .vendor-filter__count { background: var(--brand-500); color: white; }
+
+  /* Fleet table */
+  .vendor-table {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .vendor-table__head, .vendor-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 110px 130px 110px 140px 120px;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    align-items: center;
+  }
+  .vendor-table__head {
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .vendor-row {
+    border-bottom: 1px solid var(--border-subtle);
+    cursor: pointer;
+    background: var(--bg-surface);
+    transition: background-color 120ms ease-out;
+  }
+  .vendor-row:last-child { border-bottom: none; }
+  .vendor-row:hover { background: var(--bg-subtle); }
+  .vendor-row.is-offline { opacity: 0.85; }
+  .vendor-row.is-tampering { background: var(--danger-bg); }
+  .vendor-row.is-tampering:hover { background: var(--danger-bg); }
+
+  .vendor-sensor-id {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-default);
+    font-weight: var(--font-weight-semibold);
+  }
+  .vendor-ward {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+  }
+  .vendor-ward__sub {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    display: block;
+  }
+  .vendor-param {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+
+  /* Status pill — matches dim-7 5-state machine */
+  .v-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px var(--space-sm);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .v-pill__dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .v-pill--nominal   { background: var(--success-bg); color: var(--success); }
+  .v-pill--nominal   .v-pill__dot { background: var(--success); }
+  .v-pill--caution   { background: var(--warning-bg); color: var(--warning); }
+  .v-pill--caution   .v-pill__dot { background: var(--warning); }
+  .v-pill--breach    { background: var(--danger-bg);  color: var(--danger); }
+  .v-pill--breach    .v-pill__dot { background: var(--danger); }
+  .v-pill--degraded  { background: var(--bg-inset);    color: var(--fg-secondary); }
+  .v-pill--degraded  .v-pill__dot { background: var(--fg-tertiary); }
+  .v-pill--offline   { background: var(--danger-bg);  color: var(--danger); }
+  .v-pill--offline   .v-pill__dot { background: var(--danger); }
+
+  /* Calibration status — secondary column */
+  .vendor-cal {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .vendor-cal--due {
+    color: var(--warning);
+    font-weight: var(--font-weight-semibold);
+  }
+  .vendor-cal--overdue {
+    color: var(--danger);
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Battery */
+  .vendor-batt {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+  }
+  .vendor-batt__bar {
+    width: 36px;
+    height: 6px;
+    background: var(--bg-inset);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .vendor-batt__fill { height: 100%; background: var(--success); }
+  .vendor-batt--low .vendor-batt__fill { background: var(--warning); }
+  .vendor-batt--crit .vendor-batt__fill { background: var(--danger); }
+
+  /* Submit batch CTA bar (sticky bottom) */
+  .vendor-submit-bar {
+    position: sticky;
+    bottom: 0;
+    margin-top: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    box-shadow: var(--shadow-modal);
+  }
+  .vendor-submit-bar__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .vendor-submit-bar__btn {
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-xl);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+  }
+
+  /* Tampering flag callout */
+  .vendor-tamper-row {
+    background: var(--danger-bg);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-md);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-md);
+    align-items: center;
+  }
+  .vendor-tamper-row__icon {
+    width: 32px; height: 32px;
+    background: var(--danger);
+    color: white;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .vendor-tamper-row__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--danger);
+    margin: 0 0 2px;
+  }
+  .vendor-tamper-row__sub {
+    font-size: var(--font-size-xs);
+    color: var(--danger);
+    margin: 0;
+    opacity: 0.85;
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--vendor">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="fleet.html">SURAKKHA</a>
+      <div class="vendor-sidebar__welcome">
+        <div class="vendor-sidebar__name">Acme Sensors</div>
+        <div class="vendor-sidebar__role">vendor · 18 sensors</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="fleet.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg>
+          </span>
+          <span>Fleet</span>
+        </a>
+        <a href="submit-batch.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+          </span>
+          <span>Submit batch</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.5s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Acme Sensors · vendor</span>
+        </div>
+      </header>
+
+      <main class="container--wide">
+
+        <div class="page-header">
+          <div class="page-header__row">
+            <div>
+              <h1>Fleet status</h1>
+              <div class="page-header__sub">18 sensors across 6 wards · last batch ingest 12 min ago</div>
+            </div>
+            <div style="display: flex; gap: var(--space-sm);">
+              <button class="button button--secondary" type="button">
+                <span class="sidebar__icon" aria-hidden="true" style="width:14px;height:14px;"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="8"/></svg></span>
+                Search sensor
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI row — counts per status -->
+        <div class="vendor-kpi-row">
+          <div class="vendor-kpi">
+            <span class="vendor-kpi__label"><span class="vendor-kpi__dot" style="background: var(--success);"></span>Nominal</span>
+            <span class="vendor-kpi__val">14</span>
+            <span class="vendor-kpi__sub">last reading &lt; 5 min</span>
+          </div>
+          <div class="vendor-kpi">
+            <span class="vendor-kpi__label"><span class="vendor-kpi__dot" style="background: var(--warning);"></span>Caution</span>
+            <span class="vendor-kpi__val">2</span>
+            <span class="vendor-kpi__sub">borderline · &gt; 30 min</span>
+          </div>
+          <div class="vendor-kpi">
+            <span class="vendor-kpi__label"><span class="vendor-kpi__dot" style="background: var(--danger);"></span>Breach</span>
+            <span class="vendor-kpi__val">0</span>
+            <span class="vendor-kpi__sub">threshold crossed</span>
+          </div>
+          <div class="vendor-kpi">
+            <span class="vendor-kpi__label"><span class="vendor-kpi__dot" style="background: var(--fg-tertiary);"></span>Degraded</span>
+            <span class="vendor-kpi__val">1</span>
+            <span class="vendor-kpi__sub">battery / signal low</span>
+          </div>
+          <div class="vendor-kpi">
+            <span class="vendor-kpi__label"><span class="vendor-kpi__dot" style="background: var(--danger);"></span>Offline</span>
+            <span class="vendor-kpi__val">1</span>
+            <span class="vendor-kpi__sub">silent &gt; 30 min</span>
+          </div>
+        </div>
+
+        <!-- Tampering callout -->
+        <div class="vendor-tamper-row">
+          <div class="vendor-tamper-row__icon">
+            <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="m10.29 3.86-8.5 14.71A2 2 0 0 0 3.51 22h16.98a2 2 0 0 0 1.72-3.43l-8.5-14.71a2 2 0 0 0-3.42 0Z"/></svg>
+          </div>
+          <div>
+            <p class="vendor-tamper-row__title">Tampering flagged · sensor w11-ph-03</p>
+            <p class="vendor-tamper-row__sub">Housing-open event detected 02:14 · reading inconsistent with neighbours · chain event evt_01HE9T8</p>
+          </div>
+          <button class="button button--secondary" style="height: 32px; font-size: var(--font-size-xs);">Drilldown →</button>
+        </div>
+
+        <!-- Filter pills -->
+        <div class="vendor-filters">
+          <button class="vendor-filter is-active">All <span class="vendor-filter__count">18</span></button>
+          <button class="vendor-filter"><span style="width:6px;height:6px;border-radius:50%;background:var(--success);"></span>Nominal <span class="vendor-filter__count">14</span></button>
+          <button class="vendor-filter"><span style="width:6px;height:6px;border-radius:50%;background:var(--warning);"></span>Caution <span class="vendor-filter__count">2</span></button>
+          <button class="vendor-filter"><span style="width:6px;height:6px;border-radius:50%;background:var(--fg-tertiary);"></span>Degraded <span class="vendor-filter__count">1</span></button>
+          <button class="vendor-filter"><span style="width:6px;height:6px;border-radius:50%;background:var(--danger);"></span>Offline <span class="vendor-filter__count">1</span></button>
+          <button class="vendor-filter"><span style="width:6px;height:6px;border-radius:50%;background:var(--danger);"></span>Tampering <span class="vendor-filter__count">1</span></button>
+          <button class="vendor-filter">Calibration due <span class="vendor-filter__count">3</span></button>
+        </div>
+
+        <!-- Fleet table -->
+        <div class="vendor-table">
+          <div class="vendor-table__head">
+            <span>Sensor</span>
+            <span>Ward · site</span>
+            <span>Parameter</span>
+            <span>Last reading</span>
+            <span>Δ update</span>
+            <span>Status</span>
+            <span>Battery · Cal</span>
+          </div>
+
+          <!-- Tampering row -->
+          <div class="vendor-row is-tampering">
+            <div class="vendor-sensor-id">w11-ph-03</div>
+            <div class="vendor-ward">Ward 11<span class="vendor-ward__sub">Highway pump 03</span></div>
+            <div class="vendor-param">pH</div>
+            <div class="vendor-param">7.4 ± 0.1</div>
+            <div class="vendor-param" style="color: var(--danger);">flagged</div>
+            <div><span class="v-pill v-pill--breach"><span class="v-pill__dot"></span>Tampering</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 72%;"></div></div>72%</div>
+              <div class="vendor-cal">Cal · Nov 12</div>
+            </div>
+          </div>
+
+          <!-- Offline row -->
+          <div class="vendor-row is-offline">
+            <div class="vendor-sensor-id">w5-ph-04</div>
+            <div class="vendor-ward">Ward 5<span class="vendor-ward__sub">Pump station 04</span></div>
+            <div class="vendor-param">pH</div>
+            <div class="vendor-param" style="color: var(--fg-tertiary);">— (silent)</div>
+            <div class="vendor-param" style="color: var(--danger);">silent 47m</div>
+            <div><span class="v-pill v-pill--offline"><span class="v-pill__dot"></span>Offline</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 0%;"></div></div>—</div>
+              <div class="vendor-cal vendor-cal--overdue">Cal overdue · 6d</div>
+            </div>
+          </div>
+
+          <!-- Degraded row -->
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w9-tb-12</div>
+            <div class="vendor-ward">Ward 9<span class="vendor-ward__sub">School roof 12</span></div>
+            <div class="vendor-param">turbidity</div>
+            <div class="vendor-param">1.2 NTU</div>
+            <div class="vendor-param">8 min ago</div>
+            <div><span class="v-pill v-pill--degraded"><span class="v-pill__dot"></span>Degraded</span></div>
+            <div>
+              <div class="vendor-batt vendor-batt--crit"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 12%;"></div></div>12%</div>
+              <div class="vendor-cal vendor-cal--overdue">Cal overdue · 12d</div>
+            </div>
+          </div>
+
+          <!-- Caution row 1 -->
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w7-tb-09</div>
+            <div class="vendor-ward">Ward 7<span class="vendor-ward__sub">Reservoir 09</span></div>
+            <div class="vendor-param">turbidity</div>
+            <div class="vendor-param">3.8 NTU</div>
+            <div class="vendor-param" style="color: var(--warning);">42 min ago</div>
+            <div><span class="v-pill v-pill--caution"><span class="v-pill__dot"></span>Caution</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 64%;"></div></div>64%</div>
+              <div class="vendor-cal vendor-cal--due">Cal due · 3d</div>
+            </div>
+          </div>
+
+          <!-- Caution row 2 -->
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w12-ph-02</div>
+            <div class="vendor-ward">Ward 12<span class="vendor-ward__sub">Apartment block 02</span></div>
+            <div class="vendor-param">pH</div>
+            <div class="vendor-param">6.4</div>
+            <div class="vendor-param" style="color: var(--warning);">38 min ago</div>
+            <div><span class="v-pill v-pill--caution"><span class="v-pill__dot"></span>Caution</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 81%;"></div></div>81%</div>
+              <div class="vendor-cal">Cal · Oct 28</div>
+            </div>
+          </div>
+
+          <!-- Nominal rows -->
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w7-ph-04</div>
+            <div class="vendor-ward">Ward 7<span class="vendor-ward__sub">School pump 04</span></div>
+            <div class="vendor-param">pH</div>
+            <div class="vendor-param">7.1</div>
+            <div class="vendor-param">3 min ago</div>
+            <div><span class="v-pill v-pill--nominal"><span class="v-pill__dot"></span>Nominal</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 88%;"></div></div>88%</div>
+              <div class="vendor-cal">Cal · Dec 01</div>
+            </div>
+          </div>
+
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w3-ph-01</div>
+            <div class="vendor-ward">Ward 3<span class="vendor-ward__sub">Main pump 01</span></div>
+            <div class="vendor-param">pH</div>
+            <div class="vendor-param">7.2</div>
+            <div class="vendor-param">2 min ago</div>
+            <div><span class="v-pill v-pill--nominal"><span class="v-pill__dot"></span>Nominal</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 92%;"></div></div>92%</div>
+              <div class="vendor-cal">Cal · Nov 18</div>
+            </div>
+          </div>
+
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w5-cl-02</div>
+            <div class="vendor-ward">Ward 5<span class="vendor-ward__sub">Chlorinator 02</span></div>
+            <div class="vendor-param">chlorine</div>
+            <div class="vendor-param">0.6 mg/L</div>
+            <div class="vendor-param">1 min ago</div>
+            <div><span class="v-pill v-pill--nominal"><span class="v-pill__dot"></span>Nominal</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 75%;"></div></div>75%</div>
+              <div class="vendor-cal vendor-cal--due">Cal due · 5d</div>
+            </div>
+          </div>
+
+          <div class="vendor-row">
+            <div class="vendor-sensor-id">w2-ph-07</div>
+            <div class="vendor-ward">Ward 2<span class="vendor-ward__sub">Tank 07</span></div>
+            <div class="vendor-param">pH</div>
+            <div class="vendor-param">7.3</div>
+            <div class="vendor-param">4 min ago</div>
+            <div><span class="v-pill v-pill--nominal"><span class="v-pill__dot"></span>Nominal</span></div>
+            <div>
+              <div class="vendor-batt"><div class="vendor-batt__bar"><div class="vendor-batt__fill" style="width: 67%;"></div></div>67%</div>
+              <div class="vendor-cal">Cal · Nov 22</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Submit batch CTA -->
+        <div class="vendor-submit-bar">
+          <span class="vendor-submit-bar__meta">2 sensors need attention · w5-ph-04 silent · w9-tb-12 battery critical</span>
+          <a href="submit-batch.html" class="vendor-submit-bar__btn">Submit readings batch →</a>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Filter pill toggle
+    document.querySelectorAll('.vendor-filter').forEach(function (f) {
+      f.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelectorAll('.vendor-filter').forEach(function (x) { x.classList.remove('is-active'); });
+        f.classList.add('is-active');
+      });
+    });
+  </script>
+</body>
+</html>
