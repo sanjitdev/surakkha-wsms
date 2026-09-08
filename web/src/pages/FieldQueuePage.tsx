@@ -121,7 +121,7 @@ export function FieldQueuePage() {
     onsite: rows.filter((r) => r.status === 'onsite').length,
   };
 
-  const chipLabel: Record<Filter, string> = {
+  const chipFilterLabel: Record<Filter, string> = {
     all: 'All',
     P1: 'P1 critical',
     P2: 'P2',
@@ -236,14 +236,14 @@ export function FieldQueuePage() {
           </div>
 
           <div className="tech-chips">
-            {(Object.keys(chipLabel) as Filter[]).map((f) => (
+            {(Object.keys(chipFilterLabel) as Filter[]).map((f) => (
               <button
                 key={f}
                 type="button"
                 className={'tech-chip' + (filter === f ? ' is-on' : '')}
                 onClick={() => setFilter(f)}
               >
-                {chipLabel[f]} <span className="tech-chip__count">{chipCounts[f]}</span>
+                {chipFilterLabel[f]} <span className="tech-chip__count">{chipCounts[f]}</span>
               </button>
             ))}
           </div>
