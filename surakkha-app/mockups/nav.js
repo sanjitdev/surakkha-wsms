@@ -242,6 +242,25 @@
     });
   }
 
+  // ───────────────────────────────────────────────────────── theme toggle
+  // Hooks the bottom-right "◐ Theme" button. Persists choice so the
+  // pre-paint init script in each HTML <head> can re-apply it on next
+  // load (avoids flash of wrong theme).
+  //
+  // Dark is the default — `surakkha.theme === 'light'` means user has
+  // explicitly opted into light mode. Anything else (or missing) = dark.
+  function wireThemeToggle() {
+    var btn = document.querySelector('.theme-toggle');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var current = 'dark';
+      try { current = localStorage.getItem('surakkha.theme') || 'dark'; } catch (e) {}
+      var next = current === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem('surakkha.theme', next); } catch (e) {}
+      document.documentElement.dataset.theme = next === 'light' ? 'light' : '';
+    });
+  }
+
   // ───────────────────────────────────────────────────────── helpers
 
   function readPersonaId() {
@@ -259,6 +278,7 @@
     wireTopChrome();
     wireSidebar();
     wireLogout();
+    wireThemeToggle();
   }
 
   if (document.readyState === 'loading') {

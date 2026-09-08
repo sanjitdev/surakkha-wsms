@@ -6,7 +6,46 @@
    ════════════════════════════════════════════════════════════════════ */
 
 /* ── Color tokens (dim 1) ────────────────────────────────────────── */
-:root,
+/* Dark is the default theme (no attribute on <html> needed).
+   Light is selected via [data-theme="light"] on <html>. */
+:root {
+  --bg-base:        #0E1013;
+  --bg-surface:     #16191D;
+  --bg-subtle:      #1C2025;
+  --bg-inset:       #22272D;
+
+  --fg-default:     #ECEDEE;
+  --fg-secondary:   #B5B9BF;
+  --fg-tertiary:    #80858C;
+  --fg-disabled:    #54585E;
+
+  --border-subtle:  #23272D;
+  --border-default: #2E333A;
+  --border-strong:  #4A4F57;
+
+  --brand-600:      #4A8AC4;
+  --brand-500:      #5C9AD0;
+  --brand-400:      #76AEDF;
+  --brand-200:      #2B3E55;
+  --brand-100:      #1F2D3D;
+
+  --success:        #5DB287;
+  --success-bg:     #1A2D24;
+  --warning:        #D6A865;
+  --warning-bg:     #2D2418;
+  --danger:         #D8806E;
+  --danger-bg:      #2D1F1B;
+  --info:           #76AEDF;
+  --info-bg:        #1F2D3D;
+
+  --band-high:      #3E9B6E;
+  --band-medium:    #8A8E94;
+  --band-low:       #5A5C60;
+
+  --shadow-modal:   0 4px 12px rgba(0,0,0,0.32);
+  color-scheme: dark;
+}
+
 [data-theme="light"] {
   --bg-base:        #F7F7F5;
   --bg-surface:     #FFFFFF;
@@ -47,44 +86,6 @@
 
   --shadow-modal:   0 4px 12px rgba(0,0,0,0.08);
   color-scheme: light;
-}
-
-[data-theme="dark"] {
-  --bg-base:        #0E1013;
-  --bg-surface:     #16191D;
-  --bg-subtle:      #1C2025;
-  --bg-inset:       #22272D;
-
-  --fg-default:     #ECEDEE;
-  --fg-secondary:   #B5B9BF;
-  --fg-tertiary:    #80858C;
-  --fg-disabled:    #54585E;
-
-  --border-subtle:  #23272D;
-  --border-default: #2E333A;
-  --border-strong:  #4A4F57;
-
-  --brand-600:      #4A8AC4;
-  --brand-500:      #5C9AD0;
-  --brand-400:      #76AEDF;
-  --brand-200:      #2B3E55;
-  --brand-100:      #1F2D3D;
-
-  --success:        #5DB287;
-  --success-bg:     #1A2D24;
-  --warning:        #D6A865;
-  --warning-bg:     #2D2418;
-  --danger:         #D8806E;
-  --danger-bg:      #2D1F1B;
-  --info:           #76AEDF;
-  --info-bg:        #1F2D3D;
-
-  --band-high:      #3E9B6E;
-  --band-medium:    #8A8E94;
-  --band-low:       #5A5C60;
-
-  --shadow-modal:   0 4px 12px rgba(0,0,0,0.32);
-  color-scheme: dark;
 }
 
 /* ── Typography tokens (dim 2) ───────────────────────────────────── */
