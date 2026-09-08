@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Field tech history (past fixes)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--tech .sidebar { width: 200px; }
+
+  .tech-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .tech-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+  .tech-sidebar__role { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* Stats strip */
+  .tech-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
+  }
+  @media (max-width: 1100px) { .tech-stats { grid-template-columns: repeat(2, 1fr); } }
+  .tech-stats__cell {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .tech-stats__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: var(--space-xs);
+  }
+  .tech-stats__val {
+    font-size: var(--font-size-xxl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: var(--space-xs);
+  }
+  .tech-stats__sub {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+
+  /* Filters */
+  .tech-filters {
+    display: flex;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .tech-filter {
+    padding: var(--space-xs) var(--space-md);
+    border: 1px solid var(--border-default);
+    border-radius: 999px;
+    background: var(--bg-surface);
+    font-size: var(--font-size-xs);
+    font-family: var(--font-family-mono);
+    cursor: pointer;
+    color: var(--fg-secondary);
+  }
+  .tech-filter.is-on {
+    background: var(--brand-100);
+    border-color: var(--brand-500);
+    color: var(--brand-600);
+    font-weight: var(--font-weight-semibold);
+  }
+  [data-theme="dark"] .tech-filter.is-on { background: var(--brand-200); color: var(--brand-400); }
+
+  /* History table */
+  .tech-history {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .tech-history__head, .tech-history__row {
+    display: grid;
+    grid-template-columns: 120px 1fr 110px 110px 110px 130px;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg);
+    align-items: center;
+  }
+  .tech-history__head {
+    background: var(--bg-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .tech-history__row {
+    border-bottom: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: background-color 120ms ease-out;
+  }
+  .tech-history__row:last-child { border-bottom: none; }
+  .tech-history__row:hover { background: var(--bg-subtle); }
+
+  .tech-history__date {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-default);
+  }
+  .tech-history__date strong {
+    display: block;
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+  }
+  .tech-history__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    margin: 0 0 2px;
+    line-height: 1.3;
+  }
+  .tech-history__sub {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .tech-history__ticket {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .tech-history__photo-count {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-secondary);
+  }
+
+  /* Detail expansion (expandable) */
+  .tech-history__detail {
+    display: none;
+    padding: var(--space-md) var(--space-lg) var(--space-lg) 132px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--bg-base);
+  }
+  .tech-history__detail.is-on { display: block; }
+  .tech-history__detail-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-lg);
+  }
+  .tech-history__narrative {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    line-height: 1.5;
+    margin: 0 0 var(--space-md);
+  }
+  .tech-history__photos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-sm);
+  }
+  @media (max-width: 700px) { .tech-history__photos { grid-template-columns: repeat(2, 1fr); } }
+  .tech-history__photo {
+    aspect-ratio: 4/3;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .tech-history__photo.is-before { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
+  .tech-history__photo.is-after  { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+
+  /* Pills */
+  .t-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px var(--space-sm);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .t-pill--resolved { background: var(--success-bg); color: var(--success); }
+  .t-pill__dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--tech">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="work-queue.html">SURAKKHA</a>
+      <div class="tech-sidebar__welcome">
+        <div class="tech-sidebar__name">Ramesh Kumar</div>
+        <div class="tech-sidebar__role">field tech · NE zone</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="work-queue.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>Work queue</span>
+        </a>
+        <a href="my-day.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          </span>
+          <span>My day</span>
+        </a>
+        <a href="incident-detail.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          </span>
+          <span>Incident detail</span>
+        </a>
+        <a href="history.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="3 12 6 9 13 16 21 6"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>History</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.5s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Ramesh · field tech · NE zone</span>
+        </div>
+      </header>
+
+      <main class="container--wide">
+
+        <div class="page-header">
+          <div class="page-header__row">
+            <div>
+              <h1>My history</h1>
+              <div class="page-header__sub">Read-only archive of every incident you've closed. Photos and signed events are on the chain.</div>
+            </div>
+            <div style="display: flex; gap: var(--space-sm);">
+              <button class="button button--secondary" type="button">Export CSV</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats strip -->
+        <div class="tech-stats">
+          <div class="tech-stats__cell">
+            <span class="tech-stats__label">Closed (30d)</span>
+            <span class="tech-stats__val">42</span>
+            <span class="tech-stats__sub">avg close 1h 47m</span>
+          </div>
+          <div class="tech-stats__cell">
+            <span class="tech-stats__label">SLA hit</span>
+            <span class="tech-stats__val" style="color: var(--success);">92%</span>
+            <span class="tech-stats__sub">9 breaches in 30d</span>
+          </div>
+          <div class="tech-stats__cell">
+            <span class="tech-stats__label">Rework rate</span>
+            <span class="tech-stats__val">4%</span>
+            <span class="tech-stats__sub">2 returns in 30d</span>
+          </div>
+          <div class="tech-stats__cell">
+            <span class="tech-stats__label">Photos attached</span>
+            <span class="tech-stats__val">128</span>
+            <span class="tech-stats__sub">avg 3.0 per fix</span>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="tech-filters">
+          <button class="tech-filter is-on">All <span style="opacity:0.6; margin-left:4px;">42</span></button>
+          <button class="tech-filter">P1 critical <span style="opacity:0.6; margin-left:4px;">8</span></button>
+          <button class="tech-filter">P2 <span style="opacity:0.6; margin-left:4px;">21</span></button>
+          <button class="tech-filter">P3 routine <span style="opacity:0.6; margin-left:4px;">13</span></button>
+          <button class="tech-filter">Sensor hardware <span style="opacity:0.6; margin-left:4px;">14</span></button>
+          <button class="tech-filter">Chlorinator <span style="opacity:0.6; margin-left:4px;">7</span></button>
+          <button class="tech-filter">With rework <span style="opacity:0.6; margin-left:4px;">2</span></button>
+        </div>
+
+        <!-- History list (expandable rows) -->
+        <div class="tech-history">
+          <div class="tech-history__head">
+            <span>Closed</span>
+            <span>Incident</span>
+            <span>Priority</span>
+            <span>Close time</span>
+            <span>Photos</span>
+            <span>Ticket</span>
+          </div>
+
+          <div class="tech-history__row" data-history="1">
+            <div class="tech-history__date"><strong>Tue · 07:42</strong>today</div>
+            <div>
+              <p class="tech-history__title">w5-cl-02 · chlorinator nozzle swap</p>
+              <p class="tech-history__sub">replaced clogged nozzle · flow back to nominal 0.6 mg/L</p>
+            </div>
+            <div><span class="t-pill t-pill--resolved"><span class="t-pill__dot"></span>P3</span></div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--success);">23 min</div>
+            <div class="tech-history__photo-count">2 photos</div>
+            <div class="tech-history__ticket">evt_01HE9K8</div>
+          </div>
+          <div class="tech-history__detail" data-history-detail="1">
+            <div class="tech-history__detail-grid">
+              <div>
+                <p class="tech-history__narrative">Nozzle on chlorinator 02 was clogged with mineral scale. Replaced with new nozzle (chlorinator-kit-B, serial 4421). Flushed line, confirmed flow at 0.6 mg/L residual. Customer (school admin) notified.</p>
+                <div class="tech-history__photos">
+                  <div class="tech-history__photo is-before">before<br>scaled</div>
+                  <div class="tech-history__photo is-after">after<br>clean</div>
+                </div>
+              </div>
+              <div>
+                <div class="tech-history__sub" style="margin-bottom: 4px;">SIGNED ON CHAIN</div>
+                <div style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); line-height: 1.5;">
+                  TechnicianArrived · 07:19:11<br>
+                  FixSubmitted · 07:38:42<br>
+                  IncidentResolved · 07:42:18<br>
+                  sig · 0x4d…a2f
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tech-history__row" data-history="2">
+            <div class="tech-history__date"><strong>Mon · 15:08</strong>yesterday</div>
+            <div>
+              <p class="tech-history__title">w9-tb-12 · recalibrate after drift</p>
+              <p class="tech-history__sub">3.6 → 0.4 NTU after recal · photo included</p>
+            </div>
+            <div><span class="t-pill t-pill--resolved"><span class="t-pill__dot"></span>P2</span></div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs);">1h 14m</div>
+            <div class="tech-history__photo-count">3 photos</div>
+            <div class="tech-history__ticket">evt_01HE9DR</div>
+          </div>
+          <div class="tech-history__detail" data-history-detail="2">
+            <div class="tech-history__detail-grid">
+              <div>
+                <p class="tech-history__narrative">Turbidity reading was drifting upward for 3 days running. Recalibrated using formazin 4000 NTU reference. Post-cal within 0.4 NTU of lab sample. Cleared fault flag.</p>
+                <div class="tech-history__photos">
+                  <div class="tech-history__photo">diag-1</div>
+                  <div class="tech-history__photo is-before">before<br>3.6 NTU</div>
+                  <div class="tech-history__photo is-after">after<br>0.4 NTU</div>
+                </div>
+              </div>
+              <div>
+                <div class="tech-history__sub" style="margin-bottom: 4px;">SIGNED ON CHAIN</div>
+                <div style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); line-height: 1.5;">
+                  TechnicianArrived · 13:54:02<br>
+                  DiagnosisSubmitted · 14:21:18<br>
+                  FixSubmitted · 14:55:09<br>
+                  IncidentResolved · 15:08:33<br>
+                  sig · 0x8c…71b
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tech-history__row" data-history="3">
+            <div class="tech-history__date"><strong>Sun · 11:22</strong>3d ago</div>
+            <div>
+              <p class="tech-history__title">w3-ph-01 · quarterly cal check (routine)</p>
+              <p class="tech-history__sub">in-spec · next cal 90d · no fix needed</p>
+            </div>
+            <div><span class="t-pill t-pill--resolved"><span class="t-pill__dot"></span>P3</span></div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs);">29 min</div>
+            <div class="tech-history__photo-count">1 photo</div>
+            <div class="tech-history__ticket">evt_01HE8F2</div>
+          </div>
+
+          <div class="tech-history__row" data-history="4">
+            <div class="tech-history__date"><strong>Sat · 09:55</strong>4d ago</div>
+            <div>
+              <p class="tech-history__title">w2-ph-07 · housing reseal (vandalism)</p>
+              <p class="tech-history__sub">tamper-evident sticker kit applied · sent to QA for review</p>
+            </div>
+            <div><span class="t-pill t-pill--resolved"><span class="t-pill__dot"></span>P1</span></div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--success);">47 min</div>
+            <div class="tech-history__photo-count">4 photos</div>
+            <div class="tech-history__ticket">evt_01HE8A9</div>
+          </div>
+          <div class="tech-history__detail" data-history-detail="4">
+            <div class="tech-history__detail-grid">
+              <div>
+                <p class="tech-history__narrative">Housing had been disturbed — tape lifted. No PCB damage, no probe damage. Resealed with TEK-2024 batch A-117, fitted 2 fresh tamper-evident stickers. Readings match w2-ph-05, w2-ph-09 neighbours within 0.1 pH. Routed to QA for tamper-evidence review.</p>
+                <div class="tech-history__photos">
+                  <div class="tech-history__photo is-before">before<br>tape lifted</div>
+                  <div class="tech-history__photo">diag-1</div>
+                  <div class="tech-history__photo is-after">after<br>resealed</div>
+                  <div class="tech-history__photo is-after">after<br>sticker L</div>
+                </div>
+              </div>
+              <div>
+                <div class="tech-history__sub" style="margin-bottom: 4px;">SIGNED ON CHAIN</div>
+                <div style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); line-height: 1.5;">
+                  TechnicianArrived · 09:08:17<br>
+                  DiagnosisSubmitted · 09:31:50<br>
+                  FixSubmitted · 09:48:22<br>
+                  IncidentResolved · 09:55:01<br>
+                  QA review · pending<br>
+                  sig · 0xb2…4e1
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tech-history__row" data-history="5">
+            <div class="tech-history__date"><strong>Fri · 14:11</strong>6d ago</div>
+            <div>
+              <p class="tech-history__title">w7-tb-09 · flush + intake check</p>
+              <p class="tech-history__sub">intake screen partially blocked · cleared</p>
+            </div>
+            <div><span class="t-pill t-pill--resolved"><span class="t-pill__dot"></span>P2</span></div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs);">1h 02m</div>
+            <div class="tech-history__photo-count">2 photos</div>
+            <div class="tech-history__ticket">evt_01HE8B1</div>
+          </div>
+
+          <div class="tech-history__row" data-history="6">
+            <div class="tech-history__date"><strong>Thu · 16:30</strong>7d ago</div>
+            <div>
+              <p class="tech-history__title">w11-ph-04 · recalibrate (drift)</p>
+              <p class="tech-history__sub">recal with pH 4 + pH 7 buffers · post-cal 7.0 ± 0.1</p>
+            </div>
+            <div><span class="t-pill t-pill--resolved"><span class="t-pill__dot"></span>P3</span></div>
+            <div style="font-family: var(--font-family-mono); font-size: var(--font-size-xs);">38 min</div>
+            <div class="tech-history__photo-count">2 photos</div>
+            <div class="tech-history__ticket">evt_01HE7X4</div>
+          </div>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Expandable history rows
+    document.querySelectorAll('.tech-history__row').forEach(function (row) {
+      row.addEventListener('click', function (e) {
+        e.preventDefault();
+        var id = row.getAttribute('data-history');
+        var detail = document.querySelector('[data-history-detail="' + id + '"]');
+        if (detail) detail.classList.toggle('is-on');
+      });
+    });
+
+    // Filter pills
+    document.querySelectorAll('.tech-filter').forEach(function (f) {
+      f.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelectorAll('.tech-filter').forEach(function (x) { x.classList.remove('is-on'); });
+        f.classList.add('is-on');
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Field tech my day</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--tech .sidebar { width: 200px; }
+
+  .tech-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .tech-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+  .tech-sidebar__role { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .tech-day {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: var(--space-lg);
+  }
+  @media (max-width: 1100px) { .tech-day { grid-template-columns: 1fr; } }
+
+  /* Calendar / timeline */
+  .tech-cal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .tech-cal__head {
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    background: var(--bg-subtle);
+  }
+  .tech-cal__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .tech-cal__date {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .tech-cal__nav {
+    display: flex;
+    gap: var(--space-xs);
+  }
+  .tech-cal__nav-btn {
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-xs);
+    padding: 2px var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    color: var(--fg-secondary);
+  }
+  .tech-cal__nav-btn.is-on { background: var(--brand-100); border-color: var(--brand-500); color: var(--brand-600); font-weight: var(--font-weight-semibold); }
+
+  /* Timeline grid */
+  .tech-timeline {
+    padding: var(--space-md);
+  }
+  .tech-tl-row {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+    border-top: 1px dashed var(--border-subtle);
+    align-items: start;
+  }
+  .tech-tl-row:first-child { border-top: none; }
+  .tech-tl-time {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    padding-top: 6px;
+    text-align: right;
+  }
+  .tech-tl-time strong {
+    color: var(--fg-default);
+    display: block;
+    font-size: var(--font-size-sm);
+  }
+  .tech-tl-event {
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    padding: var(--space-sm) var(--space-md);
+    position: relative;
+  }
+  .tech-tl-event.is-current {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+    box-shadow: 0 0 0 2px var(--brand-500);
+  }
+  [data-theme="dark"] .tech-tl-event.is-current { background: var(--brand-200); }
+  .tech-tl-event.is-done { opacity: 0.75; }
+  .tech-tl-event.is-done .tech-tl-event__title { text-decoration: line-through; }
+  .tech-tl-event__row1 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: 2px;
+  }
+  .tech-tl-event__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    margin: 0 0 2px;
+  }
+  .tech-tl-event__sub {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-secondary);
+    line-height: 1.4;
+  }
+  .tech-tl-event__dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--brand-500);
+    flex-shrink: 0;
+  }
+  .tech-tl-event.is-p1 .tech-tl-event__dot { background: var(--danger); }
+  .tech-tl-event.is-p2 .tech-tl-event__dot { background: var(--warning); }
+  .tech-tl-event.is-p3 .tech-tl-event__dot { background: var(--fg-tertiary); }
+  .tech-tl-event.is-done .tech-tl-event__dot { background: var(--success); }
+
+  /* Side rail — shift summary */
+  .tech-rail {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .tech-rail__card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+  }
+  .tech-rail__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .tech-rail__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--space-xs) 0;
+    font-size: var(--font-size-xs);
+  }
+  .tech-rail__row + .tech-rail__row { border-top: 1px dashed var(--border-subtle); }
+  .tech-rail__k { color: var(--fg-tertiary); font-family: var(--font-family-mono); }
+  .tech-rail__v { color: var(--fg-default); font-weight: var(--font-weight-semibold); }
+
+  /* Route map placeholder */
+  .tech-route {
+    height: 180px;
+    background: var(--bg-base);
+    border: 1px dashed var(--border-default);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fg-tertiary);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    margin-top: var(--space-md);
+    background-image:
+      linear-gradient(0deg, transparent 49%, var(--border-subtle) 50%, transparent 51%),
+      linear-gradient(90deg, transparent 49%, var(--border-subtle) 50%, transparent 51%);
+    background-size: 24px 24px;
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--tech">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="work-queue.html">SURAKKHA</a>
+      <div class="tech-sidebar__welcome">
+        <div class="tech-sidebar__name">Ramesh Kumar</div>
+        <div class="tech-sidebar__role">field tech · NE zone</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="work-queue.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>Work queue</span>
+        </a>
+        <a href="my-day.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          </span>
+          <span>My day</span>
+        </a>
+        <a href="incident-detail.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          </span>
+          <span>Incident detail</span>
+        </a>
+        <a href="history.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="3 12 6 9 13 16 21 6"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>History</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.7s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Ramesh · field tech · NE zone</span>
+        </div>
+      </header>
+
+      <main class="container--wide">
+
+        <div class="page-header">
+          <div class="page-header__row">
+            <div>
+              <h1>My day</h1>
+              <div class="page-header__sub">Tue 08 Sep · shift 07:00–15:00 · NE zone · 5 sites planned</div>
+            </div>
+            <div style="display: flex; gap: var(--space-sm);">
+              <button class="button button--secondary" type="button">Clock in</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="tech-day">
+
+          <!-- Calendar / timeline -->
+          <div class="tech-cal">
+            <div class="tech-cal__head">
+              <h2 class="tech-cal__title">Schedule</h2>
+              <div style="display: flex; align-items: baseline; gap: var(--space-md);">
+                <span class="tech-cal__date">Tue 08 Sep 2026</span>
+                <div class="tech-cal__nav">
+                  <button class="tech-cal__nav-btn">‹ Mon</button>
+                  <button class="tech-cal__nav-btn is-on">Today</button>
+                  <button class="tech-cal__nav-btn">Wed ›</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="tech-timeline">
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>07:00</strong>60m</div>
+                <div class="tech-tl-event">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">Shift start · depot pickup</p>
+                  </div>
+                  <div class="tech-tl-event__sub">NE depot · collect field-tablet-04 · stock check (TEK-2024 batch A-117, pH buffer 4 + 7)</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>08:00</strong>60m</div>
+                <div class="tech-tl-event is-done">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">w5-cl-02 · chlorinator nozzle swap</p>
+                  </div>
+                  <div class="tech-tl-event__sub">evt_01HE9K8 · P3 · resolved 07:42 · 2 photos attached</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>09:00</strong>60m</div>
+                <div class="tech-tl-event is-current is-p1">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">w11-ph-03 · sensor tampering suspected</p>
+                  </div>
+                  <div class="tech-tl-event__sub">evt_01HE9T8 · P1 · 2d overdue · currently on site · diagnosis + fix pending</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>10:00</strong>60m</div>
+                <div class="tech-tl-event is-p2">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">w9-tb-12 · battery critical + recalibrate</p>
+                  </div>
+                  <div class="tech-tl-event__sub">evt_01HE9R2 · P2 · School roof 12 · bring spare battery pack</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>11:00</strong>60m</div>
+                <div class="tech-tl-event is-p2">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">w7-tb-09 · turbidity reservoir drift</p>
+                  </div>
+                  <div class="tech-tl-event__sub">evt_01HE9N4 · P2 · reservoir 09 · flush + check intake screen</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>12:00</strong>60m</div>
+                <div class="tech-tl-event">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">Lunch</p>
+                  </div>
+                  <div class="tech-tl-event__sub">NE depot cafeteria</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>13:00</strong>60m</div>
+                <div class="tech-tl-event is-p3">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">w3-ph-01 · quarterly cal check</p>
+                  </div>
+                  <div class="tech-tl-event__sub">evt_01HE9L1 · P3 · Main pump 01 · routine</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>14:00</strong>60m</div>
+                <div class="tech-tl-event">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">Buffer time · return to depot</p>
+                  </div>
+                  <div class="tech-tl-event__sub">close tickets · restock · debrief with Priya on w11-ph-03</div>
+                </div>
+              </div>
+
+              <div class="tech-tl-row">
+                <div class="tech-tl-time"><strong>15:00</strong></div>
+                <div class="tech-tl-event">
+                  <div class="tech-tl-event__row1">
+                    <span class="tech-tl-event__dot"></span>
+                    <p class="tech-tl-event__title">Shift end · clock out</p>
+                  </div>
+                  <div class="tech-tl-event__sub">field-tablet-04 sync to Surakkha</div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Right rail: shift summary + route -->
+          <div class="tech-rail">
+
+            <div class="tech-rail__card">
+              <h3 class="tech-rail__title">Shift summary</h3>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Shift</span>
+                <span class="tech-rail__v">07:00–15:00</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Zone</span>
+                <span class="tech-rail__v">NE</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Jobs planned</span>
+                <span class="tech-rail__v">5</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Closed</span>
+                <span class="tech-rail__v" style="color: var(--success);">1</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">In progress</span>
+                <span class="tech-rail__v">1</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Remaining</span>
+                <span class="tech-rail__v">3</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Avg close</span>
+                <span class="tech-rail__v">23m</span>
+              </div>
+            </div>
+
+            <div class="tech-rail__card">
+              <h3 class="tech-rail__title">Optimized route</h3>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Total distance</span>
+                <span class="tech-rail__v">28.4 km</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">Est. drive</span>
+                <span class="tech-rail__v">52 min</span>
+              </div>
+              <div class="tech-rail__row">
+                <span class="tech-rail__k">vs naive</span>
+                <span class="tech-rail__v" style="color: var(--success);">−11 km</span>
+              </div>
+              <div class="tech-route">map · 5 waypoints · live location shared with dispatch</div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+</body>
+</html>

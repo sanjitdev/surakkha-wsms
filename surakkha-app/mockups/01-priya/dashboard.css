@@ -16,6 +16,13 @@
   .app-shell { grid-template-columns: 304px 1fr; }
 }
 
+/* ── Persona variant overrides (slim 200px sidebar) ──────────── */
+.app-shell--anjali,
+.app-shell--vendor,
+.app-shell--tech {
+  grid-template-columns: 200px 1fr;
+}
+
 /* ── Sidebar ─────────────────────────────────────────────────── */
 .sidebar {
   background: var(--bg-surface);

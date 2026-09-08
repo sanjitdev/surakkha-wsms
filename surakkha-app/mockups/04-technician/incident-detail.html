@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Field tech incident detail (on-site actions)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--tech .sidebar { width: 200px; }
+
+  .tech-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .tech-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+  .tech-sidebar__role { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .tech-detail {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  /* Header card */
+  .tech-detail__head {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .tech-detail__row1 {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-xs);
+  }
+  .tech-detail__ticket {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .tech-detail__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--space-sm);
+  }
+  .tech-detail__meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px dashed var(--border-subtle);
+  }
+  .tech-detail__cell { display: flex; flex-direction: column; gap: 2px; }
+  .tech-detail__k {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .tech-detail__v {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+  }
+
+  /* Lifecycle stepper (within detail) */
+  .tech-stepper {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-bottom: var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+  }
+  .tech-stepper__step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-xs);
+    text-align: center;
+    position: relative;
+  }
+  .tech-stepper__step + .tech-stepper__step::before {
+    content: '';
+    position: absolute;
+    left: -8px;
+    top: 14px;
+    width: 14px;
+    height: 1px;
+    background: var(--border-subtle);
+  }
+  .tech-stepper__num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--bg-inset);
+    color: var(--fg-tertiary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+  }
+  .tech-stepper__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .tech-stepper__time {
+    font-family: var(--font-family-mono);
+    font-size: 9px;
+    color: var(--fg-tertiary);
+  }
+  .tech-stepper__step.is-done .tech-stepper__num {
+    background: var(--success);
+    color: white;
+  }
+  .tech-stepper__step.is-done .tech-stepper__label { color: var(--success); }
+  .tech-stepper__step.is-now .tech-stepper__num {
+    background: var(--brand-500);
+    color: white;
+    box-shadow: 0 0 0 4px var(--brand-100);
+  }
+  [data-theme="dark"] .tech-stepper__step.is-now .tech-stepper__num { box-shadow: 0 0 0 4px var(--brand-200); }
+  .tech-stepper__step.is-now .tech-stepper__label { color: var(--brand-600); font-weight: var(--font-weight-semibold); }
+
+  /* Section card */
+  .tech-section {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .tech-section__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .tech-section__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .tech-section__meta {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+
+  /* Action buttons */
+  .tech-action {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-md);
+    background: var(--bg-base);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--space-md);
+  }
+  .tech-action.is-done {
+    background: var(--success-bg);
+    border-color: var(--success);
+  }
+  .tech-action__body { line-height: 1.5; }
+  .tech-action__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 2px;
+  }
+  .tech-action__sub {
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+  .tech-action__time {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    margin-top: 4px;
+  }
+
+  .tech-btn {
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    white-space: nowrap;
+  }
+  .tech-btn:disabled {
+    background: var(--fg-disabled);
+    cursor: not-allowed;
+  }
+  .tech-btn--ghost {
+    background: transparent;
+    color: var(--fg-secondary);
+    border: 1px solid var(--border-default);
+  }
+  .tech-btn--success { background: var(--success); }
+
+  /* Inputs */
+  .tech-input {
+    width: 100%;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    background: var(--bg-base);
+    color: var(--fg-default);
+    resize: vertical;
+  }
+  .tech-input:focus {
+    outline: 2px solid var(--brand-400);
+    outline-offset: 1px;
+    border-color: var(--brand-500);
+  }
+  .tech-input--ta { min-height: 80px; }
+
+  /* Photo grid */
+  .tech-photos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-md);
+    margin-top: var(--space-md);
+  }
+  @media (max-width: 700px) { .tech-photos { grid-template-columns: repeat(2, 1fr); } }
+  .tech-photo {
+    aspect-ratio: 4/3;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    cursor: pointer;
+  }
+  .tech-photo.is-before { background: var(--warning-bg); border-color: var(--warning); color: var(--warning); }
+  .tech-photo.is-after  { background: var(--success-bg); border-color: var(--success); color: var(--success); }
+  .tech-photo.is-add {
+    background: var(--bg-base);
+    color: var(--fg-tertiary);
+    border-style: dashed;
+  }
+  .tech-photo.is-add:hover { border-color: var(--brand-500); color: var(--brand-600); }
+  .tech-photo__tag {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: var(--font-weight-semibold);
+  }
+
+  /* Signature row */
+  .tech-sig {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  /* Sticky resolve bar */
+  .tech-resolve-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-md);
+    align-items: center;
+    box-shadow: var(--shadow-modal);
+  }
+  .tech-resolve-bar__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    line-height: 1.5;
+  }
+  .tech-resolve-bar__meta strong { color: var(--fg-default); }
+
+  /* Status pills (re-use) */
+  .t-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px var(--space-sm);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .t-pill__dot { width: 6px; height: 6px; border-radius: 50%; }
+  .t-pill--onsite { background: var(--brand-100); color: var(--brand-600); }
+  [data-theme="dark"] .t-pill--onsite { background: var(--brand-200); color: var(--brand-400); }
+  .t-pill--onsite .t-pill__dot { background: var(--brand-500); }
+  .t-pill--overdue { background: var(--danger-bg); color: var(--danger); }
+  .t-pill--overdue .t-pill__dot { background: var(--danger); }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--tech">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="work-queue.html">SURAKKHA</a>
+      <div class="tech-sidebar__welcome">
+        <div class="tech-sidebar__name">Ramesh Kumar</div>
+        <div class="tech-sidebar__role">field tech · NE zone</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="work-queue.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>Work queue</span>
+        </a>
+        <a href="my-day.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          </span>
+          <span>My day</span>
+        </a>
+        <a href="incident-detail.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+          </span>
+          <span>Incident detail</span>
+        </a>
+        <a href="history.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><polyline points="3 12 6 9 13 16 21 6"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </span>
+          <span>History</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1-2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <a href="work-queue.html" style="font-size: var(--font-size-xs); color: var(--fg-secondary); text-decoration: none;">← Back to queue</a>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Ramesh · field tech · NE zone</span>
+        </div>
+      </header>
+
+      <main class="tech-detail">
+
+        <!-- Header card -->
+        <div class="tech-detail__head">
+          <div class="tech-detail__row1">
+            <span class="t-pill t-pill--overdue"><span class="t-pill__dot"></span>Overdue</span>
+            <span class="tech-detail__ticket">evt_01HE9T8 · opened Mon 02:14</span>
+          </div>
+          <h1 class="tech-detail__title">w11-ph-03 — sensor tampering suspected</h1>
+          <div class="tech-detail__meta">
+            <div class="tech-detail__cell">
+              <span class="tech-detail__k">Site</span>
+              <span class="tech-detail__v">Ward 11 · Highway pump 03</span>
+            </div>
+            <div class="tech-detail__cell">
+              <span class="tech-detail__k">Trigger</span>
+              <span class="tech-detail__v">Vendor flag (Acme)</span>
+            </div>
+            <div class="tech-detail__cell">
+              <span class="tech-detail__k">SLA</span>
+              <span class="tech-detail__v" style="color: var(--danger);">−2 days overdue</span>
+            </div>
+            <div class="tech-detail__cell">
+              <span class="tech-detail__k">Dispatcher</span>
+              <span class="tech-detail__v">Priya · via inbox</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lifecycle stepper -->
+        <div class="tech-stepper">
+          <div class="tech-stepper__step is-done">
+            <span class="tech-stepper__num">✓</span>
+            <span class="tech-stepper__label">Assigned</span>
+            <span class="tech-stepper__time">Mon 09:00</span>
+          </div>
+          <div class="tech-stepper__step is-done">
+            <span class="tech-stepper__num">✓</span>
+            <span class="tech-stepper__label">En route</span>
+            <span class="tech-stepper__time">—</span>
+          </div>
+          <div class="tech-stepper__step is-now">
+            <span class="tech-stepper__num">3</span>
+            <span class="tech-stepper__label">On site</span>
+            <span class="tech-stepper__time">now</span>
+          </div>
+          <div class="tech-stepper__step">
+            <span class="tech-stepper__num">4</span>
+            <span class="tech-stepper__label">Diagnosis</span>
+            <span class="tech-stepper__time">—</span>
+          </div>
+          <div class="tech-stepper__step">
+            <span class="tech-stepper__num">5</span>
+            <span class="tech-stepper__label">Fix + photos</span>
+            <span class="tech-stepper__time">—</span>
+          </div>
+          <div class="tech-stepper__step">
+            <span class="tech-stepper__num">6</span>
+            <span class="tech-stepper__label">Resolved</span>
+            <span class="tech-stepper__time">—</span>
+          </div>
+        </div>
+
+        <!-- Step 1: Mark arrived -->
+        <div class="tech-section">
+          <div class="tech-section__head">
+            <h2 class="tech-section__title">1 · Mark arrival on site</h2>
+            <span class="tech-section__meta">fires TechnicianArrived</span>
+          </div>
+          <div class="tech-action is-done">
+            <div class="tech-action__body">
+              <p class="tech-action__title">You're on site at Ward 11 · Highway pump 03</p>
+              <p class="tech-action__sub">Mark arrival confirmed · GPS + timestamp signed on chain</p>
+              <p class="tech-action__time">✓ TechnicianArrived · Tue 09:38:42 · 0x8a1c…d4f</p>
+            </div>
+            <button class="tech-btn" disabled>✓ On site</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Diagnosis -->
+        <div class="tech-section">
+          <div class="tech-section__head">
+            <h2 class="tech-section__title">2 · Submit diagnosis</h2>
+            <span class="tech-section__meta">fires DiagnosisSubmitted</span>
+          </div>
+          <div class="tech-action">
+            <div class="tech-action__body">
+              <p class="tech-action__title">What did you find?</p>
+              <p class="tech-action__sub">Free text + 1 photo of the housing seal. Becomes part of the chain audit.</p>
+            </div>
+          </div>
+          <textarea class="tech-input tech-input--ta" placeholder="e.g. 'Housing seal broken on north face. Two tamper-evident stickers disturbed. PCB dry, no water ingress. Probe intact. Will reseal with new tamper-evident kit.'"></textarea>
+          <div class="tech-photos">
+            <div class="tech-photo">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <span class="tech-photo__tag">diag-1</span>
+              <span>tap to add</span>
+            </div>
+            <div class="tech-photo is-add">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              <span>add photo</span>
+            </div>
+          </div>
+          <div style="margin-top: var(--space-md); display: flex; justify-content: flex-end;">
+            <button class="tech-btn">Submit diagnosis →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Fix + before/after photos -->
+        <div class="tech-section">
+          <div class="tech-section__head">
+            <h2 class="tech-section__title">3 · Submit fix</h2>
+            <span class="tech-section__meta">fires FixSubmitted → IncidentResolved</span>
+          </div>
+          <div class="tech-action">
+            <div class="tech-action__body">
+              <p class="tech-action__title">Fix applied + before/after photos</p>
+              <p class="tech-action__sub">Before photo proves what was wrong. After photo proves the fix. Both required for IncidentResolved to fire.</p>
+            </div>
+          </div>
+          <textarea class="tech-input tech-input--ta" placeholder="e.g. 'Resealed housing with tamper-evident kit (TEK-2024 batch A-117). Replaced both tamper stickers. Verified reading consistency against w11-ph-02, w11-ph-04 — within 0.05 pH. Re-attached to Surakkha.'"></textarea>
+          <div class="tech-photos">
+            <div class="tech-photo is-before">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <span class="tech-photo__tag">before</span>
+              <span>broken seal</span>
+            </div>
+            <div class="tech-photo is-after">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>
+              <span class="tech-photo__tag">after</span>
+              <span>resealed + tagged</span>
+            </div>
+            <div class="tech-photo is-add">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              <span>add photo</span>
+            </div>
+            <div class="tech-photo is-add">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+              <span>add photo</span>
+            </div>
+          </div>
+          <div class="tech-sig">device · field-tablet-04 · ed25519 pubkey:0x7e91…b6f3 · when you tap "Submit fix & resolve", the action is signed on-chain and IncidentResolved auto-fires.</div>
+          <div style="margin-top: var(--space-md); display: flex; justify-content: flex-end;">
+            <button class="tech-btn tech-btn--success">Submit fix &amp; resolve ✓</button>
+          </div>
+        </div>
+
+        <!-- Sticky resolve bar -->
+        <div class="tech-resolve-bar">
+          <div class="tech-resolve-bar__meta">
+            <strong>Step 3 of 6</strong> · on site · diagnosis + fix pending · chain head <strong>0x9f1a…4e7</strong>
+          </div>
+          <button class="tech-btn tech-btn--ghost">Save draft</button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+</body>
+</html>
