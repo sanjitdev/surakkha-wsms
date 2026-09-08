@@ -24,6 +24,10 @@
  *   GET    /api/incidents             list (CQRS read model)
  *   POST   /api/incidents             append IncidentCreated / Resolved / Escalated
  *
+ *   POST   /api/field/work-orders     field-tech submits TechnicianAssigned / Arrived /
+ *                                    DiagnosisSubmitted / FixSubmitted / IncidentResolved
+ *                                    (Story 1.2 — dim 7 §3 event-type 33-entry closed enum)
+ *
  *   GET    /api/audit/heatmap         7×24 heatmap (server-aggregated per dim 7 §9)
  *
  * Network latency: 200-400ms random (per dim 6 §6.4) to make loading
@@ -130,13 +134,16 @@ const chainHandlers = [
       payload: unknown;
     };
 
-    // Closed enum check (dim 7 §3 — 29 event types). Mock accepts all of them.
+    // Closed enum check (dim 7 §3 — 33 event types as of 2026-09-08).
+    // Field-tech side events added: TechnicianAssigned, TechnicianArrived,
+    // DiagnosisSubmitted, FixSubmitted.
     const ALLOWED = [
       'SensorReadingSubmitted', 'SensorSilenceObserved', 'SensorStatusChanged',
       'AnjaliReportSubmitted', 'AnjaliSentinelReadingSubmitted', 'AnjaliAcknowledgeDelivered',
       'IncidentCreated', 'IncidentEscalated', 'IncidentResolved',
       'PlaybookStepExecuted', 'DeviationCaptured', 'OverrideRecorded',
       'ShiftCoverageActivated', 'ShiftCoverageEnded',
+      'TechnicianAssigned', 'TechnicianArrived', 'DiagnosisSubmitted', 'FixSubmitted',
       'PlaybookVersionDrafted', 'PlaybookVersionPublished', 'PlaybookVersionAbandoned',
       'PlaybookAmendmentApproved',
       'PublicNoticeIssued', 'PublicNoticeRetracted',

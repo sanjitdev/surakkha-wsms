@@ -80,6 +80,7 @@ type ActorRole =
   | 'pha_approver'
   | 'utility_operator'
   | 'utility_message_desk'
+  | 'field_technician'
   | 'anjali'
   | 'priya'
   | 'pha_viewer'
@@ -149,6 +150,11 @@ type EventType =
   | 'OverrideRecorded'
   | 'ShiftCoverageActivated'
   | 'ShiftCoverageEnded'
+  // field-tech side (utility field staff on shift, dispatched via Surakkha)
+  | 'TechnicianAssigned'
+  | 'TechnicianArrived'
+  | 'DiagnosisSubmitted'
+  | 'FixSubmitted'
   // playbook lifecycle
   | 'PlaybookVersionDrafted'
   | 'PlaybookVersionPublished'
@@ -430,6 +436,119 @@ type ConfigKey =
 `CityConfigChanged` is single-signature (`pha_approver`) per AD-15. The `before/after` diff is replayable — auditors can rebuild any time-window's config from the event stream.
 
 ### 4.12 SensorSilenceObserved (already covered §4.3)
+
+### 4.13 IncidentResolved (technician finalises a work order)
+
+```ts
+interface IncidentResolvedPayload {
+  incident_id: ULID;
+  technician_id: ULID;                   // SessionRow.actor_ref of the resolving technician
+  fix_summary: string;                   // ≤ 240 chars; the redacted-preview form retained on chain
+  fix_summary_payload_hash: string;      // sha256(canonical(fix_summary_full)); full body reconstructable
+  after_photo_sha256: string | null;     // sha256 of the canonicalised after-photo; null = no photo attached
+  before_photo_sha256?: string;          // optional; present when FixSubmitted previously attached one
+  resolution_latency_seconds: number;    // computed at write-time: occurred_at − TechnicianAssigned.occurred_at
+  correlation_id: ULID;                  // the originating TechnicianAssigned event_id
+  causation_id: ULID;                    // the prior DiagnosisSubmitted / FixSubmitted event_id, if any
+}
+```
+
+**Sole-emitter rule** (re-stated for clarity): `IncidentResolved` is emitted by the technician (`actor_identity.role: 'field_technician'`, `actor_identity.ref: technician.actor_ref`). The gateway rejects events from any other role with `CommandRejected{reason: 'role_not_in_enum'}`.
+
+### 4.14 DeviationCaptured (operator-side rejection of a fix)
+
+```ts
+interface DeviationCapturedPayload {
+  incident_id: ULID;
+  rejecting_actor_ref: ULID;            // operator who rejected
+  rejecting_role: 'utility_operator' | 'pha_approver';
+  reason:
+    | 'sensor_still_out_of_band'
+    | 'visible_smell_persists'
+    | 'photo_does_not_match'
+    | 'sensor_reading_regressed'
+    | 'work_order_incomplete'
+    | 'other_specified_below';
+  detail?: string;                       // free-form ≤ 240 chars; required when reason === 'other_specified_below'
+  target_event_id: ULID;                 // the IncidentResolved event being rejected
+  reopened_work_order_event_id: ULID;    // next TechnicianAssigned event_id; ladder = retry
+}
+```
+
+**Wire rule:** `DeviationCaptured` reopens the work order by referencing the *next* `TechnicianAssigned` event in the payload. The chain-faithful projection surfaces both the original `IncidentResolved` (as superseded) and the new `TechnicianAssigned` (as active), so the audit view never shows a "resolved" state with no following activity.
+
+### 4.15 TechnicianAssigned (Priya dispatches Karim)
+
+```ts
+interface TechnicianAssignedPayload {
+  technician_id: ULID;                   // SessionRow.actor_ref of the dispatched technician
+  incident_id: ULID;
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  eta_target_minutes: number;            // 1-240; SLA boundary for the dispatch
+  work_order_summary: string;            // ≤ 240 chars
+  work_order_payload_hash: string;        // sha256(canonical(work_order_full)); full reconstructable
+  playbook_version_id?: ULID;            // when dispatch includes playbook execution steps
+  correlation_id: ULID;                  // the originating IncidentCreated/Escalated event_id
+}
+```
+
+**Actor rule:** emitted by the dispatching operator (`actor_identity.role: 'utility_operator'`, `actor_identity.ref: dispatcher.actor_ref`). The technician is identified by `payload.technician_id`, not by `actor_identity` — but see Story 1.2 amendment 2026-09-08 for the audit-correct override that lets the technician also emit this event himself.
+
+### 4.16 TechnicianArrived (Karim taps "on site")
+
+```ts
+interface TechnicianArrivedPayload {
+  technician_id: ULID;
+  incident_id: ULID;
+  arrived_at: ISOTimestamp;              // client-minted via field-tablet clock
+  gps_sha256: string;                    // sha256(canonical({lat, lng, accuracy_m})); verified by gateway within ward
+  device_actor_ref: ULID;                // field-tablet's auth-bound actor ULID (multi-radio adapter)
+  correlation_id: ULID;                  // the originating TechnicianAssigned event_id
+}
+```
+
+**Actor rule:** emitted by the technician (`actor_identity.role: 'field_technician'`). `gps_sha256` is cross-verified against the ward boundary on accept; GPS that lands outside the declared `ward_id` returns `CommandRejected{reason: 'gps_out_of_ward_boundary'}` and produces no chain block.
+
+### 4.17 DiagnosisSubmitted (Karim files diagnosis)
+
+```ts
+interface DiagnosisSubmittedPayload {
+  technician_id: ULID;
+  incident_id: ULID;
+  diagnosis_text: string;                // ≤ 600 chars
+  diagnosis_payload_hash: string;        // sha256(canonical(diagnosis_full)); long-form off-chain
+  photo_sha256_hashes: string[];         // 0..N pre-diagnosis photos (the broken-seal pic, etc.)
+  diagnosis_class: 'hardware' | 'software' | 'tamper' | 'consumable' | 'environmental' | 'indeterminate';
+  correlation_id: ULID;
+}
+```
+
+**Actor rule:** emitted by the technician. `photo_sha256_hashes[]` references blobs uploaded via signed gateway URLs; the off-chain photo store is content-addressed by the SHA-256 and survives independently of the chain.
+
+### 4.18 FixSubmitted (Karim files fix)
+
+```ts
+interface FixSubmittedPayload {
+  technician_id: ULID;
+  incident_id: ULID;
+  fix_summary: string;                   // ≤ 240 chars (preview form)
+  fix_payload_hash: string;              // sha256(canonical(fix_full)); long-form off-chain
+  before_photo_sha256: string;           // the "this was wrong" photo
+  after_photo_sha256: string;            // the "this is right" photo — both required for IncidentResolved
+  parts_replaced: Array<{                // optional; declared when hardware swap happened
+    sku: string;
+    serial: string;
+    reason: 'clogged' | 'broken' | 'worn' | 'tamper_repair';
+  }>;
+  signature_algorithm: 'ed25519';
+  signature: string;                     // base64url(ed25519_sign(private_key, canonical({event_id, payload_hash, technician_id})))
+  correlation_id: ULID;
+}
+```
+
+**Wire rule:** `FixSubmitted` is a *prerequisite* but not a *substitute* for `IncidentResolved`. The technician must submit a separate `IncidentResolved` to close the ticket — `FixSubmitted` is the technical record, `IncidentResolved` is the operational close. Auditors see both events on the chain, chained via `correlation_id`.
+
+
 
 ---
 
@@ -1046,3 +1165,4 @@ Per dim 6 §7 + dim 7's stricter rule (the wire is the trust-bearing surface):
 |---|---|---|
 | 2026-09-07 | Document created. 29 event types defined with discriminated-union payloads. Envelope base + HTTP/SSE/poll/IDB-wire transports locked. Sensor status state machine (5 states). Chain hash format = sha256(canonical) per spec-1-1. AD-11 3-step dual-signature wire flow documented. AD-17 character budget + rate limit + retraction precondition on wire. Locale-at-container enforced (single permitted `PublicNotice*.locale` exception). | Gate 0 dim 7 lockdown. |
 | 2026-09-07 | §5.3.1 added — Phase 1 demo: SSE replaced by polling. MSW service worker cannot intercept EventSource, so Phase 1 uses the polling fallback (30s ± 10% jitter) which is the same code path production uses when SSE drops. Chain freshness clock (`/api/chain/head`) drives the SSE pulse animation every 5s. Chain-fail shake still demonstrable. No EventSource polyfill. Phase 2 swap = remove `pollOnly` flag, MSW deletes, real SSE gateway takes over with zero component code changes. | Phase 1 = frontend-only demo against MSW + IndexedDB. Locked wire shapes unchanged. |
+| 2026-09-08 | §2.5 ActorRole widened 8 → 9 entries: added `'field_technician'` for utility field staff on shift, dispatched via Surakkha (was implicit in C-9 / operator-storyboard §5; formalised on the wire). §3 EventType widened 29 → 33 entries: added `'TechnicianAssigned'`, `'TechnicianArrived'`, `'DiagnosisSubmitted'`, `'FixSubmitted'` under a new `// field-tech side` group, between `// operator side` and `// playbook lifecycle`. All four are written by the technician as `actor_identity.role = 'field_technician'` — overriding the operator-storyboard §5 precedent that has Priya write `TechnicianAssigned` with `technician_id` as a payload field. The override is deliberate: audit guarantees that the technician signed his own work take precedence over the dispatcher's attribution. Mitigation if a future filter needs the dispatcher lineage: extend `ActorIdentity` with an optional `written_by?: ULID` field rather than collapse these two roles. | Story 1.2 — Field Technician (Karim) persona on the login picker + work-queue page. |

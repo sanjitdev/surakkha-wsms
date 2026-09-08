@@ -2,7 +2,7 @@
  * fixtures.ts
  *
  * Phase 1 seed dataset — exercises the chain by pre-populating IndexedDB
- * with one genesis block + ~12 follow-on blocks across the 6 most-exercised
+ * with one genesis block + ~17 follow-on blocks across the most-exercised
  * event types. Used on first launch only (idempotent: checks meta.seed_version
  * before re-seeding; bump the version to force re-seed on schema change).
  *
@@ -10,7 +10,7 @@
  * so the demo can show the chain-fail shake (dim 4 toast) by deliberately
  * corrupting one block via reset.ts → tamper().
  *
- * Seed event types covered (out of 29 in dim 7 §3):
+ * Seed event types covered (out of 33 in dim 7 §3 — 2026-09-08 amendment):
  *   - SensorReadingSubmitted × 5      (one sensor, last 6 hours)
  *   - SensorSilenceObserved × 1
  *   - AnjaliReportSubmitted × 1
@@ -20,6 +20,11 @@
  *   - PublicNoticeIssued × 1
  *   - SignatureAttestation × 1        (one half of AD-11 dual-sig pair)
  *   - OperatorAuthenticated × 1       (login event)
+ *   - TechnicianAssigned × 1          (Story 1.2 — Karim dispatched)
+ *   - TechnicianArrived × 1           (Story 1.2)
+ *   - DiagnosisSubmitted × 1          (Story 1.2)
+ *   - FixSubmitted × 1                (Story 1.2)
+ *   - IncidentResolved × 1            (Story 1.2 — by Karim)
  *
  * Time anchoring: all timestamps are relative to Date.now() so the seed
  * always looks "fresh" regardless of when the demo is opened.
@@ -34,7 +39,7 @@ import {
   type ChainBlock,
 } from './idb';
 
-const SEED_VERSION = 1;
+const SEED_VERSION = 2;
 const TENANT = 'dhaka';
 const SCHEMA_VERSION = 1;
 
@@ -46,6 +51,10 @@ const ACTORS = {
   priya: { kind: 'operator', ref: '01J0PRIYA000000000000000000', display: 'Priya (utility operator)' },
   pha: { kind: 'pha', ref: '01J0PHA000000000000000000000', display: 'Dr. Karim (PHA approver)' },
   vendor: { kind: 'vendor', ref: '01J0VENDOR000000000000000000', display: 'Acme Sensors' },
+  // Story 1.2 — Field Technician. Per dim 7 amendment 2026-09-08, the
+  // technician is `actor_identity` on the chain events he writes. His
+  // `actor_ref` matches the SessionRow.actor_ref minted at login time.
+  karim: { kind: 'technician', ref: '01J0KARIM0000000000000000000', display: 'Karim (field tech · NE zone)' },
 };
 
 /** Seed only when meta.seed_version is missing or stale. */
@@ -248,6 +257,124 @@ export async function seedIfEmpty(): Promise<boolean> {
   });
   await write(login);
   prevHash = login.block_hash;
+  height++;
+
+  // ── Story 1.2 — field-tech side events ───────────────────────────────
+  // Karim is dispatched, arrives, files diagnosis + fix, and resolves the
+  // incident. All 5 events use ACTORS.karim as `actor_identity` (per dim 7
+  // amendment 2026-09-08). The `incident_id` here reuses the dhanmondi
+  // incident created earlier in this seed, so the chain tells a complete
+  // story (incident → escalation → notice → fix → resolved).
+
+  const technicianId = ACTORS.karim.ref;
+  const incidentId = incident.payload.incident_id;
+  const workOrderEventId = ulid(t0 + 9000);
+
+  const techAssigned: ChainBlock = await buildBlock({
+    prev_block_hash: prevHash,
+    event_type: 'TechnicianAssigned',
+    event_id: ulid(t0 + 9001),
+    occurred_at: new Date(t0 + 5 * 60 * 1000).toISOString(),
+    actor_identity: ACTORS.karim,
+    payload: {
+      technician_id: technicianId,
+      incident_id: incidentId,
+      priority: 'P1',
+      eta_target_minutes: 15,
+      work_order_summary: 'Ward dhanmondi — chlorination drift, flush + recalibrate.',
+      work_order_payload_hash: 'mock-wo-hash-not-checked-in-phase-1',
+      correlation_id: escalated.event_id,
+      work_order_event_id: workOrderEventId,
+    },
+  });
+  await write(techAssigned);
+  prevHash = techAssigned.block_hash;
+  height++;
+
+  const techArrived: ChainBlock = await buildBlock({
+    prev_block_hash: prevHash,
+    event_type: 'TechnicianArrived',
+    event_id: ulid(t0 + 10000),
+    occurred_at: new Date(t0 + 13 * 60 * 1000).toISOString(),
+    actor_identity: ACTORS.karim,
+    payload: {
+      technician_id: technicianId,
+      incident_id: incidentId,
+      arrived_at: new Date(t0 + 13 * 60 * 1000).toISOString(),
+      gps_sha256: 'mock-gps-sha256-dhanmondi-pump-station',
+      device_actor_ref: technicianId,
+      correlation_id: techAssigned.event_id,
+    },
+  });
+  await write(techArrived);
+  prevHash = techArrived.block_hash;
+  height++;
+
+  const diagnosis: ChainBlock = await buildBlock({
+    prev_block_hash: prevHash,
+    event_type: 'DiagnosisSubmitted',
+    event_id: ulid(t0 + 11000),
+    occurred_at: new Date(t0 + 18 * 60 * 1000).toISOString(),
+    actor_identity: ACTORS.karim,
+    payload: {
+      technician_id: technicianId,
+      incident_id: incidentId,
+      diagnosis_text: 'Stuck chlorinator solenoid — flow regulator not opening under load.',
+      diagnosis_payload_hash: 'mock-diag-hash-not-checked-in-phase-1',
+      photo_sha256_hashes: ['mock-photo-broken-seal-sha256'],
+      diagnosis_class: 'hardware',
+      correlation_id: techArrived.event_id,
+    },
+  });
+  await write(diagnosis);
+  prevHash = diagnosis.block_hash;
+  height++;
+
+  const fix: ChainBlock = await buildBlock({
+    prev_block_hash: prevHash,
+    event_type: 'FixSubmitted',
+    event_id: ulid(t0 + 12000),
+    occurred_at: new Date(t0 + 25 * 60 * 1000).toISOString(),
+    actor_identity: ACTORS.karim,
+    payload: {
+      technician_id: technicianId,
+      incident_id: incidentId,
+      fix_summary: 'Replaced solenoid (part CH-22-04). Flow back to nominal 0.6 mg/L.',
+      fix_payload_hash: 'mock-fix-hash-not-checked-in-phase-1',
+      before_photo_sha256: 'mock-photo-broken-seal-sha256',
+      after_photo_sha256: 'mock-photo-resealed-sha256',
+      parts_replaced: [
+        { sku: 'CH-22-04', serial: 'sn-94a1-2626', reason: 'broken' },
+      ],
+      signature_algorithm: 'ed25519',
+      signature: 'mock-sig-placeholder',
+      correlation_id: diagnosis.event_id,
+    },
+  });
+  await write(fix);
+  prevHash = fix.block_hash;
+  height++;
+
+  const resolved: ChainBlock = await buildBlock({
+    prev_block_hash: prevHash,
+    event_type: 'IncidentResolved',
+    event_id: ulid(t0 + 13000),
+    occurred_at: new Date(t0 + 27 * 60 * 1000).toISOString(),
+    actor_identity: ACTORS.karim,
+    payload: {
+      incident_id: incidentId,
+      technician_id: technicianId,
+      fix_summary: 'Solenoid swap verified — pH stable at 7.1 since 09:30, no leaks.',
+      fix_summary_payload_hash: 'mock-fix-summary-hash-not-checked-in-phase-1',
+      after_photo_sha256: 'mock-photo-resealed-sha256',
+      before_photo_sha256: 'mock-photo-broken-seal-sha256',
+      resolution_latency_seconds: 22 * 60,  // arrived 13min after dispatch, closed 22min later
+      correlation_id: fix.event_id,
+      causation_id: fix.event_id,
+    },
+  });
+  await write(resolved);
+  prevHash = resolved.block_hash;
   height++;
 
   // ── chain head + meta ────────────────────────────────────────────────

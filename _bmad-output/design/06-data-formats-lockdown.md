@@ -503,7 +503,20 @@ interface User {
   displayName: string;
   email?: string;
   phone?: string;
-  role: 'priya' | 'operator' | 'pha' | 'anjali' | 'admin';
+  // Mirrors the dim 7 §2.5 ActorRole 9-entry enum as of 2026-09-08.
+  // `priya` here is a legacy component-shape alias retained for back-compat with
+  // the dim 5 inbox-list card; the wire-side identity is `actor_identity.role`
+  // and resolves to one of the 9 dim-7 strings.
+  role:
+    | 'priya'
+    | 'utility_operator'
+    | 'field_technician'
+    | 'pha_approver'
+    | 'pha_viewer'
+    | 'utility_message_desk'
+    | 'anjali'
+    | 'vendor'
+    | 'system';
   scopes: Scope[];                // which wards / clusters
 }
 
@@ -512,6 +525,11 @@ type Scope = WardId | { kind: 'cluster'; clusterId: ClusterId } | { kind: 'all' 
 type Permission =
   | 'incident.verify'
   | 'incident.dismiss'
+  | 'incident.assign_technician'
+  | 'incident.submit_diagnosis'
+  | 'incident.submit_fix'
+  | 'incident.resolve'
+  | 'incident.reject_fix'
   | 'councillor.notify'
   | 'sensor.add'
   | 'sensor.remove'
@@ -519,6 +537,8 @@ type Permission =
   | 'settings.edit'
   | 'audit.view';
 ```
+
+The dim 6 `User.role` enum was a 5-entry rough edge through 2026-09-07 (`'priya' | 'operator' | 'pha' | 'anjali' | 'admin'`); it now mirrors the dim 7 §2.5 9-entry enum so component-side type-checking stays consistent with the wire-side identity. The legacy `'priya'` alias is retained only for the dim 5 inbox-list card shape; new code uses `'utility_operator'` directly. `'admin'` is dropped (it was an internal-only role that never landed on the wire).
 
 ### 6.2 Sensor + reporter data
 
@@ -607,6 +627,55 @@ Per the user's call (and dim 5 §17.1), Phase 1 ships frontend-only. The mock fi
 **Type safety:** the mock fixtures import the same TypeScript interfaces from `surakkha-app/src/types/*.ts` that production uses. The fixture type-check is the wire contract — if a fixture drifts from the prod shape, `tsc` fails.
 
 **Hand-off to Phase 2:** when Story 1.1 lands, the same `EnvelopeBase` types are reused against the real gateway. The `surakkha-mock` store stays in the repo for Storybook stories and Vitest component tests (run via `msw/node`).
+
+---
+
+### 6.5 Field technician + work order (Story 1.2)
+
+```ts
+type TechnicianId = string & { readonly __brand: 'TechnicianId' };
+type WorkOrderId  = string & { readonly __brand: 'WorkOrderId' };
+
+interface FieldTechnician {
+  id: TechnicianId;
+  handle: ActorHandle;
+  displayName: string;
+  role: 'field_technician';
+  zone: string;                       // free-text zone label (e.g., 'NE zone')
+  specialism: 'chlorination' | 'mechanical' | 'electrical' | 'generalist' | 'sensor_calibration';
+  // attendance + capacity metadata — pulled from `utility-roster` (Phase 1 mock returns 3 fixtures)
+  currentShiftId?: string;
+  activeJobCount: number;              // 0..N; displayed alongside the technician card on the assign-tech panel
+  // device actor — the field-tablet that signs the chain events on the technician's behalf
+  deviceActorRef: string;
+  ed25519_pubkey: string;              // base64url(no prefix); populates the `tech-sig` row in mockup §01.4
+  scopes: Scope[];                     // which wards / clusters the technician is rated for
+}
+
+interface WorkOrder {
+  id: WorkOrderId;                     // content-addressed: sha256(canonical({technician_id, incident_id, assigned_at}))
+  technician_id: TechnicianId;
+  incident_id: ULID;
+  priority: 'P1' | 'P2' | 'P3' | 'P4';
+  eta_target_minutes: number;
+  work_order_summary: string;
+  assigned_at: ISOTimestamp;
+  status:
+    | 'assigned'                       // freshly dispatched; awaiting arrival
+    | 'en_route'                       // technician pings "I'm on the way"
+    | 'on_site'                        // TechnicianArrived landed
+    | 'in_progress'                    // DiagnosisSubmitted or FixSubmitted without incident-resolve yet
+    | 'resolved'                       // IncidentResolved landed
+    | 'rejected'                       // DeviationCaptured landed; reopened
+    | 'overdue';                       // SLA missed
+  reopen_count: number;                // 0..N; ticks every time DeviationCaptured lands
+  chainRef: ChainRef;                  // the originating TechnicianAssigned event's block_hash
+}
+```
+
+**Why two separate shapes?** The `FieldTechnician` is a roster-side entity (`utility-roster` service in production; `fixtures.ts` in Phase 1); the `WorkOrder` is the chain-derived view (read-model projection of `TechnicianAssigned / TechnicianArrived / DiagnosisSubmitted / FixSubmitted / IncidentResolved / DeviationCaptured`). The technician-list page reads `FieldTechnician[]`; the work-queue page reads `WorkOrder[]`; they reconcile via `WorkOrder.technician_id ↔ FieldTechnician.id`.
+
+**'reopen_count' invariant:** the field-tech work-queue UI surfaces an overdue-row indicator when `reopen_count > 0`, since multiple `DeviationCaptured` events against the same work order are an audit red flag. The projection is computed at read time; not stored.
 
 ---
 
@@ -776,3 +845,4 @@ Before any dim 7 work begins, confirm:
 |---|---|---|
 | 2026-09-07 | Document created. 8 component shapes + 6 page-template shapes + 8 empty-state specs + 6 domain entities (User, Sensor, SensorReading, AnjaliReport, Cluster, ChainRef). TS-first format with JSON + Zod examples. Branded IDs + ISO 8601 timestamps. Locale-at-container rule enforced. Bangla-aware data rules (§8). | Gate 0 dim 6 lockdown. |
 | 2026-09-07 | §6.4 added — Phase 1 mock fixtures. Documents the `surakkha-mock` IndexedDB store (4 object stores: chain_blocks, chain_head, session, meta) with seed-on-empty behavior. Fixtures import the same TypeScript interfaces from production so wire-contract parity is preserved. Network latency simulation (200-400ms random). Reset semantics = "delete IDB + reload". Per-browser persisted state survives page reload. | Phase 1 = frontend-only demo against MSW. Locked wire shapes from dim 7 used unchanged. |
+| 2026-09-08 | §6.1 User.role widened 5 → 9 entries to mirror the dim 7 §2.5 ActorRole enum (now that `'field_technician'` is added on the wire). Legacy `'priya'` alias retained; `'admin'` dropped (was internal-only, never reached the wire). 4 new permissions added: `incident.assign_technician`, `incident.submit_diagnosis`, `incident.submit_fix`, `incident.reject_fix`. §6.5 added — FieldTechnician + WorkOrder shapes (branded `TechnicianId`, `WorkOrderId`). WorkOrder.status is the chain-derived projection of the technician's `TechnicianAssigned / TechnicianArrived / DiagnosisSubmitted / FixSubmitted / IncidentResolved / DeviationCaptured` event stream. | Story 1.2 — Field Technician (Karim) persona. dim 6 → dim 7 alignment so component-side type-checking stays consistent with the wire-side identity. |

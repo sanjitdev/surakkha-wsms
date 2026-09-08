@@ -1,7 +1,7 @@
 /**
  * session.ts
  *
- * Phase 1 login picker — lets the demo switch among the 5 personas needed
+ * Phase 1 login picker — lets the demo switch among the 6 personas needed
  * to exercise every template (dim 5 §18 role → template mapping):
  *
  *   Priya           → /inbox, /verify, /dashboard   (utility_operator + utility_message_desk)
@@ -9,6 +9,7 @@
  *   PHA Approver    → /approve                      (pha_approver)
  *   PHA Viewer      → /audit (read-only)            (pha_viewer)
  *   Vendor          → /vendor                       (vendor — sensor fleet)
+ *   Karim           → /field                        (field_technician — utility field staff, dispatched)
  *
  * Each persona is a row in PERSONAS. `loginAs(persona)` mints a SessionRow
  * with a fresh ULID for actor_ref and a stable (per-persona) bearer token.
@@ -18,9 +19,9 @@
  * "Logout" = clearSession() + invalidate any cached fetch state.
  *
  * Note: persona strings are display labels only; the wire-level role follows
- * the closed 8-entry enum from AD-12 (vendor/pha_approver/utility_operator/
- * utility_message_desk/anjali/priya/pha_viewer/system). The mapping below is
- * kept consistent with that enum.
+ * the closed 9-entry enum from AD-12 (vendor/pha_approver/utility_operator/
+ * utility_message_desk/field_technician/anjali/priya/pha_viewer/system). The
+ * mapping below is kept consistent with that enum.
  */
 
 import { ulid } from './canonical';
@@ -34,6 +35,8 @@ export interface Persona {
   landing: string;
   /** Visual treatment on the picker. Pure CSS; not on the wire. */
   hint: string;
+  /** Short label rendered in the top-chrome persona chip. Optional — falls back to `display_name`. */
+  chip_label?: string;
 }
 
 /**
@@ -75,6 +78,14 @@ export const PERSONAS: Persona[] = [
     role: 'vendor',
     landing: '/vendor',
     hint: 'Submits SensorReadingSubmitted batches (sensor-side wire).',
+  },
+  {
+    id: 'karim',
+    display_name: 'Karim — Field Technician',
+    role: 'field_technician',
+    landing: '/field',
+    hint: 'Picks up dispatched work orders; files diagnosis + fix on chain.',
+    chip_label: 'Karim · field tech · NE zone',
   },
 ];
 
