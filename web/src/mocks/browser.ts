@@ -5,7 +5,7 @@
  *
  * Setup contract:
  *   1. Set `VITE_USE_MOCKS=true` in `.env.local` (or `.env.development`).
- *   2. `npm run dev` — Vite boots; main.tsx imports this module via
+ *   2. `pnpm dev` — Vite boots; main.tsx imports this module via
  *      `if (import.meta.env.VITE_USE_MOCKS === 'true') await startMocks();`
  *   3. The first await seeds IndexedDB (idempotent) so the chain is
  *      pre-populated for the demo. Subsequent loads skip the seed.

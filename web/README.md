@@ -6,12 +6,15 @@ the dim-7 wire format and seed an IndexedDB chain on first boot.
 
 ## First-time setup
 
+> **Package manager: pnpm 9** (pinned via `packageManager` field and
+> `.npmrc`). Run `corepack enable` once if `pnpm` is not on PATH.
+
 ```bash
-cd surakkha-app
-npm install
+cd web
+pnpm install
 cp .env.example .env.local           # VITE_USE_MOCKS=true is the default
-npm run mocks:init                   # writes public/mockServiceWorker.js
-npm run dev
+pnpm mocks:init                      # writes public/mockServiceWorker.js
+pnpm dev
 ```
 
 Open http://localhost:5173 — you'll see the login picker (5 personas).
@@ -21,7 +24,7 @@ a session row in IndexedDB, and reloads to the persona's landing route.
 ## What's where
 
 ```
-surakkha-app/
+web/
 ├─ mockups/          static HTML mockups (source of truth for visuals)
 ├─ src/
 │  ├─ App.tsx        top-level shell — currently <LoginPage />
@@ -57,7 +60,7 @@ backend with the env var flipped.
 
 To point at a real backend:
 ```bash
-VITE_USE_MOCKS=false npm run dev
+VITE_USE_MOCKS=false pnpm dev
 ```
 
 ## Story 1.1 status
