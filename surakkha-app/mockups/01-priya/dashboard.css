@@ -1,0 +1,684 @@
+/* ════════════════════════════════════════════════════════════════════
+   dashboard.css — Surakkha Priya mockup specific styles
+   Layered ON TOP OF theme.css. Adds app-shell layout + tabs + dashboard
+   variants (A · grid · B · editorial · C · workflow stages).
+   No new design tokens — references locked dim-1 + dim-4 only.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── App shell: sidebar + main ───────────────────────────────── */
+.app-shell {
+  display: grid;
+  grid-template-columns: 256px 1fr;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-lg) var(--space-md);
+  gap: var(--space-md);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+.sidebar__brand {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--brand-500);
+  letter-spacing: -0.01em;
+  text-decoration: none;
+  padding: 0 var(--space-md);
+}
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  flex: 1;
+}
+.sidebar__link, .sidebar__logout {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  height: var(--height-control-lg);
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.sidebar__link:hover, .sidebar__logout:hover {
+  background: var(--bg-subtle);
+  color: var(--fg-default);
+}
+.sidebar__link.active {
+  background: var(--brand-100);
+  color: var(--brand-600);
+}
+[data-theme="dark"] .sidebar__link.active {
+  background: var(--brand-200);
+  color: var(--brand-500);
+}
+.sidebar__icon {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-tertiary);
+  font-size: var(--font-size-md);
+  flex-shrink: 0;
+}
+.sidebar__icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sidebar__link.active .sidebar__icon { color: var(--brand-500); }
+.sidebar__badge {
+  margin-left: auto;
+  background: var(--danger);
+  color: var(--bg-surface);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-sm);
+  min-width: 20px;
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+}
+.sidebar__foot {
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Main column ─────────────────────────────────────────────── */
+.main {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Top chrome ─────────────────────────────────────────────── */
+.top-chrome {
+  height: var(--height-control-xl);
+  background: var(--bg-base);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-xl);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+.top-chrome__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+}
+.top-chrome__persona {
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+}
+.top-chrome__right { display: flex; align-items: center; }
+
+/* ── Page header ────────────────────────────────────────────── */
+.page-header {
+  padding: var(--space-xl) var(--space-xl) var(--space-md);
+}
+.page-header h1 {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-xs);
+}
+.page-header__sub {
+  font-size: var(--font-size-sm);
+  color: var(--fg-tertiary);
+}
+
+/* ── Pulse dot (chain-fresh indicator) ──────────────────────── */
+.pulse-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+  box-shadow: 0 0 0 0 var(--success);
+  animation: pulse 1600ms ease-out infinite;
+}
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 var(--success); opacity: 0.6; }
+  50%  { box-shadow: 0 0 0 6px transparent; opacity: 1; }
+  100% { box-shadow: 0 0 0 0 transparent; opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulse-dot { animation: none; }
+}
+
+main.container--wide {
+  padding: var(--space-md) var(--space-xl) var(--space-xl);
+}
+
+/* ── Tabs (kept but not shown — single Overview surface) ────── */
+.tabs {
+  display: none;  /* workflow stages replaces the tab strip */
+}
+
+/* ── Tab panels ──────────────────────────────────────────────── */
+.tab-panel { display: block; }
+.tab-panel[hidden] { display: none; }
+
+/* ── Grid (12-col utilities — kept for any variant that uses them) ── */
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-md);
+}
+.col-3 { grid-column: span 3; }
+.col-4 { grid-column: span 4; }
+.col-6 { grid-column: span 6; }
+.col-8 { grid-column: span 8; }
+.col-12 { grid-column: span 12; }
+
+/* ════════════════════════════════════════════════════════════════════
+   LAYOUT TOGGLER
+   ════════════════════════════════════════════════════════════════════ */
+
+.layout-toggle {
+  display: inline-flex;
+  gap: 2px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+.layout-toggle__btn {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-md);
+  color: var(--fg-secondary);
+  cursor: pointer;
+  height: 28px;
+  line-height: 1;
+  transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+.layout-toggle__btn:hover { color: var(--fg-default); }
+.layout-toggle__btn.is-active {
+  background: var(--bg-surface);
+  color: var(--brand-600);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+[data-theme="dark"] .layout-toggle__btn.is-active {
+  background: var(--bg-surface);
+  color: var(--brand-400);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.32);
+}
+
+.page-header__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-xl);
+  flex-wrap: wrap;
+}
+.page-header__row > div:first-child { flex: 1; min-width: 240px; }
+
+/* Default: hide all variants */
+[data-layout-only] { display: none; }
+main[data-layout="a"] [data-layout-only="a"],
+main[data-layout="b"] [data-layout-only="b"],
+main[data-layout="c"] [data-layout-only="c"] {
+  display: block;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   VARIANT C — WORKFLOW STAGES (default)
+   5-column pipeline: Monitor → Decide → Sign → Broadcast → Verify
+   Each column shows count + 3 items + footer link.
+   Empty stages display last-completed in muted style so the pipeline
+   never feels dead.
+   ════════════════════════════════════════════════════════════════════ */
+
+.workflow-stages {
+  margin-top: var(--space-md);
+}
+
+.workflow-stage {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: border-color 160ms ease-out;
+}
+
+.workflow-stage__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+}
+
+.workflow-stage__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+}
+
+.workflow-stage__step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+}
+
+.workflow-stage__count {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--fg-default);
+  font-variant-numeric: tabular-nums;
+}
+
+/* State dots on the stage header (live indicator) */
+.workflow-stage__pulse {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--fg-disabled);
+  flex-shrink: 0;
+}
+.workflow-stage--active .workflow-stage__pulse {
+  background: var(--warning);
+  box-shadow: 0 0 0 3px var(--warning-bg);
+  animation: pulse-stage 1600ms ease-out infinite;
+}
+@keyframes pulse-stage {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workflow-stage--active .workflow-stage__pulse { animation: none; }
+}
+
+/* Active stage (has live items) — highlighted border + head */
+.workflow-stage--active {
+  border-color: var(--border-default);
+}
+.workflow-stage--active .workflow-stage__head {
+  background: var(--bg-subtle);
+}
+.workflow-stage--active .workflow-stage__step {
+  background: var(--brand-500);
+  border-color: var(--brand-500);
+  color: var(--bg-surface);
+}
+
+/* Idle stage (empty, shows last-completed) — fully muted */
+.workflow-stage--idle {
+  border-style: dashed;
+  border-color: var(--border-subtle);
+}
+.workflow-stage--idle .workflow-stage__head {
+  background: var(--bg-base);
+}
+.workflow-stage--idle .workflow-stage__count {
+  color: var(--fg-tertiary);
+}
+
+/* Items list inside a stage */
+.workflow-stage__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.workflow-stage__item {
+  display: grid;
+  grid-template-columns: 16px 1fr auto;
+  gap: var(--space-sm);
+  align-items: center;
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-subtle);
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease-out;
+}
+.workflow-stage__item:first-child { border-top: none; }
+.workflow-stage__item:hover {
+  background: var(--bg-subtle);
+}
+.workflow-stage__item-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--fg-tertiary);
+  justify-self: center;
+}
+.workflow-stage__item--t3 .workflow-stage__item-dot { background: var(--danger); }
+.workflow-stage__item--t2 .workflow-stage__item-dot { background: var(--warning); }
+.workflow-stage__item--t1 .workflow-stage__item-dot { background: var(--info); }
+.workflow-stage__item--ok .workflow-stage__item-dot { background: var(--success); }
+
+.workflow-stage__item-body {
+  min-width: 0;
+}
+.workflow-stage__item-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workflow-stage__item-meta {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-mono);
+  margin-top: 2px;
+}
+
+.workflow-stage__item-badge {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-tertiary);
+}
+
+/* Idle-state last-completed row (clearly different from active items) */
+.workflow-stage__last {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  line-height: var(--line-height-body);
+}
+.workflow-stage__last-label {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-tertiary);
+  margin-bottom: var(--space-xs);
+}
+.workflow-stage__last-text {
+  font-family: var(--font-family-mono);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* Stage footer link */
+.workflow-stage__foot {
+  padding: var(--space-sm) var(--space-lg);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-base);
+}
+.workflow-stage__foot-link {
+  font-size: var(--font-size-sm);
+  color: var(--brand-500);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.workflow-stage__foot-link:hover { color: var(--brand-600); }
+.workflow-stage--idle .workflow-stage__foot-link {
+  color: var(--fg-tertiary);
+}
+
+/* ── Pipeline rail (the 5 stages laid out as columns) ────────── */
+.pipeline {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-md);
+  align-items: stretch;
+}
+
+/* Subtle arrow connectors between stages (purely decorative — drawn
+   as an inline indicator on each stage head). Active stages get a
+   brand-500 left edge marker so the eye can read direction. */
+.pipeline .workflow-stage {
+  position: relative;
+}
+.pipeline .workflow-stage--active::before {
+  content: "";
+  position: absolute;
+  left: -1px; top: var(--space-md); bottom: var(--space-md);
+  width: 2px;
+  background: var(--brand-500);
+  border-radius: 1px;
+}
+
+/* ── Secondary row below the pipeline ────────────────────────── */
+.workflow-secondary {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+.workflow-secondary .col-7 { grid-column: span 7; }
+.workflow-secondary .col-5 { grid-column: span 5; }
+
+.workflow-summary-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+}
+.workflow-summary-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-md);
+}
+.workflow-summary-card__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+.workflow-summary-card__meta {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+}
+
+/* Activity feed list (used inside summary card) */
+.activity-feed {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.activity-feed li {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  gap: var(--space-md);
+  align-items: baseline;
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--border-subtle);
+  font-size: var(--font-size-sm);
+}
+.activity-feed li:first-child { border-top: none; }
+.activity-feed__time {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+}
+.activity-feed__text strong {
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   VARIANT A — DENSE GRID (legacy — kept for comparison)
+   ════════════════════════════════════════════════════════════════════ */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.kpi {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+}
+.kpi__label {
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-tertiary);
+  font-weight: var(--font-weight-medium);
+  display: block;
+  margin-bottom: var(--space-sm);
+}
+.kpi__value {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  color: var(--fg-default);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-row .kpi { min-height: 96px; }
+
+.section-label {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--fg-tertiary);
+  margin: 0 0 var(--space-sm);
+  font-weight: var(--font-weight-semibold);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  table-layout: fixed;
+}
+.data-table th {
+  text-align: left;
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-tertiary);
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.data-table td {
+  padding: var(--space-sm) var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table .col-time    { width: 56px; font-family: var(--font-family-mono); color: var(--fg-tertiary); font-size: var(--font-size-xs); white-space: nowrap; }
+.data-table .col-status  { width: 64px; white-space: nowrap; }
+.data-table .col-action  { width: 96px; text-align: right; }
+.data-table .col-warn    { width: 16px; padding-right: 0; }
+.data-table .col-action a { font-size: var(--font-size-sm); color: var(--brand-500); text-decoration: none; font-weight: var(--font-weight-medium); white-space: nowrap; }
+.data-table .col-action a:hover { color: var(--brand-600); }
+.data-table .row-severity-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+}
+
+.data-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+}
+.data-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-md);
+}
+.data-card__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+.dense-row {
+  display: grid;
+  grid-template-columns: 8fr 4fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   VARIANT B — EDITORIAL (legacy — kept for comparison)
+   ════════════════════════════════════════════════════════════════════ */
+.editorial-hero {
+  display: grid;
+  grid-template-columns: 4fr 8fr;
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.kpi--hero {
+  padding: var(--space-xl);
+}
+.kpi--hero .kpi__value {
+  font-size: 3.5rem;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: var(--space-sm) 0;
+}
+.editorial-second {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.editorial-second .kpi .kpi__value { font-size: var(--font-size-xl); }

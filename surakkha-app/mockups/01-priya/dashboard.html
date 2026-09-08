@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha — Dashboard (Priya)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- ── LEFT SIDEBAR ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="dashboard.html">SURAKKHA</a>
+      <nav class="sidebar__nav">
+        <a href="dashboard.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
+          <span>Dashboard</span>
+        </a>
+        <a href="../01-priya/handover.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
+          <span>Handover</span>
+        </a>
+        <a href="../01-priya/inbox-list.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
+          <span>Inbox</span>
+          <span class="sidebar__badge">3</span>
+        </a>
+        <a href="../01-priya/verify-flow.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
+          <span>Verify</span>
+        </a>
+        <a href="../01-priya/notices.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
+          <span>Notices</span>
+        </a>
+        <a href="../01-priya/sensors.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
+          <span>Sensors</span>
+        </a>
+        <a href="../01-priya/audit-log.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
+          <span>Audit</span>
+        </a>
+        <a href="../01-priya/settings.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
+          <span>Settings</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ─────────────────────────────────────────── -->
+    <div class="main">
+      <!-- ── TOP CHROME ──────────────────────────────────────── -->
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.3s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Priya · utility_operator</span>
+        </div>
+      </header>
+
+      <!-- ── PAGE HEADER (with layout toggler) ──────────────── -->
+      <div class="page-header">
+        <div class="page-header__row">
+          <div>
+            <h1>Dashboard</h1>
+            <div class="page-header__sub">12 wards online · 5-stage pipeline</div>
+          </div>
+          <div class="layout-toggle" role="radiogroup" aria-label="Dashboard layout">
+            <button class="layout-toggle__btn" type="button" role="radio" aria-checked="false" data-layout-btn="a">A · grid</button>
+            <button class="layout-toggle__btn" type="button" role="radio" aria-checked="false" data-layout-btn="b">B · editorial</button>
+            <button class="layout-toggle__btn is-active" type="button" role="radio" aria-checked="true"  data-layout-btn="c">C · workflow</button>
+          </div>
+        </div>
+      </div>
+
+      <main class="container--wide" data-layout="c">
+
+        <!-- ════════════════════════════════════════════════════════
+             VARIANT C · WORKFLOW STAGES (default)
+             Monitor → Decide → Sign → Broadcast → Verify
+             ════════════════════════════════════════════════════════ -->
+        <div data-layout-only="c" class="workflow-stages">
+          <div class="pipeline">
+
+            <!-- ─── STAGE 1 · MONITOR (active) ─── -->
+            <article class="workflow-stage workflow-stage--active">
+              <header class="workflow-stage__head">
+                <span class="workflow-stage__label">
+                  <span class="workflow-stage__step">1</span>
+                  Monitor
+                  <span class="workflow-stage__pulse" aria-hidden="true"></span>
+                </span>
+                <span class="workflow-stage__count">3</span>
+              </header>
+              <ul class="workflow-stage__items">
+                <a class="workflow-stage__item workflow-stage__item--t3" href="../01-priya/sensors.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">SN-2208 · ward 7</span>
+                    <span class="workflow-stage__item-meta">silent 8 min · pH sensor</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T3</span>
+                </a>
+                <a class="workflow-stage__item workflow-stage__item--t2" href="../01-priya/sensors.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">SN-1142 · ward 3</span>
+                    <span class="workflow-stage__item-meta">pH 7.9 drift · 14m</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T2</span>
+                </a>
+                <a class="workflow-stage__item workflow-stage__item--t2" href="../01-priya/sensors.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">SN-3301 · ward 5</span>
+                    <span class="workflow-stage__item-meta">chlorine 0.4 ppm · low</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T2</span>
+                </a>
+              </ul>
+              <footer class="workflow-stage__foot">
+                <a class="workflow-stage__foot-link" href="../01-priya/sensors.html">Inspect fleet →</a>
+              </footer>
+            </article>
+
+            <!-- ─── STAGE 2 · DECIDE (active) ─── -->
+            <article class="workflow-stage workflow-stage--active">
+              <header class="workflow-stage__head">
+                <span class="workflow-stage__label">
+                  <span class="workflow-stage__step">2</span>
+                  Decide
+                  <span class="workflow-stage__pulse" aria-hidden="true"></span>
+                </span>
+                <span class="workflow-stage__count">3</span>
+              </header>
+              <ul class="workflow-stage__items">
+                <a class="workflow-stage__item workflow-stage__item--t3" href="../01-priya/inbox-list.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">Ward 7 chlorination spike</span>
+                    <span class="workflow-stage__item-meta">2 sensors + 1 citizen report</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T3</span>
+                </a>
+                <a class="workflow-stage__item workflow-stage__item--t2" href="../01-priya/inbox-list.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">Ward 3 lead-leach chronic</span>
+                    <span class="workflow-stage__item-meta">8-day trend · lab pending</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T2</span>
+                </a>
+                <a class="workflow-stage__item workflow-stage__item--t1" href="../01-priya/inbox-list.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">Ward 12 pH drift</span>
+                    <span class="workflow-stage__item-meta">deviation · review</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T1</span>
+                </a>
+              </ul>
+              <footer class="workflow-stage__foot">
+                <a class="workflow-stage__foot-link" href="../01-priya/inbox-list.html">Triage all →</a>
+              </footer>
+            </article>
+
+            <!-- ─── STAGE 3 · SIGN (active) ─── -->
+            <article class="workflow-stage workflow-stage--active">
+              <header class="workflow-stage__head">
+                <span class="workflow-stage__label">
+                  <span class="workflow-stage__step">3</span>
+                  Sign
+                  <span class="workflow-stage__pulse" aria-hidden="true"></span>
+                </span>
+                <span class="workflow-stage__count">2</span>
+              </header>
+              <ul class="workflow-stage__items">
+                <a class="workflow-stage__item workflow-stage__item--t3" href="../01-priya/inbox-detail.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">Notice · ward 7 chlorination</span>
+                    <span class="workflow-stage__item-meta">awaiting Priya signature</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T3</span>
+                </a>
+                <a class="workflow-stage__item workflow-stage__item--t2" href="../01-priya/inbox-detail.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">Notice · ward 3 lead-leach</span>
+                    <span class="workflow-stage__item-meta">awaiting Priya signature</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">T2</span>
+                </a>
+                <div class="workflow-stage__last">
+                  <div class="workflow-stage__last-label">recently signed</div>
+                  <div class="workflow-stage__last-text">W5 notice · 11:30 today · by Priya</div>
+                </div>
+              </ul>
+              <footer class="workflow-stage__foot">
+                <a class="workflow-stage__foot-link" href="../01-priya/inbox-list.html">Review queue →</a>
+              </footer>
+            </article>
+
+            <!-- ─── STAGE 4 · BROADCAST (active) ─── -->
+            <article class="workflow-stage workflow-stage--active">
+              <header class="workflow-stage__head">
+                <span class="workflow-stage__label">
+                  <span class="workflow-stage__step">4</span>
+                  Broadcast
+                  <span class="workflow-stage__pulse" aria-hidden="true"></span>
+                </span>
+                <span class="workflow-stage__count">1</span>
+              </header>
+              <ul class="workflow-stage__items">
+                <a class="workflow-stage__item workflow-stage__item--ok" href="../01-priya/notices.html">
+                  <span class="workflow-stage__item-dot" aria-hidden="true"></span>
+                  <span class="workflow-stage__item-body">
+                    <span class="workflow-stage__item-title">Ward 7 · block #13</span>
+                    <span class="workflow-stage__item-meta">broadcast 14:01 · ack pending</span>
+                  </span>
+                  <span class="workflow-stage__item-badge">SENT</span>
+                </a>
+                <div class="workflow-stage__last">
+                  <div class="workflow-stage__last-label">last broadcast</div>
+                  <div class="workflow-stage__last-text">W5 · 11:30 · Anjali signed · #11</div>
+                </div>
+                <div class="workflow-stage__last">
+                  <div class="workflow-stage__last-label">prior</div>
+                  <div class="workflow-stage__last-text">W12 · 18:14 yesterday · #9</div>
+                </div>
+              </ul>
+              <footer class="workflow-stage__foot">
+                <a class="workflow-stage__foot-link" href="../01-priya/notices.html">Open broadcast log →</a>
+              </footer>
+            </article>
+
+            <!-- ─── STAGE 5 · VERIFY (idle) ─── -->
+            <article class="workflow-stage workflow-stage--idle">
+              <header class="workflow-stage__head">
+                <span class="workflow-stage__label">
+                  <span class="workflow-stage__step">5</span>
+                  Verify
+                </span>
+                <span class="workflow-stage__count">0</span>
+              </header>
+              <ul class="workflow-stage__items">
+                <div class="workflow-stage__last" style="border-top: none;">
+                  <div class="workflow-stage__last-label">nothing to verify right now</div>
+                  <div class="workflow-stage__last-text">All recent signatures pass auto-check.</div>
+                </div>
+                <div class="workflow-stage__last">
+                  <div class="workflow-stage__last-label">last verified</div>
+                  <div class="workflow-stage__last-text">Block #12 · 13:48 · 1 signature</div>
+                </div>
+                <div class="workflow-stage__last">
+                  <div class="workflow-stage__last-label">prior</div>
+                  <div class="workflow-stage__last-text">Block #11 · 11:30 · 2 signatures</div>
+                </div>
+              </ul>
+              <footer class="workflow-stage__foot">
+                <a class="workflow-stage__foot-link" href="../01-priya/verify-flow.html">Chain explorer →</a>
+              </footer>
+            </article>
+
+          </div>
+
+          <!-- ─── SECONDARY ROW ─── -->
+          <div class="workflow-secondary">
+            <div class="col-7">
+              <article class="workflow-summary-card">
+                <header class="workflow-summary-card__head">
+                  <h3 class="workflow-summary-card__title">Today on chain</h3>
+                  <span class="workflow-summary-card__meta">last 6h · 11 events</span>
+                </header>
+                <ul class="activity-feed">
+                  <li>
+                    <span class="activity-feed__time">14:01</span>
+                    <span class="activity-feed__text"><strong>Public notice issued</strong> · ward 7 · block #13</span>
+                    <span class="badge badge--resolved">broadcast</span>
+                  </li>
+                  <li>
+                    <span class="activity-feed__time">13:48</span>
+                    <span class="activity-feed__text"><strong>Chain verification</strong> · block #12 · 1 signature</span>
+                    <span class="badge badge--resolved">ok</span>
+                  </li>
+                  <li>
+                    <span class="activity-feed__time">13:21</span>
+                    <span class="activity-feed__text"><strong>Sensor readings ×4</strong> · fleet batch · block #10</span>
+                    <span class="badge badge--tier">data</span>
+                  </li>
+                  <li>
+                    <span class="activity-feed__time">12:55</span>
+                    <span class="activity-feed__text"><strong>Citizen report</strong> · Anjali · ward 5 · block #9</span>
+                    <span class="badge badge--tier">inbox</span>
+                  </li>
+                  <li>
+                    <span class="activity-feed__time">11:30</span>
+                    <span class="activity-feed__text"><strong>Citizen signature</strong> · Anjali · W5 notice · block #7</span>
+                    <span class="badge badge--resolved">signed</span>
+                  </li>
+                  <li>
+                    <span class="activity-feed__time">09:13</span>
+                    <span class="activity-feed__text"><strong>Operator login</strong> · Priya · web · block #5</span>
+                    <span class="badge badge--open">auth</span>
+                  </li>
+                </ul>
+              </article>
+            </div>
+            <div class="col-5">
+              <article class="workflow-summary-card">
+                <header class="workflow-summary-card__head">
+                  <h3 class="workflow-summary-card__title">Operator pulse</h3>
+                  <span class="workflow-summary-card__meta">last 24h</span>
+                </header>
+                <div class="kpi-row" style="grid-template-columns: repeat(2, 1fr); margin: 0;">
+                  <div class="kpi">
+                    <span class="kpi__label">Active incidents</span>
+                    <span class="kpi__value">3 <span style="font-size: var(--font-size-sm); color: var(--fg-secondary); font-weight: var(--font-weight-medium);">open</span></span>
+                  </div>
+                  <div class="kpi">
+                    <span class="kpi__label">pH city avg</span>
+                    <span class="kpi__value">7.4 <span style="font-size: var(--font-size-sm); color: var(--fg-secondary); font-weight: var(--font-weight-medium);">pH</span></span>
+                  </div>
+                  <div class="kpi">
+                    <span class="kpi__label">Response time</span>
+                    <span class="kpi__value">2.4 <span style="font-size: var(--font-size-sm); color: var(--fg-secondary); font-weight: var(--font-weight-medium);">min</span></span>
+                  </div>
+                  <div class="kpi">
+                    <span class="kpi__label">Notices issued</span>
+                    <span class="kpi__value">1 <span style="font-size: var(--font-size-sm); color: var(--fg-secondary); font-weight: var(--font-weight-medium);">today</span></span>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════
+             VARIANT A · DENSE GRID (legacy — kept for comparison)
+             ════════════════════════════════════════════════════════ -->
+        <div data-layout-only="a">
+          <div class="kpi-row">
+            <div class="kpi"><span class="kpi__label">Active incidents</span><span class="kpi__value">3</span></div>
+            <div class="kpi"><span class="kpi__label">pH city avg</span><span class="kpi__value">7.4</span></div>
+            <div class="kpi"><span class="kpi__label">Response time</span><span class="kpi__value">2.4 min</span></div>
+            <div class="kpi"><span class="kpi__label">Pending sigs</span><span class="kpi__value">2</span></div>
+            <div class="kpi"><span class="kpi__label">Notices issued</span><span class="kpi__value">1</span></div>
+          </div>
+
+          <p class="section-label">Sensor fleet</p>
+          <div class="data-card">
+            <table class="data-table">
+              <thead><tr><th class="col-warn"></th><th>Ward / Sensor</th><th>Issue</th><th class="col-time">Detected</th><th class="col-status">Severity</th><th class="col-action"></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                  <td>Ward 7 · <span class="mono">SN-2208</span></td>
+                  <td>silent 8 min</td>
+                  <td class="col-time">14:01</td>
+                  <td class="col-status"><span class="badge badge--t3">T3</span></td>
+                  <td class="col-action"><a href="../01-priya/sensors.html">Inspect →</a></td>
+                </tr>
+                <tr>
+                  <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                  <td>Ward 3 · <span class="mono">SN-1142</span></td>
+                  <td>pH drift</td>
+                  <td class="col-time">08:12</td>
+                  <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                  <td class="col-action"><a href="../01-priya/sensors.html">Inspect →</a></td>
+                </tr>
+                <tr>
+                  <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                  <td>Ward 5 · <span class="mono">SN-3301</span></td>
+                  <td>chlorine low</td>
+                  <td class="col-time">13:58</td>
+                  <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                  <td class="col-action"><a href="../01-priya/sensors.html">Inspect →</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p class="section-label">Open threads</p>
+          <div class="data-card">
+            <table class="data-table">
+              <thead><tr><th class="col-warn"></th><th>Thread</th><th>Status / blocker</th><th class="col-time">Opened</th><th class="col-status">Severity</th><th class="col-action"></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
+                  <td>Ward 7 chlorination spike</td>
+                  <td>awaiting citizen ack</td>
+                  <td class="col-time">14:01</td>
+                  <td class="col-status"><span class="badge badge--t3">T3</span></td>
+                  <td class="col-action"><a href="../01-priya/inbox-detail.html">Open →</a></td>
+                </tr>
+                <tr>
+                  <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
+                  <td>Ward 3 lead-leach chronic</td>
+                  <td>8-day trend · awaiting lab</td>
+                  <td class="col-time">09:13</td>
+                  <td class="col-status"><span class="badge badge--t2">T2</span></td>
+                  <td class="col-action"><a href="../01-priya/inbox-detail.html">Open →</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════════════
+             VARIANT B · EDITORIAL (legacy — kept for comparison)
+             ════════════════════════════════════════════════════════ -->
+        <div data-layout-only="b">
+          <div class="editorial-hero">
+            <div class="kpi kpi--hero">
+              <span class="kpi__label">Active incidents</span>
+              <span class="kpi__value">3</span>
+              <a class="workflow-stage__foot-link" href="../01-priya/inbox-list.html" style="margin-top: var(--space-md); display: inline-block;">Triage all →</a>
+            </div>
+            <div class="data-card">
+              <div class="data-card__head"><h3 class="data-card__title">Today on chain</h3><span style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-tertiary);">last 6h</span></div>
+              <ul class="activity-feed">
+                <li><span class="activity-feed__time">14:01</span><span class="activity-feed__text"><strong>Public notice</strong> · ward 7</span><span class="badge badge--resolved">broadcast</span></li>
+                <li><span class="activity-feed__time">13:48</span><span class="activity-feed__text"><strong>Chain verify</strong> · #12</span><span class="badge badge--resolved">ok</span></li>
+                <li><span class="activity-feed__time">13:21</span><span class="activity-feed__text"><strong>Sensor readings ×4</strong></span><span class="badge badge--tier">data</span></li>
+                <li><span class="activity-feed__time">12:55</span><span class="activity-feed__text"><strong>Citizen report</strong> · Anjali · W5</span><span class="badge badge--tier">inbox</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="section-label">Today at a glance</p>
+          <div class="editorial-second">
+            <div class="kpi"><span class="kpi__label">pH city avg</span><span class="kpi__value">7.4</span></div>
+            <div class="kpi"><span class="kpi__label">Response time</span><span class="kpi__value">2.4 min</span></div>
+            <div class="kpi"><span class="kpi__label">Pending sigs</span><span class="kpi__value">2</span></div>
+            <div class="kpi"><span class="kpi__label">Notices issued</span><span class="kpi__value">1</span></div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
