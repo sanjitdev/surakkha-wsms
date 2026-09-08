@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Submit report (Anjali)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--anjali .sidebar { width: 200px; }
+  .anjali-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .anjali-sidebar__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: 2px;
+  }
+  .anjali-sidebar__ward {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .anjali-submit {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+  .anjali-submit__head {
+    margin-bottom: var(--space-xl);
+  }
+  .anjali-submit__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 var(--space-xs);
+    letter-spacing: -0.01em;
+  }
+  .anjali-submit__sub {
+    font-size: var(--font-size-sm);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+
+  /* Input mode cards (3-modality: voice, photo, text) */
+  .anjali-mode-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-bottom: var(--space-xl);
+  }
+  .anjali-mode {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: var(--space-md);
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 120ms ease-out;
+  }
+  .anjali-mode:hover { border-color: var(--brand-500); }
+  .anjali-mode.is-on {
+    border-color: var(--brand-500);
+    background: var(--brand-100);
+  }
+  [data-theme="dark"] .anjali-mode.is-on { background: var(--brand-200); }
+  .anjali-mode__icon {
+    width: 48px; height: 48px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-subtle);
+    color: var(--fg-secondary);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .anjali-mode.is-on .anjali-mode__icon {
+    background: var(--brand-500);
+    color: white;
+  }
+  .anjali-mode__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    margin: 0 0 2px;
+  }
+  .anjali-mode__hint {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    margin: 0;
+  }
+  .anjali-mode__check {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .anjali-mode.is-on .anjali-mode__check {
+    background: var(--brand-500);
+    border-color: var(--brand-500);
+    color: white;
+  }
+
+  /* Expanded voice input */
+  .anjali-voice-panel {
+    display: none;
+    background: var(--bg-surface);
+    border: 1px solid var(--brand-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+  }
+  .anjali-voice-panel.is-on { display: block; }
+  .anjali-voice-panel__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+  }
+  .anjali-voice-panel__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .anjali-voice-panel__time {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+  }
+  .anjali-waveform {
+    height: 64px;
+    background: var(--bg-base);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0 var(--space-md);
+    margin-bottom: var(--space-md);
+  }
+  .anjali-wave-bar {
+    flex: 1;
+    background: var(--brand-500);
+    border-radius: 1px;
+    min-height: 4px;
+    max-height: 48px;
+    opacity: 0.4;
+  }
+  .anjali-wave-bar.is-on {
+    opacity: 1;
+    background: var(--danger);
+  }
+  .anjali-voice-controls {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: center;
+  }
+  .anjali-voice-btn {
+    background: var(--danger);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+  }
+
+  /* Expanded photo input */
+  .anjali-photo-panel {
+    display: none;
+    background: var(--bg-surface);
+    border: 1px solid var(--brand-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+  }
+  .anjali-photo-panel.is-on { display: block; }
+  .anjali-photo-preview {
+    aspect-ratio: 4/3;
+    background: var(--warning-bg);
+    background-image:
+      linear-gradient(45deg, var(--warning-bg) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--warning-bg) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--warning-bg) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--warning-bg) 75%);
+    background-size: 24px 24px;
+    background-position: 0 0, 0 12px, 12px -12px, -12px 0;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-md);
+    position: relative;
+  }
+  .anjali-photo-strip {
+    width: 60%; height: 30%;
+    background: var(--warning);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: 0.08em;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .anjali-cv-read {
+    background: var(--success-bg);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--success);
+    text-align: center;
+  }
+
+  /* Text input */
+  .anjali-text-panel {
+    display: none;
+    background: var(--bg-surface);
+    border: 1px solid var(--brand-500);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-md);
+  }
+  .anjali-text-panel.is-on { display: block; }
+  .anjali-text-area {
+    width: 100%;
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    min-height: 120px;
+    background: var(--bg-base);
+    color: var(--fg-default);
+    resize: vertical;
+  }
+
+  /* Ward selector */
+  .anjali-ward {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-xl);
+  }
+  .anjali-ward__label {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .anjali-ward__value {
+    font-size: var(--font-size-sm);
+    color: var(--fg-default);
+    font-weight: var(--font-weight-medium);
+  }
+
+  /* Submit bar */
+  .anjali-submit-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-subtle);
+  }
+  .anjali-submit-bar__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .anjali-submit-btn {
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-xl);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+  }
+  .anjali-submit-btn:disabled {
+    background: var(--fg-disabled);
+    cursor: not-allowed;
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--anjali">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="home.html">SURAKKHA</a>
+      <div class="anjali-sidebar__welcome">
+        <div class="anjali-sidebar__name">Anjali</div>
+        <div class="anjali-sidebar__ward">Ward 7 · সদর</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="home.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span>Home</span>
+        </a>
+        <a href="submit.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M5 9l7-7 7 7"/></svg>
+          </span>
+          <span>New report</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <a href="home.html" style="font-size: var(--font-size-xs); color: var(--fg-secondary); text-decoration: none;">← Back to home</a>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Anjali · citizen</span>
+        </div>
+      </header>
+
+      <main class="anjali-submit">
+
+        <div class="anjali-submit__head">
+          <h1 class="anjali-submit__title">Submit a report</h1>
+          <p class="anjali-submit__sub">Voice + photo + text. Pick as many as you want — at least one is enough.</p>
+        </div>
+
+        <!-- Voice input -->
+        <div class="anjali-mode-list">
+          <button class="anjali-mode is-on" data-mode="voice" aria-expanded="true">
+            <span class="anjali-mode__icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
+            </span>
+            <div>
+              <h3 class="anjali-mode__title">Voice note</h3>
+              <p class="anjali-mode__hint">Tap to record · max 60 seconds · most useful for Anjali's reports</p>
+            </div>
+            <span class="anjali-mode__check">
+              <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </button>
+          <div class="anjali-voice-panel is-on">
+            <div class="anjali-voice-panel__head">
+              <span class="anjali-voice-panel__title">Recording…</span>
+              <span class="anjali-voice-panel__time">00:08 / 01:00</span>
+            </div>
+            <div class="anjali-waveform">
+              <div class="anjali-wave-bar is-on" style="height: 14px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 22px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 32px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 18px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 38px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 28px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 44px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 20px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 36px"></div>
+              <div class="anjali-wave-bar is-on" style="height: 24px"></div>
+              <div class="anjali-wave-bar" style="height: 16px"></div>
+              <div class="anjali-wave-bar" style="height: 8px"></div>
+            </div>
+            <div class="anjali-voice-controls">
+              <button class="anjali-voice-btn">
+                <span style="width:10px;height:10px;background:white;border-radius:50%;"></span>
+                Stop recording
+              </button>
+            </div>
+          </div>
+
+          <!-- Photo input -->
+          <button class="anjali-mode is-on" data-mode="photo" aria-expanded="true">
+            <span class="anjali-mode__icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            </span>
+            <div>
+              <h3 class="anjali-mode__title">Sentinel-strip photo</h3>
+              <p class="anjali-mode__hint">Tap to photograph · on-device CV reads the strip color</p>
+            </div>
+            <span class="anjali-mode__check">
+              <svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </button>
+          <div class="anjali-photo-panel is-on">
+            <div class="anjali-photo-preview">
+              <div class="anjali-photo-strip">pH STRIP<br>~5.8</div>
+            </div>
+            <div class="anjali-cv-read">
+              ✓ CV read: <strong>pH 5.8</strong> · confidence <strong>0.91</strong> · attached to report
+            </div>
+          </div>
+
+          <!-- Text input -->
+          <button class="anjali-mode" data-mode="text" aria-expanded="false">
+            <span class="anjali-mode__icon">
+              <svg viewBox="0 0 24 24" width="22" height="22" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+            </span>
+            <div>
+              <h3 class="anjali-mode__title">Free text</h3>
+              <p class="anjali-mode__hint">Optional · type anything you'd add by voice</p>
+            </div>
+            <span class="anjali-mode__check"></span>
+          </button>
+          <div class="anjali-text-panel">
+            <textarea class="anjali-text-area" placeholder="e.g. 'The chlorine smell is strongest at the school kitchen tap, not the bathroom. Started this morning around 8am.'"></textarea>
+          </div>
+        </div>
+
+        <!-- Ward selector (read-only, prefilled from profile) -->
+        <div class="anjali-ward">
+          <span class="anjali-ward__label">Ward</span>
+          <span class="anjali-ward__value">Ward 7 — সদর / Sadar</span>
+          <span style="font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); margin-left: auto;">from your profile</span>
+        </div>
+
+        <!-- Submit bar -->
+        <div class="anjali-submit-bar">
+          <span class="anjali-submit-bar__meta">2 of 3 inputs attached · draft saved locally</span>
+          <button class="anjali-submit-btn">Submit report →</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    // Mode toggle (voice/photo/text) — click the row to expand/collapse the panel
+    document.querySelectorAll('.anjali-mode').forEach(function (mode) {
+      mode.addEventListener('click', function (e) {
+        e.preventDefault();
+        var key = mode.dataset.mode;
+        var panel = document.querySelector('.anjali-' + key + '-panel');
+        var on = mode.classList.toggle('is-on');
+        if (panel) panel.classList.toggle('is-on', on);
+        mode.setAttribute('aria-expanded', String(on));
+        var check = mode.querySelector('.anjali-mode__check');
+        if (on && check && !check.innerHTML.trim()) {
+          check.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>';
+        } else if (!on && check) {
+          check.innerHTML = '';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Anjali home (citizen)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  /* ── Anjali chrome — slim sidebar, role variant of Priya ── */
+  .app-shell--anjali .sidebar { width: 200px; }
+  .app-shell--anjali .main { padding-left: 0; }
+  .anjali-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .anjali-sidebar__name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--fg-default);
+    margin-bottom: 2px;
+  }
+  .anjali-sidebar__ward {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Home content layout ── */
+  .anjali-home {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  /* Report CTA card — single action surface (FR-4.5 mirror, desktop variant) */
+  .anjali-cta {
+    background: var(--brand-500);
+    color: white;
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-lg);
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 120ms ease-out, transform 120ms ease-out;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    margin-bottom: var(--space-xl);
+  }
+  .anjali-cta:hover {
+    background: var(--brand-600);
+    transform: translateY(-1px);
+  }
+  [data-theme="dark"] .anjali-cta:hover { background: var(--brand-400); }
+  .anjali-cta__icon {
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,0.15);
+    border-radius: var(--radius-md);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+  }
+  .anjali-cta__title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin: 0 0 4px;
+    letter-spacing: -0.01em;
+  }
+  .anjali-cta__subtitle {
+    font-size: var(--font-size-sm);
+    opacity: 0.85;
+    margin: 0;
+  }
+  .anjali-cta__arrow {
+    font-size: var(--font-size-xl);
+    color: white;
+  }
+
+  /* Ack feed */
+  .anjali-feed__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .anjali-feed__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .anjali-feed__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+
+  .anjali-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .anjali-feed-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: var(--space-md);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-md);
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 120ms ease-out;
+  }
+  .anjali-feed-item:hover { border-color: var(--brand-500); }
+  .anjali-feed-item.is-pending {
+    border-color: var(--warning);
+    background: var(--warning-bg);
+  }
+  .anjali-feed-item.is-broadcast {
+    border-color: var(--success);
+  }
+  .anjali-feed-item__row1 {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    margin-bottom: var(--space-xs);
+  }
+  .anjali-feed-item__date {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .anjali-feed-item__desc {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--fg-default);
+    margin: 0 0 4px;
+  }
+  .anjali-feed-item__sub {
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    font-family: var(--font-family-mono);
+  }
+
+  /* Status pills */
+  .a-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px var(--space-sm);
+    border-radius: 999px;
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .a-pill--verified { background: var(--success-bg); color: var(--success); }
+  .a-pill--sent     { background: var(--info-bg);    color: var(--info); }
+  .a-pill--ack      { background: var(--brand-100);  color: var(--brand-600); }
+  [data-theme="dark"] .a-pill--ack { background: var(--brand-200); color: var(--brand-400); }
+  .a-pill--broadcast { background: var(--success-bg); color: var(--success); }
+  .a-pill--pending  { background: var(--warning-bg); color: var(--warning); }
+  .a-pill--queued   { background: var(--bg-subtle); color: var(--fg-secondary); }
+
+  /* Offline banner */
+  .anjali-offline {
+    display: none;
+    background: var(--warning-bg);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+    margin-bottom: var(--space-lg);
+    font-size: var(--font-size-sm);
+    color: var(--warning);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+
+  /* Lifecycle stepper (compact) */
+  .anjali-steps {
+    display: flex;
+    gap: 2px;
+    margin-top: var(--space-xs);
+  }
+  .anjali-step {
+    flex: 1;
+    height: 3px;
+    background: var(--bg-inset);
+    border-radius: 1px;
+  }
+  .anjali-step.is-done { background: var(--success); }
+  .anjali-step.is-now  { background: var(--brand-500); }
+  .anjali-step.is-pending { background: var(--warning); }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--anjali">
+
+    <!-- ── SIDEBAR (slim Anjali variant) ── -->
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="home.html">SURAKKHA</a>
+
+      <div class="anjali-sidebar__welcome">
+        <div class="anjali-sidebar__name">Anjali</div>
+        <div class="anjali-sidebar__ward">Ward 7 · সদর</div>
+      </div>
+
+      <nav class="sidebar__nav">
+        <a href="home.html" class="sidebar__link active">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span>Home</span>
+        </a>
+        <a href="submit.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M5 9l7-7 7 7"/></svg>
+          </span>
+          <span>New report</span>
+        </a>
+      </nav>
+
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ── MAIN AREA ── -->
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <span class="pulse-dot" aria-hidden="true"></span>
+          <span>chain fresh · 0.4s ago</span>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Anjali · citizen</span>
+        </div>
+      </header>
+
+      <main class="anjali-home">
+
+        <!-- T3 ack banner — only shown when Anjali has a pending ack -->
+        <a href="ack-detail.html" class="anjali-cta" style="margin-bottom: var(--space-lg); background: var(--warning); color: white; grid-template-columns: auto 1fr auto; padding: var(--space-md) var(--space-lg);">
+          <span class="anjali-cta__icon" style="width: 40px; height: 40px;">
+            <svg viewBox="0 0 24 24" width="20" height="20" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+          </span>
+          <div>
+            <div style="font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); margin-bottom: 2px;">Your report needs acknowledgment</div>
+            <div style="font-size: var(--font-size-xs); opacity: 0.9;">Ward 7 school chlorine smell · Operator is preparing a public notice · tap to review and ack</div>
+          </div>
+          <span class="anjali-cta__arrow">→</span>
+        </a>
+
+        <!-- Single Report CTA (FR-4.5 mirror — desktop variant) -->
+        <a href="submit.html" class="anjali-cta" aria-label="Submit a new report">
+          <span class="anjali-cta__icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+          </span>
+          <div>
+            <h2 class="anjali-cta__title">Report</h2>
+            <p class="anjali-cta__subtitle">What did you notice at school or in the ward today?</p>
+          </div>
+          <span class="anjali-cta__arrow">→</span>
+        </a>
+
+        <!-- Offline indicator (only visible when offline) -->
+        <div class="anjali-offline" id="offlineBanner">
+          <svg viewBox="0 0 24 24" width="16" height="16" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><line x1="1" x2="23" y1="1" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"/><path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"/><path d="M10.71 5.05A16 16 0 0 1 22.58 9"/><path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg>
+          <span><strong>Offline.</strong> 1 report queued · will send when network returns.</span>
+        </div>
+
+        <!-- Ack feed — your reports over time -->
+        <div class="anjali-feed">
+          <div class="anjali-feed__head">
+            <h3 class="anjali-feed__title">Your reports</h3>
+            <span class="anjali-feed__meta">last 30 days · 5 reports</span>
+          </div>
+
+          <div class="anjali-feed-list">
+
+            <!-- Pending ack item -->
+            <a href="ack-detail.html" class="anjali-feed-item is-pending">
+              <div>
+                <div class="anjali-feed-item__row1">
+                  <span class="anjali-feed-item__date">Today · 14:01</span>
+                  <span class="a-pill a-pill--pending">Awaiting your ack</span>
+                </div>
+                <div class="anjali-feed-item__desc">Ward 7 school — chlorine smell, yellow strip</div>
+                <div class="anjali-feed-item__sub">evt_01HF4K · Operator escalated to T3 · you are the citizen countersignature</div>
+                <div class="anjali-steps">
+                  <div class="anjali-step is-done" title="queued"></div>
+                  <div class="anjali-step is-done" title="sent"></div>
+                  <div class="anjali-step is-done" title="verified"></div>
+                  <div class="anjali-step is-done" title="escalated to T3"></div>
+                  <div class="anjali-step is-now"  title="awaiting your ack"></div>
+                  <div class="anjali-step"         title="broadcast"></div>
+                </div>
+              </div>
+              <span style="font-family: var(--font-family-mono); color: var(--warning);">→</span>
+            </a>
+
+            <!-- Broadcast item -->
+            <div class="anjali-feed-item is-broadcast">
+              <div>
+                <div class="anjali-feed-item__row1">
+                  <span class="anjali-feed-item__date">Mon · 09:18</span>
+                  <span class="a-pill a-pill--broadcast">Broadcast ✓</span>
+                </div>
+                <div class="anjali-feed-item__desc">Ward 5 — turbidity spike, school tap</div>
+                <div class="anjali-feed-item__sub">evt_01HE9D2 · T3 notice issued to 412 households · "your report mattered"</div>
+                <div class="anjali-steps">
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Verified item -->
+            <div class="anjali-feed-item">
+              <div>
+                <div class="anjali-feed-item__row1">
+                  <span class="anjali-feed-item__date">Fri · 16:42</span>
+                  <span class="a-pill a-pill--verified">Verified</span>
+                </div>
+                <div class="anjali-feed-item__desc">Ward 7 — metallic taste morning</div>
+                <div class="anjali-feed-item__sub">evt_01HE8A1 · Operator confirmed · awaiting escalation</div>
+                <div class="anjali-steps">
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-now"></div>
+                  <div class="anjali-step"></div>
+                  <div class="anjali-step"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sent item -->
+            <div class="anjali-feed-item">
+              <div>
+                <div class="anjali-feed-item__row1">
+                  <span class="anjali-feed-item__date">Tue · 07:55</span>
+                  <span class="a-pill a-pill--sent">Sent · awaiting review</span>
+                </div>
+                <div class="anjali-feed-item__desc">Ward 7 — yellow tint, kitchen tap</div>
+                <div class="anjali-feed-item__sub">evt_01HE6F0 · Server received · Operator Priya not yet picked up</div>
+                <div class="anjali-steps">
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-now"></div>
+                  <div class="anjali-step"></div>
+                  <div class="anjali-step"></div>
+                  <div class="anjali-step"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Queued item (offline-queued) -->
+            <div class="anjali-feed-item" style="opacity: 0.75;">
+              <div>
+                <div class="anjali-feed-item__row1">
+                  <span class="anjali-feed-item__date">Last week · Sun</span>
+                  <span class="a-pill a-pill--queued">Queued · 1</span>
+                </div>
+                <div class="anjali-feed-item__desc">Ward 4 — chlorine smell, evening</div>
+                <div class="anjali-feed-item__sub">evt_01HE3C9 · sent successfully after reconnect · verified by Priya</div>
+                <div class="anjali-steps">
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step is-done"></div>
+                  <div class="anjali-step"></div>
+                  <div class="anjali-step"></div>
+                  <div class="anjali-step"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+</body>
+</html>

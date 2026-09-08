@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Surakkha v1 — Acknowledge as citizen countersignature (Anjali)</title>
+<link rel="stylesheet" href="../theme.css">
+<link rel="stylesheet" href="../01-priya/dashboard.css">
+<style>
+  .app-shell--anjali .sidebar { width: 200px; }
+  .anjali-sidebar__welcome {
+    padding: var(--space-md);
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: var(--space-sm);
+  }
+  .anjali-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
+  .anjali-sidebar__ward { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .anjali-ack {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: var(--space-xl) var(--space-lg);
+  }
+
+  /* Banner — what's happening */
+  .anjali-ack-banner {
+    background: var(--warning-bg);
+    border: 1px solid var(--warning);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-lg);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-md);
+    align-items: center;
+  }
+  .anjali-ack-banner__icon {
+    width: 40px; height: 40px;
+    background: var(--warning);
+    color: white;
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .anjali-ack-banner__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--warning);
+    margin: 0 0 2px;
+  }
+  .anjali-ack-banner__sub {
+    font-size: var(--font-size-xs);
+    color: var(--warning);
+    margin: 0;
+    opacity: 0.85;
+  }
+
+  /* Original report card */
+  .anjali-original {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-lg);
+  }
+  .anjali-original__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .anjali-original__title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .anjali-original__date {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+  }
+  .anjali-original__row {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+    font-size: var(--font-size-sm);
+  }
+  .anjali-original__row + .anjali-original__row { border-top: 1px dashed var(--border-subtle); }
+  .anjali-original__k {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .anjali-original__v { color: var(--fg-default); line-height: 1.5; }
+  .anjali-original__voice {
+    font-style: italic;
+    color: var(--fg-secondary);
+  }
+
+  /* Notice preview — what will go out to Ramesh */
+  .anjali-notice {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-bottom: var(--space-lg);
+  }
+  .anjali-notice__head {
+    background: var(--bg-subtle);
+    padding: var(--space-md) var(--space-lg);
+    border-bottom: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .anjali-notice__title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+  }
+  .anjali-notice__meta {
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-tertiary);
+  }
+  .anjali-notice__body {
+    padding: var(--space-lg);
+    background: var(--bg-base);
+  }
+  .anjali-notice__bubble {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    color: var(--fg-default);
+    white-space: pre-wrap;
+  }
+  .anjali-notice__bubble strong { color: var(--danger); }
+  .anjali-notice__bubble em { color: var(--fg-tertiary); font-style: normal; font-family: var(--font-family-mono); font-size: var(--font-size-xs); }
+  .anjali-notice__channels {
+    padding: var(--space-md) var(--space-lg);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+  }
+  .anjali-channel {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: 4px var(--space-sm);
+    background: var(--bg-subtle);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-family-mono);
+    font-size: 10px;
+    color: var(--fg-secondary);
+  }
+
+  /* Two-tap CTA bar */
+  .anjali-ack-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: var(--space-md);
+    align-items: center;
+    box-shadow: var(--shadow-modal);
+  }
+  .anjali-ack-bar__meta {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--fg-secondary);
+    line-height: 1.4;
+  }
+  .anjali-ack-bar__meta strong { color: var(--fg-default); }
+  .anjali-ack-decline {
+    background: transparent;
+    color: var(--fg-secondary);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+  }
+  .anjali-ack-cta {
+    background: var(--brand-500);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: var(--space-md) var(--space-xl);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+  }
+  .anjali-ack-cta:disabled {
+    background: var(--fg-disabled);
+    cursor: not-allowed;
+  }
+
+  /* Countdown ring (5s) around Issue button after first tap */
+  .anjali-countdown {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .anjali-countdown svg {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    transform: rotate(-90deg);
+    pointer-events: none;
+  }
+  .anjali-countdown__track {
+    fill: none;
+    stroke: rgba(255,255,255,0.25);
+    stroke-width: 2;
+  }
+  .anjali-countdown__fill {
+    fill: none;
+    stroke: white;
+    stroke-width: 2;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    transition: stroke-dashoffset 100ms linear;
+  }
+
+  /* Confirmation pulse on success */
+  @keyframes ack-pulse {
+    0%   { background: var(--bg-surface); }
+    25%  { background: var(--success-bg); }
+    100% { background: var(--bg-surface); }
+  }
+  .anjali-ack-bar.is-acked { animation: ack-pulse 600ms ease-out; }
+
+  /* Disclaimer */
+  .anjali-disclaimer {
+    font-size: var(--font-size-xs);
+    color: var(--fg-tertiary);
+    margin-top: var(--space-md);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell app-shell--anjali">
+
+    <aside class="sidebar">
+      <a class="sidebar__brand" href="home.html">SURAKKHA</a>
+      <div class="anjali-sidebar__welcome">
+        <div class="anjali-sidebar__name">Anjali</div>
+        <div class="anjali-sidebar__ward">Ward 7 · সদর</div>
+      </div>
+      <nav class="sidebar__nav">
+        <a href="home.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span>Home</span>
+        </a>
+        <a href="submit.html" class="sidebar__link">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M5 9l7-7 7 7"/></svg>
+          </span>
+          <span>New report</span>
+        </a>
+      </nav>
+      <div class="sidebar__foot">
+        <button class="sidebar__logout" data-action="logout">
+          <span class="sidebar__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+          </span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="top-chrome">
+        <div class="top-chrome__left">
+          <a href="home.html" style="font-size: var(--font-size-xs); color: var(--fg-secondary); text-decoration: none;">← Back to home</a>
+        </div>
+        <div class="top-chrome__right">
+          <span class="top-chrome__persona">Anjali · citizen</span>
+        </div>
+      </header>
+
+      <main class="anjali-ack">
+
+        <!-- Banner -->
+        <div class="anjali-ack-banner">
+          <div class="anjali-ack-banner__icon">
+            <svg viewBox="0 0 24 24" width="20" height="20" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M12 2v6"/><path d="M12 22v-6"/><path d="m17 5-3 5"/><path d="m7 19 3-5"/><path d="M22 12h-6"/><path d="M8 12H2"/><path d="m19 17-3-3"/><path d="m5 7 3 3"/></svg>
+          </div>
+          <div>
+            <h2 class="anjali-ack-banner__title">Your report will be broadcast as a public notice</h2>
+            <p class="anjali-ack-banner__sub">Operator Priya escalated your report to T3. She needs your acknowledgement before the notice goes out to 412 households in Ward 7.</p>
+          </div>
+        </div>
+
+        <!-- Original report (what you sent) -->
+        <div class="anjali-original">
+          <div class="anjali-original__head">
+            <h3 class="anjali-original__title">Your original report</h3>
+            <span class="anjali-original__date">Today · 14:01 · evt_01HF4K</span>
+          </div>
+          <div class="anjali-original__row">
+            <span class="anjali-original__k">Ward</span>
+            <span class="anjali-original__v">Ward 7 — সদর / Sadar</span>
+          </div>
+          <div class="anjali-original__row">
+            <span class="anjali-original__k">Photo</span>
+            <span class="anjali-original__v">Sentinel strip · pH 5.8 ✓ (CV confidence 0.91)</span>
+          </div>
+          <div class="anjali-original__row">
+            <span class="anjali-original__k">Voice</span>
+            <span class="anjali-original__v anjali-original__voice">"School kitchen, chlorine smell, kids about to drink. Yellow strip."</span>
+          </div>
+          <div class="anjali-original__row">
+            <span class="anjali-original__k">Operator</span>
+            <span class="anjali-original__v">Priya · escalated to T3 · cross-corroborated with sensor w7-ph-04</span>
+          </div>
+        </div>
+
+        <!-- Notice preview (what will go out to Ramesh + others) -->
+        <div class="anjali-notice">
+          <div class="anjali-notice__head">
+            <h3 class="anjali-notice__title">Preview · public notice as it will reach households</h3>
+            <span class="anjali-notice__meta">notice dn-3318 · draft</span>
+          </div>
+          <div class="anjali-notice__body">
+            <div class="anjali-notice__bubble">SURAKKHA · সুরক্ষা
+
+WARD 7 SCHOOL — water safety advisory.
+
+<strong>DO NOT DRINK</strong> tap water at Ward 7 School until further notice.
+
+Boil water for 5+ minutes if needed. Bottled water available at Ward 5 community centre.
+
+Triggered by citizen report + sensor data · verified by Priya (utility).
+
+<em>verify: 01HF4K… · surakkha.app/v/01HF4K</em></div>
+          </div>
+          <div class="anjali-notice__channels">
+            <span class="anjali-channel">WhatsApp · 412 households</span>
+            <span class="anjali-channel">SMS · 412 households</span>
+            <span class="anjali-channel">Local radio</span>
+            <span class="anjali-channel">Councillor</span>
+          </div>
+        </div>
+
+        <p class="anjali-disclaimer">
+          By acknowledging, you confirm this notice accurately reflects what you reported. Your acknowledgement is recorded on the chain as <code>AnjaliAcknowledged{report_id, notice_id}</code> — the second of two attestations required before broadcast.
+        </p>
+
+        <!-- Two-tap CTA bar -->
+        <div class="anjali-ack-bar" id="ackBar">
+          <div class="anjali-ack-bar__meta">
+            <strong>2 attestations needed:</strong> Priya (operator) ✓ · <strong>You (citizen)</strong> — pending
+          </div>
+          <button class="anjali-ack-decline" data-action="ack-decline">Don't acknowledge</button>
+          <button class="anjali-ack-cta" data-action="ack-tap" id="ackCta">
+            <span>Acknowledge &amp; broadcast</span>
+          </button>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <button class="theme-toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">
+    ◐ Toggle theme
+  </button>
+
+  <script src="../nav.js"></script>
+  <script>
+    (function () {
+      var cta = document.getElementById('ackCta');
+      var bar = document.getElementById('ackBar');
+      var tapped = false;
+      var timer = null;
+      var secondsLeft = 5;
+
+      cta.addEventListener('click', function (e) {
+        e.preventDefault();
+        if (!tapped) {
+          // First tap → countdown ring + 5s wait
+          tapped = true;
+          secondsLeft = 5;
+          cta.querySelector('span').textContent = 'Tap again to confirm (5s)';
+          cta.style.position = 'relative';
+          // Wrap in countdown ring
+          var ring = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          ring.setAttribute('viewBox', '0 0 36 36');
+          ring.innerHTML =
+            '<circle class="anjali-countdown__track" cx="18" cy="18" r="16"/>' +
+            '<circle class="anjali-countdown__fill" cx="18" cy="18" r="16" stroke-dashoffset="100"/>';
+          cta.appendChild(ring);
+
+          var fill = ring.querySelector('.anjali-countdown__fill');
+          var startT = Date.now();
+          var total = 5000;
+
+          timer = setInterval(function () {
+            var elapsed = Date.now() - startT;
+            var pct = Math.min(elapsed / total, 1);
+            fill.setAttribute('stroke-dashoffset', String(100 - pct * 100));
+            var left = Math.max(0, Math.ceil((total - elapsed) / 1000));
+            cta.querySelector('span').textContent = 'Tap again to confirm (' + left + 's)';
+            if (elapsed >= total) {
+              clearInterval(timer);
+              timer = null;
+              // Auto-cancel after 30s would happen here in production
+              // For demo, just sit on "Tap again"
+            }
+          }, 100);
+        } else {
+          // Second tap → fire AnjaliAcknowledged on chain
+          clearInterval(timer);
+          bar.classList.add('is-acked');
+          cta.disabled = true;
+          cta.innerHTML =
+            '<svg viewBox="0 0 24 24" width="16" height="16" style="stroke:currentColor;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;"><polyline points="20 6 9 17 4 12"/></svg>' +
+            '<span>Acknowledged · notice broadcasting…</span>';
+          // In production: AnjaliAcknowledged event lands → both attestations present →
+          // PublicNoticeIssued auto-fires → Ramesh gets WhatsApp + SMS.
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
