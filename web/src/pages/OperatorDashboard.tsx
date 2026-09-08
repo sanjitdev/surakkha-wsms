@@ -7,23 +7,29 @@
  * - 3 layouts (A · grid / B · editorial / C · status-board) with the same
  *   localStorage-backed toggler the static mockup ships. Default = 'a'.
  * - 3 tabs (Overview / Sensors / Wards); arrow-key nav between tabs.
- * - Reads /api/chain/head for the chain-fresh pulse dot, /api/incidents for
- *   KPI counts + thread rows, /api/sensors for the sensor fleet, /api/events
- *   for "Today on chain" timeline.
+ * - Reads /api/incidents for KPI counts + thread rows, /api/sensors for the
+ *   sensor fleet, /api/events for "Today on chain" timeline.
  * - Charts (Sensors tab + Wards tab) are SVG inline per the locked mockup —
  *   dim 5b §14 placement matrix: Sensors = 1× TimeSeriesLine + 1× Donut;
  *   Wards = 1× HorizontalBar. No chart library in Phase 1.
- * - Other persona links in the sidebar are stubs (Story 1.2/#49 lands them).
+ *
+ * Post FE-1.6a:
+ *   - The page is rendered inside <AppLayout>, which owns the sidebar,
+ *     top-chrome, logout button, and 5s chain-freshness poll. This file
+ *     no longer fetches session or chain freshness — both come from
+ *     useAppLayout().
+ *   - The page renders ONLY the tab body (page-header + tabs +
+ *     <main className="container--wide">). No .app-shell wrapper, no
+ *     inline aside/top-chrome.
  */
 
 import { useEffect, useState } from 'react';
 import '../../mockups/01-priya/dashboard.css';
-import { type SessionRow, getSession } from '../mocks/idb';
+import { useAppLayout } from '../components/layout/AppLayoutContext';
 
 type Layout = 'a' | 'b' | 'c';
 type Tab = 'overview' | 'sensors' | 'wards';
 
-interface ChainHead { block_hash: string; height: number; ingested_at: string; }
 interface IncidentRow {
   incident_id: string;
   status: 'open' | 'resolved' | 'escalated';
@@ -54,29 +60,17 @@ interface ChainEventLite {
 const LAYOUT_STORAGE_KEY = 'surakkha.layout';
 
 export function OperatorDashboard() {
-  const [session, setSession] = useState<SessionRow | null | undefined>(undefined);
+  // Session + chain freshness come from the AppLayout context. AppLayout
+  // already gates on `role === 'utility_operator'` so by the time this
+  // page renders, the role check is implicit.
+  const { session } = useAppLayout();
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
-  const [chainFresh, setChainFresh] = useState<number | null>(null);
   const [incidents, setIncidents] = useState<IncidentRow[]>([]);
   const [sensors, setSensors] = useState<SensorRow[]>([]);
   const [recent, setRecent] = useState<ChainEventLite[]>([]);
 
-  // 1. session
-  useEffect(() => {
-    void (async () => {
-      const row = await getSession();
-
-      if (row?.role !== 'utility_operator') {
-        window.history.pushState({}, '', '/');
-        window.location.reload();
-        return;
-      }
-      setSession(row);
-    })();
-  }, []);
-
-  // 2. layout persistence — localStorage.surakkha.layout, default 'a'
+  // 1. layout persistence — localStorage.surakkha.layout, default 'a'
   useEffect(() => {
     try {
       const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
@@ -89,25 +83,20 @@ export function OperatorDashboard() {
     try { localStorage.setItem(LAYOUT_STORAGE_KEY, layout); } catch { /* ignore */ }
   }, [layout]);
 
-  // 3. data fetch
+  // 2. data fetch — incidents + sensors + recent chain events.
+  // Chain freshness polling moved to AppLayout (single source of truth).
   useEffect(() => {
     const cancelled = { current: false };
 
     void (async () => {
       try {
-        const [headRes, incRes, senRes, evtRes] = await Promise.all([
-          fetch('/api/chain/head').then((r) => r.ok ? r.json() as Promise<ChainHead> : null),
+        const [incRes, senRes, evtRes] = await Promise.all([
           fetch('/api/incidents').then((r) => r.json()) as Promise<IncidentRow[]>,
           fetch('/api/sensors').then((r) => r.json()) as Promise<SensorRow[]>,
           fetch('/api/events?limit=20').then((r) => r.json()) as Promise<{ events: ChainEventLite[] }>,
         ]);
 
         if (cancelled.current) return;
-        if (headRes) {
-          const age = Math.max(0, Math.round((Date.now() - new Date(headRes.ingested_at).getTime()) / 100) / 10);
-
-          setChainFresh(age);
-        }
         setIncidents(incRes);
         setSensors(senRes);
         setRecent(evtRes.events);
@@ -118,27 +107,10 @@ export function OperatorDashboard() {
     return () => { cancelled.current = true; };
   }, []);
 
-  // chain freshness polling — top chrome updates every 5s per dim 7 §5.3.1
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      void (async () => {
-        try {
-          const head = await fetch('/api/chain/head').then((r) => r.ok ? r.json() as Promise<ChainHead> : null);
-
-          if (head) {
-            const age = Math.max(0, Math.round((Date.now() - new Date(head.ingested_at).getTime()) / 100) / 10);
-
-            setChainFresh(age);
-          }
-        } catch { /* ignore */ }
-      })();
-    }, 5000);
-
-    return () => { window.clearInterval(id); };
-  }, []);
-
-  if (session === undefined) return null;
-  if (session === null) return null;
+  // Suppress unused-var for `session` — AppLayout guarantees it's the
+  // utility_operator session, but reading it here keeps a stable hook
+  // call ordering if a future story needs it for personalised KPIs.
+  void session;
 
   // derive KPIs from incident list
   const openIncidents = incidents.filter((i) => i.status !== 'resolved');
@@ -148,286 +120,298 @@ export function OperatorDashboard() {
   const pendingSigs = recent.filter((e) => e.event_type === 'SignatureAttestation').length; // rough proxy
   const pHAvg = computePHAvg(sensors);
 
+  // Pre-FE-1.6a the page returned <div className="app-shell"><aside
+  // className="sidebar">...<header className="top-chrome">...</header>{children}.
+  // Post FE-1.6a AppLayout owns the chrome, so the page returns only the
+  // page header + tabs + main content.
   return (
-    <div className="app-shell">
-
-      {/* ── LEFT SIDEBAR ── */}
-      <aside className="sidebar">
-        <a className="sidebar__brand" href="/dashboard">SURAKKHA</a>
-        <nav className="sidebar__nav">
-          <a href="/dashboard" className="sidebar__link active">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg></span>
-            <span>Dashboard</span>
-          </a>
-          <a href="/handover" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m17 3 4 4-4 4"/><path d="M21 7H3"/><path d="m7 21-4-4 4-4"/><path d="M3 17h18"/></svg></span>
-            <span>Handover</span>
-          </a>
-          <a href="/inbox" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
-            <span>Inbox</span>
-            {openIncidents.length > 0 && <span className="sidebar__badge">{openIncidents.length}</span>}
-          </a>
-          <a href="/verify" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <span>Verify</span>
-          </a>
-          <a href="/notices" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg></span>
-            <span>Notices</span>
-          </a>
-          <a href="/sensors" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0 0 14.6"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.7a6.14 6.14 0 0 1 0 14.6"/><path d="M19.1 1.9a10.14 10.14 0 0 1 0 20.2"/></svg></span>
-            <span>Sensors</span>
-          </a>
-          <a href="/audit" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 17V5a2 2 0 0 0-2-2H4"/><path d="M8 21h12a2 2 0 0 0 2-2v-1a1 1 0 0 0-1-1H11a1 1 0 0 0-1 1v1a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v2a1 1 0 0 0 1 1h3"/></svg></span>
-            <span>Audit</span>
-          </a>
-          <a href="/settings" className="sidebar__link">
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>
-            <span>Settings</span>
-          </a>
-        </nav>
-        <div className="sidebar__foot">
-          <button
-            className="sidebar__logout"
-            type="button"
-            onClick={() => { void logout().then(() => { window.location.href = '/'; }); }}
-          >
-            <span className="sidebar__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg></span>
-            <span>Logout</span>
-          </button>
-        </div>
-      </aside>
-
-      {/* ── MAIN ── */}
-      <div className="main">
-
-        <header className="top-chrome">
-          <div className="top-chrome__left">
-            <span className="pulse-dot" aria-hidden="true"></span>
-            <span>{chainFresh !== null ? `chain fresh · ${chainFresh.toFixed(1)}s ago` : 'chain · connecting…'}</span>
+    <>
+      <div className="page-header">
+        <div className="page-header__row">
+          <div>
+            <h1>Dashboard</h1>
+            <div className="page-header__sub">{openIncidents.length} {openIncidents.length === 1 ? 'ward' : 'wards'} · {sensors.length} sensors online</div>
           </div>
-          <div className="top-chrome__right">
-            <span className="top-chrome__persona">{session.display_name} · utility_operator</span>
-          </div>
-        </header>
-
-        <div className="page-header">
-          <div className="page-header__row">
-            <div>
-              <h1>Dashboard</h1>
-              <div className="page-header__sub">{openIncidents.length} {openIncidents.length === 1 ? 'ward' : 'wards'} · {sensors.length} sensors online</div>
-            </div>
-            <div className="layout-toggle" role="radiogroup" aria-label="Dashboard layout">
-              {(['a', 'b', 'c'] as Layout[]).map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  role="radio"
-                  aria-checked={layout === opt}
-                  className={`layout-toggle__btn${ layout === opt ? ' is-active' : ''}`}
-                  onClick={() => { setLayout(opt); }}
-                >
-                  {opt.toUpperCase()} · {opt === 'a' ? 'grid' : opt === 'b' ? 'editorial' : 'status-board'}
-                </button>
-              ))}
-            </div>
+          <div className="layout-toggle" role="radiogroup" aria-label="Dashboard layout">
+            {(['a', 'b', 'c'] as Layout[]).map((opt) => (
+              <button
+                key={opt}
+                type="button"
+                role="radio"
+                aria-checked={layout === opt}
+                className={`layout-toggle__btn${ layout === opt ? ' is-active' : ''}`}
+                onClick={() => { setLayout(opt); }}
+              >
+                {opt.toUpperCase()} · {opt === 'a' ? 'grid' : opt === 'b' ? 'editorial' : 'status-board'}
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
-        <div className="tabs" role="tablist" aria-label="Dashboard sections">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'overview'}
-            className={`tab${ tab === 'overview' ? ' active' : ''}`}
-            onClick={() => { setTab('overview'); }}
-          >
+      <div className="tabs" role="tablist" aria-label="Dashboard sections">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'overview'}
+          className={`tab${ tab === 'overview' ? ' active' : ''}`}
+          onClick={() => { setTab('overview'); }}
+        >
             Overview
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'sensors'}
-            className={`tab${ tab === 'sensors' ? ' active' : ''}`}
-            onClick={() => { setTab('sensors'); }}
-          >
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'sensors'}
+          className={`tab${ tab === 'sensors' ? ' active' : ''}`}
+          onClick={() => { setTab('sensors'); }}
+        >
             Sensors
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'wards'}
-            className={`tab${ tab === 'wards' ? ' active' : ''}`}
-            onClick={() => { setTab('wards'); }}
-          >
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'wards'}
+          className={`tab${ tab === 'wards' ? ' active' : ''}`}
+          onClick={() => { setTab('wards'); }}
+        >
             Wards
-          </button>
-        </div>
+        </button>
+      </div>
 
-        <main className="container--wide" data-layout={layout}>
+      <main className="container--wide" data-layout={layout}>
 
-          {/* ── TAB: OVERVIEW ── */}
-          <section
-            className={`tab-panel${ tab === 'overview' ? ' active' : ''}`}
-            data-tab="overview"
-            role="tabpanel"
-            hidden={tab !== 'overview'}
-          >
+        {/* ── TAB: OVERVIEW ── */}
+        <section
+          className={`tab-panel${ tab === 'overview' ? ' active' : ''}`}
+          data-tab="overview"
+          role="tabpanel"
+          hidden={tab !== 'overview'}
+        >
 
-            {/* Variant A — Dense grid */}
-            <div data-layout-only="a" hidden={layout !== 'a'}>
-              <div className="kpi-row">
-                <div className="kpi">
-                  <div className="kpi__head"><span className="kpi__label">Active incidents</span></div>
-                  <div className="kpi__value">{openIncidents.length}<span className="kpi__unit">open</span></div>
+          {/* Variant A — Dense grid */}
+          <div data-layout-only="a" hidden={layout !== 'a'}>
+            <div className="kpi-row">
+              <div className="kpi">
+                <div className="kpi__head"><span className="kpi__label">Active incidents</span></div>
+                <div className="kpi__value">{openIncidents.length}<span className="kpi__unit">open</span></div>
+              </div>
+              <div className="kpi">
+                <div className="kpi__head"><span className="kpi__label">pH city avg</span></div>
+                <div className="kpi__value">{pHAvg !== null ? pHAvg.toFixed(1) : '—'}<span className="kpi__unit">pH</span></div>
+              </div>
+              <div className="kpi">
+                <div className="kpi__head"><span className="kpi__label">Response time</span></div>
+                <div className="kpi__value">2.4<span className="kpi__unit">min</span></div>
+              </div>
+              <div className="kpi">
+                <div className="kpi__head"><span className="kpi__label">Pending signatures</span></div>
+                <div className="kpi__value">{pendingSigs}<span className="kpi__unit">awaiting</span></div>
+              </div>
+              <div className="kpi">
+                <div className="kpi__head"><span className="kpi__label">Notices issued</span></div>
+                <div className="kpi__value">{noticesToday}<span className="kpi__unit">today</span></div>
+              </div>
+            </div>
+
+            <div className="dense-row">
+              <div className="card data-card">
+                <div className="data-card__head">
+                  <h3 className="data-card__title">Sensor fleet</h3>
                 </div>
-                <div className="kpi">
-                  <div className="kpi__head"><span className="kpi__label">pH city avg</span></div>
-                  <div className="kpi__value">{pHAvg !== null ? pHAvg.toFixed(1) : '—'}<span className="kpi__unit">pH</span></div>
-                </div>
-                <div className="kpi">
-                  <div className="kpi__head"><span className="kpi__label">Response time</span></div>
-                  <div className="kpi__value">2.4<span className="kpi__unit">min</span></div>
-                </div>
-                <div className="kpi">
-                  <div className="kpi__head"><span className="kpi__label">Pending signatures</span></div>
-                  <div className="kpi__value">{pendingSigs}<span className="kpi__unit">awaiting</span></div>
-                </div>
-                <div className="kpi">
-                  <div className="kpi__head"><span className="kpi__label">Notices issued</span></div>
-                  <div className="kpi__value">{noticesToday}<span className="kpi__unit">today</span></div>
-                </div>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th className="col-warn" aria-label="Severity"></th>
+                      <th>Ward / Sensor</th>
+                      <th className="col-sensor">Issue</th>
+                      <th className="col-value">Reading</th>
+                      <th className="col-time">Detected</th>
+                      <th className="col-status">Severity</th>
+                      <th className="col-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sensors.slice(0, 4).map((s) => (
+                      <tr key={s.sensor_id}>
+                        <td className="col-warn"><span className="row-severity-dot" style={{ background: 'var(--warning)' }}></span></td>
+                        <td className="col-title">{s.ward_id} · <span className="mono">{s.sensor_id}</span></td>
+                        <td className="col-sensor">{s.parameter}</td>
+                        <td className="col-value">{typeof s.last_value === 'number' ? s.last_value.toFixed(1) : s.last_value}</td>
+                        <td className="col-time">{new Date(s.last_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td className="col-status"><span className="badge badge--t2">T2</span></td>
+                        <td className="col-action"><a href="/sensors">Inspect →</a></td>
+                      </tr>
+                    ))}
+                    {sensors.length === 0 && (
+                      <tr><td colSpan={7} style={{ textAlign: 'center', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>no sensors reported</td></tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
 
-              <div className="dense-row">
-                <div className="card data-card">
-                  <div className="data-card__head">
-                    <h3 className="data-card__title">Sensor fleet</h3>
-                  </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th className="col-warn" aria-label="Severity"></th>
-                        <th>Ward / Sensor</th>
-                        <th className="col-sensor">Issue</th>
-                        <th className="col-value">Reading</th>
-                        <th className="col-time">Detected</th>
-                        <th className="col-status">Severity</th>
-                        <th className="col-action"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sensors.slice(0, 4).map((s) => (
-                        <tr key={s.sensor_id}>
-                          <td className="col-warn"><span className="row-severity-dot" style={{ background: 'var(--warning)' }}></span></td>
-                          <td className="col-title">{s.ward_id} · <span className="mono">{s.sensor_id}</span></td>
-                          <td className="col-sensor">{s.parameter}</td>
-                          <td className="col-value">{typeof s.last_value === 'number' ? s.last_value.toFixed(1) : s.last_value}</td>
-                          <td className="col-time">{new Date(s.last_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
-                          <td className="col-status"><span className="badge badge--t2">T2</span></td>
-                          <td className="col-action"><a href="/sensors">Inspect →</a></td>
-                        </tr>
-                      ))}
-                      {sensors.length === 0 && (
-                        <tr><td colSpan={7} style={{ textAlign: 'center', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>no sensors reported</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+              <div className="card data-card">
+                <div className="data-card__head">
+                  <h3 className="data-card__title">Today on chain</h3>
                 </div>
-
-                <div className="card data-card">
-                  <div className="data-card__head">
-                    <h3 className="data-card__title">Today on chain</h3>
-                  </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th className="col-time">Time</th>
-                        <th>What happened</th>
-                        <th>Where</th>
-                        <th className="col-status">Status</th>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th className="col-time">Time</th>
+                      <th>What happened</th>
+                      <th>Where</th>
+                      <th className="col-status">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recent.slice(0, 6).map((e) => (
+                      <tr key={e.event_id}>
+                        <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>{summarizeEvent(e)}</td>
+                        <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
+                        <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {recent.slice(0, 6).map((e) => (
-                        <tr key={e.event_id}>
-                          <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
-                          <td>{summarizeEvent(e)}</td>
-                          <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
-                          <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
-                        </tr>
-                      ))}
-                      {recent.length === 0 && (
-                        <tr><td colSpan={4} style={{ textAlign: 'center', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>chain empty</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+                    ))}
+                    {recent.length === 0 && (
+                      <tr><td colSpan={4} style={{ textAlign: 'center', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>chain empty</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="dense-foot">
+              <div className="card data-card">
+                <div className="data-card__head">
+                  <h3 className="data-card__title">Open threads</h3>
+                </div>
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th className="col-warn" aria-label="Severity"></th>
+                      <th>Thread</th>
+                      <th>Status / blocker</th>
+                      <th className="col-time">Opened</th>
+                      <th className="col-status">Severity</th>
+                      <th className="col-action"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {openIncidents.slice(0, 3).map((i) => (
+                      <tr key={i.incident_id}>
+                        <td className="col-warn"><span className="row-severity-dot" style={{ background: severityColor(i.severity) }}></span></td>
+                        <td>{i.ward_id ?? '—'} incident</td>
+                        <td>{i.status}</td>
+                        <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
+                        <td className="col-status"><span className={`badge badge--${ severityBadgeClass(i.severity)}`}>{i.severity}</span></td>
+                        <td className="col-action"><a href="/inbox">Open →</a></td>
+                      </tr>
+                    ))}
+                    {openIncidents.length === 0 && (
+                      <tr><td colSpan={6} style={{ textAlign: 'center', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>no open threads — chain is clean</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Variant B — Editorial */}
+          <div data-layout-only="b" hidden={layout !== 'b'}>
+            <div className="editorial-hero">
+              <div className="card handover-card kpi--hero">
+                <div className="kpi__head"><span className="kpi__label">Active incidents</span></div>
+                <div className="kpi__value">{openIncidents.length}<span className="kpi__unit">open</span></div>
+                <div style={{ marginTop: 'var(--space-md)' }}>
+                  <a className="handover-list__action" href="/inbox">Triage all →</a>
                 </div>
               </div>
-
-              <div className="dense-foot">
-                <div className="card data-card">
-                  <div className="data-card__head">
-                    <h3 className="data-card__title">Open threads</h3>
-                  </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th className="col-warn" aria-label="Severity"></th>
-                        <th>Thread</th>
-                        <th>Status / blocker</th>
-                        <th className="col-time">Opened</th>
-                        <th className="col-status">Severity</th>
-                        <th className="col-action"></th>
+              <div className="card data-card">
+                <div className="data-card__head">
+                  <h3 className="data-card__title">Today on chain</h3>
+                </div>
+                <table className="data-table">
+                  <thead>
+                    <tr><th className="col-time">Time</th><th>What happened</th><th>Where</th><th className="col-status">Status</th></tr>
+                  </thead>
+                  <tbody>
+                    {recent.slice(0, 6).map((e) => (
+                      <tr key={e.event_id}>
+                        <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td>{summarizeEvent(e)}</td>
+                        <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
+                        <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
                       </tr>
-                    </thead>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <p className="section-label">Today at a glance</p>
+            <div className="editorial-second">
+              <div className="kpi"><div className="kpi__head"><span className="kpi__label">pH city avg</span></div><div className="kpi__value">{pHAvg !== null ? pHAvg.toFixed(1) : '—'}<span className="kpi__unit">pH</span></div></div>
+              <div className="kpi"><div className="kpi__head"><span className="kpi__label">Response time</span></div><div className="kpi__value">2.4<span className="kpi__unit">min</span></div></div>
+              <div className="kpi"><div className="kpi__head"><span className="kpi__label">Pending sigs</span></div><div className="kpi__value">{pendingSigs}<span className="kpi__unit">awaiting</span></div></div>
+              <div className="kpi"><div className="kpi__head"><span className="kpi__label">Notices issued</span></div><div className="kpi__value">{noticesToday}<span className="kpi__unit">today</span></div></div>
+            </div>
+          </div>
+
+          {/* Variant C — Status-board */}
+          <div data-layout-only="c" className="status-board" hidden={layout !== 'c'}>
+            <div className="kpi-strip">
+              <div className="kpi-strip__cell kpi"><div className="kpi__label">Active incidents</div><div className="kpi__value">{openIncidents.length}<span className="kpi__unit">open</span></div></div>
+              <div className="kpi-strip__cell kpi"><div className="kpi__label">pH city avg</div><div className="kpi__value">{pHAvg !== null ? pHAvg.toFixed(1) : '—'}<span className="kpi__unit">pH</span></div></div>
+              <div className="kpi-strip__cell kpi"><div className="kpi__label">Response time</div><div className="kpi__value">2.4<span className="kpi__unit">min</span></div></div>
+              <div className="kpi-strip__cell kpi"><div className="kpi__label">Pending sigs</div><div className="kpi__value">{pendingSigs}<span className="kpi__unit">awaiting</span></div></div>
+              <div className="kpi-strip__cell kpi"><div className="kpi__label">Notices issued</div><div className="kpi__value">{noticesToday}<span className="kpi__unit">today</span></div></div>
+            </div>
+            <div className="split-pane">
+              <div className="card data-card">
+                <div className="data-card__head"><h3 className="data-card__title">Sensor fleet</h3></div>
+                <table className="data-table">
+                  <thead><tr><th className="col-warn"></th><th>Ward / Sensor</th><th className="col-sensor">Issue</th><th className="col-value">Reading</th><th className="col-time">Detected</th><th className="col-status">Severity</th><th className="col-action"></th></tr></thead>
+                  <tbody>
+                    {sensors.slice(0, 4).map((s) => (
+                      <tr key={s.sensor_id}>
+                        <td className="col-warn"><span className="row-severity-dot" style={{ background: 'var(--warning)' }}></span></td>
+                        <td className="col-title">{s.ward_id} · <span className="mono">{s.sensor_id}</span></td>
+                        <td className="col-sensor">{s.parameter}</td>
+                        <td className="col-value">{typeof s.last_value === 'number' ? s.last_value.toFixed(1) : s.last_value}</td>
+                        <td className="col-time">{new Date(s.last_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
+                        <td className="col-status"><span className="badge badge--t2">T2</span></td>
+                        <td className="col-action"><a href="/sensors">Inspect →</a></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="right-rail">
+                <div className="card data-card">
+                  <div className="data-card__head"><h3 className="data-card__title">Open threads</h3></div>
+                  <table className="data-table">
+                    <thead><tr><th className="col-warn"></th><th>Thread</th><th className="col-time">Opened</th><th className="col-status">Sev.</th><th className="col-action"></th></tr></thead>
                     <tbody>
                       {openIncidents.slice(0, 3).map((i) => (
                         <tr key={i.incident_id}>
                           <td className="col-warn"><span className="row-severity-dot" style={{ background: severityColor(i.severity) }}></span></td>
                           <td>{i.ward_id ?? '—'} incident</td>
-                          <td>{i.status}</td>
                           <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
                           <td className="col-status"><span className={`badge badge--${ severityBadgeClass(i.severity)}`}>{i.severity}</span></td>
                           <td className="col-action"><a href="/inbox">Open →</a></td>
                         </tr>
                       ))}
-                      {openIncidents.length === 0 && (
-                        <tr><td colSpan={6} style={{ textAlign: 'center', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>no open threads — chain is clean</td></tr>
-                      )}
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </div>
-
-            {/* Variant B — Editorial */}
-            <div data-layout-only="b" hidden={layout !== 'b'}>
-              <div className="editorial-hero">
-                <div className="card handover-card kpi--hero">
-                  <div className="kpi__head"><span className="kpi__label">Active incidents</span></div>
-                  <div className="kpi__value">{openIncidents.length}<span className="kpi__unit">open</span></div>
-                  <div style={{ marginTop: 'var(--space-md)' }}>
-                    <a className="handover-list__action" href="/inbox">Triage all →</a>
-                  </div>
-                </div>
                 <div className="card data-card">
-                  <div className="data-card__head">
-                    <h3 className="data-card__title">Today on chain</h3>
-                  </div>
+                  <div className="data-card__head"><h3 className="data-card__title">Today on chain</h3></div>
                   <table className="data-table">
-                    <thead>
-                      <tr><th className="col-time">Time</th><th>What happened</th><th>Where</th><th className="col-status">Status</th></tr>
-                    </thead>
+                    <thead><tr><th className="col-time">Time</th><th>What</th><th className="col-status">Status</th></tr></thead>
                     <tbody>
                       {recent.slice(0, 6).map((e) => (
                         <tr key={e.event_id}>
                           <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
                           <td>{summarizeEvent(e)}</td>
-                          <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
                           <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
                         </tr>
                       ))}
@@ -435,170 +419,93 @@ export function OperatorDashboard() {
                   </table>
                 </div>
               </div>
-              <p className="section-label">Today at a glance</p>
-              <div className="editorial-second">
-                <div className="kpi"><div className="kpi__head"><span className="kpi__label">pH city avg</span></div><div className="kpi__value">{pHAvg !== null ? pHAvg.toFixed(1) : '—'}<span className="kpi__unit">pH</span></div></div>
-                <div className="kpi"><div className="kpi__head"><span className="kpi__label">Response time</span></div><div className="kpi__value">2.4<span className="kpi__unit">min</span></div></div>
-                <div className="kpi"><div className="kpi__head"><span className="kpi__label">Pending sigs</span></div><div className="kpi__value">{pendingSigs}<span className="kpi__unit">awaiting</span></div></div>
-                <div className="kpi"><div className="kpi__head"><span className="kpi__label">Notices issued</span></div><div className="kpi__value">{noticesToday}<span className="kpi__unit">today</span></div></div>
-              </div>
             </div>
+          </div>
+        </section>
 
-            {/* Variant C — Status-board */}
-            <div data-layout-only="c" className="status-board" hidden={layout !== 'c'}>
-              <div className="kpi-strip">
-                <div className="kpi-strip__cell kpi"><div className="kpi__label">Active incidents</div><div className="kpi__value">{openIncidents.length}<span className="kpi__unit">open</span></div></div>
-                <div className="kpi-strip__cell kpi"><div className="kpi__label">pH city avg</div><div className="kpi__value">{pHAvg !== null ? pHAvg.toFixed(1) : '—'}<span className="kpi__unit">pH</span></div></div>
-                <div className="kpi-strip__cell kpi"><div className="kpi__label">Response time</div><div className="kpi__value">2.4<span className="kpi__unit">min</span></div></div>
-                <div className="kpi-strip__cell kpi"><div className="kpi__label">Pending sigs</div><div className="kpi__value">{pendingSigs}<span className="kpi__unit">awaiting</span></div></div>
-                <div className="kpi-strip__cell kpi"><div className="kpi__label">Notices issued</div><div className="kpi__value">{noticesToday}<span className="kpi__unit">today</span></div></div>
-              </div>
-              <div className="split-pane">
-                <div className="card data-card">
-                  <div className="data-card__head"><h3 className="data-card__title">Sensor fleet</h3></div>
-                  <table className="data-table">
-                    <thead><tr><th className="col-warn"></th><th>Ward / Sensor</th><th className="col-sensor">Issue</th><th className="col-value">Reading</th><th className="col-time">Detected</th><th className="col-status">Severity</th><th className="col-action"></th></tr></thead>
-                    <tbody>
-                      {sensors.slice(0, 4).map((s) => (
-                        <tr key={s.sensor_id}>
-                          <td className="col-warn"><span className="row-severity-dot" style={{ background: 'var(--warning)' }}></span></td>
-                          <td className="col-title">{s.ward_id} · <span className="mono">{s.sensor_id}</span></td>
-                          <td className="col-sensor">{s.parameter}</td>
-                          <td className="col-value">{typeof s.last_value === 'number' ? s.last_value.toFixed(1) : s.last_value}</td>
-                          <td className="col-time">{new Date(s.last_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
-                          <td className="col-status"><span className="badge badge--t2">T2</span></td>
-                          <td className="col-action"><a href="/sensors">Inspect →</a></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+        {/* ── TAB: SENSORS ── */}
+        <section className="tab-panel" data-tab="sensors" role="tabpanel" hidden={tab !== 'sensors'}>
+          <div className="grid-12">
+            <div className="col-8">
+              <div className="chart-card">
+                <div className="chart-card__head">
+                  <h3 className="chart-card__title">Sensor history — last 24h</h3>
+                  <span className="chart-card__meta">{sensors.length} sensors · live</span>
                 </div>
-                <div className="right-rail">
-                  <div className="card data-card">
-                    <div className="data-card__head"><h3 className="data-card__title">Open threads</h3></div>
-                    <table className="data-table">
-                      <thead><tr><th className="col-warn"></th><th>Thread</th><th className="col-time">Opened</th><th className="col-status">Sev.</th><th className="col-action"></th></tr></thead>
-                      <tbody>
-                        {openIncidents.slice(0, 3).map((i) => (
-                          <tr key={i.incident_id}>
-                            <td className="col-warn"><span className="row-severity-dot" style={{ background: severityColor(i.severity) }}></span></td>
-                            <td>{i.ward_id ?? '—'} incident</td>
-                            <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
-                            <td className="col-status"><span className={`badge badge--${ severityBadgeClass(i.severity)}`}>{i.severity}</span></td>
-                            <td className="col-action"><a href="/inbox">Open →</a></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="card data-card">
-                    <div className="data-card__head"><h3 className="data-card__title">Today on chain</h3></div>
-                    <table className="data-table">
-                      <thead><tr><th className="col-time">Time</th><th>What</th><th className="col-status">Status</th></tr></thead>
-                      <tbody>
-                        {recent.slice(0, 6).map((e) => (
-                          <tr key={e.event_id}>
-                            <td className="col-time">{new Date(e.occurred_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</td>
-                            <td>{summarizeEvent(e)}</td>
-                            <td className="col-status"><span className={`badge badge--${ statusBadgeClass(e.event_type)}`}>{statusBadgeLabel(e.event_type)}</span></td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                <div className="chart-card__body">
+                  <svg viewBox="0 0 800 220" width="100%" height="100%" aria-label="24h multi-sensor time series">
+                    <g stroke="var(--border-subtle)" strokeWidth="1">
+                      <line x1="0" y1="40" x2="800" y2="40" />
+                      <line x1="0" y1="100" x2="800" y2="100" />
+                      <line x1="0" y1="160" x2="800" y2="160" />
+                    </g>
+                    <g fontFamily="var(--font-family-mono)" fontSize="10" fill="var(--fg-tertiary)">
+                      <text x="0" y="218">00:00</text>
+                      <text x="200" y="218">06:00</text>
+                      <text x="400" y="218">12:00</text>
+                      <text x="600" y="218">18:00</text>
+                      <text x="775" y="218" textAnchor="end">now</text>
+                    </g>
+                    <path d="M0,160 L100,155 L200,148 L300,140 L400,130 L500,118 L600,100 L700,82 L800,68" fill="none" stroke="var(--brand-500)" strokeWidth="2" />
+                    <path d="M0,170 L100,168 L200,165 L300,162 L400,160 L500,160 L600,162 L700,165 L800,168" fill="none" stroke="var(--success)" strokeWidth="2" />
+                    <path d="M0,180 L100,178 L200,180 L300,176 L400,178 L500,180 L600,176 L700,178 L800,180" fill="none" stroke="var(--warning)" strokeWidth="2" />
+                    <g fontFamily="var(--font-family-sans)" fontSize="11" fill="var(--fg-secondary)">
+                      <rect x="640" y="10" width="12" height="3" fill="var(--brand-500)" />
+                      <text x="656" y="14">pH (×10)</text>
+                      <rect x="640" y="22" width="12" height="3" fill="var(--success)" />
+                      <text x="656" y="26">Chlorine</text>
+                      <rect x="720" y="22" width="12" height="3" fill="var(--warning)" />
+                      <text x="736" y="26">Turbidity</text>
+                    </g>
+                  </svg>
                 </div>
               </div>
             </div>
-          </section>
-
-          {/* ── TAB: SENSORS ── */}
-          <section className="tab-panel" data-tab="sensors" role="tabpanel" hidden={tab !== 'sensors'}>
-            <div className="grid-12">
-              <div className="col-8">
-                <div className="chart-card">
-                  <div className="chart-card__head">
-                    <h3 className="chart-card__title">Sensor history — last 24h</h3>
-                    <span className="chart-card__meta">{sensors.length} sensors · live</span>
-                  </div>
-                  <div className="chart-card__body">
-                    <svg viewBox="0 0 800 220" width="100%" height="100%" aria-label="24h multi-sensor time series">
-                      <g stroke="var(--border-subtle)" strokeWidth="1">
-                        <line x1="0" y1="40" x2="800" y2="40" />
-                        <line x1="0" y1="100" x2="800" y2="100" />
-                        <line x1="0" y1="160" x2="800" y2="160" />
-                      </g>
-                      <g fontFamily="var(--font-family-mono)" fontSize="10" fill="var(--fg-tertiary)">
-                        <text x="0" y="218">00:00</text>
-                        <text x="200" y="218">06:00</text>
-                        <text x="400" y="218">12:00</text>
-                        <text x="600" y="218">18:00</text>
-                        <text x="775" y="218" textAnchor="end">now</text>
-                      </g>
-                      <path d="M0,160 L100,155 L200,148 L300,140 L400,130 L500,118 L600,100 L700,82 L800,68" fill="none" stroke="var(--brand-500)" strokeWidth="2" />
-                      <path d="M0,170 L100,168 L200,165 L300,162 L400,160 L500,160 L600,162 L700,165 L800,168" fill="none" stroke="var(--success)" strokeWidth="2" />
-                      <path d="M0,180 L100,178 L200,180 L300,176 L400,178 L500,180 L600,176 L700,178 L800,180" fill="none" stroke="var(--warning)" strokeWidth="2" />
-                      <g fontFamily="var(--font-family-sans)" fontSize="11" fill="var(--fg-secondary)">
-                        <rect x="640" y="10" width="12" height="3" fill="var(--brand-500)" />
-                        <text x="656" y="14">pH (×10)</text>
-                        <rect x="640" y="22" width="12" height="3" fill="var(--success)" />
-                        <text x="656" y="26">Chlorine</text>
-                        <rect x="720" y="22" width="12" height="3" fill="var(--warning)" />
-                        <text x="736" y="26">Turbidity</text>
-                      </g>
-                    </svg>
-                  </div>
+            <div className="col-4">
+              <div className="chart-card">
+                <div className="chart-card__head">
+                  <h3 className="chart-card__title">Band distribution</h3>
+                  <span className="chart-card__meta">last 7 days</span>
                 </div>
-              </div>
-              <div className="col-4">
-                <div className="chart-card">
-                  <div className="chart-card__head">
-                    <h3 className="chart-card__title">Band distribution</h3>
-                    <span className="chart-card__meta">last 7 days</span>
-                  </div>
-                  <div className="chart-card__body donut-body">
-                    <svg viewBox="0 0 200 200" width="180" height="180" aria-label="Band distribution donut">
-                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-low)" strokeWidth="32" strokeDasharray="254.5 439.8" transform="rotate(-90 100 100)" />
-                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-medium)" strokeWidth="32" strokeDasharray="79.2 615.1" strokeDashoffset="-254.5" transform="rotate(-90 100 100)" />
-                      <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-high)" strokeWidth="32" strokeDasharray="105.6 588.7" strokeDashoffset="-333.7" transform="rotate(-90 100 100)" />
-                      <text x="100" y="96" textAnchor="middle" fontSize="var(--font-size-display)" fontWeight="var(--font-weight-bold)" fill="var(--fg-default)" fontFamily="var(--font-family-sans)">{recent.length * 12}</text>
-                      <text x="100" y="118" textAnchor="middle" fontSize="var(--font-size-xs)" fill="var(--fg-tertiary)" fontFamily="var(--font-family-sans)">readings</text>
-                    </svg>
-                  </div>
-                  <div className="donut-legend">
-                    <span><span className="donut-legend__dot" style={{ background: 'var(--band-high)' }}></span>High 12%</span>
-                    <span><span className="donut-legend__dot" style={{ background: 'var(--band-medium)' }}></span>Med 9%</span>
-                    <span><span className="donut-legend__dot" style={{ background: 'var(--band-low)' }}></span>Low 58%</span>
-                  </div>
+                <div className="chart-card__body donut-body">
+                  <svg viewBox="0 0 200 200" width="180" height="180" aria-label="Band distribution donut">
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-low)" strokeWidth="32" strokeDasharray="254.5 439.8" transform="rotate(-90 100 100)" />
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-medium)" strokeWidth="32" strokeDasharray="79.2 615.1" strokeDashoffset="-254.5" transform="rotate(-90 100 100)" />
+                    <circle cx="100" cy="100" r="70" fill="none" stroke="var(--band-high)" strokeWidth="32" strokeDasharray="105.6 588.7" strokeDashoffset="-333.7" transform="rotate(-90 100 100)" />
+                    <text x="100" y="96" textAnchor="middle" fontSize="var(--font-size-display)" fontWeight="var(--font-weight-bold)" fill="var(--fg-default)" fontFamily="var(--font-family-sans)">{recent.length * 12}</text>
+                    <text x="100" y="118" textAnchor="middle" fontSize="var(--font-size-xs)" fill="var(--fg-tertiary)" fontFamily="var(--font-family-sans)">readings</text>
+                  </svg>
+                </div>
+                <div className="donut-legend">
+                  <span><span className="donut-legend__dot" style={{ background: 'var(--band-high)' }}></span>High 12%</span>
+                  <span><span className="donut-legend__dot" style={{ background: 'var(--band-medium)' }}></span>Med 9%</span>
+                  <span><span className="donut-legend__dot" style={{ background: 'var(--band-low)' }}></span>Low 58%</span>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-          {/* ── TAB: WARDS ── */}
-          <section className="tab-panel" data-tab="wards" role="tabpanel" hidden={tab !== 'wards'}>
-            <div className="grid-12">
-              <div className="col-12">
-                <div className="chart-card">
-                  <div className="chart-card__head">
-                    <h3 className="chart-card__title">Slowest wards — response time, last 7 days</h3>
-                    <span className="chart-card__meta">12 wards</span>
-                  </div>
-                  <div className="chart-card__body chart-card__body--auto">
-                    <WardRanking incidents={incidents} />
-                  </div>
+        {/* ── TAB: WARDS ── */}
+        <section className="tab-panel" data-tab="wards" role="tabpanel" hidden={tab !== 'wards'}>
+          <div className="grid-12">
+            <div className="col-12">
+              <div className="chart-card">
+                <div className="chart-card__head">
+                  <h3 className="chart-card__title">Slowest wards — response time, last 7 days</h3>
+                  <span className="chart-card__meta">12 wards</span>
+                </div>
+                <div className="chart-card__body chart-card__body--auto">
+                  <WardRanking incidents={incidents} />
                 </div>
               </div>
             </div>
-          </section>
+          </div>
+        </section>
 
-        </main>
-      </div>
-    </div>
+      </main>
+    </>
   );
-}
-// ────────────────────────────────────────────── helpers ──────────────
-async function logout(): Promise<void> {
-  try { await fetch('/api/auth/logout', { method: 'POST' }); } catch (err) { console.error('[surakkha] logout failed', err); }
 }
 function computePHAvg(sensors: SensorRow[]): number | null {
   const ph = sensors.filter((s) => s.parameter.toLowerCase() === 'ph' && typeof s.last_value === 'number');

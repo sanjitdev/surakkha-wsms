@@ -10,12 +10,24 @@ export interface SidebarProps {
   navItems: SidebarNavItem[];
   currentPath: string;
   brand?: string;
+  /** href the brand chip navigates to. Defaults to '/dashboard'.
+   *  Pass the persona's landing route so clicking SURAKKHA returns the
+   *  user to their home surface (Priya → /inbox, Karim → /field, etc.). */
+  brandHref?: string;
+  /** Optional content rendered after the nav inside .sidebar__foot.
+   *  AppLayout uses this to mount the logout button without forking
+   *  the sidebar component per persona. */
+  footer?: ReactNode;
   testId?: string;
 }
-export function Sidebar({ navItems, currentPath, brand, testId }: SidebarProps) {
+export function Sidebar({ navItems, currentPath, brand, brandHref, footer, testId }: SidebarProps) {
   return (
     <aside className="sidebar" data-testid={testId ?? 'sidebar'}>
-      {brand ? <div className="sidebar__brand">{brand}</div> : null}
+      {brand ? (
+        <Link to={brandHref ?? '/dashboard'} className="sidebar__brand" data-testid="sidebar-brand">
+          {brand}
+        </Link>
+      ) : null}
       <nav className="sidebar__nav" aria-label="Primary">
         {navItems.map((item, i) => {
           const active = item.href === currentPath;
@@ -34,6 +46,7 @@ export function Sidebar({ navItems, currentPath, brand, testId }: SidebarProps) 
           );
         })}
       </nav>
+      {footer ? <div className="sidebar__foot">{footer}</div> : null}
     </aside>
   );
 }

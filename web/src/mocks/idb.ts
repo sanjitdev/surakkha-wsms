@@ -64,6 +64,13 @@ export interface SessionRow {
   token: string; // opaque, server-minted in prod; mock mints locally
   logged_in_at: string;
   tenant_id: string;
+  /**
+   * Optional persona chip rendered in <TopChrome>. Stories 1.2 (Karim)
+   * added this so the field-tech persona shows
+   * "Karim · field tech · NE zone" instead of the raw display_name.
+   * AppLayout falls back to display_name when unset.
+   */
+  chip_label?: string;
 }
 export async function getSession(): Promise<SessionRow | undefined> {
   return (get('current', stores.session));

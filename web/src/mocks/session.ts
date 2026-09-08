@@ -26,6 +26,7 @@
 
 import { ulid } from './canonical';
 import { type SessionRow, clearSession, getSession, setSession } from './idb';
+import { notifySessionChanged } from './session-bus';
 
 export interface Persona {
   id: string;
@@ -116,6 +117,42 @@ export async function currentSession(): Promise<SessionRow | null> {
 
   return row ?? null;
 }
+/**
+ * Log out the current persona. Single source of truth — every persona
+ * page (and the AppLayout footer button) calls this.
+ *
+ * Sequence:
+ *   1. POST /api/auth/logout — emits the OperatorAccessLogged event
+ *      on the chain and (in production) revokes the bearer token.
+ *      Failure is non-fatal (we still clear locally).
+ *   2. clearSession() — wipes the IndexedDB row.
+ *   3. notifySessionChanged() — wakes up RoutedSurface so the route
+ *      tree re-renders to / without a full-page reload.
+ *
+ * Why this matters: previously OperatorDashboard and FieldQueuePage
+ * each defined their own inline logout() that used
+ * `window.location.href = '/'` — the original login-flash bug we
+ * already patched at commit abd7972. Consolidating removes the
+ * chance to regress.
+ */
 export async function logout(): Promise<void> {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch (err) {
+    console.error('[surakkha] /api/auth/logout POST failed (continuing local clear)', err);
+  }
   await clearSession();
+  // Wake up the route tree so it re-renders to / without a full-page
+  // reload. session-bus is imported statically above (was a dynamic
+  // import to dodge a circular dep, but the graph settled).
+  notifySessionChanged();
+}
+/**
+ * Convenience wrapper for the AppLayout logout button: clear session +
+ * navigate to the login picker. Used in Sidebar footers / top-chrome
+ * logout actions. Caller passes the react-router `useNavigate()` result.
+ */
+export async function logoutAndRedirect(navigate: (to: string, opts?: { replace?: boolean }) => void): Promise<void> {
+  await logout();
+  navigate('/', { replace: true });
 }
