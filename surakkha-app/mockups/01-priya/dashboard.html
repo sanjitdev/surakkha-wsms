@@ -73,7 +73,7 @@
         <div class="page-header__row">
           <div>
             <h1>Dashboard</h1>
-            <div class="page-header__sub">Today, 14:08 · Ward coverage: 12 of 12 online</div>
+            <div class="page-header__sub">12 wards online</div>
           </div>
           <div class="layout-toggle" role="radiogroup" aria-label="Dashboard layout">
             <button class="layout-toggle__btn is-active" type="button" role="radio" aria-checked="true"  data-layout-btn="a">A · grid</button>
@@ -100,37 +100,31 @@
           <div data-layout-only="a">
             <div class="kpi-row">
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Active incidents</span><span class="badge badge--open">open</span></div>
+                <div class="kpi__head"><span class="kpi__label">Active incidents</span></div>
                 <div class="kpi__value">3<span class="kpi__unit">open</span></div>
-                <div class="kpi__delta kpi__delta--up">▲ 2 new since 09:00</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">pH city avg</span><span class="badge badge--t2">drift</span></div>
+                <div class="kpi__head"><span class="kpi__label">pH city avg</span></div>
                 <div class="kpi__value">7.4<span class="kpi__unit">pH</span></div>
-                <div class="kpi__delta kpi__delta--up">▲ 0.3 in last 6h</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Response time</span><span class="badge badge--tier">SLA</span></div>
+                <div class="kpi__head"><span class="kpi__label">Response time</span></div>
                 <div class="kpi__value">2.4<span class="kpi__unit">min</span></div>
-                <div class="kpi__delta kpi__delta--down">▼ 0.8 vs yesterday</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Pending signatures</span><span class="badge badge--t2">citizen ack</span></div>
+                <div class="kpi__head"><span class="kpi__label">Pending signatures</span></div>
                 <div class="kpi__value">2<span class="kpi__unit">awaiting</span></div>
-                <div class="kpi__delta kpi__delta--neutral">Ward 7 · Ward 12</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Notices issued</span><span class="badge badge--resolved">today</span></div>
-                <div class="kpi__value">1<span class="kpi__unit">published</span></div>
-                <div class="kpi__delta kpi__delta--neutral">4 channels · 14:01</div>
+                <div class="kpi__head"><span class="kpi__label">Notices issued</span></div>
+                <div class="kpi__value">1<span class="kpi__unit">today</span></div>
               </div>
             </div>
 
             <div class="dense-row">
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Sensor fleet — silent / drifting</h3>
-                  <span class="data-card__meta">4 of 12 need attention</span>
+                  <h3 class="data-card__title">Sensor fleet</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -147,38 +141,38 @@
                   <tbody>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
-                      <td class="col-title">Ward 3 · <span class="mono" style="color: var(--fg-tertiary);">SN-1142</span></td>
+                      <td class="col-title">Ward 3 · <span class="mono">SN-1142</span></td>
                       <td class="col-sensor">pH drift</td>
                       <td class="col-value">pH 7.9 ↑</td>
                       <td class="col-time">08:12</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
-                      <td class="col-title">Ward 7 · <span class="mono" style="color: var(--fg-tertiary);">SN-2208</span></td>
+                      <td class="col-title">Ward 7 · <span class="mono">SN-2208</span></td>
                       <td class="col-sensor">silent 8 min</td>
                       <td class="col-value">—</td>
                       <td class="col-time">14:01</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                      <td class="col-status"><span class="badge badge--t3">T3</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
-                      <td class="col-title">Ward 5 · <span class="mono" style="color: var(--fg-tertiary);">SN-3301</span></td>
+                      <td class="col-title">Ward 5 · <span class="mono">SN-3301</span></td>
                       <td class="col-sensor">chlorine low</td>
                       <td class="col-value">0.4 ppm</td>
                       <td class="col-time">13:58</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
-                      <td class="col-title">Ward 12 · <span class="mono" style="color: var(--fg-tertiary);">SN-4407</span></td>
+                      <td class="col-title">Ward 12 · <span class="mono">SN-4407</span></td>
                       <td class="col-sensor">cal. due</td>
                       <td class="col-value">—</td>
                       <td class="col-time">14 d</td>
-                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">T1</span></td>
+                      <td class="col-status"><span class="badge badge--t1">T1</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                   </tbody>
@@ -187,8 +181,7 @@
 
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Today on chain — last 6h</h3>
-                  <span class="data-card__meta">6 events · tamper at 13:48</span>
+                  <h3 class="data-card__title">Today on chain</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -203,38 +196,38 @@
                     <tr>
                       <td class="col-time">14:01</td>
                       <td>Public notice issued</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">ward 7</td>
-                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">broadcast</span></td>
+                      <td>ward 7</td>
+                      <td class="col-status"><span class="badge badge--resolved">broadcast</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">13:48</td>
                       <td>Chain verification failed</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">block #12</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">err</span></td>
+                      <td>block #12</td>
+                      <td class="col-status"><span class="badge badge--t3">err</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">13:21</td>
                       <td>Sensor readings ×4</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">fleet</td>
-                      <td class="col-status"><span class="badge badge--tier" style="font-size: 10px;">data</span></td>
+                      <td>fleet</td>
+                      <td class="col-status"><span class="badge badge--tier">data</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">12:55</td>
                       <td>Citizen report (Anjali)</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">ward 5</td>
-                      <td class="col-status"><span class="badge badge--tier" style="font-size: 10px;">inbox</span></td>
+                      <td>ward 5</td>
+                      <td class="col-status"><span class="badge badge--tier">inbox</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">11:30</td>
                       <td>Citizen ack</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">ward 5 notice</td>
-                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">signed</span></td>
+                      <td>ward 5 notice</td>
+                      <td class="col-status"><span class="badge badge--resolved">signed</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">09:13</td>
                       <td>Operator login (Priya)</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">web</td>
-                      <td class="col-status"><span class="badge badge--open" style="font-size: 10px;">auth</span></td>
+                      <td>web</td>
+                      <td class="col-status"><span class="badge badge--open">auth</span></td>
                     </tr>
                   </tbody>
                 </table>
@@ -244,8 +237,7 @@
             <div class="dense-foot">
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Open threads — handover brief</h3>
-                  <span class="data-card__meta">3 threads · oldest: 17:30 yesterday</span>
+                  <h3 class="data-card__title">Open threads</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -262,25 +254,25 @@
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
                       <td>Ward 7 chlorination spike</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">awaiting citizen ack</td>
+                      <td>awaiting citizen ack</td>
                       <td class="col-time">14:01 today</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                      <td class="col-status"><span class="badge badge--t3">T3</span></td>
                       <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
                       <td>Ward 3 lead-leach chronic</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">8-day trend · awaiting lab result</td>
+                      <td>8-day trend · awaiting lab result</td>
                       <td class="col-time">09:13 today</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
                       <td>Ward 12 pH drift</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">deviation pending review</td>
+                      <td>deviation pending review</td>
                       <td class="col-time">17:30 yesterday</td>
-                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">T1</span></td>
+                      <td class="col-status"><span class="badge badge--t1">T1</span></td>
                       <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                     </tr>
                   </tbody>
@@ -293,17 +285,15 @@
           <div data-layout-only="b">
             <div class="editorial-hero">
               <div class="card handover-card kpi--hero">
-                <div class="kpi__head"><span class="kpi__label">Active incidents</span><span class="badge badge--t3">T3</span></div>
+                <div class="kpi__head"><span class="kpi__label">Active incidents</span></div>
                 <div class="kpi__value">3<span class="kpi__unit">open</span></div>
-                <div class="kpi__delta kpi__delta--up">▲ 2 new since 09:00 · 1 awaiting citizen ack</div>
-                <div style="margin-top: var(--space-lg);">
-                  <a class="handover-list__action" href="inbox-list.html" style="font-size: var(--font-size-sm);">Triage all →</a>
+                <div style="margin-top: var(--space-md);">
+                  <a class="handover-list__action" href="inbox-list.html">Triage all →</a>
                 </div>
               </div>
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Today on chain — last 6h</h3>
-                  <span class="data-card__meta">6 events · tamper at 13:48</span>
+                  <h3 class="data-card__title">Today on chain</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -318,38 +308,38 @@
                     <tr>
                       <td class="col-time">14:01</td>
                       <td>Public notice issued</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">ward 7</td>
-                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">broadcast</span></td>
+                      <td>ward 7</td>
+                      <td class="col-status"><span class="badge badge--resolved">broadcast</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">13:48</td>
                       <td>Chain verification failed</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">block #12</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">err</span></td>
+                      <td>block #12</td>
+                      <td class="col-status"><span class="badge badge--t3">err</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">13:21</td>
                       <td>Sensor readings ×4</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">fleet</td>
-                      <td class="col-status"><span class="badge badge--tier" style="font-size: 10px;">data</span></td>
+                      <td>fleet</td>
+                      <td class="col-status"><span class="badge badge--tier">data</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">12:55</td>
                       <td>Citizen report (Anjali)</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">ward 5</td>
-                      <td class="col-status"><span class="badge badge--tier" style="font-size: 10px;">inbox</span></td>
+                      <td>ward 5</td>
+                      <td class="col-status"><span class="badge badge--tier">inbox</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">11:30</td>
                       <td>Citizen ack</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">ward 5 notice</td>
-                      <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">signed</span></td>
+                      <td>ward 5 notice</td>
+                      <td class="col-status"><span class="badge badge--resolved">signed</span></td>
                     </tr>
                     <tr>
                       <td class="col-time">09:13</td>
                       <td>Operator login (Priya)</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">web</td>
-                      <td class="col-status"><span class="badge badge--open" style="font-size: 10px;">auth</span></td>
+                      <td>web</td>
+                      <td class="col-status"><span class="badge badge--open">auth</span></td>
                     </tr>
                   </tbody>
                 </table>
@@ -359,24 +349,20 @@
             <p class="section-label">Today at a glance</p>
             <div class="editorial-second">
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">pH city avg</span><span class="badge badge--t2">drift</span></div>
+                <div class="kpi__head"><span class="kpi__label">pH city avg</span></div>
                 <div class="kpi__value">7.4<span class="kpi__unit">pH</span></div>
-                <div class="kpi__delta kpi__delta--up">▲ 0.3 in last 6h</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Response time</span><span class="badge badge--tier">SLA</span></div>
+                <div class="kpi__head"><span class="kpi__label">Response time</span></div>
                 <div class="kpi__value">2.4<span class="kpi__unit">min</span></div>
-                <div class="kpi__delta kpi__delta--down">▼ 0.8 vs yesterday</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Pending sigs</span><span class="badge badge--t2">citizen ack</span></div>
+                <div class="kpi__head"><span class="kpi__label">Pending sigs</span></div>
                 <div class="kpi__value">2<span class="kpi__unit">awaiting</span></div>
-                <div class="kpi__delta kpi__delta--neutral">Ward 7 · Ward 12</div>
               </div>
               <div class="kpi">
-                <div class="kpi__head"><span class="kpi__label">Notices issued</span><span class="badge badge--resolved">today</span></div>
-                <div class="kpi__value">1<span class="kpi__unit">published</span></div>
-                <div class="kpi__delta kpi__delta--neutral">4 channels · 14:01</div>
+                <div class="kpi__head"><span class="kpi__label">Notices issued</span></div>
+                <div class="kpi__value">1<span class="kpi__unit">today</span></div>
               </div>
             </div>
 
@@ -384,8 +370,7 @@
             <div class="editorial-row">
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Open threads — handover brief</h3>
-                  <span class="data-card__meta">3 threads · oldest: 17:30 yesterday</span>
+                  <h3 class="data-card__title">Open threads</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -402,25 +387,25 @@
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
                       <td>Ward 7 chlorination spike</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">awaiting citizen ack</td>
+                      <td>awaiting citizen ack</td>
                       <td class="col-time">14:01 today</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                      <td class="col-status"><span class="badge badge--t3">T3</span></td>
                       <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
                       <td>Ward 3 lead-leach chronic</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">8-day trend · awaiting lab result</td>
+                      <td>8-day trend · awaiting lab result</td>
                       <td class="col-time">09:13 today</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
                       <td>Ward 12 pH drift</td>
-                      <td class="mono" style="color: var(--fg-secondary); font-size: var(--font-size-xs);">deviation pending review</td>
+                      <td>deviation pending review</td>
                       <td class="col-time">17:30 yesterday</td>
-                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">T1</span></td>
+                      <td class="col-status"><span class="badge badge--t1">T1</span></td>
                       <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                     </tr>
                   </tbody>
@@ -432,8 +417,7 @@
             <div class="editorial-row">
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Sensor fleet — silent / drifting</h3>
-                  <span class="data-card__meta">4 of 12 need attention</span>
+                  <h3 class="data-card__title">Sensor fleet</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -450,38 +434,38 @@
                   <tbody>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
-                      <td class="col-title">Ward 3 · <span class="mono" style="color: var(--fg-tertiary);">SN-1142</span></td>
+                      <td class="col-title">Ward 3 · <span class="mono">SN-1142</span></td>
                       <td class="col-sensor">pH drift</td>
                       <td class="col-value">pH 7.9 ↑</td>
                       <td class="col-time">08:12</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
-                      <td class="col-title">Ward 7 · <span class="mono" style="color: var(--fg-tertiary);">SN-2208</span></td>
+                      <td class="col-title">Ward 7 · <span class="mono">SN-2208</span></td>
                       <td class="col-sensor">silent 8 min</td>
                       <td class="col-value">—</td>
                       <td class="col-time">14:01</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                      <td class="col-status"><span class="badge badge--t3">T3</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
-                      <td class="col-title">Ward 5 · <span class="mono" style="color: var(--fg-tertiary);">SN-3301</span></td>
+                      <td class="col-title">Ward 5 · <span class="mono">SN-3301</span></td>
                       <td class="col-sensor">chlorine low</td>
                       <td class="col-value">0.4 ppm</td>
                       <td class="col-time">13:58</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
-                      <td class="col-title">Ward 12 · <span class="mono" style="color: var(--fg-tertiary);">SN-4407</span></td>
+                      <td class="col-title">Ward 12 · <span class="mono">SN-4407</span></td>
                       <td class="col-sensor">cal. due</td>
                       <td class="col-value">—</td>
                       <td class="col-time">14 d</td>
-                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">T1</span></td>
+                      <td class="col-status"><span class="badge badge--t1">T1</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                   </tbody>
@@ -496,35 +480,29 @@
               <div class="kpi-strip__cell kpi">
                 <div class="kpi__label">Active incidents</div>
                 <div class="kpi__value">3<span class="kpi__unit">open</span></div>
-                <div class="kpi__delta kpi__delta--up">▲ 2 new</div>
               </div>
               <div class="kpi-strip__cell kpi">
                 <div class="kpi__label">pH city avg</div>
                 <div class="kpi__value">7.4<span class="kpi__unit">pH</span></div>
-                <div class="kpi__delta kpi__delta--up">▲ 0.3</div>
               </div>
               <div class="kpi-strip__cell kpi">
                 <div class="kpi__label">Response time</div>
                 <div class="kpi__value">2.4<span class="kpi__unit">min</span></div>
-                <div class="kpi__delta kpi__delta--down">▼ 0.8</div>
               </div>
               <div class="kpi-strip__cell kpi">
                 <div class="kpi__label">Pending sigs</div>
                 <div class="kpi__value">2<span class="kpi__unit">awaiting</span></div>
-                <div class="kpi__delta kpi__delta--neutral">Ward 7 · 12</div>
               </div>
               <div class="kpi-strip__cell kpi">
                 <div class="kpi__label">Notices issued</div>
                 <div class="kpi__value">1<span class="kpi__unit">today</span></div>
-                <div class="kpi__delta kpi__delta--neutral">4 channels</div>
               </div>
             </div>
 
             <div class="split-pane">
               <div class="card data-card">
                 <div class="data-card__head">
-                  <h3 class="data-card__title">Sensor fleet — silent / drifting</h3>
-                  <span class="data-card__meta">4 of 12 need attention</span>
+                  <h3 class="data-card__title">Sensor fleet</h3>
                 </div>
                 <table class="data-table">
                   <thead>
@@ -541,38 +519,38 @@
                   <tbody>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
-                      <td class="col-title">Ward 3 · <span class="mono" style="color: var(--fg-tertiary);">SN-1142</span></td>
+                      <td class="col-title">Ward 3 · <span class="mono">SN-1142</span></td>
                       <td class="col-sensor">pH drift</td>
                       <td class="col-value">pH 7.9 ↑</td>
                       <td class="col-time">08:12</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
-                      <td class="col-title">Ward 7 · <span class="mono" style="color: var(--fg-tertiary);">SN-2208</span></td>
+                      <td class="col-title">Ward 7 · <span class="mono">SN-2208</span></td>
                       <td class="col-sensor">silent 8 min</td>
                       <td class="col-value">—</td>
                       <td class="col-time">14:01</td>
-                      <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                      <td class="col-status"><span class="badge badge--t3">T3</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
-                      <td class="col-title">Ward 5 · <span class="mono" style="color: var(--fg-tertiary);">SN-3301</span></td>
+                      <td class="col-title">Ward 5 · <span class="mono">SN-3301</span></td>
                       <td class="col-sensor">chlorine low</td>
                       <td class="col-value">0.4 ppm</td>
                       <td class="col-time">13:58</td>
-                      <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                      <td class="col-status"><span class="badge badge--t2">T2</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                     <tr>
                       <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
-                      <td class="col-title">Ward 12 · <span class="mono" style="color: var(--fg-tertiary);">SN-4407</span></td>
+                      <td class="col-title">Ward 12 · <span class="mono">SN-4407</span></td>
                       <td class="col-sensor">cal. due</td>
                       <td class="col-value">—</td>
                       <td class="col-time">14 d</td>
-                      <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">T1</span></td>
+                      <td class="col-status"><span class="badge badge--t1">T1</span></td>
                       <td class="col-action"><a href="sensors.html">Inspect →</a></td>
                     </tr>
                   </tbody>
@@ -581,8 +559,7 @@
               <div class="right-rail">
                 <div class="card data-card">
                   <div class="data-card__head">
-                    <h3 class="data-card__title">Open threads — handover brief</h3>
-                    <span class="data-card__meta">3 threads</span>
+                    <h3 class="data-card__title">Open threads</h3>
                   </div>
                   <table class="data-table">
                     <thead>
@@ -599,21 +576,21 @@
                         <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
                         <td>Ward 7 chlorination spike</td>
                         <td class="col-time">14:01</td>
-                        <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">T3</span></td>
+                        <td class="col-status"><span class="badge badge--t3">T3</span></td>
                         <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                       </tr>
                       <tr>
                         <td class="col-warn"><span class="row-severity-dot" style="background: var(--warning);"></span></td>
                         <td>Ward 3 lead-leach chronic</td>
                         <td class="col-time">09:13</td>
-                        <td class="col-status"><span class="badge badge--t2" style="font-size: 10px;">T2</span></td>
+                        <td class="col-status"><span class="badge badge--t2">T2</span></td>
                         <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                       </tr>
                       <tr>
                         <td class="col-warn"><span class="row-severity-dot" style="background: var(--info);"></span></td>
                         <td>Ward 12 pH drift</td>
                         <td class="col-time">17:30</td>
-                        <td class="col-status"><span class="badge badge--t1" style="font-size: 10px;">T1</span></td>
+                        <td class="col-status"><span class="badge badge--t1">T1</span></td>
                         <td class="col-action"><a href="inbox-detail.html">Open →</a></td>
                       </tr>
                     </tbody>
@@ -621,8 +598,7 @@
                 </div>
                 <div class="card data-card">
                   <div class="data-card__head">
-                    <h3 class="data-card__title">Today on chain — last 6h</h3>
-                    <span class="data-card__meta">6 events</span>
+                    <h3 class="data-card__title">Today on chain</h3>
                   </div>
                   <table class="data-table">
                     <thead>
@@ -636,45 +612,35 @@
                       <tr>
                         <td class="col-time">14:01</td>
                         <td>Notice issued · ward 7</td>
-                        <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">done</span></td>
+                        <td class="col-status"><span class="badge badge--resolved">done</span></td>
                       </tr>
                       <tr>
                         <td class="col-time">13:48</td>
                         <td>Chain verify failed · #12</td>
-                        <td class="col-status"><span class="badge badge--t3" style="font-size: 10px;">err</span></td>
+                        <td class="col-status"><span class="badge badge--t3">err</span></td>
                       </tr>
                       <tr>
                         <td class="col-time">13:21</td>
                         <td>Sensor readings ×4</td>
-                        <td class="col-status"><span class="badge badge--tier" style="font-size: 10px;">data</span></td>
+                        <td class="col-status"><span class="badge badge--tier">data</span></td>
                       </tr>
                       <tr>
                         <td class="col-time">12:55</td>
                         <td>Citizen report · ward 5</td>
-                        <td class="col-status"><span class="badge badge--tier" style="font-size: 10px;">inbox</span></td>
+                        <td class="col-status"><span class="badge badge--tier">inbox</span></td>
                       </tr>
                       <tr>
                         <td class="col-time">11:30</td>
                         <td>Citizen signature</td>
-                        <td class="col-status"><span class="badge badge--resolved" style="font-size: 10px;">signed</span></td>
+                        <td class="col-status"><span class="badge badge--resolved">signed</span></td>
                       </tr>
                       <tr>
                         <td class="col-time">09:13</td>
                         <td>Priya login · web</td>
-                        <td class="col-status"><span class="badge badge--open" style="font-size: 10px;">auth</span></td>
+                        <td class="col-status"><span class="badge badge--open">auth</span></td>
                       </tr>
                     </tbody>
                   </table>
-                </div>
-              </div>
-            </div>
-          </div>
-                    <li>
-                      <span class="mono" style="font-size: var(--font-size-xs); color: var(--fg-tertiary);">09:13</span>
-                      <span class="handover-list__title">Priya login</span>
-                      <span class="badge badge--open" style="font-size: 10px;">login</span>
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>

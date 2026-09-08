@@ -71,7 +71,7 @@
         <div class="page-header__row">
           <div>
             <h1>Handover</h1>
-            <div class="page-header__sub">Shift change brief · drafted from live state · 14:08 IST</div>
+            <div class="page-header__sub">Shift change brief · 14:08 IST</div>
           </div>
           <div style="display: flex; gap: var(--space-sm);">
             <button class="button button--secondary" type="button">Preview as PDF</button>
@@ -91,21 +91,21 @@
               </div>
               <div class="handover-brief" style="line-height: var(--line-height-loose); font-size: var(--font-size-sm); color: var(--fg-default);">
                 <p><strong>Shift:</strong> day · 06:00 → 14:00 · Priya out, Aarav in (starts 14:30).</p>
-                <p><strong>Active incidents (3):</strong></p>
+                <p><strong>Active incidents:</strong></p>
                 <ul style="margin: 0 0 var(--space-md) var(--space-xl);">
-                  <li><strong style="color: var(--danger);">T3 ward 7 chlorination spike</strong> — SN-2208 went silent at 14:01, chlorine 0.1 ppm. Public notice <span class="mono">dn-3318</span> drafted by Priya, citizen-acked by Anjali 14:08. Broadcast sealed in block #13 at 14:08. 412 households. Watch for downstream citizen reports in next 2h.</li>
-                  <li><strong style="color: var(--warning);">T2 ward 3 pH drift</strong> — SN-1142 reading pH 7.9 (baseline 7.4). Field tech Ramesh (NE zone) on site, diagnosis in progress — expected close within shift.</li>
-                  <li><strong style="color: var(--warning);">T2 ward 5 lead-leach chronic</strong> — 8-day trend. Citizen ack from Babul received 11:30, notice dn-3301 broadcast. Lab result expected 17:00 — if it returns elevated, escalate to T3 and start new notice thread.</li>
+                  <li><strong class="is-t3">T3 ward 7 chlorination spike</strong> — SN-2208 silent at 14:01, chlorine 0.1 ppm. Notice dn-3318 drafted by Priya, citizen-acked by Anjali 14:08. Broadcast sealed in block #13. 412 households.</li>
+                  <li><strong class="is-t2">T2 ward 3 pH drift</strong> — SN-1142 pH 7.9 (baseline 7.4). Ramesh on site, diagnosis in progress — expected close within shift.</li>
+                  <li><strong class="is-t2">T2 ward 5 lead-leach chronic</strong> — 8-day trend. Citizen ack from Babul 11:30, dn-3301 broadcast. Lab result expected 17:00 — if elevated, escalate to T3.</li>
                 </ul>
                 <p><strong>My drafts (1):</strong> ward 12 pH drift advisory — drafted 2 d ago, not yet sent. Decide before 18:00 or it expires.</p>
-                <p><strong>Chain health:</strong> block #12 has a batch-hash mismatch (auto-flagged, in queue). Walk-back verification through block #7 is clean. Don't anchor anything new until #12 is reconciled or it'll propagate the gap. Field tech Suresh (NE depot) was notified for the field-tablet reconciliation sweep.</p>
-                <p><strong>Sensor fleet:</strong> 12 of 12 online, 1 silent (SN-2208, T3), 3 drifting, 2 cal-due within 14 d. Watch SN-4407 ward 12 — calibration is the only thing keeping it inside spec.</p>
+                <p><strong>Chain health:</strong> block #12 batch-hash mismatch (auto-flagged, in queue). Walk-back through #7 is clean. Don't anchor anything new until #12 is reconciled. Suresh (NE depot) notified for the field-tablet sweep.</p>
+                <p><strong>Sensor fleet:</strong> 12 of 12 online, 1 silent (SN-2208), 3 drifting, 2 cal-due within 14 d. Watch SN-4407 ward 12 — calibration is the only thing keeping it inside spec.</p>
                 <p><strong>Open verifications:</strong> 0. All anchors on chain verified clean as of 14:08.</p>
-                <p><strong>Carryover to next shift:</strong></p>
+                <p><strong>Carryover:</strong></p>
                 <ul style="margin: 0 0 var(--space-md) var(--space-xl);">
-                  <li>If lab result on ward 5 is elevated → trigger T3 issuance immediately, don't wait for me.</li>
-                  <li>If ward 7 zone A (adjacent) crosses 0.2 ppm chlorine in the next hour, that's contamination spread — escalate.</li>
-                  <li>The two paired devices (Pixel 7 + Tab S9 backup) are both in your keyring.</li>
+                  <li>Ward 5 lab result elevated → trigger T3 issuance, don't wait for me.</li>
+                  <li>Ward 7 zone A chlorine crosses 0.2 ppm → contamination spread, escalate.</li>
+                  <li>Paired devices (Pixel 7 + Tab S9 backup) are both in your keyring.</li>
                 </ul>
                 <p><strong>Quiet hours start 22:00.</strong> T3 still wakes you. I'm reachable until 18:00 on Signal if anything fires before then.</p>
               </div>
@@ -117,7 +117,7 @@
                 <h3 class="data-card__title">Add to brief</h3>
                 <span class="data-card__meta">free-form · sealed to the brief block</span>
               </div>
-              <textarea class="input" rows="4" style="height: auto; padding: var(--space-md); font-family: inherit; line-height: var(--line-height-body);" placeholder="Anything not auto-captured — context, names, the thing you can't put in a table…"></textarea>
+              <textarea class="input" rows="4" style="height: auto; padding: var(--space-md); font-family: inherit; line-height: var(--line-height-body);" placeholder="Anything not auto-captured — context, names…"></textarea>
               <div style="display: flex; justify-content: flex-end; margin-top: var(--space-sm);">
                 <button class="button button--secondary" type="button" style="height: 32px; font-size: var(--font-size-xs);">Append to brief</button>
               </div>
@@ -149,7 +149,7 @@
                   </tr>
                   <tr>
                     <td>Active sessions</td>
-                    <td style="text-align: right;">0 (off-shift)</td>
+                    <td style="text-align: right;">0</td>
                   </tr>
                   <tr>
                     <td>Signature device</td>
@@ -167,7 +167,7 @@
               <div class="block-meta">
                 <div class="block-meta__row">
                   <span class="block-meta__label">Draft hash</span>
-                  <span class="block-meta__value mono" style="font-size: 10px;">0x7b21…4ad9</span>
+                  <span class="block-meta__value mono hash">0x7b21…4ad9</span>
                 </div>
                 <div class="block-meta__row">
                   <span class="block-meta__label">Last edited</span>

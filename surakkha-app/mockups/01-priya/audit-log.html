@@ -71,7 +71,7 @@
         <div class="page-header__row">
           <div>
             <h1>Audit log</h1>
-            <div class="page-header__sub">Complete chronological chain · 13 blocks · 142 events</div>
+            <div class="page-header__sub">13 blocks · 142 events</div>
           </div>
           <div style="display: flex; gap: var(--space-sm);">
             <button class="button button--secondary" type="button">
@@ -152,11 +152,11 @@
             </thead>
             <tbody>
               <!-- ── Block #13 ─────────────────────────────── -->
-              <tr>
-                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #13</strong>
-                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 14:08:42 · 4 events · root 0x4f8a…b21e</span>
+              <tr class="block-sep">
+                <td colspan="6">
+                  <div class="block-sep__row">
+                    <strong class="block-sep__title">BLOCK #13</strong>
+                    <span class="block-sep__meta">sealed 14:08:42 · 4 events · root 0x4f8a…b21e</span>
                   </div>
                 </td>
               </tr>
@@ -206,15 +206,15 @@
               </tr>
 
               <!-- ── Block #12 ─────────────────────────────── -->
-              <tr>
-                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #12</strong>
-                    <span class="mono" style="font-size: 10px; color: var(--warning);">hash mismatch detected · auto-escalated</span>
+              <tr class="block-sep">
+                <td colspan="6">
+                  <div class="block-sep__row">
+                    <strong class="block-sep__title">BLOCK #12</strong>
+                    <span class="block-sep__meta is-warn">hash mismatch detected · auto-escalated</span>
                   </div>
                 </td>
               </tr>
-              <tr class="event-row" style="background: var(--danger-bg);">
+              <tr class="event-row is-err">
                 <td class="col-time">13:48</td>
                 <td class="col-warn"><span class="row-severity-dot" style="background: var(--danger);"></span></td>
                 <td class="col-title">
@@ -238,11 +238,11 @@
               </tr>
 
               <!-- ── Block #11 ─────────────────────────────── -->
-              <tr>
-                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #11</strong>
-                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 13:21:09 · 3 events · root 0x5c2e…a14f</span>
+              <tr class="block-sep">
+                <td colspan="6">
+                  <div class="block-sep__row">
+                    <strong class="block-sep__title">BLOCK #11</strong>
+                    <span class="block-sep__meta">sealed 13:21:09 · 3 events · root 0x5c2e…a14f</span>
                   </div>
                 </td>
               </tr>
@@ -281,11 +281,11 @@
               </tr>
 
               <!-- ── Block #10 ─────────────────────────────── -->
-              <tr>
-                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #10</strong>
-                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 12:55:33 · 1 event · root 0x8b41…06cd</span>
+              <tr class="block-sep">
+                <td colspan="6">
+                  <div class="block-sep__row">
+                    <strong class="block-sep__title">BLOCK #10</strong>
+                    <span class="block-sep__meta">sealed 12:55:33 · 1 event · root 0x8b41…06cd</span>
                   </div>
                 </td>
               </tr>
@@ -302,11 +302,11 @@
               </tr>
 
               <!-- ── Block #9 ──────────────────────────────── -->
-              <tr>
-                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #9</strong>
-                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 11:30:08 · 2 events · root 0x2f97…1aae</span>
+              <tr class="block-sep">
+                <td colspan="6">
+                  <div class="block-sep__row">
+                    <strong class="block-sep__title">BLOCK #9</strong>
+                    <span class="block-sep__meta">sealed 11:30:08 · 2 events · root 0x2f97…1aae</span>
                   </div>
                 </td>
               </tr>
@@ -334,11 +334,11 @@
               </tr>
 
               <!-- ── Block #8 ──────────────────────────────── -->
-              <tr>
-                <td colspan="6" style="background: var(--bg-subtle); padding: var(--space-sm) var(--space-lg); border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-subtle);">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <strong style="font-family: var(--font-family-mono); font-size: var(--font-size-xs); color: var(--fg-default);">BLOCK #8</strong>
-                    <span class="mono" style="font-size: 10px; color: var(--fg-tertiary);">sealed 09:13:51 · 2 events · root 0xc6e3…5d29</span>
+              <tr class="block-sep">
+                <td colspan="6">
+                  <div class="block-sep__row">
+                    <strong class="block-sep__title">BLOCK #8</strong>
+                    <span class="block-sep__meta">sealed 09:13:51 · 2 events · root 0xc6e3…5d29</span>
                   </div>
                 </td>
               </tr>
@@ -368,11 +368,7 @@
           </table>
 
           <div class="inbox-pager">
-            <span class="inbox-pager__meta">Showing 14 of 142 events · blocks #8 — #13</span>
-            <div style="display:flex;gap:var(--space-xs);">
-              <button class="button button--secondary" type="button" style="height:28px;font-size:var(--font-size-xs);">‹ Older blocks</button>
-              <button class="button button--secondary" type="button" style="height:28px;font-size:var(--font-size-xs);" disabled>Newer blocks ›</button>
-            </div>
+            <span class="inbox-pager__meta">14 of 142 · blocks #8 — #13</span>
           </div>
         </div>
       </main>

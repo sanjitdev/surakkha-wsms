@@ -282,6 +282,16 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 
 /* ── Handover card ───────────────────────────────────────────── */
 .handover-card { padding: var(--space-md) var(--space-lg); }
+.handover-brief strong.is-t3 { color: var(--danger); }
+.handover-brief strong.is-t2 { color: var(--warning); }
+.card-heading {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-secondary);
+  margin: 0 0 var(--space-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 .handover-list {
   list-style: none;
   margin: 0;
@@ -1161,6 +1171,12 @@ main[data-layout="c"] [data-layout-only="c"] {
    Verify result panel · verify chips · block meta list
    ════════════════════════════════════════════════════════════════════ */
 
+/* hash cells in tables (compact monospace) */
+.data-table td.hash,
+.data-table th.hash {
+  font-size: 10px;
+}
+
 .verify-result {
   display: grid;
   grid-template-columns: 56px 1fr;
@@ -1306,10 +1322,34 @@ main[data-layout="c"] [data-layout-only="c"] {
   vertical-align: top;
   padding-top: var(--space-md);
 }
+.event-row.is-err td { background: var(--danger-bg, rgba(220, 38, 38, 0.04)); }
+
+/* Block separator row inside audit-log table */
+.block-sep td {
+  background: var(--bg-subtle);
+  padding: var(--space-sm) var(--space-lg);
+  border-top: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.block-sep__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.block-sep__title {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-default);
+}
+.block-sep__meta {
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-mono);
+}
+.block-sep__meta.is-warn { color: var(--warning); }
 .event-row td.col-detail {
   font-size: var(--font-size-xs);
   color: var(--fg-tertiary);
-  font-family: var(--font-family-mono);
   margin-top: 2px;
 }
 .event-expand {
