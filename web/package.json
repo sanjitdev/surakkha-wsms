@@ -12,6 +12,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "test": "vitest run",
     "typecheck": "tsc -b --noEmit",
     "mocks:init": "msw init public/ --save"
   },
@@ -21,13 +22,17 @@
     "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.7.0",
     "idb-keyval": "^6.3.0",
+    "jsdom": "^30.0.1",
     "msw": "^2.15.0",
     "typescript": "^5.9.3",
-    "vite": "^5.4.21"
+    "vite": "^5.4.21",
+    "vitest": "^3.2.7"
   },
   "msw": {
     "workerDirectory": [
