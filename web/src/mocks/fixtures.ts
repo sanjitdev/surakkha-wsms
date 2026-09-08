@@ -39,7 +39,7 @@ import {
   type ChainBlock,
 } from './idb';
 
-const SEED_VERSION = 2;
+const SEED_VERSION = 3;
 const TENANT = 'dhaka';
 const SCHEMA_VERSION = 1;
 
@@ -376,6 +376,187 @@ export async function seedIfEmpty(): Promise<boolean> {
   await write(resolved);
   prevHash = resolved.block_hash;
   height++;
+
+  // ── FE-1.5b — 7 inbox-row fixtures (one per mockup row) ──────────────
+  // Each IncidentCreated payload embeds the inbox-row fields the page's
+  // useEffect parser needs: incident_id, severity, ward + sensor_id (→ where),
+  // owner_role / owner_display (→ owner), status (→ pill caption + chip
+  // mapping), href (→ row + trailing action target), summary (→ title +
+  // meta), occurred_at (→ timestamp), read (→ muted styling). Actor kind
+  // diverges per row (operator vs technician vs citizen vs system vs vendor)
+  // so the right-rail severity counts and the filter-chip "Awaiting sigs"
+  // count derive correctly from the kind:actor ref.
+  type InboxFixture = {
+    severity: 'high' | 'medium' | 'low' | 'none';
+    ward: string;
+    sensor_id: string;
+    owner_kind: 'operator' | 'technician' | 'citizen' | 'system' | 'vendor';
+    owner_ref: string;
+    owner_display: string;
+    status: 'awaiting_ack' | 'awaiting_sig' | 'awaiting_draft' | 'citizen_report' | 'chain_verify' | 'info';
+    href: string;
+    title: string;
+    summary: string;
+    occurred_at: string;
+    isUrgent: boolean;
+    isDraft: boolean;
+    isCitizen: boolean;
+    isAwaitingSig: boolean;
+  };
+  const inboxFixtures: InboxFixture[] = [
+    {
+      severity: 'high',
+      ward: 'ward-07',
+      sensor_id: 'SN-2208',
+      owner_kind: 'operator',
+      owner_ref: ACTORS.priya.ref,
+      owner_display: 'Priya',
+      status: 'awaiting_ack',
+      href: '/inbox-detail',
+      title: 'Ward 7 chlorination spike',
+      summary: 'citizen-ack request sent · Anjali (reporter) · SN-2208 silent 8 min',
+      occurred_at: new Date(t0 - 12 * 60 * 1000).toISOString(),
+      isUrgent: true,
+      isDraft: false,
+      isCitizen: false,
+      isAwaitingSig: true,
+    },
+    {
+      severity: 'medium',
+      ward: 'ward-05',
+      sensor_id: 'SN-3301',
+      owner_kind: 'citizen',
+      owner_ref: ACTORS.anjali.ref,
+      owner_display: 'Babul',
+      status: 'awaiting_ack',
+      href: '/inbox-detail',
+      title: 'Ward 5 lead-leach chronic',
+      summary: '8-day trend · awaiting citizen ack from Babul (reporter)',
+      occurred_at: new Date(t0 - 30 * 60 * 1000).toISOString(),
+      isUrgent: false,
+      isDraft: false,
+      isCitizen: false,
+      isAwaitingSig: false,
+    },
+    {
+      severity: 'medium',
+      ward: 'ward-03',
+      sensor_id: 'SN-1142',
+      owner_kind: 'technician',
+      owner_ref: ACTORS.karim.ref,
+      owner_display: 'Ramesh',
+      status: 'awaiting_sig',
+      href: '/inbox-detail',
+      title: 'Ward 3 pH drift correction',
+      summary: 'Ramesh (tech) on site · diagnosis + fix in progress',
+      occurred_at: new Date(t0 - 65 * 60 * 1000).toISOString(),
+      isUrgent: false,
+      isDraft: false,
+      isCitizen: false,
+      isAwaitingSig: true,
+    },
+    {
+      severity: 'medium',
+      ward: 'ward-12',
+      sensor_id: 'SN-4407',
+      owner_kind: 'operator',
+      owner_ref: ACTORS.priya.ref,
+      owner_display: 'Priya',
+      status: 'awaiting_draft',
+      href: '/inbox-detail',
+      title: 'Ward 12 pH drift — advisory',
+      summary: 'Draft by Priya · 2 d ago · not yet sent',
+      occurred_at: new Date(t0 - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      isUrgent: false,
+      isDraft: true,
+      isCitizen: false,
+      isAwaitingSig: false,
+    },
+    {
+      severity: 'low',
+      ward: 'ward-09',
+      sensor_id: 'SN-5503',
+      owner_kind: 'citizen',
+      owner_ref: ACTORS.anjali.ref,
+      owner_display: 'Anjali',
+      status: 'citizen_report',
+      href: '/inbox-detail',
+      title: 'Citizen report — discoloured water',
+      summary: 'Reported by Anjali (citizen) · 2 photos attached',
+      occurred_at: new Date(t0 - 3 * 60 * 60 * 1000).toISOString(),
+      isUrgent: false,
+      isDraft: false,
+      isCitizen: true,
+      isAwaitingSig: false,
+    },
+    {
+      severity: 'low',
+      ward: 'block-12',
+      sensor_id: 'system',
+      owner_kind: 'system',
+      owner_ref: ACTORS.sensor.ref,
+      owner_display: 'System',
+      status: 'chain_verify',
+      href: '/verify-flow',
+      title: 'Chain verification failed',
+      summary: 'Block #12 · auto-flagged · sensor batch hash mismatch',
+      occurred_at: new Date(t0 - 4 * 60 * 60 * 1000).toISOString(),
+      isUrgent: false,
+      isDraft: false,
+      isCitizen: false,
+      isAwaitingSig: false,
+    },
+    {
+      severity: 'none',
+      ward: 'ward-12',
+      sensor_id: 'SN-4407',
+      owner_kind: 'vendor',
+      owner_ref: ACTORS.vendor.ref,
+      owner_display: 'Acme',
+      status: 'info',
+      href: '/sensors',
+      title: 'Ward 12 cal. due in 14 days',
+      summary: 'Scheduled maintenance · no action required',
+      occurred_at: new Date(t0 - 8 * 60 * 60 * 1000).toISOString(),
+      isUrgent: false,
+      isDraft: false,
+      isCitizen: false,
+      isAwaitingSig: false,
+    },
+  ];
+  for (const f of inboxFixtures) {
+    const ev: ChainBlock = await buildBlock({
+      prev_block_hash: prevHash,
+      event_type: 'IncidentCreated',
+      event_id: ulid(t0 + 14000 + inboxFixtures.indexOf(f)),
+      occurred_at: f.occurred_at,
+      actor_identity: { kind: f.owner_kind, ref: f.owner_ref, display: f.owner_display },
+      payload: {
+        incident_id: ulid(t0 + 14000 + inboxFixtures.indexOf(f) + 1),
+        severity: f.severity,
+        ward_id: f.ward,
+        source: 'sensor',
+        sensor_snapshot: [{ sensor_id: f.sensor_id, parameter: 'pH', value: 7.4 }],
+        // inbox-row extensions (the page's useEffect parser reads these)
+        inbox: {
+          owner_kind: f.owner_kind,
+          owner_display: f.owner_display,
+          status: f.status,
+          href: f.href,
+          title: f.title,
+          summary: f.summary,
+          isUrgent: f.isUrgent,
+          isDraft: f.isDraft,
+          isCitizen: f.isCitizen,
+          isAwaitingSig: f.isAwaitingSig,
+          read: false,
+        },
+      },
+    });
+    await write(ev);
+    prevHash = ev.block_hash;
+    height++;
+  }
 
   // ── chain head + meta ────────────────────────────────────────────────
   await setChainHead({

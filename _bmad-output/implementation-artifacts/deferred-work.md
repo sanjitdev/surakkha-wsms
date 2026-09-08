@@ -50,3 +50,19 @@
   - SSR `typeof window === 'undefined'` branch coverage on the body-level hooks.
   - `@vitest/coverage-v8` config + Button/BandPill/TopChrome coverage tests.
   Belong in a future story so FE-1.1c's scope stays bounded.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-5b-inbox-list.md`
+  summary: FE-1.5b review-loop-1 — InboxList bulk-bar transition coverage (selectedRows toggle / select-all / bulk-bar appear + disappear). Page-level interaction test, not a primitive test.
+  evidence: FE-1.5b ships 9 primitive tests for InboxRow + FilterChip; the bulk-bar's `hidden={selectedRows.size === 0}` lifecycle and the per-row + select-all toggle semantics are exercised only by manual QA in dev. Spec I/O row "HAPPY_PATH_select" claims bulk-bar appears with `<strong>{N}</strong> selected` but no test asserts that. Page-level integration tests are explicitly out of scope for FE-1.3a primitives.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-5b-inbox-list.md`
+  summary: FE-1.5b review-loop-1 — InboxList page-level integration test (renders 6 fixture rows, narrows to 1 on T3 chip, recovers from /api/events 500 via EmptyState, renders Bangla chrome). All 6 spec I/O matrix rows need an RTL + MSW integration test.
+  evidence: FE-1.5b ships primitive tests; the page composition (Sidebar active marker, TopChrome chain-fresh slot, filter chip aria-selected flow, severity rail counts, awaiting-action rail) is untested. Spec promises all 6 I/O matrix rows work; without integration tests, a future refactor of InboxList.tsx could break any of them silently.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-5b-inbox-list.md`
+  summary: FE-1.5b review-loop-1 — App.tsx `/inbox` route assertion (verify utility_operator session lands on InboxList, not LoginPage or OperatorDashboard).
+  evidence: The one-line App.tsx edit swapped `<OperatorDashboard />` for `<InboxList />` at `/inbox` but no test asserts the route branch. Belongs in the FE-1.5c route-test follow-up so the test scaffold lives next to the persona-aware router.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-5b-inbox-list.md`
+  summary: FE-1.5b review-loop-1 — sweep inbox.css for stray CSS literals (`#fff`, `#0E1013`) and replace with `var(--*)` tokens. Lock the file to the dim 1 token surface.
+  evidence: inbox.css was written to compose primitives but slipped two hex literals; reviewers flagged them. The dim 4 lockdown requires every visual value to be a `var(--*)` reference. A dedicated CSS lockdown pass is the right home for this.

@@ -32,6 +32,7 @@ import { LoginPage } from './pages/LoginPage';
 import { FieldQueuePage } from './pages/FieldQueuePage';
 import { OperatorDashboard } from './pages/OperatorDashboard';
 import { StyleguidePage } from './pages/StyleguidePage';
+import { InboxList } from './pages/InboxList';
 import { getSession, type SessionRow } from './mocks/idb';
 import { useTheme } from './hooks/useTheme';
 import { useLocale } from './hooks/useLocale';
@@ -82,12 +83,12 @@ function RoutedSurface() {
         }
       />
 
-      {/* Operator branch (Story 1.3). */}
+      {/* Operator inbox (Story FE-1.5b). */}
       <Route
         path="/inbox"
         element={
           session?.role === 'utility_operator' ? (
-            <OperatorDashboard />
+            <InboxList />
           ) : (
             <Navigate to="/" replace />
           )
