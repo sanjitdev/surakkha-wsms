@@ -24,6 +24,8 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { MemoryRouter } from 'react-router-dom';
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { InboxList } from '../pages/InboxList';
 import { handlers } from '../mocks/handlers';
 
@@ -39,6 +41,11 @@ afterAll(() => {
 
 beforeEach(() => {
   server.resetHandlers(...handlers);
+  // Clear body-level locale reset so any test that mutates body[data-locale]
+  // (e.g. locale_bangla) cannot leak across the suite. The locale_bangla case
+  // sets + restores the attribute inside try/finally; this guard catches any
+  // future test that forgets the cleanup.
+  delete document.body.dataset.locale;
 });
 
 afterEach(() => {
@@ -249,5 +256,128 @@ describe('InboxList bulk-bar', () => {
     });
     expect(bulkbar?.hasAttribute('hidden')).toBe(true);
     expect(selectAll.checked).toBe(false);
+  });
+});
+
+/**
+ * FE-1.5b review-loop D2/D3/D4 — I/O matrix + route + CSS lockdown.
+ * Locks 4 unwritten I/O rows + route wiring + dim-4 colour lockdown.
+ */
+describe('InboxList I/O matrix', () => {
+  it('filter_T3: clicking the T3 urgent chip shows only T3 rows; chip is active', async () => {
+    await renderInboxAndWaitForRows();
+    const t3Chip = screen.getByTestId('filter-chip-t3-urgent');
+
+    expect(t3Chip.getAttribute('aria-selected')).toBe('false');
+    expect(t3Chip.className).not.toContain('is-active');
+
+    act(() => {
+      fireEvent.click(t3Chip);
+    });
+
+    expect(t3Chip.getAttribute('aria-selected')).toBe('true');
+    expect(t3Chip.className).toContain('is-active');
+
+    // Only the T3 row (high → T3 per SEVERITY_FROM_WIRE) remains.
+    const visibleRows = screen.queryAllByTestId('inbox-row');
+
+    expect(visibleRows.length).toBe(1);
+    expect(visibleRows[0]?.textContent).toContain('Ward 7 chlorination spike');
+  });
+
+  it('fetch_fail: 500 from /api/events renders <EmptyState heading="No incidents" />', async () => {
+    // Override /api/events: IncidentCreated → 500 (triggers the catch path),
+    // everything else → empty array (so the recent-decisions rail stays
+    // honest instead of mirroring the failed fetch). The `beforeEach`
+    // already reset handlers to the base set, so this single `server.use()`
+    // call replaces the chain for this test only.
+    server.use(
+      http.get('/api/events', ({ request }) => {
+        if (new URL(request.url).searchParams.get('event_type') === 'IncidentCreated') {
+          return new HttpResponse(null, { status: 500 });
+        }
+        return HttpResponse.json({ total: 0, events: [] });
+      }),
+    );
+
+    render(
+      <MemoryRouter>
+        <InboxList />
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('empty-state')).toBeTruthy();
+    });
+
+    expect(screen.getByRole('heading', { level: 2, name: 'No incidents' })).toBeTruthy();
+    expect(screen.queryAllByTestId('inbox-row').length).toBe(0);
+    expect(document.querySelector('.inbox-bulkbar')?.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('locale_bangla: setting body[data-locale=bn] before render leaves it set and renders rows', async () => {
+    document.body.dataset.locale = 'bn';
+    try {
+      await renderInboxAndWaitForRows();
+
+      expect(document.body.getAttribute('data-locale')).toBe('bn');
+      expect(screen.queryAllByTestId('inbox-row').length).toBeGreaterThan(0);
+    } finally {
+      delete document.body.dataset.locale;
+    }
+  });
+
+  it('severity_rail: with 1×T3, 1×T2, 1×T1 rows the rail reads T3=1, T2=1, T1=1, T0=0', async () => {
+    await renderInboxAndWaitForRows();
+    const sevCard = Array.from(document.querySelectorAll('.card')).find(
+      (c) => c.querySelector('.card-heading')?.textContent === 'Queue by severity',
+    );
+
+    expect(sevCard).toBeDefined();
+
+    const rows = Array.from(sevCard!.querySelectorAll('.hbar-row'));
+
+    expect(rows.length).toBe(4);
+    // Each Hbar: `<label> <track/> <value/total>`.
+    const summary = rows.map(
+      (r) =>
+        `${r.querySelector('.hbar-label')?.textContent} ${r.querySelector('.hbar-value')?.textContent}`,
+    );
+
+    expect(summary).toEqual([
+      'T3 urgent 1 / 3',
+      'T2 elevated 1 / 3',
+      'T1 review 1 / 3',
+      'T0 info 0 / 3',
+    ]);
+  });
+});
+
+/**
+ * D3 — source-assert `<InboxList />` is wired at `/inbox` in App.tsx.
+ */
+describe('InboxList /inbox route', () => {
+  it('App.tsx wires path="/inbox" + element={<InboxList />} within 3 lines', () => {
+    const appSrc = readFileSync(resolve(__dirname, '../App.tsx'), 'utf8');
+    const lines = appSrc.split(/\r?\n/);
+    const pathIdx = lines.findIndex((l) => l.includes('path="/inbox"'));
+
+    expect(pathIdx).toBeGreaterThan(-1);
+    // 3 lines of slack covers prettier wrap variants.
+    const window = lines.slice(pathIdx, pathIdx + 3).join('\n');
+
+    expect(window).toContain('element={<InboxList />}');
+  });
+});
+
+/**
+ * D4 — inbox.css stays token-only per dim 4 lockdown (no hex / rgb()).
+ */
+describe('InboxList CSS lockdown', () => {
+  it('inbox.css contains zero hex literals or rgb( calls', () => {
+    const css = readFileSync(resolve(__dirname, '../styles/inbox.css'), 'utf8');
+    const matches = css.match(/#[0-9a-fA-F]{3,8}|rgb\(/g);
+
+    expect(matches ?? []).toEqual([]);
   });
 });
