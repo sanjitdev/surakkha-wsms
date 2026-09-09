@@ -1,4 +1,13 @@
-import { type MutableRefObject, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import {
+  type MutableRefObject,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { DropdownOption } from './Dropdown.types';
 import type { TypeAheadBuffer } from './useDropdownKeyboard';
 
@@ -25,6 +34,10 @@ export interface DropdownState<T> {
   activeIndex: number;
   query: string;
   selectedSet: Set<T>;
+  /** Viewport-collision-driven placement for the popover. Defaults to
+   *  `'below'`; flips to `'above'` when there's not enough room below
+   *  the trigger for the 240px max-height popover + 16px margin. */
+  placement: 'below' | 'above';
   setQuery: (v: string) => void;
   setActiveIndex: import('./Dropdown.types').Setter<number>;
   setOpen: (b: boolean | ((prev: boolean) => boolean)) => void;
@@ -52,6 +65,10 @@ export function useDropdownState<T>({
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState('');
+  // Viewport-collision-driven popover placement. Flips to `'above'` when
+  // there's not enough room below the trigger. SSR-safe — defaults to
+  // `'below'` when measurement isn't possible.
+  const [placement, setPlacement] = useState<'below' | 'above'>('below');
 
   const selectedSet = useMemo(() => {
     if (isMulti) return new Set<T>((value as T[] | undefined) ?? []);
@@ -61,6 +78,27 @@ export function useDropdownState<T>({
   useEffect(() => {
     if (open && searchable) searchRef.current?.focus();
   }, [open, searchable]);
+
+  // B5a-1 — viewport-collision auto-flip. Runs synchronously before paint
+  // (useLayoutEffect) when the popover opens so the user never sees a
+  // one-frame flash in the wrong position. Flips the popover above the
+  // trigger when there's not enough room below for the 240px popover
+  // max-height + 16px safety margin. SSR-safe via `typeof window` guard;
+  // jsdom test-safe by mocking `window.innerHeight` + the trigger rect.
+  useLayoutEffect(() => {
+    if (!open) return;
+    if (typeof window === 'undefined') return;
+
+    const rect = triggerRef.current?.getBoundingClientRect();
+
+    if (!rect) return;
+    const POPOVER_MAX = 240;
+    const SAFETY_MARGIN = 16;
+
+    const wouldOverflow = rect.bottom + POPOVER_MAX + SAFETY_MARGIN > window.innerHeight;
+
+    setPlacement(wouldOverflow ? 'above' : 'below');
+  }, [open]);
 
   // Outside-click: close the popover when a mousedown lands outside the
   // root container. We listen on `mousedown` (not `click`) so the close
@@ -139,6 +177,7 @@ export function useDropdownState<T>({
     activeIndex,
     query,
     selectedSet,
+    placement,
     setQuery,
     setActiveIndex,
     setOpen,

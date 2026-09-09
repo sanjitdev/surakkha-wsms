@@ -17,6 +17,10 @@ interface DropdownPopoverProps<T> {
   selectedSet: Set<T>;
   commit: (opt: DropdownOption<T>) => void;
   testId: string;
+  /** Viewport-collision-driven placement. CSS keys off this attribute
+   *  (`[data-placement='above']`) to anchor the popover above the trigger
+   *  when there's not enough room below. */
+  placement: 'below' | 'above';
 }
 
 export function DropdownPopover<T>({
@@ -35,9 +39,10 @@ export function DropdownPopover<T>({
   selectedSet,
   commit,
   testId,
+  placement,
 }: DropdownPopoverProps<T>) {
   return (
-    <div className="dropdown__popover" data-testid={`${testId}-popover`}>
+    <div className="dropdown__popover" data-testid={`${testId}-popover`} data-placement={placement}>
       {searchable ? (
         <div className="dropdown__search">
           <input

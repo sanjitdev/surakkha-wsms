@@ -51,7 +51,7 @@ export function Dropdown<T>(props: DropdownProps<T>) {
     searchable,
     typeAheadBufferRef,
   });
-  const { rootId, listboxId, searchInputId, rootRef, triggerRef, searchRef, open, activeIndex, query, selectedSet, setQuery, setActiveIndex, setOpen, close, commit, removeChip } = state;
+  const { rootId, listboxId, searchInputId, rootRef, triggerRef, searchRef, open, activeIndex, query, selectedSet, placement, setQuery, setActiveIndex, setOpen, close, commit, removeChip } = state;
   const filtered = useFiltered(options, searchable, query);
 
   const onKeyDown = useDropdownKeyboard<T>({
@@ -139,6 +139,7 @@ export function Dropdown<T>(props: DropdownProps<T>) {
           selectedSet={selectedSet}
           commit={commit}
           testId={testId}
+          placement={placement}
         />
       ) : null}
     </div>
