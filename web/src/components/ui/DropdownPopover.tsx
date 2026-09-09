@@ -4,6 +4,7 @@ import type { KeyboardEvent, MutableRefObject } from 'react';
 interface DropdownPopoverProps<T> {
   rootId: string;
   listboxId: string;
+  searchInputId: string;
   searchable: boolean;
   query: string;
   setQuery: (v: string) => void;
@@ -21,6 +22,7 @@ interface DropdownPopoverProps<T> {
 export function DropdownPopover<T>({
   rootId,
   listboxId,
+  searchInputId,
   searchable,
   query,
   setQuery,
@@ -41,6 +43,7 @@ export function DropdownPopover<T>({
           <input
             ref={searchRef}
             type="text"
+            id={searchInputId}
             className="dropdown__search-input"
             placeholder="Type to filter…"
             value={query}

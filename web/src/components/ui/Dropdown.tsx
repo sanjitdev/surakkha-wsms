@@ -44,7 +44,7 @@ export function Dropdown<T>(props: DropdownProps<T>) {
     isMulti,
     searchable,
   });
-  const { rootId, listboxId, rootRef, triggerRef, searchRef, open, activeIndex, query, selectedSet, setQuery, setActiveIndex, setOpen, close, commit, removeChip } = state;
+  const { rootId, listboxId, searchInputId, rootRef, triggerRef, searchRef, open, activeIndex, query, selectedSet, setQuery, setActiveIndex, setOpen, close, commit, removeChip } = state;
   const filtered = useFiltered(options, searchable, query);
 
   const onKeyDown = useDropdownKeyboard<T>({
@@ -108,6 +108,8 @@ export function Dropdown<T>(props: DropdownProps<T>) {
         label={label}
         placeholder={placeholder}
         testId={testId}
+        searchable={searchable}
+        searchInputId={searchInputId}
         selectedLabel={selectedLabel}
         onKeyDown={onKeyDown}
         onToggle={onToggle}
@@ -116,6 +118,7 @@ export function Dropdown<T>(props: DropdownProps<T>) {
         <DropdownPopover
           rootId={rootId}
           listboxId={listboxId}
+          searchInputId={searchInputId}
           searchable={searchable}
           query={query}
           setQuery={setQuery}

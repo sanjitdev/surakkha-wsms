@@ -11,6 +11,10 @@ interface DropdownTriggerProps {
   label: string | undefined;
   placeholder: string;
   testId: string;
+  /** When true, `aria-controls` lists both the listbox and the search input. */
+  searchable?: boolean;
+  /** Id of the search input inside the popover; only consulted when `searchable` is true. */
+  searchInputId?: string;
   /** Label of the currently-selected option, or `undefined` for placeholder. */
   selectedLabel: string | undefined;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement | HTMLInputElement>) => void;
@@ -32,10 +36,17 @@ export function DropdownTrigger({
   label,
   placeholder,
   testId,
+  searchable,
+  searchInputId,
   selectedLabel,
   onKeyDown,
   onToggle,
 }: DropdownTriggerProps) {
+  // WAI-ARIA combobox pattern: when `searchable`, the trigger controls
+  // BOTH the listbox AND the search input. `aria-controls` accepts
+  // space-separated id tokens, so we concatenate both ids.
+  const controls = searchable && searchInputId ? `${listboxId} ${searchInputId}` : listboxId;
+
   return (
     <button
       id={`${rootId}-trigger`}
@@ -45,7 +56,7 @@ export function DropdownTrigger({
       className="dropdown__trigger"
       aria-haspopup="listbox"
       aria-expanded={open}
-      aria-controls={listboxId}
+      aria-controls={controls}
       aria-activedescendant={activeOptionId}
       aria-disabled={disabled}
       aria-label={label ?? placeholder}

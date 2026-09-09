@@ -11,6 +11,7 @@ interface UseDropdownStateArgs<T> {
 export interface DropdownState<T> {
   rootId: string;
   listboxId: string;
+  searchInputId: string;
   rootRef: MutableRefObject<HTMLDivElement | null>;
   triggerRef: MutableRefObject<HTMLButtonElement | null>;
   searchRef: MutableRefObject<HTMLInputElement | null>;
@@ -28,6 +29,7 @@ export interface DropdownState<T> {
 export function useDropdownState<T>({ value, onChange, isMulti, searchable }: UseDropdownStateArgs<T>): DropdownState<T> {
   const rootId = useId();
   const listboxId = `${rootId}-listbox`;
+  const searchInputId = `${rootId}-search`;
   const rootRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -62,6 +64,7 @@ export function useDropdownState<T>({ value, onChange, isMulti, searchable }: Us
         setOpen(false);
         setActiveIndex(-1);
         setQuery('');
+        queueMicrotask(() => triggerRef.current?.focus());
       }
     };
 
@@ -107,6 +110,7 @@ export function useDropdownState<T>({ value, onChange, isMulti, searchable }: Us
   return {
     rootId,
     listboxId,
+    searchInputId,
     rootRef,
     triggerRef,
     searchRef,
