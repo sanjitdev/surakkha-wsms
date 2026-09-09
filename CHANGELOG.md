@@ -26,11 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **FE-1.5b review-loop D1:** `InboxList.tsx` — removed the duplicate `<span className="inbox-bulkbar__count">` copy-paste leftover from the FE-1.5b ship (lines 294-296 rendered the same `<strong>{selectedRows.size}</strong> selected` twice). The new `fe-1-5b-inboxlist.test.tsx` structural assertion `expect(bulkbar?.querySelectorAll('strong').length).toBe(1)` locks this fix.
+
 - **FE-1.5:** AuditLog / InboxDetail — the `ChainEvent.actor_identity` field is a `{kind, ref, display}` object (per dim 7 §2.5), not a string. Both pages now render `actor_identity?.display ?? '—'` instead of crashing with "Objects are not valid as a React child".
 
 ### Tests
 
 - **FE-1.5:** E2E suite now 32 specs (23 functional + 9 visual). New: 4 functional specs in `e2e/auth-routes.spec.ts` confirming each new Priya route renders its real page (not a `ComingSoonPage` stub) with the expected testid surface + the shared `AppLayout` chrome wrapping it exactly once. Settings spec also exercises the locale toggle (clicks `settings-locale-bn`, waits for `body[data-locale="bn"]`). New: 4 visual snapshots in `e2e/visual.spec.ts` for inbox-detail, verify-flow-step1, audit-log, settings (committed under `web/e2e/visual.spec.ts-snapshots/`).
+- **FE-1.5b review-loop D1:** InboxList bulk-bar coverage — `web/src/__checks__/fe-1-5b-inboxlist.test.tsx` ships 2 Vitest cases locking the bulk-bar's `hidden={selectedRows.size === 0}` lifecycle, the per-row toggle on/off, the select-all on/off, and a structural assertion that the bulk-bar renders exactly one `<strong>` count cell (catches the duplicate-`<span>` copy-paste leftover from FE-1.5b). Uses `msw/node` `setupServer` with a narrow handler override that returns 3 hardcoded `IncidentCreated` events for the inbox-rows fetch and empty arrays for the 4 recent-decisions fetches (no IndexedDB seeding required in jsdom). Vitest suite now 51 cases (was 49). Follow-up spec ships D2–D4 (I/O matrix, `/inbox` route assertion, CSS lockdown verification).
 
 ### Changed
 

@@ -1,0 +1,253 @@
+/**
+ * FE-1.5b review-loop D1 — InboxList bulk-bar state coverage.
+ *
+ * Locks the bulk-bar's `hidden={selectedRows.size === 0}` lifecycle and
+ * the per-row + select-all toggle semantics. FE-1.5b shipped with these
+ * untested (review-loop-1 change log D1); this file covers them so a
+ * future refactor cannot silently regress either.
+ *
+ * Why this file overrides the /api/events handler instead of seeding
+ * IndexedDB: vitest's jsdom env has no fake-indexeddb polyfill, so the
+ * real handler's `await getAllBlocks()` resolves to an empty array in
+ * tests, and the page renders the `<EmptyState>` instead of rows. The
+ * override returns 3 hardcoded `IncidentCreated` events with the
+ * minimal inbox-payload shape the page's `buildRows` parser consumes —
+ * enough rows to exercise bulk-bar selection and select-all without
+ * dragging in the full 7-row fixture set.
+ *
+ * D2 (I/O matrix), D3 (route assertion), D4 (CSS verification) ship as
+ * a follow-up spec; this file will gain more `describe` groups then.
+ */
+
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { HttpResponse, http } from 'msw';
+import { setupServer } from 'msw/node';
+import { InboxList } from '../pages/InboxList';
+import { handlers } from '../mocks/handlers';
+
+const server = setupServer(...handlers);
+
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'warn' });
+});
+
+afterAll(() => {
+  server.close();
+});
+
+beforeEach(() => {
+  server.resetHandlers(...handlers);
+});
+
+afterEach(() => {
+  cleanup();
+});
+
+/**
+ * Three minimal `IncidentCreated` events covering the inbox.payload shape
+ * the page's `buildRows` parser reads. Keeps the test independent of the
+ * 7-row fixture set so a refactor to the seeded data won't break this
+ * coverage.
+ */
+const ROWS = [
+  {
+    event_id: 'evt_test_001',
+    event_type: 'IncidentCreated',
+    occurred_at: '2026-09-08T10:00:00.000Z',
+    ingested_at: '2026-09-08T10:00:01.000Z',
+    actor_identity: { kind: 'priya', ref: 'priya-001', display: 'Priya' },
+    payload: {
+      incident_id: 'inc_test_001',
+      severity: 'high',
+      ward_id: 'ward-dhanmondi',
+      inbox: {
+        owner_kind: 'priya',
+        owner_display: 'Priya',
+        status: 'awaiting_ack',
+        href: '/inbox/inc_test_001',
+        title: 'Ward 7 chlorination spike',
+        summary: 'citizen-ack request sent · Anjali (reporter) · SN-2208 silent 8 min',
+        isUrgent: true,
+        isDraft: false,
+        isCitizen: false,
+        isAwaitingSig: true,
+        read: false,
+      },
+    },
+    block_hash: 'hash_001',
+    height: 1,
+  },
+  {
+    event_id: 'evt_test_002',
+    event_type: 'IncidentCreated',
+    occurred_at: '2026-09-08T10:05:00.000Z',
+    ingested_at: '2026-09-08T10:05:01.000Z',
+    actor_identity: { kind: 'priya', ref: 'priya-001', display: 'Priya' },
+    payload: {
+      incident_id: 'inc_test_002',
+      severity: 'medium',
+      ward_id: 'ward-mohammadpur',
+      inbox: {
+        owner_kind: 'priya',
+        owner_display: 'Priya',
+        status: 'awaiting_sig',
+        href: '/inbox/inc_test_002',
+        title: 'Ward 5 lead-leach watch',
+        summary: 'SN-3301 above advisory · pending counter-sign',
+        isUrgent: false,
+        isDraft: false,
+        isCitizen: false,
+        isAwaitingSig: true,
+        read: false,
+      },
+    },
+    block_hash: 'hash_002',
+    height: 2,
+  },
+  {
+    event_id: 'evt_test_003',
+    event_type: 'IncidentCreated',
+    occurred_at: '2026-09-08T10:10:00.000Z',
+    ingested_at: '2026-09-08T10:10:01.000Z',
+    actor_identity: { kind: 'citizen', ref: 'citizen-007', display: 'Anjali' },
+    payload: {
+      incident_id: 'inc_test_003',
+      severity: 'low',
+      ward_id: 'ward-mirpur',
+      inbox: {
+        owner_kind: 'citizen',
+        owner_display: 'Anjali',
+        status: 'citizen_report',
+        href: '/inbox/inc_test_003',
+        title: 'Citizen report — discoloured water',
+        summary: 'Reported by Anjali (citizen) · 2 photos attached',
+        isUrgent: false,
+        isDraft: false,
+        isCitizen: true,
+        isAwaitingSig: false,
+        read: false,
+      },
+    },
+    block_hash: 'hash_003',
+    height: 3,
+  },
+];
+
+function overrideEventsHandler() {
+  // Only intercept /api/events?event_type=IncidentCreated (the page's main
+  // inbox-rows fetch). The page also fires 4 parallel recent-decisions
+  // fetches (PublicNoticeIssued, IncidentEscalated, CouncillorEndorsement-
+  // Recorded, SignatureAttestation); for those we return an explicit empty
+  // array so the recent-decisions rail renders the "No decisions yet"
+  // placeholder instead of mirroring IncidentCreated rows. Returning
+  // `passthrough()` here would surface a noisy `ECONNREFUSED` stderr
+  // because there's no dev server in the test env.
+  server.use(
+    http.get('/api/events', ({ request }) => {
+      const eventType = new URL(request.url).searchParams.get('event_type');
+
+      if (eventType === 'IncidentCreated') {
+        return HttpResponse.json({ total: ROWS.length, events: ROWS });
+      }
+      return HttpResponse.json({ total: 0, events: [] });
+    }),
+  );
+}
+
+/**
+ * Render InboxList inside MemoryRouter with the /api/events handler
+ * overridden to return 3 hardcoded rows. Waits for the rows to mount
+ * before returning so the caller can assert on them directly.
+ */
+async function renderInboxAndWaitForRows() {
+  overrideEventsHandler();
+  render(
+    <MemoryRouter>
+      <InboxList />
+    </MemoryRouter>,
+  );
+  await waitFor(() => {
+    expect(screen.queryAllByTestId('inbox-row').length).toBeGreaterThan(0);
+  });
+}
+
+describe('InboxList bulk-bar', () => {
+  it('hides the bulk-bar by default, shows <strong>1</strong> after one row check, hides again on second click', async () => {
+    await renderInboxAndWaitForRows();
+
+    const bulkbar = document.querySelector('.inbox-bulkbar');
+
+    expect(bulkbar).not.toBeNull();
+    // Defensive: the bulk-bar renders exactly one `<strong>` count cell.
+    // FE-1.5b shipped with a duplicate `<span className="inbox-bulkbar__count">`
+    // (copy-paste leftover) — fixed in this same patch. If a future refactor
+    // re-introduces the duplicate, the count text would still render but
+    // `querySelectorAll('strong').length` would jump to 2.
+    expect(bulkbar?.querySelectorAll('strong').length).toBe(1);
+    // Initially hidden — no rows selected.
+    expect(bulkbar?.hasAttribute('hidden')).toBe(true);
+
+    const firstRowCheck = screen.getAllByTestId(/^inbox-row-check-/).at(0);
+
+    expect(firstRowCheck).toBeDefined();
+    act(() => {
+      fireEvent.click(firstRowCheck!);
+    });
+    expect(bulkbar?.hasAttribute('hidden')).toBe(false);
+    expect(bulkbar?.querySelector('strong')?.textContent).toBe('1');
+    expect(bulkbar?.textContent).toContain('selected');
+
+    // Click the same checkbox again — toggle off, bulk-bar hides.
+    act(() => {
+      fireEvent.click(firstRowCheck!);
+    });
+    expect(bulkbar?.hasAttribute('hidden')).toBe(true);
+  });
+
+  it('select-all toggles every visible row on click, deselects them on a second click', async () => {
+    await renderInboxAndWaitForRows();
+
+    const selectAll: HTMLInputElement = screen.getByRole('checkbox', { name: 'Select all' });
+
+    expect(selectAll.checked).toBe(false);
+
+    // First click — select-all: every visible row gets is-selected, bulk-bar
+    // becomes visible with the row count, and the select-all checkbox flips
+    // to checked. Locks the `else visibleRows.forEach((r) => next.add(r.id))`
+    // branch in `InboxList.tsx:117`.
+    act(() => {
+      fireEvent.click(selectAll);
+    });
+
+    const visibleRows = screen.queryAllByTestId('inbox-row');
+
+    expect(visibleRows.length).toBeGreaterThan(0);
+    visibleRows.forEach((row) => {
+      expect(row.classList.contains('is-selected')).toBe(true);
+    });
+
+    const bulkbar = document.querySelector('.inbox-bulkbar');
+
+    expect(bulkbar?.hasAttribute('hidden')).toBe(false);
+    expect(bulkbar?.querySelector('strong')?.textContent).toBe(String(visibleRows.length));
+    expect(selectAll.checked).toBe(true);
+
+    // Second click — deselect-all: every row loses is-selected, bulk-bar
+    // hides, and the select-all checkbox returns to unchecked. Locks the
+    // `if (allSelected) visibleRows.forEach((r) => next.delete(r.id))`
+    // branch in `InboxList.tsx:117`. Without this assertion a regression
+    // that removed the deselect branch would silently pass the first
+    // half of this test (Set semantics make the missing delete a no-op).
+    act(() => {
+      fireEvent.click(selectAll);
+    });
+
+    visibleRows.forEach((row) => {
+      expect(row.classList.contains('is-selected')).toBe(false);
+    });
+    expect(bulkbar?.hasAttribute('hidden')).toBe(true);
+    expect(selectAll.checked).toBe(false);
+  });
+});

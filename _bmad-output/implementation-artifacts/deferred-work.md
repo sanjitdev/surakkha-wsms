@@ -66,3 +66,7 @@
 - source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-5b-inbox-list.md`
   summary: FE-1.5b review-loop-1 — sweep inbox.css for stray CSS literals (`#fff`, `#0E1013`) and replace with `var(--*)` tokens. Lock the file to the dim 1 token surface.
   evidence: inbox.css was written to compose primitives but slipped two hex literals; reviewers flagged them. The dim 4 lockdown requires every visual value to be a `var(--*)` reference. A dedicated CSS lockdown pass is the right home for this.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-5b-review-loop-followups.md`
+  summary: FE-1.5b review-loop D2/D3/D4 follow-up — append I/O matrix integration tests (5 cases), `/inbox` route source-assertion (1 case), and CSS literal lockdown verification to `web/src/__checks__/fe-1-5b-inboxlist.test.tsx`. Also append the matching CHANGELOG `### Tests` + `### Changed`/`Fixed` bullets. Bundle target: ~1,400 tokens.
+  evidence: User chose to split the over-ceiling FE-1.5b review-loop follow-ups spec (1,700–2,100 tokens) into 2 specs at the 1,600-token ceiling gate. This spec ships D1 (bulk-bar, ~80 lines, 2 cases) alone; the remaining D2 (I/O matrix), D3 (route assertion), and D4 (CSS literal verification) ship as a follow-up so each spec stays ≤1,600 tokens. D2/D3/D4 are independently shippable and the file split is deferred to that follow-up.

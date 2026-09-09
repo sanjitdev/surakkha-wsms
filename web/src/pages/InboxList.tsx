@@ -291,9 +291,6 @@ export function InboxList() {
               <span className="inbox-bulkbar__count">
                 <strong>{selectedRows.size}</strong> selected
               </span>
-              <span className="inbox-bulkbar__count">
-                <strong>{selectedRows.size}</strong> selected
-              </span>
               <div className="inbox-bulkbar__actions">
                 <Button variant="secondary" size="sm" disabled>
                   Assign to me
