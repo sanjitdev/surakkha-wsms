@@ -1,5 +1,6 @@
 import { type MutableRefObject, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { DropdownOption } from './Dropdown.types';
+import type { TypeAheadBuffer } from './useDropdownKeyboard';
 
 interface UseDropdownStateArgs<T> {
   options: DropdownOption<T>[];
@@ -7,6 +8,11 @@ interface UseDropdownStateArgs<T> {
   onChange: (v: T | T[] | null) => void;
   isMulti: boolean;
   searchable: boolean;
+  /** Optional ref shared with `useDropdownKeyboard`. On close +
+   *  outside-click, the buffer is nulled so the next type-ahead opens
+   *  at the first match of a fresh prefix instead of continuing the
+   *  previous cycle. */
+  typeAheadBufferRef?: MutableRefObject<TypeAheadBuffer>;
 }
 export interface DropdownState<T> {
   rootId: string;
@@ -26,7 +32,13 @@ export interface DropdownState<T> {
   commit: (opt: DropdownOption<T>) => void;
   removeChip: (chipValue: T) => void;
 }
-export function useDropdownState<T>({ value, onChange, isMulti, searchable }: UseDropdownStateArgs<T>): DropdownState<T> {
+export function useDropdownState<T>({
+  value,
+  onChange,
+  isMulti,
+  searchable,
+  typeAheadBufferRef,
+}: UseDropdownStateArgs<T>): DropdownState<T> {
   const rootId = useId();
   const listboxId = `${rootId}-listbox`;
   const searchInputId = `${rootId}-search`;
@@ -54,6 +66,13 @@ export function useDropdownState<T>({ value, onChange, isMulti, searchable }: Us
   // root container. We listen on `mousedown` (not `click`) so the close
   // happens before any subsequent `click` on the outside element. SSR-safe
   // via the `typeof document` guard.
+  const clearTypeAheadBuffer = useCallback(() => {
+    if (typeAheadBufferRef) {
+      // eslint-disable-next-line no-param-reassign
+      typeAheadBufferRef.current.buffer = null;
+    }
+  }, [typeAheadBufferRef]);
+
   useEffect(() => {
     if (!open || typeof document === 'undefined') return undefined;
     const handler = (ev: MouseEvent) => {
@@ -65,6 +84,7 @@ export function useDropdownState<T>({ value, onChange, isMulti, searchable }: Us
         setActiveIndex(-1);
         setQuery('');
         queueMicrotask(() => triggerRef.current?.focus());
+        clearTypeAheadBuffer();
       }
     };
 
@@ -72,14 +92,15 @@ export function useDropdownState<T>({ value, onChange, isMulti, searchable }: Us
     return () => {
       document.removeEventListener('mousedown', handler);
     };
-  }, [open]);
+  }, [clearTypeAheadBuffer, open]);
 
   const close = useCallback((restoreFocus: boolean) => {
     setOpen(false);
     setActiveIndex(-1);
     setQuery('');
     if (restoreFocus) queueMicrotask(() => triggerRef.current?.focus());
-  }, []);
+    clearTypeAheadBuffer();
+  }, [clearTypeAheadBuffer]);
   const commit = useCallback(
     (opt: DropdownOption<T>) => {
       if (opt.disabled) return;

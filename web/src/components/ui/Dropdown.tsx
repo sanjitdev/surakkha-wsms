@@ -9,7 +9,8 @@
  * to keep each file ≤ 200 lines (AD-FE-5 ceiling).
  */
 import '../../styles/dropdown.css';
-import { useDropdownKeyboard } from './useDropdownKeyboard';
+import { useRef } from 'react';
+import { type TypeAheadBuffer, useDropdownKeyboard } from './useDropdownKeyboard';
 import { useDropdownState } from './useDropdownState';
 import { DropdownChips, DropdownTrigger } from './DropdownTrigger';
 import { DropdownPopover } from './DropdownPopover';
@@ -37,12 +38,18 @@ export function Dropdown<T>(props: DropdownProps<T>) {
   const value = props.value;
   const onChange = props.onChange;
 
+  // Shared 1-char type-ahead buffer. The keyboard hook reads/writes it;
+  // the state hook nulls it on close + outside-click so the next
+  // type-ahead opens at the first match of a fresh prefix.
+  const typeAheadBufferRef = useRef<TypeAheadBuffer>({ buffer: null });
+
   const state = useDropdownState<T>({
     options,
     value,
     onChange: onChange as (v: T | T[] | null) => void,
     isMulti,
     searchable,
+    typeAheadBufferRef,
   });
   const { rootId, listboxId, searchInputId, rootRef, triggerRef, searchRef, open, activeIndex, query, selectedSet, setQuery, setActiveIndex, setOpen, close, commit, removeChip } = state;
   const filtered = useFiltered(options, searchable, query);
@@ -57,6 +64,7 @@ export function Dropdown<T>(props: DropdownProps<T>) {
     disabled,
     commit,
     close,
+    typeAheadBufferRef,
   });
 
   const activeOptionId =

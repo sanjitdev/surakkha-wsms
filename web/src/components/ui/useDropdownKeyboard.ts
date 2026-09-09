@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useCallback } from 'react';
+import { type KeyboardEvent, type MutableRefObject, useCallback } from 'react';
 import type { DropdownOption } from './Dropdown.types';
 
 
@@ -10,15 +10,32 @@ import type { DropdownOption } from './Dropdown.types';
  *   - Home/End: jump to first/last option (open popover only).
  *   - Enter: select the active option (open popover only).
  *   - Escape: close the popover and restore focus to the trigger.
- *   - Type-ahead (single printable char): open the popover and jump to the
- *     first option whose label starts with the typed character (case-
- *     insensitive).
+ *   - Type-ahead (single printable char): cycle within the prefix-match
+ *     group. A short buffer tracks the last typed letters within the
+ *     popover session. Repeating the buffer's last letter cycles within
+ *     the prefix group (wrapping at the end); pressing a different
+ *     letter extends the prefix. Disabled options are skipped. Matches
+ *     the W3C ARIA combobox example for same-letter match groups.
+ *
+ * The type-ahead buffer is owned by the composition root (`Dropdown.tsx`)
+ * and shared with the state hook via a `typeAheadBufferRef`; the state
+ * hook nulls the buffer on close + outside-click so the next type-ahead
+ * opens at the first match of a fresh prefix instead of continuing the
+ * previous cycle.
  *
  * The handler is intentionally tolerant of being attached to either the
  * trigger `<button>` or the search `<input>` inside the popover — when the
  * search input owns typing, the per-char type-ahead branch is harmless
  * because the search `<input>` re-renders on each keystroke.
  */
+
+/** Shared type-ahead buffer cell. Lives in a ref so the keyboard hook
+ *  and the state hook can both read/write without re-rendering. */
+export interface TypeAheadBuffer {
+  /** The cumulative prefix typed so far within the popover session
+   *  (lowercase). Null when the buffer is empty. */
+  buffer: string | null;
+}
 export interface DropdownKeyboardState<T> {
   open: boolean;
   activeIndex: number;
@@ -29,26 +46,82 @@ export interface DropdownKeyboardState<T> {
   disabled: boolean;
   commit: (opt: DropdownOption<T>) => void;
   close: (restoreFocus: boolean) => void;
+  /** Stable ref shared with `useDropdownState`; mutated on close + Escape
+   *  to clear the type-ahead buffer. */
+  typeAheadBufferRef: MutableRefObject<TypeAheadBuffer>;
 }
 export function useDropdownKeyboard<T>(state: DropdownKeyboardState<T>) {
-  const { open, activeIndex, setOpen, setActiveIndex, filtered, options, disabled, commit, close } = state;
+  const { open, activeIndex, setOpen, setActiveIndex, filtered, options, disabled, commit, close, typeAheadBufferRef } = state;
 
   return useCallback(
     (e: KeyboardEvent<HTMLButtonElement | HTMLInputElement>) => {
       if (disabled) return;
       const max = filtered.length;
 
-      if (!open && e.key.length === 1 && /[\p{L}\p{N}]/u.test(e.key)) {
-        const idx = options.findIndex(
-          (o) => !o.disabled && o.label.toLowerCase().startsWith(e.key.toLowerCase()),
-        );
+      // Type-ahead — applies to BOTH closed and open popovers. The
+      // regex guard stays: only letter/number chars trigger.
+      if (e.key.length === 1 && /[\p{L}\p{N}]/u.test(e.key)) {
+        const typed = e.key.toLowerCase();
+        const prev = typeAheadBufferRef.current.buffer;
+        // Determine the prefix used for matching:
+        //   - First letter (prev === null): prefix is `typed`.
+        //   - Same letter as the buffer's last char: prefix is `prev`
+        //     (the user is cycling within the existing group).
+        //   - Different letter: extend the prefix to `prev + typed`
+        //     (multi-char match, e.g. "a" + "p" → "ap").
+        let prefix: string;
+        let isRepeatSameLast: boolean;
 
-        if (idx >= 0) {
-          setOpen(true);
-          setActiveIndex(idx);
+        if (prev === null) {
+          prefix = typed;
+          isRepeatSameLast = false;
+        } else if (prev.charAt(prev.length - 1) === typed) {
+          prefix = prev;
+          isRepeatSameLast = true;
+        } else {
+          prefix = prev + typed;
+          isRepeatSameLast = false;
+        }
+        const matches: number[] = [];
+
+        for (let i = 0; i < filtered.length; i += 1) {
+          const o = filtered[i];
+
+          if (!o.disabled && o.label.toLowerCase().startsWith(prefix)) {
+            matches.push(i);
+          }
+        }
+        if (matches.length > 0) {
           e.preventDefault();
+          const currentMatchIdx = matches.indexOf(activeIndex);
+
+          let nextIdx: number;
+
+          if (!open) {
+            // Closed popover: open + jump to first match of the prefix.
+            nextIdx = matches[0];
+            setOpen(true);
+          } else if (isRepeatSameLast) {
+            // Already open + same letter as the buffer's last char:
+            // cycle within the prefix group, wrapping at the end.
+            const from = currentMatchIdx >= 0 ? currentMatchIdx : -1;
+
+            nextIdx = matches[(from + 1) % matches.length];
+          } else {
+            // Already open + extended/new prefix: jump to the next
+            // match past the current activeIndex if it's still in
+            // the matches list (multi-char type-ahead continuation);
+            // otherwise land on the first match of the new prefix.
+            nextIdx = currentMatchIdx >= 0 ? matches[(currentMatchIdx + 1) % matches.length] : matches[0];
+          }
+          typeAheadBufferRef.current.buffer = prefix;
+          setActiveIndex(nextIdx);
           return;
         }
+        // No matches: buffer is unchanged; popover state is unchanged
+        // (closed stays closed; open stays open). Resetting the buffer
+        // here would cause type-ahead to "lose" previous prefix chars
+        // after a missed keystroke — don't.
       }
       /** Returns the next non-disabled option index (wraps in `dir`=+1/-1).
        *  If every option is disabled, returns `null` and the caller should
@@ -146,6 +219,6 @@ export function useDropdownKeyboard<T>(state: DropdownKeyboardState<T>) {
         default:
       }
     },
-    [activeIndex, close, commit, disabled, filtered, open, options, setActiveIndex, setOpen],
+    [activeIndex, close, commit, disabled, filtered, open, options, setActiveIndex, setOpen, typeAheadBufferRef],
   );
 }
