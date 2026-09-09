@@ -15,8 +15,8 @@
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   transition:
-    background-color 120ms ease-out,
-    border-color 120ms ease-out;
+    background-color var(--motion-press-120) var(--ease-out),
+    border-color var(--motion-press-120) var(--ease-out);
   cursor: pointer;
 }
 

@@ -44,7 +44,7 @@
   border-radius: var(--radius-pill, 999px);
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
-  color: #fff;
+  color: var(--fg-on-status-light);
   margin-right: var(--space-sm);
   flex-shrink: 0;
 }
@@ -62,28 +62,28 @@
 }
 .badge--t3 {
   background: var(--danger);
-  color: #fff;
+  color: var(--fg-on-status-light);
 }
 .badge--t2 {
   background: var(--warning);
-  color: #0e1013;
+  color: var(--fg-on-status-dark);
 }
 .badge--t1 {
   background: var(--info);
-  color: #fff;
+  color: var(--fg-on-status-light);
 }
 .badge--t0 {
   background: var(--band-medium);
-  color: #0e1013;
+  color: var(--fg-on-status-dark);
 }
 [data-theme='dark'] .badge--t3 {
-  color: #0e1013;
+  color: var(--fg-on-status-dark);
 }
 [data-theme='dark'] .badge--t2 {
-  color: #0e1013;
+  color: var(--fg-on-status-dark);
 }
 [data-theme='dark'] .badge--t0 {
-  color: #0e1013;
+  color: var(--fg-on-status-dark);
 }
 
 /* ── bulk-bar count — strong element inside .inbox-bulkbar__count uses

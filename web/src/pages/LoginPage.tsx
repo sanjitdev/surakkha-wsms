@@ -133,6 +133,7 @@ export function LoginPage() {
                   ? 'picker-status--error'
                   : 'picker-status--pending'
             }`}
+            data-testid="picker-status"
           >
             <span className="picker-status__dot" aria-hidden="true"></span>
             {status === 'ready'

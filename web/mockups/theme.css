@@ -42,6 +42,28 @@
   --band-medium:    #8A8E94;
   --band-low:       #5A5C60;
 
+  /* Foreground for use on top of saturated brand / status backgrounds.
+     Dark text on light status fills (badge--t2, badge--t0 in dark mode
+     swap to dark text per the Inbox row severity contract — see
+     inbox.css §badge variants). White text on danger / info fills and
+     on the brand panel. */
+  --fg-on-status-light: #FFFFFF;
+  --fg-on-status-dark:  #0E1013;
+
+  /* Foreground for use on --brand-600 (the brand-panel background).
+     Off-white in dark mode where the panel reads against --brand-600;
+     near-white in light mode where the panel reads against brand-600.
+     Pure white is reserved for the hero title which sits on the dark
+     gradient overlay in dark mode. */
+  --brand-on-color:        #F5F7FA;
+  --brand-on-color-strong: #FFFFFF;
+
+  /* Deep navy gradient stops used in the brand panel's dark-theme
+     background. The brand-panel sits on --brand-600 in light mode and
+     on this gradient in dark mode (see app.css §brand-panel). */
+  --brand-gradient-dark-from: #0B1A2A;
+  --brand-gradient-dark-to:   #0F2236;
+
   --shadow-modal:   0 4px 12px rgba(0,0,0,0.32);
   color-scheme: dark;
 }
@@ -136,6 +158,24 @@
 
   --height-row-default:     40px;
   --height-row-comfortable: 56px;
+}
+
+/* ── Motion tokens (dim 8) ──────────────────────────────────────────
+   Theme-invariant — motion does not change with light/dark. The three
+   durations cover every transition we currently use (button press,
+   persona/tab selection, hover state). The remaining 12 dim 8 tokens
+   (modal, toast, chart, shake, etc.) ship with their first consumer
+   in a later story — this is the foundation, not the full set. */
+:root {
+  --motion-press-120:    120ms;
+  --motion-tab-switch:   160ms;
+  --motion-pane-in:      200ms;
+
+  /* Easings — state-gain (ease-out), state-loss (ease-in),
+     symmetric (ease-in-out). */
+  --ease-out:    cubic-bezier(0.2, 0.8, 0.4, 1);
+  --ease-in:     cubic-bezier(0.6, 0, 0.8, 0.2);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 /* ── Base resets ─────────────────────────────────────────────────── */

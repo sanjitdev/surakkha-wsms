@@ -154,6 +154,22 @@ other — status badges need contrast.
 | `--height-row-default`     | `40px` | Dense tables (audit log) |
 | `--height-row-comfortable` | `56px` | Inbox rows, KPI tiles    |
 
+## Foreground on saturated backgrounds (B5.1)
+
+Foreground tokens for use on top of `--danger` / `--info` / `--warning`
+/ `--band-medium` fills (severity badges) and on `--brand-600` /
+brand-panel gradient (login splash). Theme-invariant — these are
+contrast colors, not theme colors.
+
+| Token                        | Value     | Use                                                  |
+| ---------------------------- | --------- | ---------------------------------------------------- |
+| `--fg-on-status-light`       | `#FFFFFF` | White text on red/blue severity fills                |
+| `--fg-on-status-dark`        | `#0E1013` | Dark text on yellow/gray severity fills              |
+| `--brand-on-color`           | `#F5F7FA` | Off-white on the brand panel (mark glyph, live text) |
+| `--brand-on-color-strong`    | `#FFFFFF` | Pure white for the hero title over dark gradient     |
+| `--brand-gradient-dark-from` | `#0B1A2A` | Brand panel dark gradient — top stop                 |
+| `--brand-gradient-dark-to`   | `#0F2236` | Brand panel dark gradient — bottom stop              |
+
 ## Container widths (dim 5 §3)
 
 These are NOT CSS custom properties — they're hard-coded in `.container--*`
@@ -165,13 +181,24 @@ class definitions in `theme.css`. Three breakpoints:
 | `.container--bangla` | `1080px`  | Anjali submission (BN: longer words) |
 | `.container--wide`   | `1280px`  | Operator dashboard, inbox            |
 
-## Motion (locked in dim 8; not tokenized)
+## Motion (dim 8)
 
-Motion is locked in `dim-8-motion.md` and currently uses inline `transition`
-properties in component CSS (e.g. `transition: background-color 120ms ease-out`).
-A motion token (`--motion-duration-fast` etc.) is in the ADR backlog but
-NOT yet implemented — when it lands, all transition values get tokenized
-in a single pass and this README is updated.
+Theme-invariant. Defined in `mockups/theme.css` under a dedicated
+`--motion-*` / `--ease-*` section.
+
+| Token                 | Value                            | Use                          |
+| --------------------- | -------------------------------- | ---------------------------- |
+| `--motion-press-120`  | `120ms`                          | Button press, persona border |
+| `--motion-tab-switch` | `160ms`                          | Persona / nav-link hover     |
+| `--motion-pane-in`    | `200ms`                          | Pane slide-in (future)       |
+| `--ease-out`          | `cubic-bezier(0.2, 0.8, 0.4, 1)` | State-gain (default)         |
+| `--ease-in`           | `cubic-bezier(0.6, 0, 0.8, 0.2)` | State-loss                   |
+| `--ease-in-out`       | `cubic-bezier(0.4, 0, 0.6, 1)`   | Symmetric change             |
+
+The remaining 12 dim 8 tokens (modal-in, toast-pane-in, chart-new-point,
+shake-300, etc.) ship with their first consumer — adding them now without
+a use site is dead weight. See `_bmad-output/design/08-motion-lockdown.md`
+for the full enumeration.
 
 ## What is NOT a token (deferred)
 
@@ -189,7 +216,36 @@ zero literals outside `theme.css`.
   `--width-sidebar`.
 - **Icon sizes** — `16px` / `20px` / `24px` hardcoded throughout
   components. Could be `--icon-size-{sm,md,lg}`.
-- **Transition durations** — see Motion above.
+- **SSE pulse `1600ms`** — login brand-panel pulse animation. Should
+  become `--motion-pulse-1600` (or similar) when the motion section
+  gets its full 14-token implementation.
+- **`1.875rem` font-size** — `.brand-panel__title` hero text. Could
+  become `--font-size-hero`.
+
+## Visual regression (B5.2)
+
+`web/e2e/visual.spec.ts` ships 5 `toHaveScreenshot()` specs covering
+the 3 real surfaces × the 3 theme/locale combinations that matter:
+
+| Surface       | Theme | Locale | Snapshot                    |
+| ------------- | ----- | ------ | --------------------------- |
+| Login picker  | dark  | en     | `login-picker-dark-en.png`  |
+| Login picker  | dark  | bn     | `login-picker-dark-bn.png`  |
+| Login picker  | light | en     | `login-picker-light-en.png` |
+| Inbox (Priya) | dark  | en     | `inbox-priya-dark-en.png`   |
+| Field (Karim) | dark  | en     | `field-karim-dark-en.png`   |
+
+Strict matching (`maxDiffPixelRatio: 0.005` — ~0.5% tolerance for
+sub-pixel anti-aliasing drift) on a 1280×800 viewport, with the chain
+freshness number + toast region masked (time-varying). Animations
+disabled globally so the SSE pulse dot doesn't drift frame-by-frame.
+
+To update snapshots after an intentional visual change:
+
+```sh
+pnpm exec playwright test e2e/visual.spec.ts --update-snapshots
+git add web/e2e/visual.spec.ts-snapshots/
+```
 
 ## Verification
 
@@ -201,13 +257,19 @@ When adding a new component:
    `--token-name` in `theme.css`, then reference it from your component.
    The new token should belong to an existing dim (1-8); if it doesn't,
    that's a dim extension, not a new addition.
-3. **Run `pnpm lint`.** The CSS-variable-name lint rule (when added)
-   will catch component CSS that uses literals.
-4. **Snapshot test** (B5, deferred) will diff the rendered DOM against
-   the previous approved baseline.
+3. **Run `pnpm lint`.** Pre-commit hook runs `eslint --fix` on the
+   changed files; CI runs the full `pnpm lint` (0 errors required).
+4. **Run `pnpm test:e2e`** — Vitest covers primitives, Playwright
+   covers full routes, and visual.spec covers the 3 ship-ready
+   surfaces.
 
 When reviewing a PR:
 
 - Any literal `#hex`, `px` value, or `font-size` in component CSS
   requires a justification ("this is the only place we use this value"
   is acceptable; "I forgot" is not).
+- Any change to `theme.css` requires a CHANGELOG entry — the token
+  surface is the application contract, and every token has a name
+  that's reviewed here.
+- Any change that touches the login picker, inbox, or field surfaces
+  requires a visual snapshot update via `--update-snapshots`.

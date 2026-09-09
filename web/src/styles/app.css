@@ -26,7 +26,7 @@
 /* ── Brand panel (left half) ─────────────────────────────────── */
 .brand-panel {
   background: var(--brand-600);
-  color: #f5f7fa;
+  color: var(--brand-on-color);
   padding: var(--space-2xl);
   display: flex;
   flex-direction: column;
@@ -47,9 +47,13 @@
 }
 
 [data-theme='dark'] .brand-panel {
-  background: linear-gradient(160deg, #0b1a2a 0%, #0f2236 100%);
+  background: linear-gradient(
+    160deg,
+    var(--brand-gradient-dark-from) 0%,
+    var(--brand-gradient-dark-to) 100%
+  );
   background-image:
-    linear-gradient(160deg, #0b1a2a 0%, #0f2236 100%),
+    linear-gradient(160deg, var(--brand-gradient-dark-from) 0%, var(--brand-gradient-dark-to) 100%),
     radial-gradient(
       at top left,
       color-mix(in srgb, var(--brand-500) 30%, transparent) 0%,
@@ -73,21 +77,21 @@
 .brand-panel__mark-glyph {
   width: 32px;
   height: 32px;
-  border: 1.5px solid #f5f7fa;
+  border: 1.5px solid var(--brand-on-color);
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-bold);
-  color: #f5f7fa;
+  color: var(--brand-on-color);
 }
 
 .brand-panel__mark-text {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.01em;
-  color: #f5f7fa;
+  color: var(--brand-on-color);
 }
 
 .brand-panel__title {
@@ -96,7 +100,7 @@
   font-weight: var(--font-weight-bold);
   letter-spacing: -0.03em;
   margin: 0;
-  color: #ffffff;
+  color: var(--brand-on-color-strong);
   max-width: 16ch;
   position: relative;
   z-index: 1;
@@ -109,7 +113,7 @@
   align-items: center;
   gap: var(--space-sm);
   font-size: var(--font-size-xs);
-  color: color-mix(in srgb, #f5f7fa 75%, transparent);
+  color: color-mix(in srgb, var(--brand-on-color) 75%, transparent);
   font-family: var(--font-family-mono);
 }
 
@@ -186,8 +190,8 @@
   font-family: inherit;
   color: var(--fg-default);
   transition:
-    border-color 160ms ease-out,
-    background-color 160ms ease-out;
+    border-color var(--motion-tab-switch) var(--ease-out),
+    background-color var(--motion-tab-switch) var(--ease-out);
 }
 
 .persona:hover {

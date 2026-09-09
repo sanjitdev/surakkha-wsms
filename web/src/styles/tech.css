@@ -125,7 +125,7 @@
   gap: var(--space-lg);
   align-items: center;
   cursor: pointer;
-  transition: border-color 120ms ease-out;
+  transition: border-color var(--motion-press-120) var(--ease-out);
 }
 .tech-job:hover {
   border-color: var(--brand-500);
