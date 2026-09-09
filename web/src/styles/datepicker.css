@@ -1,0 +1,218 @@
+/* datepicker.css — FE-B5c composition CSS.
+ *
+ * Token-only: every visual value references a `var(--*)`. No hex literals,
+ * no rgb() — verified via grep. Mirrors dropdown.css:42-67 + 179-190 for the
+ * popover surface + mobile bottom-sheet breakpoint (767px).
+ */
+
+.datepicker {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 320px;
+  font-family: inherit;
+}
+
+.datepicker__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  height: var(--height-control-md);
+  padding: 0 var(--space-md);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.datepicker__trigger:hover {
+  background: var(--bg-subtle);
+}
+
+.datepicker__trigger:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+
+.datepicker__trigger:disabled,
+.datepicker__trigger[aria-disabled='true'] {
+  cursor: not-allowed;
+  color: var(--fg-disabled);
+  background: var(--bg-subtle);
+}
+
+.datepicker__trigger--placeholder .datepicker__value {
+  color: var(--fg-disabled);
+}
+
+.datepicker__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datepicker__caret {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+}
+
+/* Popover (desktop) — mirrors dropdown.css lines 110-124 */
+.datepicker__popover {
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  left: 0;
+  right: 0;
+  z-index: 10;
+  min-width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-sm);
+}
+
+/* Calendar grid ──────────────────────────────────────────────── */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: 280px;
+}
+
+.calendar__header {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  align-items: center;
+  gap: var(--space-xs);
+  padding-block: var(--space-xs);
+}
+
+.calendar__nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--height-control-sm);
+  width: var(--height-control-sm);
+  background: transparent;
+  color: var(--fg-secondary);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-md);
+  font-family: inherit;
+}
+
+.calendar__nav:hover {
+  background: var(--bg-subtle);
+  color: var(--fg-default);
+}
+
+.calendar__nav:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+
+.calendar__nav--year {
+  font-size: var(--font-size-sm);
+}
+
+.calendar__label {
+  text-align: center;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+}
+
+.calendar__weekdays,
+.calendar__week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar__weekday {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  padding-block: var(--space-xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide, 0.05em);
+}
+
+.calendar__day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--height-control-sm);
+  background: transparent;
+  color: var(--fg-default);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  padding: 0;
+}
+
+.calendar__day:hover {
+  background: var(--bg-subtle);
+}
+
+.calendar__day:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+
+.calendar__day--other {
+  color: var(--fg-disabled);
+}
+
+.calendar__day--today {
+  font-weight: var(--font-weight-bold);
+  border-color: var(--brand-300, var(--brand-400));
+}
+
+.calendar__day--selected {
+  background: var(--brand-500);
+  color: var(--fg-on-status-light);
+  border-color: var(--brand-500);
+}
+
+.calendar__day--in-range {
+  background: var(--brand-100, var(--bg-subtle));
+  color: var(--fg-default);
+}
+
+.calendar__day--disabled,
+.calendar__day:disabled {
+  color: var(--fg-disabled);
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Mobile floor — bottom sheet at ≤ 767 px (mirrors dropdown.css) */
+@media (max-width: 767px) {
+  .datepicker__popover {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    max-height: 60vh;
+    box-shadow: var(--shadow-modal);
+  }
+}

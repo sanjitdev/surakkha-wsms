@@ -15,7 +15,7 @@
  * Layout: 2-column shell (Sidebar + main). Main renders one <Section> per
  * component, each showing every variant + a one-line description.
  */
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/styleguide.css';
 import { Button } from '../components/ui/Button';
@@ -30,6 +30,8 @@ import { TopChrome } from '../components/layout/TopChrome';
 import { Sidebar, type SidebarNavItem } from '../components/layout/Sidebar';
 import { Dropdown, type DropdownOption } from '../components/ui/Dropdown';
 import { Table, type TableColumn } from '../components/ui/Table';
+import { DatePicker } from '../components/ui/DatePicker';
+import { DateRangePicker } from '../components/ui/DateRangePicker';
 import { Pagination } from '../components/ui/Pagination';
 import { Band, ContainerWidth, DropdownMode, ToastVariant } from '../types/domain';
 import { useTheme } from '../hooks/useTheme';
@@ -147,6 +149,25 @@ export function StyleguidePage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedRows = TABLE_ROWS.slice((page - 1) * pageSize, page * pageSize);
+  // FE-B5c: DatePicker showcase state — five examples (single with today,
+  // range, min/max, disabled, locale-toggle live readout).
+  const [dateToday, setDateToday] = useState<Date | null>(new Date());
+  const [dateRange, setDateRange] = useState<{ from: Date | null; to: Date | null } | null>(() => {
+    const today = new Date();
+    const week = new Date(today);
+
+    week.setDate(week.getDate() - 6);
+    return { from: week, to: today };
+  });
+  const [dateBounded, setDateBounded] = useState<Date | null>(null);
+  const dateMin = useMemo(() => new Date(), []);
+  const dateMax = useMemo(() => {
+    const d = new Date();
+
+    d.setDate(d.getDate() + 30);
+    return d;
+  }, []);
+  const [dateDisabled] = useState<Date | null>(new Date());
   // Pull theme + locale hooks first; the table-column renderers below close
   // over `locale` (date formatter) so the hooks must run before the columns.
   const { theme, toggle: toggleTheme } = useTheme();
@@ -641,6 +662,49 @@ export function StyleguidePage() {
                   page,
                   pageSize,
                   total: TABLE_ROWS.length,
+                },
+                null,
+                2,
+              )}
+            </pre>
+          </div>
+        </Row>
+      </Section>
+
+      <Section
+        title="DatePicker"
+        blurb="FE-B5c primitive. ARIA grid pattern (role=grid + 42 role=gridcell). Locale-aware headers via Intl.DateTimeFormat. Keyboard nav: Arrow keys + PageUp/Down (Shift = year) + Home/End + Enter/Escape. Range mode highlights in-range cells. Mobile floor at 767px collapses to a bottom sheet."
+      >
+        <Row label="single with today">
+          <DatePicker value={dateToday} onChange={setDateToday} placeholder="Pick a date" />
+        </Row>
+        <Row label="range">
+          <DateRangePicker value={dateRange} onChange={setDateRange} />
+        </Row>
+        <Row label="min=today, max=+30d">
+          <DatePicker
+            value={dateBounded}
+            onChange={setDateBounded}
+            min={dateMin}
+            max={dateMax}
+            placeholder="Within next 30 days"
+          />
+        </Row>
+        <Row label="disabled">
+          <DatePicker value={dateDisabled} onChange={() => {}} disabled />
+        </Row>
+        <Row label="locale-toggle live readout">
+          <div className="section--datepicker">
+            <Button variant="secondary" size="sm" onClick={toggleLocale}>
+              locale: <strong>{locale}</strong> (click to toggle)
+            </Button>
+            <pre data-testid="sg-datepicker-readout" className="sg-datepicker-readout">
+              {JSON.stringify(
+                {
+                  locale,
+                  single: dateToday ? dateToday.toISOString() : null,
+                  range: dateRange,
+                  bounded: dateBounded ? dateBounded.toISOString() : null,
                 },
                 null,
                 2,

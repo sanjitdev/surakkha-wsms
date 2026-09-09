@@ -1,10 +1,24 @@
 {
   "app": {
-    "name": "Surakkha"
+    "name": "সুরক্ষা"
   },
   "common": {
-    "loading": "Loading…",
-    "error": "Something went wrong",
-    "retry": "Retry"
+    "loading": "লোড হচ্ছে…",
+    "error": "কিছু ভুল হয়েছে",
+    "retry": "আবার চেষ্টা করুন"
+  },
+  "datepicker": {
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "previousYear": "Previous year",
+    "nextYear": "Next year",
+    "selectDate": "Select a date",
+    "selectRange": "Select a date range",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "clear": "Clear",
+    "today": "Today",
+    "weekdays": "Sun, Mon, Tue, Wed, Thu, Fri, Sat",
+    "months": "January, February, March, April, May, June, July, August, September, October, November, December"
   }
 }

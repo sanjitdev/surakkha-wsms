@@ -218,3 +218,25 @@
   max-width: 480px;
   white-space: pre-wrap;
 }
+
+/* FE-B5c — DatePicker section scaffolding. Token-only spacing; mirrors
+   the dropdown + table scaffolding so the live readout sits comfortably
+   beside the picker controls. */
+.section--datepicker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+}
+.sg-datepicker-readout {
+  background: var(--bg-inset);
+  color: var(--fg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono, ui-monospace);
+  font-size: var(--font-size-xs);
+  margin: 0;
+  max-width: 480px;
+  white-space: pre-wrap;
+}
