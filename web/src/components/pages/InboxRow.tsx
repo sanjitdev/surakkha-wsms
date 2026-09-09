@@ -67,7 +67,11 @@ export function InboxRow({ row, selected, onToggle, testId }: InboxRowProps) {
         />
       </td>
       <td className="col-warn">
-        <span className="row-severity-dot" style={{ background: severityDotColor(row.severity) }} aria-hidden="true" />
+        <span
+          className="row-severity-dot"
+          style={{ background: severityDotColor(row.severity) }}
+          aria-hidden="true"
+        />
       </td>
       <td className="col-title">
         <Link to={row.href} className="inbox-row__title-link">
@@ -80,7 +84,11 @@ export function InboxRow({ row, selected, onToggle, testId }: InboxRowProps) {
         <div className="row-sub">{row.whereSub}</div>
       </td>
       <td className="col-owner">
-        <span className="avatar-dot" style={{ background: ownerColor(row.ownerKind) }} aria-hidden="true">
+        <span
+          className="avatar-dot"
+          style={{ background: ownerColor(row.ownerKind) }}
+          aria-hidden="true"
+        >
           {row.ownerName ? row.ownerName.slice(0, 2) : '?'}
         </span>
         {row.ownerName}

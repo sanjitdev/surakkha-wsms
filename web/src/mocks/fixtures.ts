@@ -31,13 +31,7 @@
  */
 
 import { GENESIS_PREV_HASH, blockHash, ulid } from './canonical';
-import {
-  type ChainBlock,
-  appendBlock,
-  getMeta,
-  setChainHead,
-  setMeta,
-} from './idb';
+import { type ChainBlock, appendBlock, getMeta, setChainHead, setMeta } from './idb';
 
 const SEED_VERSION = 3;
 const TENANT = 'dhaka';
@@ -48,13 +42,21 @@ const NOW = () => new Date().toISOString();
 const ACTORS = {
   sensor: { kind: 'system', ref: '01J0SENSOR00000000000000000', display: 'sensor-fleet' },
   anjali: { kind: 'citizen', ref: '01J0ANJALI00000000000000000', display: 'anjali@example.com' },
-  priya: { kind: 'operator', ref: '01J0PRIYA000000000000000000', display: 'Priya (utility operator)' },
+  priya: {
+    kind: 'operator',
+    ref: '01J0PRIYA000000000000000000',
+    display: 'Priya (utility operator)',
+  },
   pha: { kind: 'pha', ref: '01J0PHA000000000000000000000', display: 'Dr. Karim (PHA approver)' },
   vendor: { kind: 'vendor', ref: '01J0VENDOR000000000000000000', display: 'Acme Sensors' },
   // Story 1.2 — Field Technician. Per dim 7 amendment 2026-09-08, the
   // technician is `actor_identity` on the chain events he writes. His
   // `actor_ref` matches the SessionRow.actor_ref minted at login time.
-  karim: { kind: 'technician', ref: '01J0KARIM0000000000000000000', display: 'Karim (field tech · NE zone)' },
+  karim: {
+    kind: 'technician',
+    ref: '01J0KARIM0000000000000000000',
+    display: 'Karim (field tech · NE zone)',
+  },
 };
 
 /** Seed only when meta.seed_version is missing or stale. */
@@ -162,9 +164,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       ward_id: 'ward-dhanmondi',
       severity: 'medium',
       source: 'AnjaliReport',
-      sensor_snapshot: [
-        { sensor_id: sensorId, parameter: 'pH', value: 7.6, band: 'medium' },
-      ],
+      sensor_snapshot: [{ sensor_id: sensorId, parameter: 'pH', value: 7.6, band: 'medium' }],
     },
   });
 
@@ -361,9 +361,7 @@ export async function seedIfEmpty(): Promise<boolean> {
       fix_payload_hash: 'mock-fix-hash-not-checked-in-phase-1',
       before_photo_sha256: 'mock-photo-broken-seal-sha256',
       after_photo_sha256: 'mock-photo-resealed-sha256',
-      parts_replaced: [
-        { sku: 'CH-22-04', serial: 'sn-94a1-2626', reason: 'broken' },
-      ],
+      parts_replaced: [{ sku: 'CH-22-04', serial: 'sn-94a1-2626', reason: 'broken' }],
       signature_algorithm: 'ed25519',
       signature: 'mock-sig-placeholder',
       correlation_id: diagnosis.event_id,
@@ -413,7 +411,13 @@ export async function seedIfEmpty(): Promise<boolean> {
     owner_kind: 'operator' | 'technician' | 'citizen' | 'system' | 'vendor';
     owner_ref: string;
     owner_display: string;
-    status: 'awaiting_ack' | 'awaiting_sig' | 'awaiting_draft' | 'citizen_report' | 'chain_verify' | 'info';
+    status:
+      | 'awaiting_ack'
+      | 'awaiting_sig'
+      | 'awaiting_draft'
+      | 'citizen_report'
+      | 'chain_verify'
+      | 'info';
     href: string;
     title: string;
     summary: string;
@@ -626,7 +630,8 @@ async function buildBlock(input: {
     actor_identity: input.actor_identity,
     payload: input.payload,
   };
-}async function write(block: ChainBlock): Promise<void> {
+}
+async function write(block: ChainBlock): Promise<void> {
   const head = await import('./idb').then((m) => m.getChainHead());
 
   block.height = (head?.height ?? 0) + 1;

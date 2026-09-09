@@ -22,7 +22,7 @@ export function useLocale(): {
   locale: Locale;
   setLocale: (next: Locale) => void;
   toggle: () => void;
-  } {
+} {
   const [locale, setLocaleState] = useState<Locale>(readInitial);
 
   useEffect(() => {

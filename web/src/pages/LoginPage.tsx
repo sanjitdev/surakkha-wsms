@@ -98,16 +98,21 @@ export function LoginPage() {
     <div className="login-shell">
       <aside className="brand-panel">
         <div className="brand-panel__mark">
-          <div className="brand-panel__mark-glyph" aria-hidden="true">S</div>
+          <div className="brand-panel__mark-glyph" aria-hidden="true">
+            S
+          </div>
           <div className="brand-panel__mark-text">Surakkha</div>
         </div>
         <h1 className="brand-panel__title">
-          Civic water-safety,<br />audited.
+          Civic water-safety,
+          <br />
+          audited.
         </h1>
         <div className="brand-panel__live">
           <span className="brand-panel__live-dot" aria-hidden="true"></span>
           <span>
-            chain {status === 'ready' && chainHeight !== null
+            chain{' '}
+            {status === 'ready' && chainHeight !== null
               ? `live · ${chainHeight} blocks`
               : status === 'pending'
                 ? 'connecting…'
@@ -119,14 +124,13 @@ export function LoginPage() {
       <main className="picker-panel">
         <div className="picker-panel__inner">
           <div
-            className={
-              `picker-status ${
-                status === 'ready'
-                  ? 'picker-status--ready'
-                  : status === 'error'
-                    ? 'picker-status--error'
-                    : 'picker-status--pending'}`
-            }
+            className={`picker-status ${
+              status === 'ready'
+                ? 'picker-status--ready'
+                : status === 'error'
+                  ? 'picker-status--error'
+                  : 'picker-status--pending'
+            }`}
           >
             <span className="picker-status__dot" aria-hidden="true"></span>
             mock backend · {status}
@@ -144,15 +148,18 @@ export function LoginPage() {
                   type="button"
                   role="radio"
                   aria-checked={isSel}
-                  className={`persona${ isSel ? ' persona--selected' : ''}`}
-                  onClick={() => { setSelected(p); }}
+                  className={`persona${isSel ? ' persona--selected' : ''}`}
+                  onClick={() => {
+                    setSelected(p);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
                       e.preventDefault();
                       const idx = PERSONAS.findIndex((q) => q.id === selected.id);
-                      const nextIdx = e.key === 'ArrowDown'
-                        ? (idx + 1) % PERSONAS.length
-                        : (idx - 1 + PERSONAS.length) % PERSONAS.length;
+                      const nextIdx =
+                        e.key === 'ArrowDown'
+                          ? (idx + 1) % PERSONAS.length
+                          : (idx - 1 + PERSONAS.length) % PERSONAS.length;
 
                       setSelected(PERSONAS[nextIdx]);
                     }
@@ -163,7 +170,10 @@ export function LoginPage() {
                   </div>
                   <div>
                     <div className="persona__name">{p.display_name}</div>
-                    <div className="persona__hint" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--fg-tertiary)' }}>
+                    <div
+                      className="persona__hint"
+                      style={{ fontSize: 'var(--font-size-xs)', color: 'var(--fg-tertiary)' }}
+                    >
                       {p.hint}
                     </div>
                   </div>
@@ -183,7 +193,11 @@ export function LoginPage() {
               {isLoggingIn ? 'Signing in…' : 'Continue →'}
             </button>
             {loginError ? (
-              <div role="alert" className="picker-status picker-status--error" style={{ marginTop: 'var(--space-sm)' }}>
+              <div
+                role="alert"
+                className="picker-status picker-status--error"
+                style={{ marginTop: 'var(--space-sm)' }}
+              >
                 {loginError}
               </div>
             ) : null}

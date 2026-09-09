@@ -47,14 +47,18 @@ function buildRow(overrides: Partial<InboxRowType> = {}): InboxRowType {
 // ─── (1) InboxRow renders title + meta + T3 badge ────────────────────
 
 describe('FE-1.3a · InboxRow', () => {
-  afterEach(() => { cleanup(); });
+  afterEach(() => {
+    cleanup();
+  });
 
   it('(1) renders the row title, meta line, and a T3 priority pill', () => {
     render(
       <MemoryRouter>
-        <table><tbody>
-          <InboxRow row={buildRow()} selected={false} onToggle={() => {}} />
-        </tbody></table>
+        <table>
+          <tbody>
+            <InboxRow row={buildRow()} selected={false} onToggle={() => {}} />
+          </tbody>
+        </table>
       </MemoryRouter>,
     );
 
@@ -73,9 +77,11 @@ describe('FE-1.3a · InboxRow', () => {
   it('(2) wraps the title in a <Link href="/inbox-detail">', () => {
     render(
       <MemoryRouter>
-        <table><tbody>
-          <InboxRow row={buildRow()} selected={false} onToggle={() => {}} />
-        </tbody></table>
+        <table>
+          <tbody>
+            <InboxRow row={buildRow()} selected={false} onToggle={() => {}} />
+          </tbody>
+        </table>
       </MemoryRouter>,
     );
 
@@ -89,13 +95,15 @@ describe('FE-1.3a · InboxRow', () => {
   it('(3) trailing action column renders the action label as a Link href when `action` set', () => {
     render(
       <MemoryRouter>
-        <table><tbody>
-          <InboxRow
-            row={buildRow({ action: { label: 'Edit', href: '/inbox-detail?edit=1' } })}
-            selected={false}
-            onToggle={() => {}}
-          />
-        </tbody></table>
+        <table>
+          <tbody>
+            <InboxRow
+              row={buildRow({ action: { label: 'Edit', href: '/inbox-detail?edit=1' } })}
+              selected={false}
+              onToggle={() => {}}
+            />
+          </tbody>
+        </table>
       </MemoryRouter>,
     );
 
@@ -116,16 +124,24 @@ describe('FE-1.3a · FilterChip', () => {
     if (!('matchMedia' in window)) {
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
-        value: (q: string) => {return {
-          matches: false, media: q, onchange: null,
-          addListener: () => {}, removeListener: () => {},
-          addEventListener: () => {}, removeEventListener: () => {},
-          dispatchEvent: () => false,
-        }},
+        value: (q: string) => {
+          return {
+            matches: false,
+            media: q,
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          };
+        },
       });
     }
   });
-  afterEach(() => { cleanup(); });
+  afterEach(() => {
+    cleanup();
+  });
 
   // ─── (4) FilterChip aria-selected flips on click ────────────────────
 
@@ -138,7 +154,10 @@ describe('FE-1.3a · FilterChip', () => {
         <FilterChip
           label="All"
           active={active}
-          onClick={() => { clickSpy(); setActive((s) => !s); }}
+          onClick={() => {
+            clickSpy();
+            setActive((s) => !s);
+          }}
           testId="chip-all"
         />
       );
@@ -147,7 +166,9 @@ describe('FE-1.3a · FilterChip', () => {
     const chip = screen.getByTestId('chip-all');
 
     expect(chip.getAttribute('aria-selected')).toBe('false');
-    act(() => { chip.click(); });
+    act(() => {
+      chip.click();
+    });
     expect(chip.getAttribute('aria-selected')).toBe('true');
   });
 
@@ -167,10 +188,14 @@ describe('FE-1.3a · FilterChip', () => {
   });
 
   it('(5b) does NOT render a count chip when count is 0 or undefined', () => {
-    const { container: c1 } = render(<FilterChip label="All" count={0} active={false} onClick={() => {}} />);
+    const { container: c1 } = render(
+      <FilterChip label="All" count={0} active={false} onClick={() => {}} />,
+    );
 
     expect(c1.querySelectorAll('.filter-chip__count')).toHaveLength(0);
-    const { container: c2 } = render(<FilterChip label="Other" active={false} onClick={() => {}} />);
+    const { container: c2 } = render(
+      <FilterChip label="Other" active={false} onClick={() => {}} />,
+    );
 
     expect(c2.querySelectorAll('.filter-chip__count')).toHaveLength(0);
   });
@@ -178,7 +203,9 @@ describe('FE-1.3a · FilterChip', () => {
   // ─── (6) FilterChip data-active="true" when active ──────────────────
 
   it('(6) data-active="true" when active; "false" when not', () => {
-    const { rerender } = render(<FilterChip label="All" active={false} onClick={() => {}} testId="chip-x" />);
+    const { rerender } = render(
+      <FilterChip label="All" active={false} onClick={() => {}} testId="chip-x" />,
+    );
 
     expect(screen.getByTestId('chip-x').getAttribute('data-active')).toBe('false');
     rerender(<FilterChip label="All" active={true} onClick={() => {}} testId="chip-x" />);
@@ -191,8 +218,12 @@ describe('FE-1.3a · FilterChip', () => {
     const handler = vi.fn();
 
     render(<FilterChip label="X" active={false} onClick={handler} testId="chip-y" />);
-    act(() => { fireEvent.click(screen.getByTestId('chip-y')); });
-    act(() => { fireEvent.click(screen.getByTestId('chip-y')); });
+    act(() => {
+      fireEvent.click(screen.getByTestId('chip-y'));
+    });
+    act(() => {
+      fireEvent.click(screen.getByTestId('chip-y'));
+    });
     expect(handler).toHaveBeenCalledTimes(2);
   });
 });

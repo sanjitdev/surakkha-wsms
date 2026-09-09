@@ -41,10 +41,20 @@ function ThemeProbe() {
   return (
     <div>
       <span data-testid="probe-theme">{theme}</span>
-      <button data-testid="probe-toggle" onClick={() => { toggle(); }}>
+      <button
+        data-testid="probe-toggle"
+        onClick={() => {
+          toggle();
+        }}
+      >
         toggle
       </button>
-      <button data-testid="probe-set-dark" onClick={() => { setTheme(Theme.Dark); }}>
+      <button
+        data-testid="probe-set-dark"
+        onClick={() => {
+          setTheme(Theme.Dark);
+        }}
+      >
         set-dark
       </button>
     </div>
@@ -56,10 +66,20 @@ function LocaleProbe() {
   return (
     <div>
       <span data-testid="probe-locale">{locale}</span>
-      <button data-testid="probe-set-en" onClick={() => { setLocale(Locale.En); }}>
+      <button
+        data-testid="probe-set-en"
+        onClick={() => {
+          setLocale(Locale.En);
+        }}
+      >
         set-en
       </button>
-      <button data-testid="probe-toggle-locale" onClick={() => { toggle(); }}>
+      <button
+        data-testid="probe-toggle-locale"
+        onClick={() => {
+          toggle();
+        }}
+      >
         toggle-locale
       </button>
     </div>
@@ -75,7 +95,12 @@ function ToastWrapper(props: { message: string }) {
 
   return (
     <div>
-      <button data-testid="bump-dismiss" onClick={() => { setTick((n) => n + 1); }}>
+      <button
+        data-testid="bump-dismiss"
+        onClick={() => {
+          setTick((n) => n + 1);
+        }}
+      >
         bump
       </button>
       <Toast
@@ -186,7 +211,12 @@ describe('MODAL_ESCAPE + AC-3 (Modal stability + Esc)', () => {
 
       return (
         <>
-          <button data-testid="rerender" onClick={() => { force((n) => n + 1); }}>
+          <button
+            data-testid="rerender"
+            onClick={() => {
+              force((n) => n + 1);
+            }}
+          >
             rerender
           </button>
           <Modal open onClose={() => calls++}>
@@ -232,7 +262,7 @@ describe('MODAL_ESCAPE + AC-3 (Modal stability + Esc)', () => {
 
     // Pre-focus the trigger.
     act(() => {
-      (screen.getByTestId('trigger')).focus();
+      screen.getByTestId('trigger').focus();
     });
     expect(document.activeElement).toBe(screen.getByTestId('trigger'));
 
@@ -252,12 +282,13 @@ describe('TOAST_HOVER_PAUSE + AC-4 (Toast math + stability)', () => {
     vi.stubGlobal(
       'requestAnimationFrame',
       (cb: FrameRequestCallback) =>
-        setTimeout(() => { cb(performance.now()); }, 0) as unknown as number,
+        setTimeout(() => {
+          cb(performance.now());
+        }, 0) as unknown as number,
     );
-    vi.stubGlobal(
-      'cancelAnimationFrame',
-      (id: number) => { clearTimeout(id as unknown as ReturnType<typeof setTimeout>); },
-    );
+    vi.stubGlobal('cancelAnimationFrame', (id: number) => {
+      clearTimeout(id as unknown as ReturnType<typeof setTimeout>);
+    });
   });
 
   afterEach(() => {
@@ -428,26 +459,12 @@ describe('AC-9 (Input testid decoupling + SearchInput forwarding)', () => {
   });
 
   it('AC-9: Input with icon renders data-testid="input-icon-md"', () => {
-    render(
-      <Input
-        value=""
-        onChange={() => {}}
-        icon={<span>X</span>}
-      />,
-    );
+    render(<Input value="" onChange={() => {}} icon={<span>X</span>} />);
     expect(screen.getByTestId('input-icon-md')).not.toBeNull();
   });
 
   it('AC-9: SearchInput forwards size="lg" + disabled + aria-label + testid="input-search-md"', () => {
-    render(
-      <SearchInput
-        value=""
-        onChange={() => {}}
-        size="lg"
-        disabled
-        placeholder="Search"
-      />,
-    );
+    render(<SearchInput value="" onChange={() => {}} size="lg" disabled placeholder="Search" />);
     const input = screen.getByTestId('input-search-md');
 
     expect(input).not.toBeNull();
@@ -522,16 +539,18 @@ describe('AC-11 (Sidebar duplicate-href safety)', () => {
     if (!('matchMedia' in window)) {
       Object.defineProperty(window, 'matchMedia', {
         writable: true,
-        value: (query: string) => {return {
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: () => {},
-          removeListener: () => {},
-          addEventListener: () => {},
-          removeEventListener: () => {},
-          dispatchEvent: () => false,
-        }},
+        value: (query: string) => {
+          return {
+            matches: false,
+            media: query,
+            onchange: null,
+            addListener: () => {},
+            removeListener: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {},
+            dispatchEvent: () => false,
+          };
+        },
       });
     }
     // Spy on console.error so React's duplicate-key warning is captured.

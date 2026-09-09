@@ -152,7 +152,9 @@ export async function logout(): Promise<void> {
  * navigate to the login picker. Used in Sidebar footers / top-chrome
  * logout actions. Caller passes the react-router `useNavigate()` result.
  */
-export async function logoutAndRedirect(navigate: (to: string, opts?: { replace?: boolean }) => void): Promise<void> {
+export async function logoutAndRedirect(
+  navigate: (to: string, opts?: { replace?: boolean }) => void,
+): Promise<void> {
   await logout();
   navigate('/', { replace: true });
 }

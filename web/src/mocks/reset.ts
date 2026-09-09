@@ -59,7 +59,7 @@ export async function tamperBlock(blockIndex: number = 1): Promise<{ block_hash:
   // makes the verified head pointer's `next_block` traversal fail.
   const corrupted = {
     ...target,
-    block_hash: `0x${ 'f'.repeat(64)}`, // obvious corruption
+    block_hash: `0x${'f'.repeat(64)}`, // obvious corruption
   };
 
   await appendBlock(corrupted);
@@ -76,7 +76,9 @@ export async function tamperBlock(blockIndex: number = 1): Promise<{ block_hash:
 }
 /** Emit a fresh ChainVerificationFailed event (separate from tamperBlock
  * — useful for triggering the demo toast without modifying storage). */
-export async function simulateChainVerificationFailed(reason: string = 'tamper-detected'): Promise<void> {
+export async function simulateChainVerificationFailed(
+  reason: string = 'tamper-detected',
+): Promise<void> {
   const head = await getChainHead();
 
   if (!head) return;
@@ -88,7 +90,11 @@ export async function simulateChainVerificationFailed(reason: string = 'tamper-d
   // extension — the demo only needs the toast to fire. In production, the
   // gateway would refuse to advance past a failed-verification point.
   await appendBlock({
-    block_hash: `0x${ Math.floor(Math.random() * 1e16).toString(16).padStart(16, '0').repeat(4).slice(0, 64)}`,
+    block_hash: `0x${Math.floor(Math.random() * 1e16)
+      .toString(16)
+      .padStart(16, '0')
+      .repeat(4)
+      .slice(0, 64)}`,
     height: head.height + 1,
     prev_block_hash: head.block_hash,
     tenant_id: 'dhaka',
@@ -109,5 +115,10 @@ export const DEMO_CONTROLS = [
   { id: 'reset', label: 'Reset everything', action: resetEverything, kind: 'destructive' },
   { id: 'reseed', label: 'Reseed chain', action: reseedChain, kind: 'safe' },
   { id: 'tamper', label: 'Tamper block #5', action: () => tamperBlock(5), kind: 'warning' },
-  { id: 'fail', label: 'Simulate chain failure', action: () => simulateChainVerificationFailed(), kind: 'warning' },
+  {
+    id: 'fail',
+    label: 'Simulate chain failure',
+    action: () => simulateChainVerificationFailed(),
+    kind: 'warning',
+  },
 ] as const;

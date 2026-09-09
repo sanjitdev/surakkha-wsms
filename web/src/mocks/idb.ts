@@ -35,10 +35,10 @@ const stores = {
 // ───────────────────────────────────────────────────────── chain_blocks ──
 
 export async function getAllBlocks() {
-  return (values(stores.chain_blocks));
+  return values(stores.chain_blocks);
 }
 export async function getBlock(hash: string): Promise<ChainBlock | undefined> {
-  return (get(hash, stores.chain_blocks));
+  return get(hash, stores.chain_blocks);
 }
 export async function appendBlock(block: ChainBlock): Promise<void> {
   await set(block.block_hash, block, stores.chain_blocks);
@@ -50,7 +50,7 @@ export interface ChainHead {
   ingested_at: string;
 }
 export async function getChainHead(): Promise<ChainHead | undefined> {
-  return (get('head', stores.chain_head));
+  return get('head', stores.chain_head);
 }
 export async function setChainHead(head: ChainHead): Promise<void> {
   await set('head', head, stores.chain_head);
@@ -73,7 +73,7 @@ export interface SessionRow {
   chip_label?: string;
 }
 export async function getSession(): Promise<SessionRow | undefined> {
-  return (get('current', stores.session));
+  return get('current', stores.session);
 }
 export async function setSession(session: SessionRow): Promise<void> {
   await set('current', session, stores.session);

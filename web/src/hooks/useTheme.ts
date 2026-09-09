@@ -24,7 +24,7 @@ export function useTheme(): {
   theme: Theme;
   setTheme: (next: Theme) => void;
   toggle: () => void;
-  } {
+} {
   const [theme, setThemeState] = useState<Theme>(readInitial);
 
   useEffect(() => {

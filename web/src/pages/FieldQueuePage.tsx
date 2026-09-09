@@ -65,8 +65,12 @@ export function FieldQueuePage() {
     void (async () => {
       try {
         const [assigned, resolved] = await Promise.all([
-          fetch('/api/events?event_type=TechnicianAssigned&limit=100').then((r) => r.json()) as Promise<{ events: ChainEventLite[] }>,
-          fetch('/api/events?event_type=IncidentResolved&limit=100').then((r) => r.json()) as Promise<{ events: ChainEventLite[] }>,
+          fetch('/api/events?event_type=TechnicianAssigned&limit=100').then((r) =>
+            r.json(),
+          ) as Promise<{ events: ChainEventLite[] }>,
+          fetch('/api/events?event_type=IncidentResolved&limit=100').then((r) =>
+            r.json(),
+          ) as Promise<{ events: ChainEventLite[] }>,
         ]);
 
         setRows(buildRows(technicianId, assigned.events, resolved.events));
@@ -112,7 +116,11 @@ export function FieldQueuePage() {
   };
 
   const today = new Date();
-  const todayLabel = today.toLocaleDateString('en-GB', { weekday: 'short', day: '2-digit', month: 'short' });
+  const todayLabel = today.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+  });
 
   // Pre-FE-1.6a the page returned <div className="app-shell app-shell--tech">
   // with an inline <aside>, <header className="top-chrome">, and logout
@@ -124,7 +132,9 @@ export function FieldQueuePage() {
         <div className="page-header__row">
           <div>
             <h1>Work queue</h1>
-            <div className="page-header__sub">{personaName} · {personaRole} · {rows.length} jobs · {todayLabel} · 07:00–15:00</div>
+            <div className="page-header__sub">
+              {personaName} · {personaRole} · {rows.length} jobs · {todayLabel} · 07:00–15:00
+            </div>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
             <button className="button button--secondary" type="button" disabled title="Phase 2">
@@ -144,15 +154,26 @@ export function FieldQueuePage() {
           <span className="tech-today__label">In progress</span>
           <span className="tech-today__val">{chipCounts.enroute + chipCounts.onsite}</span>
           <span className="tech-today__sub">
-            {chipCounts.enroute > 0 ? `${chipCounts.enroute} en route` : chipCounts.onsite > 0 ? `${chipCounts.onsite} on site` : '—'}
+            {chipCounts.enroute > 0
+              ? `${chipCounts.enroute} en route`
+              : chipCounts.onsite > 0
+                ? `${chipCounts.onsite} on site`
+                : '—'}
           </span>
         </div>
         <div className="tech-today__cell">
           <span className="tech-today__label">Overdue</span>
-          <span className="tech-today__val" style={{ color: rows.some((r) => r.timeIsOverdue && !r.isDone) ? 'var(--danger)' : undefined }}>
+          <span
+            className="tech-today__val"
+            style={{
+              color: rows.some((r) => r.timeIsOverdue && !r.isDone) ? 'var(--danger)' : undefined,
+            }}
+          >
             {rows.filter((r) => r.timeIsOverdue && !r.isDone).length}
           </span>
-          <span className="tech-today__sub">{rows.find((r) => r.timeIsOverdue && !r.isDone)?.title ?? '—'}</span>
+          <span className="tech-today__sub">
+            {rows.find((r) => r.timeIsOverdue && !r.isDone)?.title ?? '—'}
+          </span>
         </div>
         <div className="tech-today__cell">
           <span className="tech-today__label">Closed this week</span>
@@ -167,7 +188,9 @@ export function FieldQueuePage() {
             key={f}
             type="button"
             className={`tech-chip${filter === f ? ' is-on' : ''}`}
-            onClick={() => { setFilter(f); }}
+            onClick={() => {
+              setFilter(f);
+            }}
           >
             {chipFilterLabel[f]} <span className="tech-chip__count">{chipCounts[f]}</span>
           </button>
@@ -176,21 +199,44 @@ export function FieldQueuePage() {
 
       <div className="tech-jobs">
         {loading && (
-          <div style={{ padding: 'var(--space-lg)', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>
+          <div
+            style={{
+              padding: 'var(--space-lg)',
+              fontFamily: 'var(--font-family-mono)',
+              fontSize: 10,
+              color: 'var(--fg-tertiary)',
+            }}
+          >
             loading queue from chain…
           </div>
         )}
         {!loading && visible.length === 0 && (
-          <div style={{ padding: 'var(--space-lg)', fontFamily: 'var(--font-family-mono)', fontSize: 10, color: 'var(--fg-tertiary)' }}>
+          <div
+            style={{
+              padding: 'var(--space-lg)',
+              fontFamily: 'var(--font-family-mono)',
+              fontSize: 10,
+              color: 'var(--fg-tertiary)',
+            }}
+          >
             no jobs in this filter
           </div>
         )}
         {visible.map((r) => (
-          <a key={r.id} href={`/field/incident-detail?work_order=${r.id}`} className={`tech-job${r.isActive ? ' is-active' : ''}${r.isDone ? ' is-done' : ''}`}>
-            <span className={`tech-job__priority tech-job__priority--${r.priority.toLowerCase()}`}>{r.priority}</span>
+          <a
+            key={r.id}
+            href={`/field/incident-detail?work_order=${r.id}`}
+            className={`tech-job${r.isActive ? ' is-active' : ''}${r.isDone ? ' is-done' : ''}`}
+          >
+            <span className={`tech-job__priority tech-job__priority--${r.priority.toLowerCase()}`}>
+              {r.priority}
+            </span>
             <div>
               <div className="tech-job__row1">
-                <span className={`t-pill t-pill--${r.status}`}><span className="t-pill__dot"></span>{pillLabel(r.status, r.timeVal)}</span>
+                <span className={`t-pill t-pill--${r.status}`}>
+                  <span className="t-pill__dot"></span>
+                  {pillLabel(r.status, r.timeVal)}
+                </span>
                 <span className="tech-job__ticket">{r.ticket}</span>
               </div>
               <p className="tech-job__title">{r.title}</p>
@@ -198,9 +244,18 @@ export function FieldQueuePage() {
             </div>
             <div className="tech-job__time">
               <div className="tech-job__time-label">{r.timeLabel}</div>
-              <div className={`tech-job__time-val${r.timeIsOverdue ? ' is-overdue' : ''}`}>{r.timeVal}</div>
+              <div className={`tech-job__time-val${r.timeIsOverdue ? ' is-overdue' : ''}`}>
+                {r.timeVal}
+              </div>
             </div>
-            <span style={{ fontFamily: 'var(--font-family-mono)', color: r.isActive ? 'var(--brand-500)' : 'var(--fg-tertiary)' }}>{r.isDone ? '↗' : '→'}</span>
+            <span
+              style={{
+                fontFamily: 'var(--font-family-mono)',
+                color: r.isActive ? 'var(--brand-500)' : 'var(--fg-tertiary)',
+              }}
+            >
+              {r.isDone ? '↗' : '→'}
+            </span>
           </a>
         ))}
       </div>

@@ -40,7 +40,9 @@ export function Sidebar({ navItems, currentPath, brand, brandHref, footer, testI
               aria-current={active ? 'page' : undefined}
               data-testid={`sidebar-link-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
             >
-              <span className="sidebar__icon" aria-hidden="true">{item.icon}</span>
+              <span className="sidebar__icon" aria-hidden="true">
+                {item.icon}
+              </span>
               <span>{item.label}</span>
             </Link>
           );

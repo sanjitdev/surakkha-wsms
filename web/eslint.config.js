@@ -20,6 +20,7 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
+import prettier from 'eslint-config-prettier';
 
 export default [
   // ───────────────────────────────────────────── ignores ──────────
@@ -37,6 +38,9 @@ export default [
       // projectService: true which would try to resolve a tsconfig for
       // eslint.config.js and fail.
       'eslint.config.js',
+      // commitlint config is plain CJS, not part of the TS project.
+      // We don't lint it (commitlint lints commit messages, not code).
+      'commitlint.config.cjs',
     ],
   },
 
@@ -70,7 +74,7 @@ export default [
       'no-multi-spaces': ['error', { ignoreEOLComments: false }],
       'no-whitespace-before-property': 'error',
       'no-mixed-spaces-and-tabs': ['error', 'smart-tabs'],
-      'indent': ['error', 2, { SwitchCase: 1 }],
+      indent: ['error', 2, { SwitchCase: 1 }],
       'padding-line-between-statements': [
         'error',
         // Always require blank line after a sequence of variable declarations
@@ -89,7 +93,7 @@ export default [
       'no-alert': 'error',
       'no-var': 'error',
       'prefer-const': 'error',
-      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
       'no-implicit-coercion': 'error',
       'no-lonely-if': 'error',
       'no-else-return': ['error', { allowElseIf: false }],
@@ -105,27 +109,33 @@ export default [
       'no-useless-rename': 'error',
       'no-useless-return': 'error',
       'consistent-return': 'error',
-      'curly': ['error', 'multi-line'],
+      curly: ['error', 'multi-line'],
       'default-case-last': 'error',
       'default-param-last': 'error',
       'no-duplicate-imports': 'error',
       'no-empty': ['error', { allowEmptyCatch: true }],
       'no-fallthrough': 'error',
-      'no-irregular-whitespace': ['error', { skipComments: true, skipStrings: false, skipRegExps: false, skipTemplates: false }],
-      'no-mixed-operators': ['error', {
-        groups: [
-          ['%', '**'],
-          ['%', '+'],
-          ['%', '-'],
-          ['%', '*'],
-          ['%', '/'],
-          ['/', '*'],
-          ['&', '|', '<<', '>>', '>>>'],
-          ['==', '!=', '===', '!=='],
-          ['&&', '||'],
-        ],
-        allowSamePrecedence: false,
-      }],
+      'no-irregular-whitespace': [
+        'error',
+        { skipComments: true, skipStrings: false, skipRegExps: false, skipTemplates: false },
+      ],
+      'no-mixed-operators': [
+        'error',
+        {
+          groups: [
+            ['%', '**'],
+            ['%', '+'],
+            ['%', '-'],
+            ['%', '*'],
+            ['%', '/'],
+            ['/', '*'],
+            ['&', '|', '<<', '>>', '>>>'],
+            ['==', '!=', '===', '!=='],
+            ['&&', '||'],
+          ],
+          allowSamePrecedence: false,
+        },
+      ],
       'no-new': 'error',
       'no-new-func': 'error',
       'no-param-reassign': ['error', { props: true }],
@@ -138,13 +148,16 @@ export default [
       // "explicit undefined" mistakes still surface, but idiomatic code
       // doesn't get flagged.
       'no-undefined': 'warn',
-      'no-underscore-dangle': ['error', { allowAfterThis: false, allowAfterSuper: false, allowInArrayDestructuring: false }],
+      'no-underscore-dangle': [
+        'error',
+        { allowAfterThis: false, allowAfterSuper: false, allowInArrayDestructuring: false },
+      ],
       'no-unreachable': 'error',
       'no-use-before-define': ['error', { functions: false, classes: false, variables: true }],
       'prefer-arrow-callback': ['error', { allowNamedFunctions: false, allowUnboundThis: true }],
       'prefer-template': 'error',
-      'radix': 'error',
-      'yoda': 'error',
+      radix: 'error',
+      yoda: 'error',
       'sort-imports': ['error', { ignoreDeclarationSort: true }],
       'spaced-comment': ['error', 'always', { exceptions: ['-', '+'], markers: ['/'] }],
       'arrow-body-style': ['error', 'as-needed', { requireReturnForObjectLiteral: true }],
@@ -188,12 +201,22 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/consistent-type-imports': [
         'error',
-        { prefer: 'type-imports', fixStyle: 'separate-type-imports', disallowTypeAnnotations: false },
+        {
+          prefer: 'type-imports',
+          fixStyle: 'separate-type-imports',
+          disallowTypeAnnotations: false,
+        },
       ],
       '@typescript-eslint/no-import-type-side-effects': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
-      '@typescript-eslint/no-misused-promises': ['error', { checksVoidReturn: { attributes: false, arguments: false } }],
-      '@typescript-eslint/no-unnecessary-condition': ['error', { allowConstantLoopConditions: true }],
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false, arguments: false } },
+      ],
+      '@typescript-eslint/no-unnecessary-condition': [
+        'error',
+        { allowConstantLoopConditions: true },
+      ],
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'warn',
       '@typescript-eslint/no-unsafe-call': 'warn',
@@ -221,7 +244,12 @@ export default [
         'error',
         // camelCase / PascalCase / UPPER_CASE only — no snake_case in code.
         // variableLike covers vars + params + functions in one rule.
-        { selector: 'variableLike', leadingUnderscore: 'allow', format: ['camelCase', 'PascalCase', 'UPPER_CASE'], trailingUnderscore: 'allow' },
+        {
+          selector: 'variableLike',
+          leadingUnderscore: 'allow',
+          format: ['camelCase', 'PascalCase', 'UPPER_CASE'],
+          trailingUnderscore: 'allow',
+        },
         { selector: 'typeLike', format: ['PascalCase'] },
         { selector: 'enumMember', format: ['UPPER_CASE', 'PascalCase'] },
         { selector: 'property', format: null },
@@ -290,7 +318,12 @@ export default [
 
   // ───────────────────────────────────────────── test files ───────
   {
-    files: ['src/__checks__/**/*.{ts,tsx}', '**/*.test.{ts,tsx}', 'vitest.config.ts', 'vite.config.ts'],
+    files: [
+      'src/__checks__/**/*.{ts,tsx}',
+      '**/*.test.{ts,tsx}',
+      'vitest.config.ts',
+      'vite.config.ts',
+    ],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -377,4 +410,10 @@ export default [
   },
 
   // eslint.config.js is in the `ignores` block above — it's not linted.
+
+  // ───────────────────────────────────────────── prettier compat ──
+  // MUST be the last entry in the array. Disables ESLint stylistic rules
+  // that conflict with Prettier so the two tools don't fight over the
+  // same lines. `pnpm format` runs Prettier; `pnpm lint` runs ESLint.
+  prettier,
 ];

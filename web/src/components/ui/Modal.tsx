@@ -22,14 +22,7 @@ function activeHTMLElement(): HTMLElement | null {
   if (el && el instanceof HTMLElement) return el;
   return null;
 }
-export function Modal({
-  open,
-  onClose,
-  children,
-  ariaLabel,
-  ariaLabelledBy,
-  testId,
-}: ModalProps) {
+export function Modal({ open, onClose, children, ariaLabel, ariaLabelledBy, testId }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
@@ -95,9 +88,7 @@ export function Modal({
   // pass `ariaLabelledBy` (preferred — point to a heading id) or `ariaLabel`
   // (fallback). If neither is supplied, fall back to a generic label so the
   // dialog is never announced as bare "dialog".
-  const dialogAriaLabel = ariaLabelledBy
-    ? undefined
-    : ariaLabel ?? 'Dialog';
+  const dialogAriaLabel = ariaLabelledBy ? undefined : (ariaLabel ?? 'Dialog');
   const dialogLabelledBy = ariaLabelledBy;
 
   return (
@@ -122,7 +113,9 @@ export function Modal({
         aria-label={dialogAriaLabel}
         aria-labelledby={dialogLabelledBy}
         ref={dialogRef}
-        onClick={(e) => { e.stopPropagation(); }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
       >
         {children}
       </div>

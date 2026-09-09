@@ -19,7 +19,9 @@ export function TopChrome({
     <header className="top-chrome" data-testid={testId ?? 'top-chrome'}>
       <div className="top-chrome__left">
         <span className="top-chrome__brand">{brand}</span>
-        <span className="top-chrome__sep" aria-hidden="true">·</span>
+        <span className="top-chrome__sep" aria-hidden="true">
+          ·
+        </span>
         <span className="top-chrome__chain">
           <span className="pulse-dot" aria-hidden="true" />
           <span className="mono">

@@ -15,8 +15,12 @@
 }
 
 @media (max-width: 900px) {
-  .login-shell { grid-template-columns: 1fr; }
-  .brand-panel { display: none; }
+  .login-shell {
+    grid-template-columns: 1fr;
+  }
+  .brand-panel {
+    display: none;
+  }
 }
 
 /* ── Brand panel (left half) ─────────────────────────────────── */
@@ -30,16 +34,32 @@
   position: relative;
   overflow: hidden;
   background-image:
-    radial-gradient(at top left, color-mix(in srgb, var(--brand-500) 60%, transparent) 0%, transparent 55%),
-    radial-gradient(at bottom right, color-mix(in srgb, var(--brand-400) 25%, transparent) 0%, transparent 60%);
+    radial-gradient(
+      at top left,
+      color-mix(in srgb, var(--brand-500) 60%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      at bottom right,
+      color-mix(in srgb, var(--brand-400) 25%, transparent) 0%,
+      transparent 60%
+    );
 }
 
-[data-theme="dark"] .brand-panel {
+[data-theme='dark'] .brand-panel {
   background: linear-gradient(160deg, #0b1a2a 0%, #0f2236 100%);
   background-image:
     linear-gradient(160deg, #0b1a2a 0%, #0f2236 100%),
-    radial-gradient(at top left, color-mix(in srgb, var(--brand-500) 30%, transparent) 0%, transparent 55%),
-    radial-gradient(at bottom right, color-mix(in srgb, var(--brand-400) 14%, transparent) 0%, transparent 60%);
+    radial-gradient(
+      at top left,
+      color-mix(in srgb, var(--brand-500) 30%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      at bottom right,
+      color-mix(in srgb, var(--brand-400) 14%, transparent) 0%,
+      transparent 60%
+    );
 }
 
 .brand-panel__mark {
@@ -102,12 +122,19 @@
 }
 
 @keyframes login-pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-panel__live-dot { animation: none; }
+  .brand-panel__live-dot {
+    animation: none;
+  }
 }
 
 /* ── Picker panel (right half) ───────────────────────────────── */
@@ -158,10 +185,14 @@
   cursor: pointer;
   font-family: inherit;
   color: var(--fg-default);
-  transition: border-color 160ms ease-out, background-color 160ms ease-out;
+  transition:
+    border-color 160ms ease-out,
+    background-color 160ms ease-out;
 }
 
-.persona:hover { border-color: var(--border-strong); }
+.persona:hover {
+  border-color: var(--border-strong);
+}
 
 .persona:focus-visible {
   outline: 2px solid var(--brand-400);
@@ -173,7 +204,7 @@
   box-shadow: 0 0 0 3px var(--brand-100);
 }
 
-[data-theme="dark"] .persona--selected {
+[data-theme='dark'] .persona--selected {
   background: color-mix(in srgb, var(--brand-500) 6%, var(--bg-surface));
   box-shadow: 0 0 0 3px var(--brand-200);
 }
@@ -221,7 +252,9 @@
   border-color: var(--brand-500);
 }
 
-.persona--selected .persona__check::after { content: '✓'; }
+.persona--selected .persona__check::after {
+  content: '✓';
+}
 
 .picker-actions {
   margin-top: var(--space-xl);
@@ -249,6 +282,12 @@
   margin-right: var(--space-xs);
 }
 
-.picker-status--ready .picker-status__dot { background: var(--success); }
-.picker-status--pending .picker-status__dot { background: var(--warning); }
-.picker-status--error .picker-status__dot { background: var(--danger); }
+.picker-status--ready .picker-status__dot {
+  background: var(--success);
+}
+.picker-status--pending .picker-status__dot {
+  background: var(--warning);
+}
+.picker-status--error .picker-status__dot {
+  background: var(--danger);
+}

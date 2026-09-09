@@ -47,6 +47,7 @@ contracts (dim 1-8) are closed; Phase 2 may relax this but Phase 1 does
 not.
 
 If a component needs a style that doesn't exist as a class yet:
+
 1. Add it to `mockups/theme.css` or `mockups/dashboard.css` first.
 2. Reference it from `src/styles/app.css` or directly from a component.
 3. Never use inline hex codes or hardcoded pixel values.
@@ -59,6 +60,7 @@ calls `fetch('/api/incidents')` etc. — same code works against the real
 backend with the env var flipped.
 
 To point at a real backend:
+
 ```bash
 VITE_USE_MOCKS=false pnpm dev
 ```
@@ -66,6 +68,7 @@ VITE_USE_MOCKS=false pnpm dev
 ## Story 1.1 status
 
 Currently delivers:
+
 - Login picker wired to MSW (5 personas from dim 7 §2.5)
 - Chain-head probe on mount → ready/pending/error status pill
 - Session row persisted to IndexedDB

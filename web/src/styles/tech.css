@@ -8,15 +8,27 @@
    .sidebar / .top-chrome chrome — Vite imports both into FieldQueuePage.
    ════════════════════════════════════════════════════════════════════ */
 
-.app-shell--tech .sidebar { width: 200px; }
+.app-shell--tech .sidebar {
+  width: 200px;
+}
 
 .tech-sidebar__welcome {
   padding: var(--space-md);
   border-bottom: 1px solid var(--border-subtle);
   margin-bottom: var(--space-sm);
 }
-.tech-sidebar__name { font-size: var(--font-size-sm); font-weight: var(--font-weight-semibold); margin-bottom: 2px; }
-.tech-sidebar__role { font-family: var(--font-family-mono); font-size: 10px; color: var(--fg-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
+.tech-sidebar__name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: 2px;
+}
+.tech-sidebar__role {
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
 
 /* Today strip */
 .tech-today {
@@ -25,7 +37,11 @@
   gap: var(--space-md);
   margin-bottom: var(--space-lg);
 }
-@media (max-width: 1100px) { .tech-today { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 1100px) {
+  .tech-today {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 .tech-today__cell {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -77,7 +93,10 @@
   color: var(--brand-600);
   font-weight: var(--font-weight-semibold);
 }
-[data-theme="dark"] .tech-chip.is-on { background: var(--brand-200); color: var(--brand-400); }
+[data-theme='dark'] .tech-chip.is-on {
+  background: var(--brand-200);
+  color: var(--brand-400);
+}
 .tech-chip__count {
   background: var(--bg-inset);
   padding: 0 6px;
@@ -85,7 +104,10 @@
   font-size: 9px;
   margin-left: 4px;
 }
-.tech-chip.is-on .tech-chip__count { background: var(--brand-500); color: white; }
+.tech-chip.is-on .tech-chip__count {
+  background: var(--brand-500);
+  color: white;
+}
 
 /* Job list rows */
 .tech-jobs {
@@ -105,23 +127,44 @@
   cursor: pointer;
   transition: border-color 120ms ease-out;
 }
-.tech-job:hover { border-color: var(--brand-500); }
-.tech-job.is-active { border-color: var(--warning); background: var(--warning-bg); }
-.tech-job.is-done { opacity: 0.7; }
-.tech-job.is-done .tech-job__row2 { text-decoration: line-through; }
+.tech-job:hover {
+  border-color: var(--brand-500);
+}
+.tech-job.is-active {
+  border-color: var(--warning);
+  background: var(--warning-bg);
+}
+.tech-job.is-done {
+  opacity: 0.7;
+}
+.tech-job.is-done .tech-job__row2 {
+  text-decoration: line-through;
+}
 
 .tech-job__priority {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-xs);
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-family-mono);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-xs);
   flex-shrink: 0;
 }
-.tech-job__priority--p1 { background: var(--danger);  color: white; }
-.tech-job__priority--p2 { background: var(--warning); color: white; }
-.tech-job__priority--p3 { background: var(--bg-inset); color: var(--fg-secondary); }
+.tech-job__priority--p1 {
+  background: var(--danger);
+  color: white;
+}
+.tech-job__priority--p2 {
+  background: var(--warning);
+  color: white;
+}
+.tech-job__priority--p3 {
+  background: var(--bg-inset);
+  color: var(--fg-secondary);
+}
 
 .tech-job__row1 {
   display: flex;
@@ -164,7 +207,9 @@
   font-weight: var(--font-weight-semibold);
   color: var(--fg-default);
 }
-.tech-job__time-val.is-overdue { color: var(--danger); }
+.tech-job__time-val.is-overdue {
+  color: var(--danger);
+}
 
 /* Status pills (tech-side) */
 .t-pill {
@@ -180,13 +225,41 @@
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
-.t-pill__dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.t-pill--assigned { background: var(--info-bg);    color: var(--info); }
-.t-pill--assigned .t-pill__dot { background: var(--info); }
-.t-pill--enroute  { background: var(--warning-bg); color: var(--warning); }
-.t-pill--enroute  .t-pill__dot { background: var(--warning); }
-.t-pill--onsite   { background: var(--brand-100);  color: var(--brand-600); }
-[data-theme="dark"] .t-pill--onsite { background: var(--brand-200); color: var(--brand-400); }
-.t-pill--onsite   .t-pill__dot { background: var(--brand-500); }
-.t-pill--resolved { background: var(--success-bg); color: var(--success); }
-.t-pill--resolved .t-pill__dot { background: var(--success); }
+.t-pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.t-pill--assigned {
+  background: var(--info-bg);
+  color: var(--info);
+}
+.t-pill--assigned .t-pill__dot {
+  background: var(--info);
+}
+.t-pill--enroute {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.t-pill--enroute .t-pill__dot {
+  background: var(--warning);
+}
+.t-pill--onsite {
+  background: var(--brand-100);
+  color: var(--brand-600);
+}
+[data-theme='dark'] .t-pill--onsite {
+  background: var(--brand-200);
+  color: var(--brand-400);
+}
+.t-pill--onsite .t-pill__dot {
+  background: var(--brand-500);
+}
+.t-pill--resolved {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.t-pill--resolved .t-pill__dot {
+  background: var(--success);
+}

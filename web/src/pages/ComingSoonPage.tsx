@@ -57,13 +57,24 @@ export function ComingSoonPage({ landing, description }: ComingSoonPageProps) {
           <p style={{ color: 'var(--fg-secondary)', marginBottom: 'var(--space-md)' }}>
             {description}
           </p>
-          <p style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-sm)', marginBottom: 'var(--space-lg)' }}>
-            This persona is wired to the chain and the session row is live — only
-            the page surface is deferred. Click below to return to the login picker
-            and try a different persona.
+          <p
+            style={{
+              color: 'var(--fg-tertiary)',
+              fontSize: 'var(--font-size-sm)',
+              marginBottom: 'var(--space-lg)',
+            }}
+          >
+            This persona is wired to the chain and the session row is live — only the page surface
+            is deferred. Click below to return to the login picker and try a different persona.
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            <Button variant="secondary" size="sm" onClick={() => { void logout(); }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                void logout();
+              }}
+            >
               ← Back to login
             </Button>
           </div>

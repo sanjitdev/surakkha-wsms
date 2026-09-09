@@ -60,13 +60,31 @@
   border-radius: var(--radius-xs);
   letter-spacing: var(--letter-spacing-wide, 0.04em);
 }
-.badge--t3 { background: var(--danger); color: #fff; }
-.badge--t2 { background: var(--warning); color: #0E1013; }
-.badge--t1 { background: var(--info); color: #fff; }
-.badge--t0 { background: var(--band-medium); color: #0E1013; }
-[data-theme="dark"] .badge--t3 { color: #0E1013; }
-[data-theme="dark"] .badge--t2 { color: #0E1013; }
-[data-theme="dark"] .badge--t0 { color: #0E1013; }
+.badge--t3 {
+  background: var(--danger);
+  color: #fff;
+}
+.badge--t2 {
+  background: var(--warning);
+  color: #0e1013;
+}
+.badge--t1 {
+  background: var(--info);
+  color: #fff;
+}
+.badge--t0 {
+  background: var(--band-medium);
+  color: #0e1013;
+}
+[data-theme='dark'] .badge--t3 {
+  color: #0e1013;
+}
+[data-theme='dark'] .badge--t2 {
+  color: #0e1013;
+}
+[data-theme='dark'] .badge--t0 {
+  color: #0e1013;
+}
 
 /* ── bulk-bar count — strong element inside .inbox-bulkbar__count uses
       the brand colour to mirror the row-urgent marker. ─────────────── */
@@ -76,6 +94,6 @@
 
 /* ── Bangla row block-padding — dim 4 Amendment A §15.4. The container
       is <main data-locale="bn"> in AppShell so this matches all rows. */
-[data-locale="bn"] .data-table--inbox tr td {
+[data-locale='bn'] .data-table--inbox tr td {
   padding-block: calc(var(--space-md) + var(--space-xs));
 }

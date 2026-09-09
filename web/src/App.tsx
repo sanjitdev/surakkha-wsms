@@ -27,14 +27,7 @@
  *   *                → <Navigate to="/" replace />
  */
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
-import {
-  BrowserRouter,
-  Navigate,
-  Outlet,
-  Route,
-  Routes,
-  useLocation,
-} from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { FieldQueuePage } from './pages/FieldQueuePage';
@@ -57,12 +50,32 @@ function AppShell({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }
 /** Placeholder route definitions for unbuilt persona landings. */
-interface Placeholder { path: string; landing: string; description: string; }
+interface Placeholder {
+  path: string;
+  landing: string;
+  description: string;
+}
 const PLACEHOLDERS: Placeholder[] = [
-  { path: '/submit', landing: '/submit', description: 'Anjali submits a citizen water-safety report (SMS / WhatsApp / voice / photo).' },
-  { path: '/approve', landing: '/approve', description: 'PHA Approver dual-signs PublicNoticeIssued + PlaybookAmendmentApproved.' },
-  { path: '/audit', landing: '/audit', description: 'Read-only audit chain explorer (PHA Viewer).' },
-  { path: '/vendor', landing: '/vendor', description: 'Vendor sensor-fleet batch submission (SensorReadingSubmitted).' },
+  {
+    path: '/submit',
+    landing: '/submit',
+    description: 'Anjali submits a citizen water-safety report (SMS / WhatsApp / voice / photo).',
+  },
+  {
+    path: '/approve',
+    landing: '/approve',
+    description: 'PHA Approver dual-signs PublicNoticeIssued + PlaybookAmendmentApproved.',
+  },
+  {
+    path: '/audit',
+    landing: '/audit',
+    description: 'Read-only audit chain explorer (PHA Viewer).',
+  },
+  {
+    path: '/vendor',
+    landing: '/vendor',
+    description: 'Vendor sensor-fleet batch submission (SensorReadingSubmitted).',
+  },
 ];
 
 /**
@@ -81,10 +94,14 @@ function RequireSession() {
 
   useEffect(() => {
     void refresh();
-    const onChange = () => { void refresh(); };
+    const onChange = () => {
+      void refresh();
+    };
 
     window.addEventListener(SESSION_CHANGED_EVENT, onChange);
-    return () => { window.removeEventListener(SESSION_CHANGED_EVENT, onChange); };
+    return () => {
+      window.removeEventListener(SESSION_CHANGED_EVENT, onChange);
+    };
   }, [refresh]);
 
   // First render — IndexedDB hasn't returned yet. Render nothing to
@@ -111,9 +128,7 @@ function RoutedSurface() {
 
       {/* Dev-only styleguide stays outside the chrome (it's a primitive
           showcase, not a persona page). */}
-      {import.meta.env.DEV && (
-        <Route path="/styleguide" element={<StyleguidePage />} />
-      )}
+      {import.meta.env.DEV && <Route path="/styleguide" element={<StyleguidePage />} />}
 
       {/* Authenticated shell — every nested route is wrapped in
           <AppLayout>. <Outlet /> is the page rendered for the matched
@@ -130,9 +145,7 @@ function RoutedSurface() {
           <Route
             key={p.path}
             path={p.path}
-            element={
-              <ComingSoonPage landing={p.landing} description={p.description} />
-            }
+            element={<ComingSoonPage landing={p.landing} description={p.description} />}
           />
         ))}
 

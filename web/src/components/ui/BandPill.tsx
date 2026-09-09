@@ -20,7 +20,9 @@ export function BandPill({ band, testId }: BandPillProps) {
       data-testid={testId ?? `band-pill-${className}`}
       aria-label={`${band} trust band`}
     >
-      <span className="band-pill__icon" aria-hidden="true">{icon}</span>
+      <span className="band-pill__icon" aria-hidden="true">
+        {icon}
+      </span>
       <span>{band.toUpperCase()}</span>
     </span>
   );

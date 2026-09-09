@@ -6,11 +6,7 @@
  * invariant. No React imports here — this is plain data shaping.
  */
 
-import type {
-  InboxRowStatus,
-  InboxRow as InboxRowType,
-  IncidentSeverity,
-} from '../types/inbox';
+import type { InboxRowStatus, InboxRow as InboxRowType, IncidentSeverity } from '../types/inbox';
 
 /**
  * Convert an unknown wire-payload field to a string. Rejects objects so we
@@ -71,7 +67,7 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       (p.sensor_snapshot as { sensor_id?: string }[] | undefined)?.[0]?.sensor_id ?? '—',
       '—',
     );
-    const ownerKind = (inbox.owner_kind as InboxRowType['ownerKind']);
+    const ownerKind = inbox.owner_kind as InboxRowType['ownerKind'];
     const actionHref = toStr(inbox.href, '/inbox-detail');
 
     return {
@@ -102,10 +98,18 @@ export function mergeRecentDecisions(
   rev: ChainEventLite[],
 ): RecentDecision[] {
   const items: RecentDecision[] = [
-    ...bcast.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Broadcast', target: 'ward 7 notice' }}),
-    ...esc.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Escalated', target: 'block #12' }}),
-    ...csig.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Countersigned', target: 'ward 5' }}),
-    ...rev.map((e) => {return { time: fmtTime(e.occurred_at), verb: 'Reviewed', target: 'ward 12 draft' }}),
+    ...bcast.map((e) => {
+      return { time: fmtTime(e.occurred_at), verb: 'Broadcast', target: 'ward 7 notice' };
+    }),
+    ...esc.map((e) => {
+      return { time: fmtTime(e.occurred_at), verb: 'Escalated', target: 'block #12' };
+    }),
+    ...csig.map((e) => {
+      return { time: fmtTime(e.occurred_at), verb: 'Countersigned', target: 'ward 5' };
+    }),
+    ...rev.map((e) => {
+      return { time: fmtTime(e.occurred_at), verb: 'Reviewed', target: 'ward 12 draft' };
+    }),
   ];
 
   return items.sort((a, b) => b.time.localeCompare(a.time)).slice(0, 4);

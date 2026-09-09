@@ -1,8 +1,4 @@
-import type {
-  ChangeEventHandler,
-  InputHTMLAttributes,
-  ReactNode,
-} from 'react';
+import type { ChangeEventHandler, InputHTMLAttributes, ReactNode } from 'react';
 
 export interface InputProps {
   value: string;

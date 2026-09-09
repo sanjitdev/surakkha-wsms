@@ -144,20 +144,43 @@ const chainHandlers = [
     // Field-tech side events added: TechnicianAssigned, TechnicianArrived,
     // DiagnosisSubmitted, FixSubmitted.
     const ALLOWED = [
-      'SensorReadingSubmitted', 'SensorSilenceObserved', 'SensorStatusChanged',
-      'AnjaliReportSubmitted', 'AnjaliSentinelReadingSubmitted', 'AnjaliAcknowledgeDelivered',
-      'IncidentCreated', 'IncidentEscalated', 'IncidentResolved',
-      'PlaybookStepExecuted', 'DeviationCaptured', 'OverrideRecorded',
-      'ShiftCoverageActivated', 'ShiftCoverageEnded',
-      'TechnicianAssigned', 'TechnicianArrived', 'DiagnosisSubmitted', 'FixSubmitted',
-      'PlaybookVersionDrafted', 'PlaybookVersionPublished', 'PlaybookVersionAbandoned',
+      'SensorReadingSubmitted',
+      'SensorSilenceObserved',
+      'SensorStatusChanged',
+      'AnjaliReportSubmitted',
+      'AnjaliSentinelReadingSubmitted',
+      'AnjaliAcknowledgeDelivered',
+      'IncidentCreated',
+      'IncidentEscalated',
+      'IncidentResolved',
+      'PlaybookStepExecuted',
+      'DeviationCaptured',
+      'OverrideRecorded',
+      'ShiftCoverageActivated',
+      'ShiftCoverageEnded',
+      'TechnicianAssigned',
+      'TechnicianArrived',
+      'DiagnosisSubmitted',
+      'FixSubmitted',
+      'PlaybookVersionDrafted',
+      'PlaybookVersionPublished',
+      'PlaybookVersionAbandoned',
       'PlaybookAmendmentApproved',
-      'PublicNoticeIssued', 'PublicNoticeRetracted',
-      'CouncillorEndorsementRecorded', 'CouncillorRelayMissed', 'CouncillorQualityFlagged', 'CouncillorBypassActivated',
+      'PublicNoticeIssued',
+      'PublicNoticeRetracted',
+      'CouncillorEndorsementRecorded',
+      'CouncillorRelayMissed',
+      'CouncillorQualityFlagged',
+      'CouncillorBypassActivated',
       'ChannelDeliveryFailed',
-      'SignatureAttestation', 'CityConfigChanged', 'SchemaVersionBumped',
-      'OperatorAuthenticated', 'OperatorAccessLogged',
-      'ChainVerificationFailed', 'CommandRejected', 'ProjectionFailed',
+      'SignatureAttestation',
+      'CityConfigChanged',
+      'SchemaVersionBumped',
+      'OperatorAuthenticated',
+      'OperatorAccessLogged',
+      'ChainVerificationFailed',
+      'CommandRejected',
+      'ProjectionFailed',
     ];
 
     if (!ALLOWED.includes(envelope.event_type)) {
@@ -251,16 +274,18 @@ const chainHandlers = [
 
     return HttpResponse.json({
       total: filtered.length,
-      events: sorted.map((b) => {return {
-        event_id: b.event_id,
-        event_type: b.event_type,
-        occurred_at: b.occurred_at,
-        ingested_at: b.ingested_at,
-        actor_identity: b.actor_identity,
-        payload: b.payload,
-        block_hash: b.block_hash,
-        height: b.height,
-      }}),
+      events: sorted.map((b) => {
+        return {
+          event_id: b.event_id,
+          event_type: b.event_type,
+          occurred_at: b.occurred_at,
+          ingested_at: b.ingested_at,
+          actor_identity: b.actor_identity,
+          payload: b.payload,
+          block_hash: b.block_hash,
+          height: b.height,
+        };
+      }),
     });
   }),
 ];
@@ -272,10 +297,18 @@ const sensorHandlers = [
     await delay(LATENCY_MS());
     const all = await getAllBlocks();
     const readings = all.filter((b) => b.event_type === 'SensorReadingSubmitted');
-    const bySensor = new Map<string, { sensor_id: string; ward_id: string; parameter: string; last_value: number; last_at: string }>();
+    const bySensor = new Map<
+      string,
+      { sensor_id: string; ward_id: string; parameter: string; last_value: number; last_at: string }
+    >();
 
     for (const b of readings) {
-      const p = b.payload as { sensor_id: string; ward_id: string; parameter: string; value: number };
+      const p = b.payload as {
+        sensor_id: string;
+        ward_id: string;
+        parameter: string;
+        value: number;
+      };
       const prev = bySensor.get(p.sensor_id);
 
       if (!prev || prev.last_at < b.occurred_at) {
@@ -302,11 +335,13 @@ const sensorHandlers = [
       .filter((b) => (b.payload as { sensor_id: string }).sensor_id === params.id)
       .filter((b) => new Date(b.occurred_at).getTime() >= sinceTs)
       .sort((a, b) => a.occurred_at.localeCompare(b.occurred_at))
-      .map((b) => {return {
-        t: b.occurred_at,
-        value: (b.payload as { value: number }).value,
-        seriesId: (b.payload as { sensor_id: string }).sensor_id,
-      }});
+      .map((b) => {
+        return {
+          t: b.occurred_at,
+          value: (b.payload as { value: number }).value,
+          seriesId: (b.payload as { sensor_id: string }).sensor_id,
+        };
+      });
 
     return HttpResponse.json(readings);
   }),

@@ -16,7 +16,8 @@
 
 export type IncidentSeverity = 'T3' | 'T2' | 'T1' | 'T0';
 export type InboxRowFilter = 'all' | 'T3' | 'sig' | 'drafts' | 'citizen' | 'resolved';
-export type InboxRowStatus = 'awaiting_ack' | 'awaiting_sig' | 'awaiting_draft' | 'citizen_report' | 'chain_verify' | 'info';
+export type InboxRowStatus =
+  'awaiting_ack' | 'awaiting_sig' | 'awaiting_draft' | 'citizen_report' | 'chain_verify' | 'info';
 export interface InboxRowAction {
   label: string;
   href: string;

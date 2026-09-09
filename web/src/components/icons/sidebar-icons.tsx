@@ -31,7 +31,14 @@ import type { ReactElement, ReactNode } from 'react';
 
 function IconShell({ children }: { children: ReactNode }): ReactElement {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       {children}
     </svg>
   );

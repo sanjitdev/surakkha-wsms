@@ -26,7 +26,9 @@ export function EmptyState({
       data-testid={testId ?? 'empty-state'}
       aria-labelledby={headingId}
     >
-      <div className="empty-state__icon" aria-hidden="true">{icon}</div>
+      <div className="empty-state__icon" aria-hidden="true">
+        {icon}
+      </div>
       {createElement(
         `h${headingLevel}`,
         { className: 'empty-state__title', id: headingId },

@@ -31,7 +31,9 @@ export function useAppLayout(): AppLayoutContextValue {
   const v = useContext(AppLayoutContext);
 
   if (!v) {
-    throw new Error('useAppLayout must be used inside <AppLayout>. Pages rendered outside the authenticated shell cannot consume session/chainFreshSeconds.');
+    throw new Error(
+      'useAppLayout must be used inside <AppLayout>. Pages rendered outside the authenticated shell cannot consume session/chainFreshSeconds.',
+    );
   }
   return v;
 }

@@ -63,16 +63,16 @@ export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
       className={`toast toast--${variantKey}`}
       role="status"
       aria-live="polite"
-      onMouseEnter={() => { setPaused(true); }}
-      onMouseLeave={() => { setPaused(false); }}
+      onMouseEnter={() => {
+        setPaused(true);
+      }}
+      onMouseLeave={() => {
+        setPaused(false);
+      }}
       data-testid={testId ?? `toast-${variantKey}`}
     >
       <span className="toast__message">{message}</span>
-      <span
-        className="toast__progress"
-        aria-hidden="true"
-        style={{ width: `${progress}%` }}
-      />
+      <span className="toast__progress" aria-hidden="true" style={{ width: `${progress}%` }} />
     </div>
   );
 }

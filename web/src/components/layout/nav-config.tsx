@@ -60,22 +60,14 @@ export const NAV_BY_ROLE: Record<string, readonly SidebarNavItem[]> = {
     { label: 'Incident detail', href: '/field/incident', icon: <AlertIcon /> },
     { label: 'History', href: '/field/history', icon: <LineChartIcon /> },
   ],
-  anjali: [
-    { label: 'Submit report', href: '/submit', icon: <SendIcon /> },
-  ],
+  anjali: [{ label: 'Submit report', href: '/submit', icon: <SendIcon /> }],
   pha_approver: [
     { label: 'Approve', href: '/approve', icon: <CheckIcon /> },
     { label: 'Audit', href: '/audit', icon: <AuditIcon /> },
   ],
-  pha_viewer: [
-    { label: 'Audit', href: '/audit', icon: <AuditIcon /> },
-  ],
-  vendor: [
-    { label: 'Submit batch', href: '/vendor', icon: <UploadIcon /> },
-  ],
-  utility_message_desk: [
-    { label: 'Inbox', href: '/inbox', icon: <InboxIcon /> },
-  ],
+  pha_viewer: [{ label: 'Audit', href: '/audit', icon: <AuditIcon /> }],
+  vendor: [{ label: 'Submit batch', href: '/vendor', icon: <UploadIcon /> }],
+  utility_message_desk: [{ label: 'Inbox', href: '/inbox', icon: <InboxIcon /> }],
 };
 /**
  * Resolve the persona's default landing route. Used for the sidebar
@@ -86,13 +78,13 @@ export const NAV_BY_ROLE: Record<string, readonly SidebarNavItem[]> = {
  * import the same map so they cannot drift.
  */
 export const LANDING_BY_ROLE: Record<string, string> = {
-  field_technician:     '/field',
-  utility_operator:     '/inbox',
+  field_technician: '/field',
+  utility_operator: '/inbox',
   utility_message_desk: '/inbox',
-  anjali:               '/submit',
-  pha_approver:         '/approve',
-  pha_viewer:           '/audit',
-  vendor:               '/vendor',
+  anjali: '/submit',
+  pha_approver: '/approve',
+  pha_viewer: '/audit',
+  vendor: '/vendor',
 };
 export function landingFor(role: string): string {
   return LANDING_BY_ROLE[role] ?? '/';

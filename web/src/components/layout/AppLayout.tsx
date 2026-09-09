@@ -90,9 +90,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     };
 
     void tick();
-    const id = window.setInterval(() => { void tick(); }, 5000);
+    const id = window.setInterval(() => {
+      void tick();
+    }, 5000);
 
-    return () => { window.clearInterval(id); };
+    return () => {
+      window.clearInterval(id);
+    };
   }, []);
 
   // (3) logout — single source of truth from mocks/session.ts.
@@ -121,10 +125,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <button
               type="button"
               className="sidebar__logout"
-              onClick={() => { void logout(); }}
+              onClick={() => {
+                void logout();
+              }}
               data-testid="sidebar-logout"
             >
-              <span className="sidebar__icon" aria-hidden="true"><LogoutIcon /></span>
+              <span className="sidebar__icon" aria-hidden="true">
+                <LogoutIcon />
+              </span>
               <span>Logout</span>
             </button>
           }

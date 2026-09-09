@@ -105,4 +105,4 @@ export function ulid(now: number = Date.now()): string {
  * Genesis hash is sha256(canonical({ ...all fields, prev_block_hash: null })).
  * Returned as the literal "0x" + 64 hex chars per dim 7 §6 wire form.
  */
-export const GENESIS_PREV_HASH = `0x${ '0'.repeat(64)}`;
+export const GENESIS_PREV_HASH = `0x${'0'.repeat(64)}`;

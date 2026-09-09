@@ -52,13 +52,17 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
 }
-.sg-header__link:hover { text-decoration: underline; }
+.sg-header__link:hover {
+  text-decoration: underline;
+}
 
 .sg-section {
   margin-block: var(--space-xl);
   padding: var(--space-xl);
 }
-.sg-section__head { margin-bottom: var(--space-lg); }
+.sg-section__head {
+  margin-bottom: var(--space-lg);
+}
 .sg-section__title {
   font-size: var(--font-size-lg);
   font-weight: var(--font-weight-semibold);
@@ -116,7 +120,11 @@
   font-size: var(--font-size-xs);
   color: var(--fg-default);
 }
-.sg-footer__small { font-size: var(--font-size-xs); color: var(--fg-tertiary); margin: 0; }
+.sg-footer__small {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  margin: 0;
+}
 
 @media (max-width: 767px) {
   .sg-shell {
