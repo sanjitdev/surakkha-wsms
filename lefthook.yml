@@ -1,0 +1,44 @@
+# Lefthook config for Surakkha.
+#
+# Runs on:
+#   pre-commit  → format staged files with Prettier, then ESLint --fix
+#                 the staged ts/tsx files (type-aware checks are skipped
+#                 in the staged run for speed — CI still runs the full
+#                 type-aware pass).
+#   commit-msg  → commitlint with conventional config.
+#   pre-push    → typecheck the whole project (slow but catches the
+#                 last-minute "I forgot to typecheck" case before CI does).
+#
+# Install via `pnpm prepare` (the `prepare` script in package.json).
+# Hooks are stored in `.git/hooks/lefthook-*` after install.
+
+pre-commit:
+  parallel: true
+  commands:
+    prettier:
+      glob_strict_files: true
+      glob: "*.{ts,tsx,js,jsx,json,md,css,yml,yaml,cjs,mjs,html}"
+      exclude: "(\\.gitignore|\\.prettierignore|public/mockServiceWorker\\.js|coverage/.*)"
+      run: pnpm exec prettier --write --log-level warn {staged_files}
+      stage_fixed: true
+    eslint-fix:
+      glob_strict_files: true
+      glob: "*.{ts,tsx,js,jsx}"
+      run: pnpm exec eslint --fix --max-warnings 0 {staged_files}
+      stage_fixed: true
+
+commit-msg:
+  parallel: false
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  parallel: false
+  commands:
+    typecheck:
+      run: pnpm typecheck
+
+# ─────────────────────────────────────────────────────────────────────
+# CI uses the same scripts. If you change a command here, mirror it
+# in .github/workflows/ci.yml.

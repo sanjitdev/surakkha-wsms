@@ -1,0 +1,7 @@
+dist
+node_modules
+coverage
+public/mockServiceWorker.js
+*.tsbuildinfo
+mockups
+pnpm-lock.yaml
