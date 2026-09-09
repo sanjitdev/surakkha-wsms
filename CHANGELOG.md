@@ -14,12 +14,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **B1 (in progress):** MIT `LICENSE` at the repository root.
-- **B1 (in progress):** Keep-a-Changelog format `CHANGELOG.md` with seeded history below.
-- **B1 (planned):** GitHub Actions CI workflow (`.github/workflows/ci.yml`) running `typecheck`, `lint`, `test --coverage`, and `build`.
-- **B1 (planned):** Vitest coverage gate (v8 provider, soft 60 % line threshold).
-- **B1 (planned):** Lefthook pre-commit hooks (Prettier + ESLint --fix) and commitlint (`commit-msg`) for Conventional Commits.
-- **B1 (planned):** Prettier config and `eslint-config-prettier` integration so stylistic rules don't fight Prettier.
+- **B2:** Top-level `ErrorBoundary` + `ErrorScreen` recovery UI. Any render-time exception in the SPA is caught and presented with a heading, the error name + message, a collapsible stack trace (in dev), `Reload page` and `Copy diagnostics` actions. Wrapped around `<BrowserRouter>` in `App.tsx` so even router errors don't white-screen.
+- **B2:** `ToastProvider` + `useToast()` hook. App code can now call `toast.danger("…")` / `.warning` / `.info` / `.success` / `.dismiss(id)` / `.clear()` from anywhere; up to 5 toasts stack in the bottom-right region (`role="region"`, `aria-live="polite"`). Built on top of the existing `<Toast />` primitive (`durationMs` now overridable for tests).
+- **B2:** Five ADRs (`docs/adr/0001-…0005`) capturing the foundational tech choices: React 18 + Vite, react-router-dom v6, React Context for state, CSS variables for styling, and pnpm.
+- **B2:** Vitest coverage for ToastProvider (push / variants / dismiss / FIFO eviction / outside-provider throw) and ErrorBoundary (children render / fallback reveal / `onError` / custom fallback / reset).
+
+- **B1:** MIT `LICENSE` at the repository root.
+- **B1:** Keep-a-Changelog format `CHANGELOG.md` with seeded history below.
+- **B1:** GitHub Actions CI workflow (`.github/workflows/ci.yml`) running `typecheck`, `lint`, `format:check`, `test --coverage`, and `build`.
+- **B1:** Vitest coverage gate (v8 provider, report-only — no threshold enforcement yet, see ADR to follow).
+- **B1:** Lefthook pre-commit hooks (Prettier + ESLint --fix) and commitlint (`commit-msg`) for Conventional Commits.
+- **B1:** Prettier config and `eslint-config-prettier` integration so stylistic rules don't fight Prettier.
 
 ### Phase 1 — Foundations (already in master, history preserved below)
 
