@@ -29,6 +29,8 @@ import { EmptyState } from '../components/layout/EmptyState';
 import { TopChrome } from '../components/layout/TopChrome';
 import { Sidebar, type SidebarNavItem } from '../components/layout/Sidebar';
 import { Dropdown, type DropdownOption } from '../components/ui/Dropdown';
+import { Table, type TableColumn } from '../components/ui/Table';
+import { Pagination } from '../components/ui/Pagination';
 import { Band, ContainerWidth, DropdownMode, ToastVariant } from '../types/domain';
 import { useTheme } from '../hooks/useTheme';
 import { useLocale } from '../hooks/useLocale';
@@ -78,6 +80,34 @@ const ICON_FIELD = '⚙';
 const ICON_AUDIT = '⌬';
 const ICON_HOME = '◉';
 
+/* ──────────────────────── Table fixture ──────────────────── */
+interface TableRow {
+  id: string;
+  severity: 'High' | 'Medium' | 'Low';
+  ward: string;
+  openedAt: string;
+  status: 'open' | 'resolved' | 'escalated';
+}
+const WARD_NAMES = ['Gulshan', 'Dhanmondi', 'Mirpur', 'Uttara', 'Tejgaon', 'Banani', 'Mohammadpur', 'Ramna'];
+const TABLE_ROWS: TableRow[] = Array.from({ length: 25 }, (_, i) => {
+  const idx = i + 1;
+
+  return {
+    id: `INC-${String(idx).padStart(3, '0')}`,
+    severity: (['High', 'Medium', 'Low'] as const)[i % 3],
+    ward: WARD_NAMES[i % WARD_NAMES.length],
+    openedAt: new Date(2026, 8, 1 + i, 9 + (i % 8), (i * 7) % 60).toISOString(),
+    status: (['open', 'resolved', 'escalated'] as const)[i % 3],
+  };
+});
+const TABLE_COLUMNS: TableColumn<TableRow>[] = [
+  { key: 'id', header: 'Incident', sortable: true, resizable: true, width: '140px' },
+  { key: 'severity', header: 'Severity', sortable: true, resizable: true, width: '120px' },
+  { key: 'ward', header: 'Ward', sortable: true, resizable: true, width: '140px' },
+  { key: 'openedAt', header: 'Opened at', sortable: true, resizable: true, width: '200px' },
+  { key: 'status', header: 'Status', sortable: true, width: '120px' },
+];
+
 export function StyleguidePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [toastKey, setToastKey] = useState(0);
@@ -90,6 +120,13 @@ export function StyleguidePage() {
   const [searchWard, setSearchWard] = useState<string | null>(null);
   const [disabledWard, setDisabledWard] = useState<string | null>('gulshan');
   const [multiWard, setMultiWard] = useState<string[]>(['gulshan', 'dhanmondi']);
+  // FE-B5b: Table showcase state — sort + selection + page wired live.
+  // The Table primitive owns its own sort state internally; we only need to
+  // expose selection + pagination here.
+  const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const paginatedRows = TABLE_ROWS.slice((page - 1) * pageSize, page * pageSize);
   const WARDS: DropdownOption<string>[] = [
     { value: 'gulshan', label: 'Gulshan' },
     { value: 'dhanmondi', label: 'Dhanmondi' },
@@ -498,6 +535,50 @@ export function StyleguidePage() {
         <Row label="interactive sidebar">
           <div className="sg-sidebar-frame">
             <Sidebar navItems={navItems} currentPath="/inbox" brand="Surakkha" />
+          </div>
+        </Row>
+      </Section>
+
+      <Section
+        title="Table"
+        blurb="FE-B5b primitive. Generic <Table<T>> over a row record. Opt-in per-column sort + resize. Optional selection + pagination via <Pagination>. Live readout below shows current sort + selection + page state."
+      >
+        <Row label="25-row fixture">
+          <div className="section--table">
+            <Table<TableRow>
+              columns={TABLE_COLUMNS}
+              rows={paginatedRows}
+              rowKey="id"
+              selectable
+              selectedRows={selectedRows}
+              onSelectionChange={setSelectedRows}
+              testId="sg-table"
+            />
+            <div className="pagination-row">
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                total={TABLE_ROWS.length}
+                onPageChange={setPage}
+                onPageSizeChange={(n) => {
+                  setPageSize(n);
+                  setPage(1);
+                }}
+                testId="sg-pagination"
+              />
+            </div>
+            <pre data-testid="sg-table-readout" className="sg-table-readout">
+              {JSON.stringify(
+                {
+                  selected: Array.from(selectedRows),
+                  page,
+                  pageSize,
+                  total: TABLE_ROWS.length,
+                },
+                null,
+                2,
+              )}
+            </pre>
           </div>
         </Row>
       </Section>

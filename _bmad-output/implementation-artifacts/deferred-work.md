@@ -106,3 +106,31 @@
 - source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
   summary: FE-B5a follow-up — keyboard type-ahead on the trigger should reset the searchable `query` state when the popover opens via keyboard (not the search input).
   evidence: B5a's type-ahead branch calls `setOpen(true)` + `setActiveIndex(idx)` but does not clear `query`. If the user previously typed "dh" then closed the popover and re-opened it with the keyboard, "dh" is still in the filter input. Minor inconsistency; cleanup belongs in a follow-up.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5d — consumer migration: replace the bespoke `<table className="data-table">` markup in `OperatorDashboard.tsx`, `InboxList.tsx`, and `AuditLog.tsx` with the `<Table>` primitive. One sub-spec per consumer.
+  evidence: B5b's "Never" boundary explicitly forbids source edits to the page consumers so the primitive lands with zero blast radius. The three pages each hand-roll sort logic, select-all checkboxes, and pagination — the whole reason B5b exists. Each migration reshapes a different row model (`IncidentSummary` for the dashboard, the inbox row model for InboxList, chain events for AuditLog) and touches that page's existing test file, so bundling all three would blow the 1,600-token ceiling and create a 3-page blast radius in one PR.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5b follow-up — column resize state is keyed by column key and never resets when the `columns` array changes identity. Adding/removing a column leaves stale widths in `useTableResize`'s `Record<string, string>`.
+  evidence: `useTableResize.ts` holds `useState<Record<string, string>>({})` with no effect that prunes keys absent from the current `columns`. Today every FE-1 consumer passes a static `columns` const so no test fails, but a future column-picker UI (show/hide columns) would leak widths for hidden columns and re-apply them on re-show. The documented workaround is remounting via a `key` prop on `<Table>`; a proper fix prunes the record in a `useEffect` keyed on the column-key list. Edge-Hunter finding.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5b follow-up — `useTableSort`'s comparator returns 0 for ties, and `Array.prototype.sort` stability is relied on implicitly. Non-primitive cell values (objects, arrays, Dates) sort as equal because `stringify` returns `''` for them.
+  evidence: The `stringify(v)` helper added in the review patch explicitly returns `''` for anything that is not `string`/`number`/`boolean`, which silences `@typescript-eslint/no-base-to-string` but means a `sortable` column whose cell is a `Date` or a nested object sorts every row as tied. B5b's fixtures are all primitives so no test catches it. The fix is either a per-column `sortAccessor?: (row: T) => string | number` escape hatch or a `Date` branch in `stringify`. Blind-Hunter finding.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5b follow-up — select-all only toggles rows on the current page; there is no tri-state (indeterminate) header checkbox for the partial-selection case.
+  evidence: `TableHeader.tsx` renders `checked={allSelected}` with no `indeterminate` DOM property wiring (which React only exposes via a ref, not a JSX attribute). When 2 of 3 rows are selected the header checkbox reads unchecked, which is misleading. The WAI-ARIA grid pattern and every mature data table ship the mixed state. Deferred because it needs a `useRef` + `useEffect` on the input node and a matching Vitest case that reads `.indeterminate`.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5b follow-up — column resize is mouse-only. No keyboard affordance and no touch (`pointerdown`/`touchstart`) support on the `role="separator"` handle.
+  evidence: `useTableResize.ts` binds `mousedown` on the handle and window-level `mousemove`/`mouseup`. The handle carries `role="separator"` + `aria-orientation="vertical"` + `aria-valuenow` but has no `tabIndex` and no Arrow-key handler, so keyboard and touch users cannot resize at all. The WAI-ARIA window-splitter pattern specifies Left/Right arrows adjust by a step and Home/End jump to min/max. Deferred so B5b's mouse path ships first; the a11y hardening pass should cover Dropdown's popover and Table's resize handle together.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5b follow-up — row virtualization for tables over ~1,000 rows, plus a sticky first column on horizontal scroll.
+  evidence: B5b's "Out of scope" section defers both. The mobile floor at 767px switches the table to horizontal scroll, at which point the identifier column scrolls out of view and rows become unreadable — the audit-log timeline is the first real consumer that will need `position: sticky; left: 0` on column 0. Virtualization is unproven need: no FE-1 endpoint currently returns more than ~500 rows, so the follow-up should benchmark a real query before pulling in windowing logic.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5b-table.md`
+  summary: FE-B5b follow-up — wire `onSortChange` to a server-side sort round-trip and add a `sortMode: 'client' | 'server'` prop so the Table stops re-sorting rows the server already ordered.
+  evidence: `Table.tsx` always applies its `sortedRows` `useMemo` comparator, even when the consumer is fetching pre-sorted pages from the gateway. The callback surface for server-side sort exists but the opt-out does not, so a server-sorted consumer would sort twice (harmless for a full dataset, wrong for a paginated slice — page 2 of a server-sorted set would be re-sorted within the slice only). Ships naturally alongside B5d's AuditLog migration, which is the first consumer with a server-ordered query (`block_height desc`).
