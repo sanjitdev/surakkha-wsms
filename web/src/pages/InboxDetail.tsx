@@ -26,16 +26,8 @@ import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
 import { AlertIcon, InboxIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
+import { useIncidents } from '../hooks/useIncidents';
 
-interface IncidentSummary {
-  incident_id: string;
-  status: string;
-  severity: string;
-  ward_id?: string;
-  last_block_height?: number;
-  last_event_type?: string;
-  last_occurred_at?: string;
-}
 interface ChainEvent {
   event_id: string;
   event_type: string;
@@ -107,31 +99,39 @@ function eventTitle(event: ChainEvent): string {
 }
 export function InboxDetail() {
   const { id = '' } = useParams<{ id: string }>();
-  const [incidents, setIncidents] = useState<IncidentSummary[]>([]);
+  const { incidents, loading: incLoading, error: incError } = useIncidents();
   const [events, setEvents] = useState<ChainEvent[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Chain poll is owned by AppLayout; this page only fetches the
+    // chain-event feed it needs to render the incident thread timeline.
+    const cancelled = { current: false };
+
     void (async () => {
       try {
-        const [incR, evR] = await Promise.all([
-          fetch('/api/incidents').then((r) => r.json()) as Promise<IncidentSummary[]>,
-          fetch('/api/events?limit=200').then((r) => r.json()) as Promise<{
-            events: ChainEvent[];
-          }>,
-        ]);
+        const evR = (await fetch('/api/events?limit=200').then((r) => r.json())) as {
+          events: ChainEvent[];
+        };
 
-        setIncidents(incR);
+        if (cancelled.current) return;
         setEvents(evR.events);
       } catch (err) {
+        if (cancelled.current) return;
         console.error('[surakkha] inbox-detail fetch failed', err);
-        setIncidents([]);
         setEvents([]);
-      } finally {
-        setLoading(false);
       }
     })();
+    return () => {
+      cancelled.current = true;
+    };
   }, []);
+
+  const loading = incLoading;
+
+  // Surface the hook's error in dev — no toast, per spec §HAPPY_PATH_memo
+  // contract. The page still renders "Incident not found" if the
+  // incidents projection never resolves the requested id.
+  void incError;
 
   const incident = useMemo(
     () => incidents.find((i) => i.incident_id === id) ?? null,

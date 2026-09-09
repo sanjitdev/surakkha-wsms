@@ -26,19 +26,12 @@
 import { useEffect, useState } from 'react';
 import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
+import { useIncidents } from '../hooks/useIncidents';
+import type { IncidentSummary } from '../types/domain';
 
 type Layout = 'a' | 'b' | 'c';
 type Tab = 'overview' | 'sensors' | 'wards';
 
-interface IncidentRow {
-  incident_id: string;
-  status: 'open' | 'resolved' | 'escalated';
-  severity: string;
-  ward_id?: string;
-  last_block_height: number;
-  last_event_type: string;
-  last_occurred_at: string;
-}
 interface SensorRow {
   sensor_id: string;
   ward_id: string;
@@ -66,7 +59,13 @@ export function OperatorDashboard() {
   const { session } = useAppLayout();
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
-  const [incidents, setIncidents] = useState<IncidentRow[]>([]);
+  const { incidents, loading: incLoading } = useIncidents();
+
+  // incLoading is surfaced for future skeleton use; the page today renders
+  // an empty `openIncidents` slice instead of a loading spinner so the
+  // hook's flag is intentionally unused.
+  void incLoading;
+
   const [sensors, setSensors] = useState<SensorRow[]>([]);
   const [recent, setRecent] = useState<ChainEventLite[]>([]);
 
@@ -89,15 +88,15 @@ export function OperatorDashboard() {
     }
   }, [layout]);
 
-  // 2. data fetch — incidents + sensors + recent chain events.
-  // Chain freshness polling moved to AppLayout (single source of truth).
+  // 2. data fetch — sensors + recent chain events only. Incidents come
+  // from `useIncidents()` (Layer C) so the dashboard, inbox detail, and
+  // any future incident consumer share a single fetch path.
   useEffect(() => {
     const cancelled = { current: false };
 
     void (async () => {
       try {
-        const [incRes, senRes, evtRes] = await Promise.all([
-          fetch('/api/incidents').then((r) => r.json()) as Promise<IncidentRow[]>,
+        const [senRes, evtRes] = await Promise.all([
           fetch('/api/sensors').then((r) => r.json()) as Promise<SensorRow[]>,
           fetch('/api/events?limit=20').then((r) => r.json()) as Promise<{
             events: ChainEventLite[];
@@ -105,7 +104,6 @@ export function OperatorDashboard() {
         ]);
 
         if (cancelled.current) return;
-        setIncidents(incRes);
         setSensors(senRes);
         setRecent(evtRes.events);
       } catch (err) {
@@ -1012,7 +1010,7 @@ function relativeTime(iso: string): string {
 // Synthesises a ranking from incident data so the chart populates with
 // whatever the chain has — falls back to the locked static layout if
 // no incidents are reported yet.
-function WardRanking({ incidents }: { incidents: IncidentRow[] }) {
+function WardRanking({ incidents }: { incidents: IncidentSummary[] }) {
   // group incidents by ward_id and count by severity
   const byWard = new Map<string, { count: number; weighted: number }>();
 
