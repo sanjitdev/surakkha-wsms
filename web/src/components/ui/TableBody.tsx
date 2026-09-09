@@ -62,7 +62,7 @@ export function TableBody<T>(props: TableBodyProps<T>): ReactNode {
         return (
           <tr
             key={k === '' ? String(rowIndex) : k}
-            className="table__row"
+            className={`table__row${checked ? ' table__row--selected' : ''}`}
             data-testid={`${rootTestId}-row-${k === '' ? String(rowIndex) : k}`}
           >
             {selectable ? (
@@ -90,11 +90,12 @@ export function TableBody<T>(props: TableBodyProps<T>): ReactNode {
                 width,
                 textAlign: align,
               };
+              const tdClass = `table__cell ${col.cellClassName ?? ''} ${col.className ?? ''}`.trim();
 
               return (
                 <td
                   key={ckey}
-                  className={`table__cell ${col.className ?? ''}`.trim()}
+                  className={tdClass}
                   style={tdStyle}
                 >
                   {col.render !== undefined

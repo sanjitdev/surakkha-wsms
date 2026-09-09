@@ -1,6 +1,6 @@
-/* table.css — FE-B5b Table primitive.
-   Token-only composition on top of components.css + dim 4 tokens.
-   No hex literals. No new tokens. */
+/* table.css — FE-B5b Table primitive (redesign pass).
+   Token-only composition on components.css + dim 4 tokens.
+   No hex literals. No new tokens. ≤200 LoC (AD-FE-5). */
 
 .table {
   width: 100%;
@@ -8,12 +8,12 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   overflow: hidden;
+  font-family: var(--font-family-sans);
 }
 .table__inner {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: var(--font-size-sm);
   color: var(--fg-default);
 }
 .table__head {
@@ -22,15 +22,20 @@
 .table__head tr {
   border-bottom: 1px solid var(--border-default);
 }
+/* Headers — uppercase tracked labels, secondary text color (was default).
+   The compact --font-size-xs + letter-spacing gives the "DATA TABLE" look. */
 .table__header-cell {
   height: var(--height-control-md);
   padding: 0 var(--space-md);
   font-weight: var(--font-weight-semibold);
-  color: var(--fg-default);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-secondary);
   white-space: nowrap;
   user-select: none;
   background: var(--bg-elevated);
-  /* `position: relative` set inline so resize handle can anchor right edge. */
+  position: relative;
 }
 .table__sort-button {
   display: inline-flex;
@@ -43,38 +48,49 @@
   cursor: pointer;
   font: inherit;
   color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
 }
-.table__sort-button:focus-visible {
+.table__sort-button:focus-visible,
+.table__resize-handle:focus-visible {
   outline: 2px solid var(--brand-500);
-  outline-offset: 2px;
-  border-radius: var(--radius-xs);
+  outline-offset: -2px;
 }
-.table__header-label {
-  font-weight: var(--font-weight-semibold);
-}
+.table__header-label { font-weight: var(--font-weight-semibold); }
+/* Single chevron that rotates for ascending/descending — keeps header width
+   stable instead of swapping glyphs (was ▲/▼). */
 .table__sort-indicator {
-  font-size: var(--font-size-xs);
-  color: var(--fg-muted);
-  min-width: 0.75em;
   display: inline-block;
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  min-width: 0.75em;
+  transition: transform var(--motion-press-120) var(--ease-out),
+              color var(--motion-press-120) var(--ease-out);
 }
+.table__sort-indicator::before {
+  content: "▾";
+}
+.table__header-cell[aria-sort="ascending"] .table__sort-indicator { transform: rotate(180deg); }
 .table__header-cell[aria-sort="ascending"] .table__sort-indicator,
 .table__header-cell[aria-sort="descending"] .table__sort-indicator {
   color: var(--brand-500);
 }
+/* Resize handle — invisible until the column is hovered, then a 2 px brand rail. */
 .table__resize-handle {
   position: absolute;
-  top: 0;
+  top: 25%;
+  bottom: 25%;
   right: 0;
-  bottom: 0;
-  width: 8px;
+  width: 2px;
   cursor: col-resize;
   background: transparent;
+  transition: background-color var(--motion-press-120) var(--ease-out);
 }
+.table__header-cell:hover .table__resize-handle,
 .table__resize-handle:hover,
 .table__resize-handle[aria-valuenow="1"] {
   background: var(--brand-500);
-  opacity: 0.4;
+  opacity: 0.5;
 }
 .table__select-cell {
   width: 40px;
@@ -93,30 +109,60 @@
   accent-color: var(--brand-500);
   cursor: pointer;
 }
+/* Rows — dense (40 px) + visible zebra (--bg-inset, not the washed-out --zebra
+   fallback that the original spec used) + selected row rail. */
 .table__row {
+  min-height: var(--height-row-default);
   border-bottom: 1px solid var(--border-subtle);
   background: var(--bg-surface);
+  transition: background-color var(--motion-press-120) var(--ease-out);
 }
-.table__row:nth-child(even) {
-  background: var(--zebra, var(--bg-subtle));
+.table__row:nth-child(even) { background: var(--bg-inset); }
+.table__row:hover { background: var(--bg-elevated); }
+.table__row--selected {
+  background: var(--brand-100);
+  box-shadow: inset 3px 0 0 var(--brand-500);
 }
-.table__row:hover {
-  background: var(--bg-elevated);
-}
+.table__row--selected:hover { background: var(--brand-200); }
+/* Cells — tight 4/12 padding so 40 px rows read as dense data. */
 .table__cell {
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-xs) var(--space-md);
   vertical-align: middle;
   color: var(--fg-default);
   font-size: var(--font-size-sm);
   line-height: var(--line-height-body);
 }
-.table__row--skeleton .table__cell {
-  padding-block: var(--space-md);
+.table__cell--mono {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
 }
+/* Status column — colored dot + lowercase label. */
+.table__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.table__status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-tertiary);
+  flex: none;
+}
+.table__status-dot--open      { background: var(--success); }
+.table__status-dot--resolved  { background: var(--fg-tertiary); }
+.table__status-dot--escalated { background: var(--warning); }
+.table__status-label {
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+}
+/* Skeleton rows — tighter shimmer to match the dense row height. */
+.table__row--skeleton .table__cell { padding-block: var(--space-sm); }
 .table__skeleton {
   display: block;
   width: 100%;
-  height: 14px;
+  height: 10px;
   border-radius: var(--radius-xs);
   background: linear-gradient(
     90deg,
@@ -140,16 +186,11 @@
   }
 }
 @media (max-width: 767px) {
-  .table {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  .table__inner {
-    min-width: 640px;
-  }
+  .table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .table__inner { min-width: 640px; }
 }
 
-/* ── Pagination (B5b sub-component) ─────────────────────────── */
+/* ── Pagination (B5b sub-component) ────────────────────────── */
 .pagination {
   display: flex;
   align-items: center;
@@ -160,10 +201,7 @@
   background: var(--bg-surface);
   flex-wrap: wrap;
 }
-.pagination__summary {
-  color: var(--fg-secondary);
-  font-size: var(--font-size-sm);
-}
+.pagination__summary { color: var(--fg-secondary); font-size: var(--font-size-sm); }
 .pagination__controls {
   display: flex;
   align-items: center;
@@ -189,34 +227,23 @@
   font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
+  transition: background-color var(--motion-press-120) var(--ease-out),
+              border-color var(--motion-press-120) var(--ease-out);
 }
-.pagination__chip:hover {
-  background: var(--bg-elevated);
-}
+.pagination__chip:hover { background: var(--bg-elevated); }
 .pagination__chip--active {
   background: var(--brand-500);
   color: var(--bg-surface);
   border-color: var(--brand-500);
 }
-.pagination__chip:focus-visible {
-  outline: 2px solid var(--brand-500);
-  outline-offset: 2px;
-}
+.pagination__chip:focus-visible { outline: 2px solid var(--brand-500); outline-offset: 2px; }
 .pagination__ellipsis {
-  color: var(--fg-muted);
+  color: var(--fg-tertiary);
   font-size: var(--font-size-xs);
   padding-inline: var(--space-xs);
 }
-.pagination__size {
-  min-width: 160px;
-}
+.pagination__size { min-width: 160px; }
 @media (max-width: 767px) {
-  .pagination {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .pagination__controls {
-    margin-inline-start: 0;
-    justify-content: space-between;
-  }
+  .pagination { flex-direction: column; align-items: stretch; }
+  .pagination__controls { margin-inline-start: 0; justify-content: space-between; }
 }

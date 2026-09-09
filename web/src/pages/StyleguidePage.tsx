@@ -15,7 +15,7 @@
  * Layout: 2-column shell (Sidebar + main). Main renders one <Section> per
  * component, each showing every variant + a one-line description.
  */
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/styleguide.css';
 import { Button } from '../components/ui/Button';
@@ -100,14 +100,34 @@ const TABLE_ROWS: TableRow[] = Array.from({ length: 25 }, (_, i) => {
     status: (['open', 'resolved', 'escalated'] as const)[i % 3],
   };
 });
-const TABLE_COLUMNS: TableColumn<TableRow>[] = [
-  { key: 'id', header: 'Incident', sortable: true, resizable: true, width: '140px' },
-  { key: 'severity', header: 'Severity', sortable: true, resizable: true, width: '120px' },
-  { key: 'ward', header: 'Ward', sortable: true, resizable: true, width: '140px' },
-  { key: 'openedAt', header: 'Opened at', sortable: true, resizable: true, width: '200px' },
-  { key: 'status', header: 'Status', sortable: true, width: '120px' },
-];
 
+/** Render the severity column as a BandPill (B5a-composed primitive). */
+function renderSeverity(row: TableRow): ReactNode {
+  return <BandPill band={row.severity} />;
+}
+/** Render the status column as a colored dot + label (low-emphasis pill). */
+function renderStatus(row: TableRow): ReactNode {
+  const className = `table__status-dot table__status-dot--${row.status}`;
+
+  return (
+    <span className="table__status">
+      <span className={className} aria-hidden="true" />
+      <span className="table__status-label">{row.status}</span>
+    </span>
+  );
+}
+/** Locale-aware short date+time. Reads the live i18n value via closure. */
+function makeOpenedAtRenderer(locale: 'en' | 'bn'): (row: TableRow) => ReactNode {
+  const fmt = new Intl.DateTimeFormat(locale, {
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+
+  return (row) => fmt.format(new Date(row.openedAt));
+}
 export function StyleguidePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [toastKey, setToastKey] = useState(0);
@@ -127,6 +147,56 @@ export function StyleguidePage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const paginatedRows = TABLE_ROWS.slice((page - 1) * pageSize, page * pageSize);
+  // Pull theme + locale hooks first; the table-column renderers below close
+  // over `locale` (date formatter) so the hooks must run before the columns.
+  const { theme, toggle: toggleTheme } = useTheme();
+  const { locale, toggle: toggleLocale } = useLocale();
+  // The column descriptor for the severity + status + openedAt columns closes
+  // over a function that reads the live `locale` value, so it must be built
+  // inside the component (not at module top-level like the rest of TABLE_COLUMNS).
+  const tableColumns: TableColumn<TableRow>[] = [
+    {
+      key: 'id',
+      header: 'Incident',
+      sortable: true,
+      resizable: true,
+      width: '140px',
+      cellClassName: 'table__cell--mono',
+    },
+    {
+      key: 'severity',
+      header: 'Severity',
+      sortable: true,
+      resizable: true,
+      width: '150px',
+      cellClassName: 'table__cell--badge',
+      render: renderSeverity,
+    },
+    {
+      key: 'ward',
+      header: 'Ward',
+      sortable: true,
+      resizable: true,
+      width: '140px',
+    },
+    {
+      key: 'openedAt',
+      header: 'Opened at',
+      sortable: true,
+      resizable: true,
+      width: '200px',
+      cellClassName: 'table__cell--date',
+      render: makeOpenedAtRenderer(locale),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: true,
+      width: '140px',
+      cellClassName: 'table__cell--status',
+      render: renderStatus,
+    },
+  ];
   const WARDS: DropdownOption<string>[] = [
     { value: 'gulshan', label: 'Gulshan' },
     { value: 'dhanmondi', label: 'Dhanmondi' },
@@ -134,9 +204,6 @@ export function StyleguidePage() {
     { value: 'uttara', label: 'Uttara' },
     { value: 'tejgaon', label: 'Tejgaon' },
   ];
-
-  const { theme, toggle: toggleTheme } = useTheme();
-  const { locale, toggle: toggleLocale } = useLocale();
 
   const navItems: SidebarNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: ICON_HOME },
@@ -546,7 +613,7 @@ export function StyleguidePage() {
         <Row label="25-row fixture">
           <div className="section--table">
             <Table<TableRow>
-              columns={TABLE_COLUMNS}
+              columns={tableColumns}
               rows={paginatedRows}
               rowKey="id"
               selectable

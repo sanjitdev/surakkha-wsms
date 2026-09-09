@@ -30,8 +30,10 @@ export interface TableColumn<T> {
   align?: 'left' | 'right' | 'center';
   /** Opt-in per-column drag handle. */
   resizable?: boolean;
-  /** Extra className appended to the `<th>` + matching `<td>`. */
+  /** Extra className appended to the `<th>` only (use for column-level modifiers). */
   className?: string;
+  /** Extra className appended to the matching `<td>` cells (e.g. `table__cell--mono`). */
+  cellClassName?: string;
 }
 /** Top-level Table props. Generic over the row record type. */
 export interface TableProps<T> {
