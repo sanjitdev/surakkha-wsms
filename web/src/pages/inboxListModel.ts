@@ -7,6 +7,8 @@
  */
 
 import type { InboxRowStatus, InboxRow as InboxRowType, IncidentSeverity } from '../types/inbox';
+import type { Locale } from '../types/domain';
+import { formatDate } from '../hooks/useDateFormatter';
 
 /**
  * Convert an unknown wire-payload field to a string. Rejects objects so we
@@ -44,11 +46,6 @@ export const STATUS_FROM_WIRE: Record<string, InboxRowStatus> = {
   chain_verify: 'chain_verify',
   info: 'info',
 };
-export function fmtTime(iso: string): string {
-  const d = new Date(iso);
-
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
 export function actionLabelFor(status: InboxRowStatus): string {
   if (status === 'awaiting_draft') return 'Edit';
   if (status === 'chain_verify') return 'Inspect';
@@ -100,6 +97,7 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
   });
 }
 export function mergeRecentDecisions(
+  locale: Locale,
   bcast: ChainEventLite[],
   esc: ChainEventLite[],
   csig: ChainEventLite[],
@@ -107,16 +105,16 @@ export function mergeRecentDecisions(
 ): RecentDecision[] {
   const items: RecentDecision[] = [
     ...bcast.map((e) => {
-      return { time: fmtTime(e.occurred_at), verb: 'Broadcast', target: 'ward 7 notice' };
+      return { time: formatDate(locale, 'time-24', e.occurred_at), verb: 'Broadcast', target: 'ward 7 notice' };
     }),
     ...esc.map((e) => {
-      return { time: fmtTime(e.occurred_at), verb: 'Escalated', target: 'block #12' };
+      return { time: formatDate(locale, 'time-24', e.occurred_at), verb: 'Escalated', target: 'block #12' };
     }),
     ...csig.map((e) => {
-      return { time: fmtTime(e.occurred_at), verb: 'Countersigned', target: 'ward 5' };
+      return { time: formatDate(locale, 'time-24', e.occurred_at), verb: 'Countersigned', target: 'ward 5' };
     }),
     ...rev.map((e) => {
-      return { time: fmtTime(e.occurred_at), verb: 'Reviewed', target: 'ward 12 draft' };
+      return { time: formatDate(locale, 'time-24', e.occurred_at), verb: 'Reviewed', target: 'ward 12 draft' };
     }),
   ];
 

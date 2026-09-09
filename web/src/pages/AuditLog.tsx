@@ -23,6 +23,7 @@ import { Button } from '../components/ui/Button';
 import { AuditIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
+import { useDateFormatter } from '../hooks/useDateFormatter';
 
 interface ChainEvent {
   event_id: string;
@@ -80,11 +81,6 @@ const CHIPS: readonly ChipDef[] = [
   },
 ];
 
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-
-  return d.toLocaleTimeString('en-GB', { hour12: false });
-}
 function truncateHash(hash: string): string {
   return `${hash.slice(0, 8)}…${hash.slice(-4)}`;
 }
@@ -97,6 +93,7 @@ async function copyToClipboard(value: string): Promise<void> {
 }
 export function AuditLog() {
   const { chainHead } = useAppLayout();
+  const { format: formatTime } = useDateFormatter();
   const [events, setEvents] = useState<ChainEvent[]>([]);
   const [filter, setFilter] = useState<FilterId>('all');
   const [loading, setLoading] = useState(true);
@@ -187,7 +184,7 @@ export function AuditLog() {
                 }}
               >
                 prev {chainHead.prev_hash ? truncateHash(chainHead.prev_hash) : '—'}
-                {chainHead.sealed_at ? ` · sealed ${formatTime(chainHead.sealed_at)}` : ''}
+                {chainHead.sealed_at ? ` · sealed ${formatTime('time-full', chainHead.sealed_at)}` : ''}
                 {' · root ok'}
               </div>
             </div>
@@ -289,7 +286,7 @@ export function AuditLog() {
                     className="data-table--inbox__tr audit-row"
                     data-testid={`audit-row-${e.event_id}`}
                   >
-                    <td className="col-time mono">{formatTime(e.occurred_at)}</td>
+                    <td className="col-time mono">{formatTime('time-24', e.occurred_at)}</td>
                     <td className="col-warn">
                       <span
                         className="row-severity-dot"

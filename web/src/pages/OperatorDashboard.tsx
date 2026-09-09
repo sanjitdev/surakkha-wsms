@@ -27,6 +27,7 @@ import { useEffect, useState } from 'react';
 import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidents } from '../hooks/useIncidents';
+import { useDateFormatter } from '../hooks/useDateFormatter';
 import type { IncidentSummary } from '../types/domain';
 
 type Layout = 'a' | 'b' | 'c';
@@ -57,6 +58,7 @@ export function OperatorDashboard() {
   // already gates on `role === 'utility_operator'` so by the time this
   // page renders, the role check is implicit.
   const { session } = useAppLayout();
+  const { format: formatTime } = useDateFormatter();
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
   const { incidents, loading: incLoading } = useIncidents();
@@ -294,10 +296,7 @@ export function OperatorDashboard() {
                             : s.last_value}
                         </td>
                         <td className="col-time">
-                          {new Date(s.last_at).toLocaleTimeString('en-GB', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatTime('time', s.last_at)}
                         </td>
                         <td className="col-status">
                           <span className="badge badge--t2">T2</span>
@@ -343,10 +342,7 @@ export function OperatorDashboard() {
                     {recent.slice(0, 6).map((e) => (
                       <tr key={e.event_id}>
                         <td className="col-time">
-                          {new Date(e.occurred_at).toLocaleTimeString('en-GB', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatTime('time', e.occurred_at)}
                         </td>
                         <td>{summarizeEvent(e)}</td>
                         <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
@@ -470,10 +466,7 @@ export function OperatorDashboard() {
                     {recent.slice(0, 6).map((e) => (
                       <tr key={e.event_id}>
                         <td className="col-time">
-                          {new Date(e.occurred_at).toLocaleTimeString('en-GB', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatTime('time', e.occurred_at)}
                         </td>
                         <td>{summarizeEvent(e)}</td>
                         <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
@@ -602,10 +595,7 @@ export function OperatorDashboard() {
                             : s.last_value}
                         </td>
                         <td className="col-time">
-                          {new Date(s.last_at).toLocaleTimeString('en-GB', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
+                          {formatTime('time', s.last_at)}
                         </td>
                         <td className="col-status">
                           <span className="badge badge--t2">T2</span>
@@ -673,10 +663,7 @@ export function OperatorDashboard() {
                       {recent.slice(0, 6).map((e) => (
                         <tr key={e.event_id}>
                           <td className="col-time">
-                            {new Date(e.occurred_at).toLocaleTimeString('en-GB', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                            {formatTime('time', e.occurred_at)}
                           </td>
                           <td>{summarizeEvent(e)}</td>
                           <td className="col-status">

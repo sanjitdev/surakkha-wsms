@@ -27,6 +27,7 @@ import { setupServer } from 'msw/node';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { InboxList } from '../pages/InboxList';
+import { LocaleProvider } from '../hooks/useLocale';
 import { handlers } from '../mocks/handlers';
 
 const server = setupServer(...handlers);
@@ -164,16 +165,20 @@ function overrideEventsHandler() {
 }
 
 /**
- * Render InboxList inside MemoryRouter with the /api/events handler
+ * Render InboxList inside MemoryRouter + LocaleProvider (FE-B5d added
+ * `useDateFormatter` to InboxList which subscribes to `useLocale()`,
+ * so the provider must wrap every render). The /api/events handler is
  * overridden to return 3 hardcoded rows. Waits for the rows to mount
  * before returning so the caller can assert on them directly.
  */
 async function renderInboxAndWaitForRows() {
   overrideEventsHandler();
   render(
-    <MemoryRouter>
-      <InboxList />
-    </MemoryRouter>,
+    <LocaleProvider>
+      <MemoryRouter>
+        <InboxList />
+      </MemoryRouter>
+    </LocaleProvider>,
   );
   await waitFor(() => {
     expect(screen.queryAllByTestId('inbox-row').length).toBeGreaterThan(0);
@@ -301,9 +306,11 @@ describe('InboxList I/O matrix', () => {
     );
 
     render(
-      <MemoryRouter>
-        <InboxList />
-      </MemoryRouter>,
+      <LocaleProvider>
+        <MemoryRouter>
+          <InboxList />
+        </MemoryRouter>
+      </LocaleProvider>,
     );
 
     await waitFor(() => {
@@ -316,13 +323,18 @@ describe('InboxList I/O matrix', () => {
   });
 
   it('locale_bangla: setting body[data-locale=bn] before render leaves it set and renders rows', async () => {
-    document.body.dataset.locale = 'bn';
+    // FE-B5d: InboxList now consumes `useLocale()` via `useDateFormatter`,
+    // so the LocaleProvider reads `localStorage['surakkha.locale']` at
+    // mount. Seed that before render so the in-memory locale + the body
+    // attribute both end up at 'bn' after the provider's useEffect runs.
     try {
+      window.localStorage.setItem('surakkha.locale', 'bn');
       await renderInboxAndWaitForRows();
 
       expect(document.body.getAttribute('data-locale')).toBe('bn');
       expect(screen.queryAllByTestId('inbox-row').length).toBeGreaterThan(0);
     } finally {
+      window.localStorage.removeItem('surakkha.locale');
       delete document.body.dataset.locale;
     }
   });

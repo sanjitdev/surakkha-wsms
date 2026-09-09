@@ -21,6 +21,7 @@ import { InboxRow } from '../components/pages/InboxRow';
 import { FilterChip } from '../components/pages/FilterChip';
 import type { InboxRowFilter, InboxRow as InboxRowType } from '../types/inbox';
 import { ContainerWidth } from '../types/domain';
+import { useDateFormatter } from '../hooks/useDateFormatter';
 import {
   type ChainEventLite,
   type RecentDecision,
@@ -31,6 +32,7 @@ import {
 import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRail';
 
 export function InboxList() {
+  const { format: formatTime, locale } = useDateFormatter();
   const [rows, setRows] = useState<InboxRowType[]>([]);
   const [recent, setRecent] = useState<RecentDecision[]>([]);
   const [filter, setFilter] = useState<InboxRowFilter>('all');
@@ -56,6 +58,8 @@ export function InboxList() {
 
   // (2) recent decisions — 4 parallel fetches via Promise.all
   // Chain freshness polling moved to AppLayout (single source of truth).
+  // Re-fetches when `locale` changes so the rail re-renders in the active
+  // locale immediately after the user toggles /settings.
   useEffect(() => {
     void (async () => {
       try {
@@ -74,6 +78,7 @@ export function InboxList() {
           ) as Promise<{ events: ChainEventLite[] }>,
         ]);
         const merged: RecentDecision[] = mergeRecentDecisions(
+          locale,
           b.events,
           e.events,
           c.events,
@@ -86,7 +91,7 @@ export function InboxList() {
         setRecent([]);
       }
     })();
-  }, []);
+  }, [locale]);
 
   const chipCounts = useMemo(() => countByFilter(rows), [rows]);
   const visibleRows = useMemo(
@@ -227,13 +232,7 @@ export function InboxList() {
               <h3 className="data-card__title">Action queue</h3>
               <span className="data-card__meta">
                 {visibleRows.length} · last updated{' '}
-                {rows[0]?.timestamp
-                  ? new Date(rows[0].timestamp).toLocaleTimeString('en-GB', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false,
-                    })
-                  : '—'}
+                {rows[0]?.timestamp ? formatTime('time-24', rows[0].timestamp) : '—'}
               </span>
             </div>
             {loading ? (

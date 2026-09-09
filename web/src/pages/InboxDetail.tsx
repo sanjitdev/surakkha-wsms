@@ -27,6 +27,7 @@ import { Button } from '../components/ui/Button';
 import { AlertIcon, InboxIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
+import { useDateFormatter } from '../hooks/useDateFormatter';
 
 interface ChainEvent {
   event_id: string;
@@ -38,11 +39,6 @@ interface ChainEvent {
   height: number;
 }
 
-function formatTime(iso: string): string {
-  const d = new Date(iso);
-
-  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-}
 function severityBadgeClass(sev: string): string {
   if (sev === 'T3' || sev === 't3') return 'badge badge--t3';
   if (sev === 'T2' || sev === 't2') return 'badge badge--t2';
@@ -100,6 +96,7 @@ function eventTitle(event: ChainEvent): string {
 export function InboxDetail() {
   const { id = '' } = useParams<{ id: string }>();
   const { incidents, loading: incLoading, error: incError } = useIncidents();
+  const { format: formatTime } = useDateFormatter();
   const [events, setEvents] = useState<ChainEvent[]>([]);
 
   useEffect(() => {
@@ -286,7 +283,7 @@ export function InboxDetail() {
               <ul className="timeline" data-testid="inbox-detail-timeline-list">
                 {threadEvents.map((e) => (
                   <li key={e.event_id}>
-                    <div className="timeline__time mono">{formatTime(e.occurred_at)}</div>
+                    <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
                     <p className="timeline__title">{eventTitle(e)}</p>
                     <div
                       className="timeline__meta"

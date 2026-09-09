@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
+import { useDateFormatter } from '../hooks/useDateFormatter';
 
 type Filter = 'all' | 'P1' | 'P2' | 'P3' | 'enroute' | 'onsite';
 
@@ -55,6 +56,7 @@ export function FieldQueuePage() {
   // `role === 'field_technician'`. We only need the actor_ref to
   // filter the chain events to Karim's jobs.
   const { session } = useAppLayout();
+  const { format: formatDateLocal } = useDateFormatter();
   const technicianId = session.actor_ref;
   const [rows, setRows] = useState<WorkOrderRow[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
@@ -116,11 +118,7 @@ export function FieldQueuePage() {
   };
 
   const today = new Date();
-  const todayLabel = today.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: '2-digit',
-    month: 'short',
-  });
+  const todayLabel = formatDateLocal('date-short', today);
 
   // Pre-FE-1.6a the page returned <div className="app-shell app-shell--tech">
   // with an inline <aside>, <header className="top-chrome">, and logout
