@@ -1,0 +1,22 @@
+{
+  "brandPanel": {
+    "title": "নাগরিক জল-নিরাপত্তা,",
+    "titleLine2": "অডিটযোগ্য।"
+  },
+  "chain": {
+    "liveWithCount_one": "চেইন লাইভ · {{count}}টি ব্লক",
+    "liveWithCount_other": "চেইন লাইভ · {{count}}টি ব্লক",
+    "liveWithHeight": "চেইন লাইভ · {{count}}টি ব্লক",
+    "connecting": "সংযোগ হচ্ছে…",
+    "unreachable": "অনুপলব্ধ"
+  },
+  "picker": {
+    "statusReady": "মক ব্যাকএন্ড · প্রস্তুত",
+    "statusPending": "মক ব্যাকএন্ড · অপেক্ষমান",
+    "statusError": "মক ব্যাকএন্ড · ত্রুটি",
+    "heading": "সাইন ইন করুন",
+    "radiogroupLabel": "ব্যক্তি নির্বাচক",
+    "continue": "এগিয়ে যান →",
+    "signingIn": "সাইন ইন হচ্ছে…"
+  }
+}

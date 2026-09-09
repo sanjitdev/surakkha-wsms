@@ -1,0 +1,10 @@
+{
+  "app": {
+    "name": "Surakkha"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Retry"
+  }
+}

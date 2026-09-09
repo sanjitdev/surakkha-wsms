@@ -14,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **B3:** `i18next` + `react-i18next` integration. Namespaced JSON resources at `web/src/i18n/locales/{en,bn}/common.json` cover `app`, `common`, and `login` namespaces.
+- **B3:** `useLocaleSync` bridge — when `useLocale()` flips, the bridge calls `i18next.changeLanguage` so `useTranslation` consumers stay in sync with `body[data-locale]`. The existing `useLocale` hook remains the single source of truth for the user preference.
+- **B3:** LoginPage strings extracted into the `login` namespace: brand title, panel title, chain status (with `count` interpolation + pluralization keys for English one/other forms), picker status, heading, radiogroup label, Continue/Signing in labels.
+- **B3:** Bangla translations for the `app`, `common`, and `login` namespaces.
+- **B3:** `I18nextProvider` mounted in `main.tsx`; `useLocaleSync()` mounted in `AppShell`.
+- **B3:** `useLocale` refactored to a `LocaleProvider` + `useLocaleContext` pattern. Previously each `useLocale()` call created independent state — `useLocaleSync` and the picker UI saw different values, so toggling the language in the UI never reached `i18next`. The provider makes the locale preference a single source of truth across all consumers.
+- **B3:** 9 new Vitest checks under `web/src/__checks__/fe-b3-i18n.test.tsx` covering bootstrap, setLanguage idempotency, key translation, interpolation, and the LocaleSync bridge.
+
 - **B2:** Top-level `ErrorBoundary` + `ErrorScreen` recovery UI. Any render-time exception in the SPA is caught and presented with a heading, the error name + message, a collapsible stack trace (in dev), `Reload page` and `Copy diagnostics` actions. Wrapped around `<BrowserRouter>` in `App.tsx` so even router errors don't white-screen.
 - **B2:** `ToastProvider` + `useToast()` hook. App code can now call `toast.danger("…")` / `.warning` / `.info` / `.success` / `.dismiss(id)` / `.clear()` from anywhere; up to 5 toasts stack in the bottom-right region (`role="region"`, `aria-live="polite"`). Built on top of the existing `<Toast />` primitive (`durationMs` now overridable for tests).
 - **B2:** Five ADRs (`docs/adr/0001-…0005`) capturing the foundational tech choices: React 18 + Vite, react-router-dom v6, React Context for state, CSS variables for styling, and pnpm.

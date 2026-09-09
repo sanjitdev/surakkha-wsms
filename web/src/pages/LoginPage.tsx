@@ -20,6 +20,7 @@
  */
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { PERSONAS, type Persona, loginAs } from '../mocks/session';
 import { notifySessionChanged } from '../mocks/session-bus';
 
@@ -40,6 +41,7 @@ interface ChainStatus {
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selected, setSelected] = useState<Persona>(PERSONAS[0]);
   const [status, setStatus] = useState<'pending' | 'ready' | 'error'>('pending');
   const [chainHeight, setChainHeight] = useState<number | null>(null);
@@ -104,19 +106,19 @@ export function LoginPage() {
           <div className="brand-panel__mark-text">Surakkha</div>
         </div>
         <h1 className="brand-panel__title">
-          Civic water-safety,
+          {t('login:brandPanel.title')}
           <br />
-          audited.
+          {t('login:brandPanel.titleLine2')}
         </h1>
         <div className="brand-panel__live">
           <span className="brand-panel__live-dot" aria-hidden="true"></span>
           <span>
             chain{' '}
             {status === 'ready' && chainHeight !== null
-              ? `live · ${chainHeight} blocks`
+              ? t('login:chain.liveWithCount', { count: chainHeight })
               : status === 'pending'
-                ? 'connecting…'
-                : 'unreachable'}
+                ? t('login:chain.connecting')
+                : t('login:chain.unreachable')}
           </span>
         </div>
       </aside>
@@ -133,12 +135,20 @@ export function LoginPage() {
             }`}
           >
             <span className="picker-status__dot" aria-hidden="true"></span>
-            mock backend · {status}
+            {status === 'ready'
+              ? t('login:picker.statusReady')
+              : status === 'error'
+                ? t('login:picker.statusError')
+                : t('login:picker.statusPending')}
           </div>
 
-          <h2 className="picker-panel__heading">Sign in</h2>
+          <h2 className="picker-panel__heading">{t('login:picker.heading')}</h2>
 
-          <div className="picker-list" role="radiogroup" aria-label="Persona picker">
+          <div
+            className="picker-list"
+            role="radiogroup"
+            aria-label={t('login:picker.radiogroupLabel')}
+          >
             {PERSONAS.map((p) => {
               const isSel = p.id === selected.id;
 
@@ -190,7 +200,7 @@ export function LoginPage() {
               onClick={handleContinue}
               disabled={isLoggingIn}
             >
-              {isLoggingIn ? 'Signing in…' : 'Continue →'}
+              {isLoggingIn ? t('login:picker.signingIn') : t('login:picker.continue')}
             </button>
             {loginError ? (
               <div

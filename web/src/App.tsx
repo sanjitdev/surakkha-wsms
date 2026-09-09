@@ -37,17 +37,21 @@ import { InboxList } from './pages/InboxList';
 import { type SessionRow, getSession } from './mocks/idb';
 import { SESSION_CHANGED_EVENT } from './mocks/session-bus';
 import { useTheme } from './hooks/useTheme';
-import { useLocale } from './hooks/useLocale';
+import { LocaleProvider, useLocale } from './hooks/useLocale';
 import { AppLayout } from './components/layout/AppLayout';
 import { useAppLayout } from './components/layout/AppLayoutContext';
 import { landingFor } from './components/layout/nav-config';
 import { ToastProvider } from './components/ui/ToastProvider';
 import { ErrorBoundary } from './components/ui/ErrorBoundary';
+import { useLocaleSync } from './hooks/useLocaleSync';
 
 /** Mounts body-level theme + locale hooks so dataset attrs are live. */
 function AppShell({ children }: { children: ReactNode }) {
   useTheme();
   useLocale();
+  // Bridges the existing useLocale preference into i18next so all
+  // useTranslation consumers stay in sync with body[data-locale].
+  useLocaleSync();
   useLocation();
   return <>{children}</>;
 }
@@ -178,11 +182,13 @@ export function App() {
   return (
     <ErrorBoundary>
       <BrowserRouter>
-        <ToastProvider>
-          <AppShell>
-            <RoutedSurface />
-          </AppShell>
-        </ToastProvider>
+        <LocaleProvider>
+          <ToastProvider>
+            <AppShell>
+              <RoutedSurface />
+            </AppShell>
+          </ToastProvider>
+        </LocaleProvider>
       </BrowserRouter>
     </ErrorBoundary>
   );

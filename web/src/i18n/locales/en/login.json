@@ -1,0 +1,22 @@
+{
+  "brandPanel": {
+    "title": "Civic water-safety,",
+    "titleLine2": "audited."
+  },
+  "chain": {
+    "liveWithCount_one": "chain live · {{count}} block",
+    "liveWithCount_other": "chain live · {{count}} blocks",
+    "liveWithHeight": "chain live · {{count}} blocks",
+    "connecting": "connecting…",
+    "unreachable": "unreachable"
+  },
+  "picker": {
+    "statusReady": "mock backend · ready",
+    "statusPending": "mock backend · pending",
+    "statusError": "mock backend · error",
+    "heading": "Sign in",
+    "radiogroupLabel": "Persona picker",
+    "continue": "Continue →",
+    "signingIn": "Signing in…"
+  }
+}

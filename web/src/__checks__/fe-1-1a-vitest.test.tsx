@@ -26,7 +26,7 @@ import { Container } from '../components/layout/Container';
 import { EmptyState } from '../components/layout/EmptyState';
 import { Sidebar } from '../components/layout/Sidebar';
 import { useTheme } from '../hooks/useTheme';
-import { useLocale } from '../hooks/useLocale';
+import { LocaleProvider, useLocale } from '../hooks/useLocale';
 import { ContainerWidth, Locale, Theme, ToastVariant } from '../types/domain';
 
 // ─── Helpers ────────────────────────────────────────────────────────────
@@ -171,7 +171,11 @@ describe('HAPPY_PATH_locale + AC-5 (useLocale)', () => {
   it('AC-5: pre-seeded localStorage["surakkha.locale"]="bn" → body.dataset.locale === "bn"', () => {
     window.localStorage.setItem('surakkha.locale', 'bn');
 
-    render(<LocaleProbe />);
+    render(
+      <LocaleProvider>
+        <LocaleProbe />
+      </LocaleProvider>,
+    );
 
     expect(document.body.dataset.locale).toBe('bn');
     expect(screen.getByTestId('probe-locale').textContent).toBe('bn');
@@ -179,7 +183,11 @@ describe('HAPPY_PATH_locale + AC-5 (useLocale)', () => {
 
   it('AC-5: setLocale("en") flips body.dataset.locale from bn → en', () => {
     window.localStorage.setItem('surakkha.locale', 'bn');
-    render(<LocaleProbe />);
+    render(
+      <LocaleProvider>
+        <LocaleProbe />
+      </LocaleProvider>,
+    );
     expect(document.body.dataset.locale).toBe('bn');
 
     act(() => {
