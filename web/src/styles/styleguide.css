@@ -172,3 +172,25 @@
 .sg-full-bleed > .sg-footer {
   margin-inline: 0;
 }
+
+/* FE-B5a — Dropdown section scaffolding. Token-only spacing so the
+   readonly <pre> readout sits comfortably under the wired dropdown
+   without intruding on the existing 200 px label column. */
+.section--dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  width: 100%;
+}
+.sg-dropdown-readout {
+  background: var(--bg-inset);
+  color: var(--fg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-mono, ui-monospace);
+  font-size: var(--font-size-xs);
+  margin: 0;
+  max-width: 480px;
+  white-space: pre-wrap;
+}

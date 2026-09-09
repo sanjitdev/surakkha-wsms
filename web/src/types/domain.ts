@@ -24,6 +24,11 @@ export const Locale = { En: 'en', Bn: 'bn' } as const;
 export type Locale = (typeof Locale)[keyof typeof Locale];
 export const Theme = { Light: 'light', Dark: 'dark' } as const;
 export type Theme = (typeof Theme)[keyof typeof Theme];
+// FE-B5a: single source of truth for the Dropdown primitive's selection
+// modes. AD-FE-6 keeps all enums in this file so primitives and hooks never
+// redefine the union locally.
+export const DropdownMode = { Single: 'single', Multi: 'multi' } as const;
+export type DropdownMode = (typeof DropdownMode)[keyof typeof DropdownMode];
 // Incident lifecycle status — projected from the latest incident-bearing
 // chain event (IncidentResolved / IncidentEscalated / IncidentCreated) per
 // dim 7 §6. Mirrors `web/src/mocks/handlers.ts:443-461` verbatim so the

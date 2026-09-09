@@ -1,0 +1,190 @@
+/* dropdown.css — FE-B5a composition CSS.
+ *
+ * Pure tokens — every visual value references a `var(--*)`. No new design
+ * tokens added here (dim 1-4 lockdown stands). Mirrors the `inbox.css`
+ * lockdown: zero hex literals, zero rgb( — verified via grep.
+ *
+ * Mobile floor at `@media (max-width: 767px)` collapses the popover to a
+ * bottom sheet pinned to the viewport floor (per FE-B5a spec).
+ */
+
+/* Root + trigger ────────────────────────────────────────────────── */
+.dropdown {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 320px;
+  font-family: inherit;
+}
+.dropdown__trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: 100%;
+  height: var(--height-control-md);
+  padding: 0 var(--space-md);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.dropdown__trigger:hover { background: var(--bg-subtle); }
+.dropdown__trigger:disabled,
+.dropdown__trigger[aria-disabled='true'] {
+  cursor: not-allowed;
+  color: var(--fg-disabled);
+  background: var(--bg-subtle);
+}
+.dropdown__trigger:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+.dropdown__value {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dropdown__value--placeholder { color: var(--fg-disabled); }
+.dropdown__caret {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-md);
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+}
+
+/* Multi-mode chips (rendered inside the trigger when collapsed) ── */
+.dropdown__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  flex: 1;
+  min-width: 0;
+  align-items: center;
+}
+.dropdown__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 2px var(--space-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs);
+  color: var(--fg-default);
+  line-height: 1;
+}
+.dropdown__chip-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-md);
+  height: var(--space-md);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg-secondary);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  line-height: 1;
+  border-radius: var(--radius-md);
+}
+.dropdown__chip-remove:hover {
+  color: var(--fg-default);
+  background: var(--bg-inset);
+}
+.dropdown__chip-remove:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+
+/* Popover (desktop) ────────────────────────────────────────────── */
+.dropdown__popover {
+  position: absolute;
+  top: calc(100% + var(--space-sm));
+  left: 0;
+  right: 0;
+  z-index: 10;
+  min-width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.dropdown__search {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-default);
+}
+.dropdown__search-input {
+  width: 100%;
+  height: var(--height-control-md);
+  padding: 0 var(--space-md);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+}
+.dropdown__search-input:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+.dropdown__list {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-sm) 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.dropdown__option {
+  padding: var(--space-sm) var(--space-md);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+.dropdown__option--active { background: var(--bg-subtle); }
+.dropdown__option--selected { font-weight: var(--font-weight-medium); }
+.dropdown__option[aria-disabled='true'] {
+  cursor: not-allowed;
+  color: var(--fg-disabled);
+}
+.dropdown__option-check {
+  flex-shrink: 0;
+  color: var(--brand-500);
+}
+.dropdown__empty {
+  padding: var(--space-md);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+/* Mobile floor — bottom sheet at ≤ 767 px ──────────────────────── */
+@media (max-width: 767px) {
+  .dropdown__popover {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    max-height: 60vh;
+    box-shadow: var(--shadow-modal);
+  }
+}

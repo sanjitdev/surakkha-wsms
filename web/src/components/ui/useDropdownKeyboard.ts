@@ -1,0 +1,151 @@
+import { type KeyboardEvent, useCallback } from 'react';
+import type { DropdownOption } from './Dropdown.types';
+
+
+/**
+ * useDropdownKeyboard — FE-B5a keyboard handler for the Dropdown primitive.
+ *
+ * Returns a stable `onKeyDown` callback implementing:
+ *   - ArrowUp/Down: move `activeIndex`; opens the popover if closed.
+ *   - Home/End: jump to first/last option (open popover only).
+ *   - Enter: select the active option (open popover only).
+ *   - Escape: close the popover and restore focus to the trigger.
+ *   - Type-ahead (single printable char): open the popover and jump to the
+ *     first option whose label starts with the typed character (case-
+ *     insensitive).
+ *
+ * The handler is intentionally tolerant of being attached to either the
+ * trigger `<button>` or the search `<input>` inside the popover — when the
+ * search input owns typing, the per-char type-ahead branch is harmless
+ * because the search `<input>` re-renders on each keystroke.
+ */
+export interface DropdownKeyboardState<T> {
+  open: boolean;
+  activeIndex: number;
+  setOpen: (v: boolean) => void;
+  setActiveIndex: import('./Dropdown.types').Setter<number>;
+  filtered: DropdownOption<T>[];
+  options: DropdownOption<T>[];
+  disabled: boolean;
+  commit: (opt: DropdownOption<T>) => void;
+  close: (restoreFocus: boolean) => void;
+}
+export function useDropdownKeyboard<T>(state: DropdownKeyboardState<T>) {
+  const { open, activeIndex, setOpen, setActiveIndex, filtered, options, disabled, commit, close } = state;
+
+  return useCallback(
+    (e: KeyboardEvent<HTMLButtonElement | HTMLInputElement>) => {
+      if (disabled) return;
+      const max = filtered.length;
+
+      if (!open && e.key.length === 1 && /[\p{L}\p{N}]/u.test(e.key)) {
+        const idx = options.findIndex(
+          (o) => !o.disabled && o.label.toLowerCase().startsWith(e.key.toLowerCase()),
+        );
+
+        if (idx >= 0) {
+          setOpen(true);
+          setActiveIndex(idx);
+          e.preventDefault();
+          return;
+        }
+      }
+      /** Returns the next non-disabled option index (wraps in `dir`=+1/-1).
+       *  If every option is disabled, returns `null` and the caller should
+       *  not move the active index. */
+      const nextEnabled = (from: number, dir: 1 | -1): number | null => {
+        if (max === 0) return null;
+        let i = from;
+
+        for (let step = 0; step < max; step += 1) {
+          i = (i + dir + max) % max;
+          if (!filtered[i]?.disabled) return i;
+        }
+        return null;
+      };
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          if (!open) {
+            setOpen(true);
+            const first = nextEnabled(-1, 1);
+
+            setActiveIndex(first ?? -1);
+            return;
+          }
+          setActiveIndex((i: number) => {
+            const start = i < 0 ? -1 : i;
+            const next = nextEnabled(start, 1);
+
+            return next ?? i;
+          });
+          return;
+        case 'ArrowUp':
+          e.preventDefault();
+          if (!open) {
+            setOpen(true);
+            const last = nextEnabled(max, -1);
+
+            setActiveIndex(last ?? -1);
+            return;
+          }
+          setActiveIndex((i: number) => {
+            const start = i < 0 ? max : i;
+            const next = nextEnabled(start, -1);
+
+            return next ?? i;
+          });
+          return;
+        case 'Home':
+          if (open && max > 0) {
+            e.preventDefault();
+            const firstEnabled = filtered.findIndex((o) => !o.disabled);
+
+            setActiveIndex(firstEnabled >= 0 ? firstEnabled : -1);
+          }
+          return;
+        case 'End':
+          if (open && max > 0) {
+            e.preventDefault();
+            let lastEnabled = -1;
+
+            for (let i = filtered.length - 1; i >= 0; i -= 1) {
+              if (!filtered[i]?.disabled) {
+                lastEnabled = i;
+                break;
+              }
+            }
+            setActiveIndex(lastEnabled);
+          }
+          return;
+        case 'Enter':
+          // Always preventDefault when the Dropdown is inside a <form>:
+          // - Open + active option: commit.
+          // - Open + no active: ignore.
+          // - Closed: don't submit the parent form on Enter/Space.
+          if (!open) {
+            e.preventDefault();
+            break;
+          }
+          if (activeIndex >= 0 && activeIndex < max) {
+            const opt = filtered[activeIndex];
+
+            if (!opt.disabled) {
+              e.preventDefault();
+              commit(opt);
+            }
+          }
+          break;
+        case 'Escape':
+          if (open) {
+            e.preventDefault();
+            close(true);
+          }
+          break;
+        default:
+      }
+    },
+    [activeIndex, close, commit, disabled, filtered, open, options, setActiveIndex, setOpen],
+  );
+}

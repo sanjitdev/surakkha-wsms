@@ -86,3 +86,23 @@
 - source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-1-3c-useincidents-hook.md`
   summary: FE-1.3c follow-up — surface `incError` in InboxDetail so a failed incidents fetch renders a fetch-failure UI instead of "Incident not found".
   evidence: FE-1.3c returns `{ incidents, loading, error }` from the hook and `InboxDetail.tsx` consumes all three, but the page treats `incidents=[]` after a 500 the same as "no incident exists" — both branches render `<IncidentNotFound />`. Spec boundary deferred error UX to a follow-up; sub-goal C (InboxList migration) is the natural home since it already reshapes the page's loading/error handling around `IncidentSummary`. Edge-Hunter finding.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
+  summary: FE-B5a follow-up — auto-flip the dropdown popover when it would overflow the viewport bottom; shift horizontally when it would overflow the viewport right.
+  evidence: B5a ships the popover rendered as a sibling of the trigger with no viewport collision logic. When the dropdown is near the bottom of the viewport (e.g., the last row in a long table filter), the popover currently flows off-screen. The CSS already slots a mobile bottom-sheet at 767px, so the desktop auto-flip logic is a focused enhancement. Edge-Hunter finding; defer until B5b ships a real Table consumer that triggers the overflow.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
+  summary: FE-B5a follow-up — `aria-controls` on the combobox trigger should also reference the search input id when `searchable` is true.
+  evidence: B5a wires `aria-controls={listboxId}` only; when the search input is enabled, the trigger does not declaratively link to the search field. WAI-ARIA combobox pattern recommends declaring both controls so AT can navigate them. The search input is reachable via Tab, so the omission is not blocking, but tightening the linkage belongs in a follow-up so B5a's scope stays bounded.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
+  summary: FE-B5a follow-up — outside-click closes the popover but does not restore focus to the trigger (Escape does). Consider a click-outside variant that mimics the Escape path for keyboard parity.
+  evidence: B5a's outside-click handler in `useDropdownState.ts` resets `open`/`activeIndex`/`query` but skips the `queueMicrotask(() => triggerRef.current?.focus())` that `close(true)` runs. This means the user clicks elsewhere → focus stays on the document body → Tab order restarts from the top. Escape already restores focus. Decoupling the focus-restore decision belongs in a follow-up that surveys keyboard ergonomics across all primitive dialogs (Modal, Toast, future Combobox async).
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
+  summary: FE-B5a follow-up — type-ahead on closed trigger matches the first option starting with the typed char; cycling through subsequent matches requires adding a `lastTypedAt` timestamp + a small buffer.
+  evidence: B5a's type-ahead branch (useDropdownKeyboard.ts:41-52) uses a single keystroke → first match. The WAI-ARIA APG notes that rapid-fire typing within ~500ms cycles through all options starting with the typed prefix ("Dh", "Dha", "Dhak" → all Dhaka-prefixed matches). Today only the first match is highlighted. Belongs in a follow-up that bundles type-ahead enhancements across primitives.
+
+- source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
+  summary: FE-B5a follow-up — keyboard type-ahead on the trigger should reset the searchable `query` state when the popover opens via keyboard (not the search input).
+  evidence: B5a's type-ahead branch calls `setOpen(true)` + `setActiveIndex(idx)` but does not clear `query`. If the user previously typed "dh" then closed the popover and re-opened it with the keyboard, "dh" is still in the filter input. Minor inconsistency; cleanup belongs in a follow-up.

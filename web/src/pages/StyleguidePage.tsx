@@ -28,7 +28,8 @@ import { Container } from '../components/layout/Container';
 import { EmptyState } from '../components/layout/EmptyState';
 import { TopChrome } from '../components/layout/TopChrome';
 import { Sidebar, type SidebarNavItem } from '../components/layout/Sidebar';
-import { Band, ContainerWidth, ToastVariant } from '../types/domain';
+import { Dropdown, type DropdownOption } from '../components/ui/Dropdown';
+import { Band, ContainerWidth, DropdownMode, ToastVariant } from '../types/domain';
 import { useTheme } from '../hooks/useTheme';
 import { useLocale } from '../hooks/useLocale';
 
@@ -84,6 +85,18 @@ export function StyleguidePage() {
   const [containerWidth, setContainerWidth] = useState<ShowcaseWidth>(ContainerWidth.Wide);
   const [searchValue, setSearchValue] = useState('');
   const [inputValue, setInputValue] = useState('');
+  // FE-B5a: dropdown showcase state — single + multi + live readout.
+  const [singleWard, setSingleWard] = useState<string | null>(null);
+  const [searchWard, setSearchWard] = useState<string | null>(null);
+  const [disabledWard, setDisabledWard] = useState<string | null>('gulshan');
+  const [multiWard, setMultiWard] = useState<string[]>(['gulshan', 'dhanmondi']);
+  const WARDS: DropdownOption<string>[] = [
+    { value: 'gulshan', label: 'Gulshan' },
+    { value: 'dhanmondi', label: 'Dhanmondi' },
+    { value: 'mirpur', label: 'Mirpur' },
+    { value: 'uttara', label: 'Uttara' },
+    { value: 'tejgaon', label: 'Tejgaon' },
+  ];
 
   const { theme, toggle: toggleTheme } = useTheme();
   const { locale, toggle: toggleLocale } = useLocale();
@@ -414,6 +427,67 @@ export function StyleguidePage() {
             }
             headingLevel={3}
           />
+        </Row>
+      </Section>
+
+      <Section
+        title="Dropdown"
+        blurb="FE-B5a primitive. WAI-ARIA combobox pattern: role=combobox trigger + role=listbox popover. Single + multi-select. Searchable. Keyboard nav (ArrowUp/Down/Home/End/Enter/Escape, type-ahead). Mobile floor at 767px collapses the popover to a bottom sheet."
+      >
+        <Row label="small list (5 wards)">
+          <Dropdown
+            options={WARDS}
+            value={singleWard}
+            onChange={setSingleWard}
+            placeholder="Choose a ward…"
+            label="Ward"
+          />
+        </Row>
+        <Row label="searchable">
+          <Dropdown
+            options={WARDS}
+            value={searchWard}
+            onChange={setSearchWard}
+            placeholder="Search a ward…"
+            searchable
+            label="Search ward"
+          />
+        </Row>
+        <Row label="disabled">
+          <Dropdown
+            options={WARDS}
+            value={disabledWard}
+            onChange={setDisabledWard}
+            placeholder="Disabled"
+            disabled
+            label="Locked ward"
+          />
+        </Row>
+        <Row label="multi pre-selected">
+          <Dropdown<string>
+            options={WARDS}
+            mode={DropdownMode.Multi}
+            value={multiWard}
+            onChange={(v) => {
+              setMultiWard(v);
+            }}
+            placeholder="Pick multiple wards…"
+            label="Affected wards"
+          />
+        </Row>
+        <Row label="wired live readout">
+          <div className="section--dropdown">
+            <Dropdown
+              options={WARDS}
+              value={singleWard}
+              onChange={setSingleWard}
+              placeholder="Pick…"
+              label="Live demo"
+            />
+            <pre data-testid="sg-dropdown-readout" className="sg-dropdown-readout">
+              {JSON.stringify({ singleWard, searchWard, multiWard }, null, 2)}
+            </pre>
+          </div>
         </Row>
       </Section>
 
