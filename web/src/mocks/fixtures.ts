@@ -550,14 +550,16 @@ export async function seedIfEmpty(): Promise<boolean> {
   ];
 
   for (const f of inboxFixtures) {
+    const fixtureIdx = inboxFixtures.indexOf(f);
+    const inboxIncidentId = ulid(t0 + 14000 + fixtureIdx + 1);
     const ev: ChainBlock = await buildBlock({
       prev_block_hash: prevHash,
       event_type: 'IncidentCreated',
-      event_id: ulid(t0 + 14000 + inboxFixtures.indexOf(f)),
+      event_id: ulid(t0 + 14000 + fixtureIdx),
       occurred_at: f.occurred_at,
       actor_identity: { kind: f.owner_kind, ref: f.owner_ref, display: f.owner_display },
       payload: {
-        incident_id: ulid(t0 + 14000 + inboxFixtures.indexOf(f) + 1),
+        incident_id: inboxIncidentId,
         severity: f.severity,
         ward_id: f.ward,
         source: 'sensor',
@@ -567,7 +569,12 @@ export async function seedIfEmpty(): Promise<boolean> {
           owner_kind: f.owner_kind,
           owner_display: f.owner_display,
           status: f.status,
-          href: f.href,
+          // Per-row href overrides the fixture default (which pointed at
+          // /inbox-detail, a non-existent path). The row links to its
+          // own /inbox/:incident_id so FE-1.5a's InboxDetail receives a
+          // matching id. The inboxListModel also has a default fallback
+          // for events with no href at all.
+          href: `/inbox/${inboxIncidentId}`,
           title: f.title,
           summary: f.summary,
           isUrgent: f.isUrgent,

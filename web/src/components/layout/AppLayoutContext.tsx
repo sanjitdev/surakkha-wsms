@@ -18,8 +18,17 @@
 import { createContext, useContext } from 'react';
 import type { SessionRow } from '../../mocks/idb';
 
+export interface ChainHead {
+  block_hash: string;
+  prev_hash?: string;
+  height: number;
+  ingested_at: string;
+  sealed_at?: string;
+}
 export interface AppLayoutContextValue {
   session: SessionRow;
+  /** Latest chain head, when available. */
+  chainHead: ChainHead | null;
   /** Seconds since last block ingest. `null` while the first poll is in flight. */
   chainFreshSeconds: number | null;
   /** Hook called from the sidebar logout button. Clears session and

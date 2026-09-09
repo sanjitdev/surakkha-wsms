@@ -1,0 +1,101 @@
+/* ════════════════════════════════════════════════════════════════════
+   audit.css — AuditLog (FE-1.5c) composition styles.
+
+   Tokens only. Per dim 5 §7.6 the chain-explorer ships in "dense"
+   mode: rows are --height-row-default (40px), chain refs use
+   --font-family-mono with tabular-nums, the severity dot mirrors the
+   inbox row-severity-dot, and the copy button sits in the trailing
+   col-action cell.
+
+   The base .data-table rules live in mockups/01-priya/dashboard.css
+   (imported by AuditLog.tsx). This file fills the audit-table
+   specifics: column widths, dense row height, severity dot, the
+   inline copy button, and the chain-head banner layout.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── audit table — column widths locked at the wide container (1280px).
+      Time + severity dot are tight; event + actor + ward get the
+      readable middle; type + action sit at the trailing edge. ────── */
+.audit-table colgroup,
+.audit-table thead th {
+  /* No explicit widths — defaults come from the shared .data-table
+     rules in dashboard.css. AuditLog only overrides what it needs. */
+}
+
+/* Dense row height — dim 5 §7.6 calls out 40px rows. The shared
+   .data-table--inbox__tr rule sets 56px comfortable; we override
+   here for the audit table only. */
+.audit-row td {
+  height: var(--height-row-default);
+  padding-block: var(--space-sm);
+  padding-inline: var(--space-md);
+}
+
+/* Severity dot — same shape as inbox row-severity-dot, but inline in
+   its own cell rather than absolute-positioned. ──────────────────── */
+.row-severity-dot {
+  display: inline-block;
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border-radius: var(--radius-pill, 999px);
+  flex-shrink: 0;
+}
+
+/* Copy-to-clipboard button — lives in the col-action cell. ────────── */
+.audit-copy {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition:
+    border-color var(--motion-press-120) var(--ease-out),
+    color var(--motion-press-120) var(--ease-out);
+}
+
+.audit-copy:hover {
+  border-color: var(--brand-500);
+  color: var(--brand-500);
+}
+
+.audit-copy:active {
+  border-color: var(--brand-600);
+  color: var(--brand-600);
+}
+
+.audit-copy:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+
+/* Trailing column — keep the copy button right-aligned within the
+   col-action cell, matching inbox-row conventions. ──────────────── */
+.audit-row .col-action {
+  text-align: right;
+}
+
+/* Plex Mono cells inherit tabular-nums for the chain-ref + time
+   columns so columns line up at a glance. ───────────────────────── */
+.audit-row .col-time,
+.audit-row .col-where,
+.audit-row td.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tighten the row-meta subtext so the table doesn't get vertical
+   bloat from a 2-line cell on every row. ─────────────────────────── */
+.audit-row .row-sub {
+  margin-top: var(--space-xs);
+  line-height: var(--line-height-tight);
+}
+
+/* Chain-head banner — 3-column grid (head info · events total ·
+   blocks) collapses to a single column below <bp-md>. The grid
+   template lives inline in AuditLog.tsx; this just tightens the
+   cell padding inside the Card. ────────────────────────────────── */
+.card > div[style*='grid-template-columns'] {
+  padding-block: var(--space-xs);
+}

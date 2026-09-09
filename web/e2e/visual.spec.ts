@@ -140,3 +140,89 @@ test.describe('visual regression — field queue (Karim)', () => {
     });
   });
 });
+
+test.describe('visual regression — inbox detail (Priya, FE-1.5a)', () => {
+  test('priya opens an incident thread', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    // The inbox list rows link to /inbox/:event_id — clicking the
+    // first row's title routes to the detail page. We pick the
+    // sidebar link to skip depending on row data.
+    await expect(page.getByTestId('sidebar-link-inbox')).toBeVisible({ timeout: 15_000 });
+    // Navigate via clicking the first inbox row title link.
+    const firstRowLink = page.locator('.inbox-row__title-link').first();
+
+    await expect(firstRowLink).toBeVisible({ timeout: 10_000 });
+    await firstRowLink.click();
+    await expect(page.getByTestId('inbox-detail-title')).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+    await expect(page).toHaveScreenshot('inbox-detail-priya-dark-en.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixelRatio: 0.005,
+      mask: [
+        page.locator('.top-chrome__chain'),
+        page.getByRole('region').filter({ has: page.locator('.toast') }),
+      ],
+    });
+  });
+});
+
+test.describe('visual regression — verify flow (Priya, FE-1.5b)', () => {
+  test('priya opens step 1 of the verify wizard', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    await page.goto('/verify-flow');
+    await expect(page.getByTestId('verify-flow-header')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('verify-step-card')).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(300);
+    await expect(page).toHaveScreenshot('verify-flow-step1-priya-dark-en.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixelRatio: 0.005,
+      mask: [
+        page.locator('.top-chrome__chain'),
+        page.getByRole('region').filter({ has: page.locator('.toast') }),
+      ],
+    });
+  });
+});
+
+test.describe('visual regression — audit log (Priya, FE-1.5c)', () => {
+  test('priya opens the chain explorer', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    await page.goto('/audit-log');
+    await expect(page.getByTestId('audit-log-summary')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('audit-table')).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(500);
+    await expect(page).toHaveScreenshot('audit-log-priya-dark-en.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixelRatio: 0.005,
+      mask: [
+        page.locator('.top-chrome__chain'),
+        // The chain-head banner includes the ingested time ("sealed HH:MM")
+        // which drifts between runs — mask the whole banner.
+        page.locator('.card').first(),
+        page.getByRole('region').filter({ has: page.locator('.toast') }),
+      ],
+    });
+  });
+});
+
+test.describe('visual regression — settings (Priya, FE-1.5d)', () => {
+  test('priya opens settings', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    await page.goto('/settings');
+    await expect(page.getByTestId('settings-header')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('settings-theme-card')).toBeVisible({ timeout: 10_000 });
+    await page.waitForTimeout(300);
+    await expect(page).toHaveScreenshot('settings-priya-dark-en.png', {
+      animations: 'disabled',
+      caret: 'hide',
+      maxDiffPixelRatio: 0.005,
+      mask: [
+        page.locator('.top-chrome__chain'),
+        page.getByRole('region').filter({ has: page.locator('.toast') }),
+      ],
+    });
+  });
+});

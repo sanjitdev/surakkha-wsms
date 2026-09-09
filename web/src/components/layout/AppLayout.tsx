@@ -42,17 +42,11 @@ import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TopChrome } from './TopChrome';
 import { Sidebar } from './Sidebar';
-import { AppLayoutContext } from './AppLayoutContext';
+import { AppLayoutContext, type ChainHead } from './AppLayoutContext';
 import { NAV_BY_ROLE, landingFor } from './nav-config';
 import { type SessionRow, getSession } from '../../mocks/idb';
 import { logoutAndRedirect } from '../../mocks/session';
 import { LogoutIcon } from '../icons/sidebar-icons';
-
-interface ChainHead {
-  block_hash: string;
-  height: number;
-  ingested_at: string;
-}
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -68,9 +62,12 @@ export function AppLayout({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  // (2) chain freshness — single 5s polling loop for the whole shell.
-  // null while the first poll is in flight; number after.
+  // (2) chain freshness + head — single 5s polling loop for the whole
+  // shell. null while the first poll is in flight; number after.
+  // The full head is exposed via context so /audit-log can render
+  // its banner without a second fetch.
   const [chainFresh, setChainFresh] = useState<number | null>(null);
+  const [chainHead, setChainHead] = useState<ChainHead | null>(null);
 
   useEffect(() => {
     const tick = async () => {
@@ -83,6 +80,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
         if (Number.isNaN(t)) return;
         setChainFresh(Math.max(0, Math.round((Date.now() - t) / 100) / 10));
+        setChainHead(head);
       } catch {
         // Swallow — the chrome dot stays at the last-known value rather
         // than flickering on every transient network blip.
@@ -114,7 +112,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const chipLabel = session.chip_label ?? session.display_name;
 
   return (
-    <AppLayoutContext.Provider value={{ session, chainFreshSeconds: chainFresh, logout }}>
+    <AppLayoutContext.Provider
+      value={{ session, chainHead, chainFreshSeconds: chainFresh, logout }}
+    >
       <div className="app-shell" data-testid="app-layout">
         <Sidebar
           navItems={[...navItems]}

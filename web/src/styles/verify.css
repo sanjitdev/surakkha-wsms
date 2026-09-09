@@ -1,0 +1,113 @@
+/* ════════════════════════════════════════════════════════════════════
+   verify.css — VerifyFlow step indicator + step card composition.
+   Tokens only; no literals. Mirrors the 3-step wizard pattern from
+   the inbox-detail mockup signature-track (§7.4 mockup) and the
+   verify-flow mockup.
+   ════════════════════════════════════════════════════════════════════ */
+
+.verify-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-md);
+  list-style: none;
+  margin: 0 0 var(--space-xl);
+  padding: 0;
+}
+
+.verify-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  transition:
+    border-color var(--motion-press-120) var(--ease-out),
+    background-color var(--motion-press-120) var(--ease-out);
+}
+
+.verify-step--done {
+  border-color: var(--success);
+}
+
+.verify-step--active {
+  border-color: var(--brand-500);
+  background: color-mix(in srgb, var(--brand-500) 6%, var(--bg-surface));
+}
+
+.verify-step__num {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.verify-step--active .verify-step__num,
+.verify-step--done .verify-step__num {
+  color: var(--brand-500);
+}
+
+.verify-step__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-default);
+}
+
+.verify-step__head {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: flex-start;
+  margin-bottom: var(--space-lg);
+}
+
+.verify-step__icon {
+  flex-shrink: 0;
+  width: var(--height-control-lg);
+  height: var(--height-control-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-inset);
+  color: var(--brand-500);
+  border-radius: var(--radius-md);
+}
+
+.verify-step__bullets {
+  list-style: none;
+  margin: 0 0 var(--space-xl);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.verify-step__bullets li {
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+  padding-left: var(--space-lg);
+  position: relative;
+  line-height: var(--line-height-body);
+}
+
+.verify-step__bullets li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.6em;
+  width: var(--space-sm);
+  height: var(--space-sm);
+  border-radius: 50%;
+  background: var(--brand-500);
+}
+
+.verify-step__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-lg);
+  border-top: 1px solid var(--border-subtle);
+}

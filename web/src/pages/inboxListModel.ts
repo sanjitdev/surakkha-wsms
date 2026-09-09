@@ -68,7 +68,15 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       '—',
     );
     const ownerKind = inbox.owner_kind as InboxRowType['ownerKind'];
-    const actionHref = toStr(inbox.href, '/inbox-detail');
+    // The InboxDetail route at /inbox/:id expects an incident_id (it
+    // looks the row up in the /api/incidents list, which keys by
+    // payload.incident_id, not event_id). Prefer the explicit
+    // inbox.href when set; otherwise fall back to payload.incident_id;
+    // otherwise event_id (legacy rows that lack both).
+    const payloadIncidentId = toStr(p.incident_id, '');
+    const actionHref =
+      toStr(inbox.href, '') ||
+      (payloadIncidentId ? `/inbox/${payloadIncidentId}` : `/inbox/${e.event_id}`);
 
     return {
       id: e.event_id,

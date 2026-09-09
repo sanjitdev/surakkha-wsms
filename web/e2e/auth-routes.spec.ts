@@ -94,6 +94,64 @@ test.describe('authenticated routes — shell rendering', () => {
   });
 });
 
+test.describe('FE-1.5 — newly wired Priya routes render their real pages', () => {
+  test('Priya: /inbox/:id renders InboxDetail (FE-1.5a)', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    // Navigate via the inbox row title link — same as the visual spec.
+    await expect(page.getByTestId('sidebar-link-inbox')).toBeVisible({ timeout: 15_000 });
+    const firstRowLink = page.locator('.inbox-row__title-link').first();
+
+    await expect(firstRowLink).toBeVisible({ timeout: 10_000 });
+    await firstRowLink.click();
+    await expect(page.getByTestId('inbox-detail-title')).toBeVisible({ timeout: 10_000 });
+    // Chrome still wraps the new page exactly once.
+    await expect(page.getByTestId('app-layout')).toBeVisible();
+    await expect(page.getByTestId('sidebar')).toHaveCount(1);
+  });
+
+  test('Priya: /verify-flow renders VerifyFlow (FE-1.5b)', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    await page.goto('/verify-flow');
+    await expect(page.getByTestId('verify-flow-header')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('verify-step-card')).toBeVisible();
+    // 3-step indicator visible.
+    await expect(page.getByTestId('verify-steps')).toBeVisible();
+    await expect(page.getByTestId('verify-step-sensor-cluster')).toBeVisible();
+    await expect(page.getByTestId('verify-step-anjali-corroboration')).toBeVisible();
+    await expect(page.getByTestId('verify-step-councillor-notify')).toBeVisible();
+  });
+
+  test('Priya: /audit-log renders AuditLog (FE-1.5c)', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    await page.goto('/audit-log');
+    await expect(page.getByTestId('audit-log-summary')).toBeVisible({ timeout: 10_000 });
+    // 7 filter chips render.
+    await expect(page.getByTestId('chip-all')).toBeVisible();
+    await expect(page.getByTestId('chip-errors')).toBeVisible();
+    await expect(page.getByTestId('chip-sig')).toBeVisible();
+    await expect(page.getByTestId('chip-sensor')).toBeVisible();
+    await expect(page.getByTestId('chip-citizen')).toBeVisible();
+    await expect(page.getByTestId('chip-notices')).toBeVisible();
+    await expect(page.getByTestId('chip-auth')).toBeVisible();
+    // Table renders.
+    await expect(page.getByTestId('audit-table')).toBeVisible();
+  });
+
+  test('Priya: /settings renders Settings (FE-1.5d)', async ({ page, loginAs }) => {
+    await loginAs('priya');
+    await page.goto('/settings');
+    await expect(page.getByTestId('settings-header')).toBeVisible({ timeout: 10_000 });
+    // 4 cards render: theme, locale, role, reset.
+    await expect(page.getByTestId('settings-theme-card')).toBeVisible();
+    await expect(page.getByTestId('settings-locale-card')).toBeVisible();
+    await expect(page.getByTestId('settings-role-card')).toBeVisible();
+    await expect(page.getByTestId('settings-reset-card')).toBeVisible();
+    // Locale toggle to Bangla updates body data attribute.
+    await page.getByTestId('settings-locale-bn').click();
+    await expect(page.locator('body[data-locale="bn"]')).toBeVisible();
+  });
+});
+
 test.describe('chain-freshness polling', () => {
   test('AppLayout owns the poll — chain freshness stays live across nav', async ({
     page,

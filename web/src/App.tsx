@@ -19,6 +19,10 @@
  *   <AppLayout>      → wraps every authenticated route:
  *     /dashboard     → <OperatorDashboard />    (utility_operator)
  *     /inbox         → <InboxList />            (utility_operator)
+ *     /inbox/:id     → <InboxDetail />          (utility_operator)
+ *     /verify-flow   → <VerifyFlow />           (utility_operator)
+ *     /audit-log     → <AuditLog />             (utility_operator)
+ *     /settings      → <Settings />             (utility_operator)
  *     /field/*       → <FieldQueuePage />       (field_technician)
  *     /submit        → <ComingSoonPage />       (anjali)
  *     /approve       → <ComingSoonPage />       (pha_approver)
@@ -34,6 +38,10 @@ import { FieldQueuePage } from './pages/FieldQueuePage';
 import { OperatorDashboard } from './pages/OperatorDashboard';
 import { StyleguidePage } from './pages/StyleguidePage';
 import { InboxList } from './pages/InboxList';
+import { InboxDetail } from './pages/InboxDetail';
+import { VerifyFlow } from './pages/VerifyFlow';
+import { AuditLog } from './pages/AuditLog';
+import { Settings } from './pages/Settings';
 import { type SessionRow, getSession } from './mocks/idb';
 import { SESSION_CHANGED_EVENT } from './mocks/session-bus';
 import { useTheme } from './hooks/useTheme';
@@ -142,6 +150,10 @@ function RoutedSurface() {
       <Route element={<RequireSession />}>
         <Route path="/dashboard" element={<OperatorDashboard />} />
         <Route path="/inbox" element={<InboxList />} />
+        <Route path="/inbox/:id" element={<InboxDetail />} />
+        <Route path="/verify-flow" element={<VerifyFlow />} />
+        <Route path="/audit-log" element={<AuditLog />} />
+        <Route path="/settings" element={<Settings />} />
         <Route path="/field" element={<FieldQueuePage />} />
         <Route path="/field/*" element={<FieldQueuePage />} />
 

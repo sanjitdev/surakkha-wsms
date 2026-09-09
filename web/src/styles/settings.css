@@ -1,0 +1,69 @@
+/* ════════════════════════════════════════════════════════════════════
+   settings.css — Settings (FE-1.5d) composition styles.
+
+   Tokens only. Per dim 5 §7.7 the Settings page is a vertical stack
+   of <Card>s, each containing a "settings-row" — a 2-column grid
+   (label · control) at >= md and a single column below.
+
+   The shared .card rule (mockups/01-priya/dashboard.css) supplies
+   the outer card chrome; this file only adds the per-row layout
+   and the read-only persona readout.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Settings row — 2-col grid (label left, control right) at >= md.
+      Drops to a single column below <bp-md> (768 px). ────────────── */
+.settings-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-xl);
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .settings-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+}
+
+/* Label column — title + sub copy, max width so long sentences wrap
+   instead of pushing the control off the right edge. ────────────── */
+.settings-row__label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.settings-row__title {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+}
+
+.settings-row__sub {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+  line-height: var(--line-height-body);
+  max-width: 56ch;
+}
+
+/* Control column — toggle pair buttons, gap per dim 4 spacing. ───── */
+.settings-row__control {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* Read-only readout — for the persona section. ──────────────────── */
+.settings-row__readout {
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-xs);
+}
+
+.settings-row__display-name {
+  font-size: var(--font-size-sm);
+  color: var(--fg-tertiary);
+}
