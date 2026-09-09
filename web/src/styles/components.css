@@ -214,11 +214,18 @@
 }
 
 /* ── Toast (dim 4 §11) ──────────────────────────────────────────── */
-.toast {
+.toast-region {
   position: fixed;
   right: var(--space-xl);
   bottom: var(--space-xl);
   z-index: var(--z-modal);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+.toast {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--bg-surface);
@@ -230,6 +237,7 @@
   max-width: calc(100vw - var(--space-xl) * 2);
   box-shadow: var(--shadow-modal);
   overflow: hidden;
+  pointer-events: auto;
 }
 .toast__message {
   font-size: var(--font-size-sm);
@@ -267,6 +275,79 @@
 [data-locale='bn'] .toast {
   min-width: 280px;
   gap: 0.5em;
+}
+
+/* ── Error screen (B2.2 — ErrorBoundary fallback) ────────────────── */
+.error-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xl);
+  background: var(--bg-app, var(--bg-surface));
+  z-index: var(--z-modal);
+}
+.error-screen__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 640px;
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-modal);
+}
+.error-screen__title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+}
+.error-screen__subtitle {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--fg-secondary);
+  line-height: var(--line-height-body);
+}
+.error-screen__message {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--font-size-sm);
+  color: var(--danger);
+  background: var(--bg-subtle);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-sm);
+  word-break: break-word;
+}
+.error-screen__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.error-screen__stack summary {
+  cursor: pointer;
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+}
+.error-screen__stack pre {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--font-size-xs, 12px);
+  color: var(--fg-tertiary);
+  background: var(--bg-inset);
+  padding: var(--space-sm);
+  border-radius: var(--radius-sm);
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.error-screen__actions {
+  display: flex;
+  gap: var(--space-md);
+  margin-top: var(--space-md);
 }
 
 /* ── Band pill (dim 4 §12) ──────────────────────────────────────── */

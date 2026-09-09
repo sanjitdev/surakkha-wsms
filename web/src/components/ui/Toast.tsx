@@ -6,10 +6,14 @@ export interface ToastProps {
   message: string;
   onDismiss?: () => void;
   testId?: string;
+  /**
+   * Override the auto-dismiss duration. Defaults to 4000 ms. Tests pass a
+   * small value to keep runs fast.
+   */
+  durationMs?: number;
 }
-const DURATION_MS = 4000;
-
-export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
+export function Toast({ variant, message, onDismiss, testId, durationMs }: ToastProps) {
+  const duration = durationMs ?? 4000;
   const [paused, setPaused] = useState(false);
   const [progress, setProgress] = useState(100);
   const startRef = useRef<number>(Date.now());
@@ -38,10 +42,10 @@ export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
       const elapsed = Date.now() - startRef.current;
 
       consumedRef.current = elapsed;
-      const pct = Math.max(0, 100 - (elapsed / DURATION_MS) * 100);
+      const pct = Math.max(0, 100 - (elapsed / duration) * 100);
 
       setProgress(pct);
-      if (elapsed >= DURATION_MS) {
+      if (elapsed >= duration) {
         onDismissRef.current?.();
         return;
       }
@@ -51,7 +55,7 @@ export function Toast({ variant, message, onDismiss, testId }: ToastProps) {
     return () => {
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     };
-  }, [paused]);
+  }, [paused, duration]);
 
   const variantKey = variant.toLowerCase() as 'success' | 'warning' | 'danger' | 'info';
 

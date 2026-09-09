@@ -41,6 +41,8 @@ import { useLocale } from './hooks/useLocale';
 import { AppLayout } from './components/layout/AppLayout';
 import { useAppLayout } from './components/layout/AppLayoutContext';
 import { landingFor } from './components/layout/nav-config';
+import { ToastProvider } from './components/ui/ToastProvider';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 
 /** Mounts body-level theme + locale hooks so dataset attrs are live. */
 function AppShell({ children }: { children: ReactNode }) {
@@ -174,10 +176,14 @@ function RoleAwareRedirect() {
 }
 export function App() {
   return (
-    <BrowserRouter>
-      <AppShell>
-        <RoutedSurface />
-      </AppShell>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ToastProvider>
+          <AppShell>
+            <RoutedSurface />
+          </AppShell>
+        </ToastProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
