@@ -31,7 +31,9 @@ export function TopChrome({
       </div>
       {navSlot ? <div className="top-chrome__nav">{navSlot}</div> : null}
       <div className="top-chrome__right">
-        <span className="top-chrome__persona">{personaLabel}</span>
+        <span className="top-chrome__persona" data-testid="persona-chip">
+          {personaLabel}
+        </span>
       </div>
     </header>
   );

@@ -106,6 +106,10 @@ export async function loginAs(personaId: string): Promise<SessionRow> {
     token: mintToken(persona.id),
     logged_in_at: new Date().toISOString(),
     tenant_id: 'dhaka',
+    // Optional persona chip — set on personas whose top-chrome label
+    // differs from their raw display_name (Story 1.2 — Karim).
+    // AppLayout falls back to display_name when unset.
+    chip_label: persona.chip_label,
   };
 
   await setSession(row);
@@ -136,11 +140,6 @@ export async function currentSession(): Promise<SessionRow | null> {
  * chance to regress.
  */
 export async function logout(): Promise<void> {
-  try {
-    await fetch('/api/auth/logout', { method: 'POST' });
-  } catch (err) {
-    console.error('[surakkha] /api/auth/logout POST failed (continuing local clear)', err);
-  }
   await clearSession();
   // Wake up the route tree so it re-renders to / without a full-page
   // reload. session-bus is imported statically above (was a dynamic
@@ -148,13 +147,28 @@ export async function logout(): Promise<void> {
   notifySessionChanged();
 }
 /**
- * Convenience wrapper for the AppLayout logout button: clear session +
- * navigate to the login picker. Used in Sidebar footers / top-chrome
- * logout actions. Caller passes the react-router `useNavigate()` result.
+ * Convenience wrapper for the AppLayout logout button: fire the logout
+ * endpoint (which in the mock also clears the IndexedDB session row +
+ * emits the session-bus event), then navigate to the login picker.
+ *
+ * We call fetch FIRST so the MSW handler at POST /api/auth/logout
+ * runs `logout()` — which is the canonical "clear session" path. The
+ * previous implementation inlined `fetch` inside `logout()` itself,
+ * which caused an infinite recursion (logout → fetch → MSW handler →
+ * logout → fetch → …) when the handler delegated back into session.ts.
+ *
+ * Caller passes the react-router `useNavigate()` result.
  */
 export async function logoutAndRedirect(
   navigate: (to: string, opts?: { replace?: boolean }) => void,
 ): Promise<void> {
-  await logout();
+  try {
+    await fetch('/api/auth/logout', { method: 'POST' });
+  } catch (err) {
+    // Production: the gateway would revoke the bearer token server-side.
+    // In the mock, this only matters if the SW didn't intercept — but
+    // even then the local clear below still gets us to /.
+    console.error('[surakkha] /api/auth/logout POST failed (continuing local clear)', err);
+  }
   navigate('/', { replace: true });
 }

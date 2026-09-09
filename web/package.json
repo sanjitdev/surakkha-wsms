@@ -14,11 +14,16 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc -b --noEmit",
+    "audit": "pnpm audit --prod --audit-level=moderate",
+    "audit:full": "pnpm audit --audit-level=moderate",
+    "outdated": "pnpm outdated",
     "mocks:init": "msw init public/ --save",
     "prepare": "lefthook install"
   },
@@ -31,6 +36,7 @@
     "react-router-dom": "^6.28.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@eslint/js": "^9",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.3",

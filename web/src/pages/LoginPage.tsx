@@ -158,6 +158,7 @@ export function LoginPage() {
                   type="button"
                   role="radio"
                   aria-checked={isSel}
+                  data-testid={`persona-${p.id}`}
                   className={`persona${isSel ? ' persona--selected' : ''}`}
                   onClick={() => {
                     setSelected(p);

@@ -17,8 +17,12 @@ export default defineConfig({
     // B1.5 — coverage is reported but does NOT fail the run.
     // We don't enforce a threshold yet because the existing test surface
     // only covers ~12% of lines (src/__checks__/* + a handful of hooks).
-    // As we add tests in B3/B4, raise the thresholds and uncomment
-    // `thresholds` + `throwOnThresholdDrop: true` below.
+    // B4 added a Playwright E2E suite which DOES exercise full routes
+    // (login, persona nav, ErrorBoundary recovery, i18n bridge round-trip),
+    // but @vitest/coverage-v8 only sees the Vitest run — Playwright specs
+    // run in real Chromium and aren't picked up. Promote to a hard gate
+    // in B5: either add Vitest route-level tests with MemoryRouter + mocked
+    // idb, or wire @playwright/test's coverage collection. See ADR 0006.
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov', 'html'],

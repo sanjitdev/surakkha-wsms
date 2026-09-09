@@ -1,0 +1,81 @@
+version: 2
+
+# Surakkha dependabot config — opens a single weekly PR per
+# ecosystem with grouped minor/patch bumps. Major-version
+# bumps for the 6 framework dependencies that ship the
+# application's contract (React, React DOM, react-router-dom,
+# Vite, Vitest, @vitejs/plugin-react) are ignored — those
+# require an ADR + manual review.
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      runtime-minor:
+        applies-to: version-updates
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-router-dom"
+          - "i18next"
+          - "i18next-browser-languagedetector"
+          - "react-i18next"
+      build-minor:
+        applies-to: version-updates
+        patterns:
+          - "vite"
+          - "vitest"
+          - "@vitejs/*"
+          - "@vitest/*"
+      test-minor:
+        applies-to: version-updates
+        patterns:
+          - "@testing-library/*"
+          - "jsdom"
+          - "msw"
+          - "idb-keyval"
+          - "@playwright/test"
+      lint-minor:
+        applies-to: version-updates
+        patterns:
+          - "eslint"
+          - "@eslint/js"
+          - "@typescript-eslint/*"
+          - "prettier"
+          - "lefthook"
+          - "@commitlint/*"
+    ignore:
+      # Major-version bumps for framework deps — these change the
+      # contract that the rest of the app depends on (React 19's
+      # new hooks semantics, Vite 6's build pipeline, react-router
+      # 7's data API). Each needs an ADR + migration story.
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-router-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vite"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "vitest"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@vitejs/plugin-react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@playwright/test"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      actions-minor:
+        applies-to: version-updates
+        patterns:
+          - "actions/*"
+          - "pnpm/*"

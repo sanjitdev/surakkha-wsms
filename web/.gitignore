@@ -7,3 +7,11 @@ dist/
 .DS_Store
 .vscode/
 .idea/
+
+# Playwright artifacts — generated on every test run. CI uploads
+# them via the E2E workflow (traces on failure, HTML report always)
+# for debugging.
+test-results/
+playwright-report/
+blob-report/
+.playwright/

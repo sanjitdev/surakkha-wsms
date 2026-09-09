@@ -23,6 +23,7 @@ We follow the lightweight [MADR](https://adr.madr.tools/) shape:
 | 003 | [React Context (no Redux/Zustand) for app state](./0003-state-react-context.md) | Accepted |
 | 004 | [CSS variables + scoped stylesheets (no Tailwind/CSS-in-JS)](./0004-styling-css-variables.md) | Accepted |
 | 005 | [pnpm as the package manager](./0005-package-manager-pnpm.md) | Accepted |
+| 006 | [Testing strategy (Vitest + Playwright + MSW)](./0006-testing-strategy.md) | Accepted |
 
 ## How to add a new ADR
 

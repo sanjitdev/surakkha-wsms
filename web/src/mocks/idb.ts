@@ -8,24 +8,108 @@
  *   session        : actor identity row (login persona + ephemeral token)
  *   meta           : key-value metadata (seed_version, last_login_at, …)
  *
- * We use idb-keyval (3.3 KB minified) for simplicity. All keys are strings;
- * values are JSON-serialisable. Phase 1 deliberately does NOT use Dexie —
- * one store per concern is enough at this scale, and idb-keyval has zero
- * dependency tree to audit.
+ * We use idb-keyval (3.3 KB minified) for the put/get/del/keys/values
+ * primitives, but we DO NOT use its `createStore()` helper — it opens
+ * the DB without specifying a version, so `onupgradeneeded` only fires
+ * the first time. With multiple stores in one DB, that means the first
+ * store to be opened creates the DB (creating ONLY itself), and every
+ * subsequent store silently fails because the DB already exists and no
+ * upgrade runs. The third-party doc examples sidestep this by using
+ * separate DBs per concern.
  *
- * Singleton-row pattern (`chain_head`, `session`):
- *   - stored under a fixed key (e.g. 'head', 'current')
- *   - read returns `undefined` if absent → handlers fall back to a default
+ * We instead open the DB once at a known version with all 4 stores
+ * pre-declared in `onupgradeneeded`. From there idb-keyval's primitives
+ * work unchanged — they just receive a shared `UseStore` factory bound
+ * to the right object store inside the existing DB.
+ *
+ * Phase 1 deliberately does NOT use Dexie — one store per concern is
+ * enough at this scale, and idb-keyval has zero dependency tree to audit.
  */
 
-import { type UseStore, createStore, del, get, keys, set, values } from 'idb-keyval';
+import { type UseStore, del, get, keys, set, values } from 'idb-keyval';
 
 const DB_NAME = 'surakkha-mock';
+/**
+ * DB schema version.
+ *
+ *   v1 — original idb-keyval `createStore()` flow, which only ever created
+ *        a single store per DB on first run. Subsequent stores for the
+ *        same DB silently never materialised, so writes to `session`
+ *        failed with "object store not found" on first login.
+ *   v2 — we open the DB explicitly and declare all 4 stores in
+ *        `onupgradeneeded`. Bumping from 1 → 2 triggers `onupgradeneeded`
+ *        on existing dev DBs (which usually only have `chain_blocks`)
+ *        and adds the missing three. The conditional `contains()` check
+ *        is idempotent — clean installs skip the upgrade entirely.
+ */
+const DB_VERSION = 2;
+const STORE_NAMES = ['chain_blocks', 'chain_head', 'session', 'meta'] as const;
 
-function makeStore(name: string): UseStore {
-  return createStore(DB_NAME, name);
+type StoreName = (typeof STORE_NAMES)[number];
+
+/**
+ * Open the shared DB once per page, pre-declaring every object store.
+ *
+ * Returns a Promise that resolves with the `IDBDatabase` handle. Subsequent
+ * calls return the same handle (idb-keyval's `UseStore` pattern caches the
+ * connection internally).
+ *
+ * Why this matters: see the file header. Without an explicit version +
+ * `onupgradeneeded`, only one store ever exists in the DB, and the other
+ * stores throw "object store not found" the first time they're written to.
+ */
+let dbPromise: Promise<IDBDatabase> | null = null;
+
+function openDb(): Promise<IDBDatabase> {
+  if (dbPromise) return dbPromise;
+  dbPromise = new Promise<IDBDatabase>((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+    req.onupgradeneeded = () => {
+      const db = req.result;
+
+      for (const name of STORE_NAMES) {
+        if (!db.objectStoreNames.contains(name)) {
+          db.createObjectStore(name);
+        }
+      }
+    };
+    req.onsuccess = () => {
+      // If the connection closes (Safari, quota eviction), reset so the next
+      // caller reopens. Mirrors the behaviour of idb-keyval's own wrapper.
+      req.result.onclose = () => {
+        dbPromise = null;
+      };
+      resolve(req.result);
+    };
+    req.onerror = () => {
+      dbPromise = null;
+      const err = req.error ?? new Error(`IndexedDB open failed for ${DB_NAME}`);
+
+      reject(err instanceof Error ? err : new Error(String(err)));
+    };
+    req.onblocked = () => {
+      // Another tab holds the DB at an older version. Surface a clear error
+      // rather than letting writes silently fail later.
+      dbPromise = null;
+      reject(new Error(`IndexedDB open blocked for ${DB_NAME}`));
+    };
+  });
+  return dbPromise;
 }
-const stores = {
+/**
+ * Build a `UseStore` (idb-keyval's callback signature) bound to the named
+ * object store in the shared DB. Mirrors `createStore(dbName, storeName)`
+ * from idb-keyval but uses our pre-declared multi-store DB.
+ */
+function makeStore(storeName: StoreName): UseStore {
+  return async (txMode, callback) => {
+    const db = await openDb();
+
+    return callback(db.transaction(storeName, txMode).objectStore(storeName));
+  };
+}
+const stores: Record<StoreName, UseStore> = {
   chain_blocks: makeStore('chain_blocks'),
   chain_head: makeStore('chain_head'),
   session: makeStore('session'),

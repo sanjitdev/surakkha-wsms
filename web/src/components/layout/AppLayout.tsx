@@ -115,7 +115,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <AppLayoutContext.Provider value={{ session, chainFreshSeconds: chainFresh, logout }}>
-      <div className="app-shell">
+      <div className="app-shell" data-testid="app-layout">
         <Sidebar
           navItems={[...navItems]}
           currentPath={window.location.pathname}

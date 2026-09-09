@@ -41,6 +41,11 @@ export default [
       // commitlint config is plain CJS, not part of the TS project.
       // We don't lint it (commitlint lints commit messages, not code).
       'commitlint.config.cjs',
+      // Playwright artefacts — large video/trace blobs that live alongside
+      // test output. Lint ignores them; the .gitignore under e2e/ covers
+      // the same paths for git.
+      'test-results/**',
+      'playwright-report/**',
     ],
   },
 
@@ -313,6 +318,37 @@ export default [
       'jsx-a11y/role-supports-aria-props': 'error',
       'jsx-a11y/scope': 'error',
       'jsx-a11y/tabindex-no-positive': 'error',
+    },
+  },
+
+  // ───────────────────────────────────────────── e2e (Playwright) ───
+  // Playwright fixtures take a `use` callback that the react-hooks rule
+  // mis-classifies as the React hook. E2E specs run under @playwright/test
+  // (not Vitest + RTL), so disable the rule here — there's no JSX, no
+  // useEffect, no rules-of-hooks surface to lint.
+  {
+    files: ['e2e/**/*.{ts,tsx}', 'playwright.config.ts'],
+    rules: {
+      'react-hooks/rules-of-hooks': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+      // Playwright tests use describe/it that read better with blank
+      // lines between groups. Disable the no-blank-line-after-function
+      // clause for test files only.
+      'padding-line-between-statements': 'off',
+      // Fixtures destructure `loginAs`, `page`, `context` etc. that
+      // some tests don't use (the fixture is for OTHER specs). Allow
+      // unused destructured args here — same convention as vitest tests.
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          args: 'none',
+          caughtErrors: 'none',
+          varsIgnorePattern: '^_',
+          argsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
     },
   },
 
