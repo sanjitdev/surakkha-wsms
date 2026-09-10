@@ -7,6 +7,7 @@
  * sortable column pattern.
  */
 import { type KeyboardEvent, type ReactNode, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { ResizeState, SortState, TableColumn } from './Table.types';
 
 export interface TableHeaderProps<T> {
@@ -51,6 +52,7 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
     testId,
   } = props;
   const rootTestId = testId ?? 'table';
+  const { t } = useTranslation('common');
   // B5b-3: tri-state select-all — indeterminate is a DOM property, not an
   // attribute. React doesn't support it as a prop, so we toggle via ref.
   const selectAllRef = useRef<HTMLInputElement>(null);
@@ -71,7 +73,7 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
               type="checkbox"
               className="table__select-checkbox"
               data-testid={`${rootTestId}-select-all`}
-              aria-label="Select all rows on this page"
+              aria-label={t('table.selectAllAria')}
               checked={allSelected}
               aria-checked={ariaChecked ?? (allSelected ? 'true' : 'false')}
               onChange={() => {
@@ -136,7 +138,7 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
                     onToggleSort(key);
                   }}
                   onKeyDown={onSortKey}
-                  aria-label={`Sort by ${col.header}`}
+                  aria-label={t('table.sortByAria', { column: col.header })}
                 >
                   <span className="table__header-label">{col.header}</span>
                   <span className="table__sort-indicator" aria-hidden="true">

@@ -59,6 +59,10 @@
     "empty": "No matches",
     "searchPlaceholder": "Type to filter…"
   },
+  "table": {
+    "selectAllAria": "Select all rows on this page",
+    "sortByAria": "Sort by {{column}}"
+  },
   "band": {
     "high": "High",
     "medium": "Medium",

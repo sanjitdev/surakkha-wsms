@@ -58,6 +58,10 @@
     "empty": "কোনো মিল নেই",
     "searchPlaceholder": "ফিল্টার করতে টাইপ করুন…"
   },
+  "table": {
+    "selectAllAria": "এই পৃষ্ঠার সমস্ত সারি নির্বাচন করুন",
+    "sortByAria": "{{column}} অনুসারে সাজান"
+  },
   "band": {
     "high": "উচ্চ",
     "medium": "মাঝারি",
