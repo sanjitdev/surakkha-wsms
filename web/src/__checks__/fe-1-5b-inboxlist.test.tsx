@@ -22,11 +22,13 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { InboxList } from '../pages/InboxList';
+import i18n from '../i18n';
 import { LocaleProvider } from '../hooks/useLocale';
 import { ToastProvider } from '../components/ui/ToastProvider';
 import { handlers } from '../mocks/handlers';
@@ -175,13 +177,15 @@ function overrideEventsHandler() {
 async function renderInboxAndWaitForRows() {
   overrideEventsHandler();
   render(
-    <LocaleProvider>
-      <ToastProvider>
-        <MemoryRouter>
-          <InboxList />
-        </MemoryRouter>
-      </ToastProvider>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <ToastProvider>
+          <MemoryRouter>
+            <InboxList />
+          </MemoryRouter>
+        </ToastProvider>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
   await waitFor(() => {
     expect(screen.queryAllByTestId('inbox-row').length).toBeGreaterThan(0);
@@ -307,13 +311,15 @@ describe('InboxList I/O matrix', () => {
     );
 
     render(
-      <LocaleProvider>
-        <ToastProvider>
-          <MemoryRouter>
-            <InboxList />
-          </MemoryRouter>
-        </ToastProvider>
-      </LocaleProvider>,
+      <I18nextProvider i18n={i18n}>
+        <LocaleProvider>
+          <ToastProvider>
+            <MemoryRouter>
+              <InboxList />
+            </MemoryRouter>
+          </ToastProvider>
+        </LocaleProvider>
+      </I18nextProvider>,
     );
 
     await waitFor(() => {

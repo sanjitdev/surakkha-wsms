@@ -22,8 +22,22 @@ import { initReactI18next } from 'react-i18next';
 import { Locale } from '../types/domain';
 import enCommon from './locales/en/common.json';
 import bnCommon from './locales/bn/common.json';
+import enLayout from './locales/en/layout.json';
+import bnLayout from './locales/bn/layout.json';
+import enDatepicker from './locales/en/datepicker.json';
+import bnDatepicker from './locales/bn/datepicker.json';
 import enLogin from './locales/en/login.json';
 import bnLogin from './locales/bn/login.json';
+import enOperatorDashboard from './locales/en/operatorDashboard.json';
+import bnOperatorDashboard from './locales/bn/operatorDashboard.json';
+import enInboxCommon from './locales/en/inboxCommon.json';
+import bnInboxCommon from './locales/bn/inboxCommon.json';
+import enInboxList from './locales/en/inboxList.json';
+import bnInboxList from './locales/bn/inboxList.json';
+import enInboxDetail from './locales/en/inboxDetail.json';
+import bnInboxDetail from './locales/bn/inboxDetail.json';
+import enFieldIncidentDetail from './locales/en/fieldIncidentDetail.json';
+import bnFieldIncidentDetail from './locales/bn/fieldIncidentDetail.json';
 
 export const SUPPORTED_LOCALES: readonly Locale[] = [Locale.En, Locale.Bn];
 export const STORAGE_KEY = 'surakkha.locale';
@@ -40,13 +54,35 @@ function readInitialLocale(): Locale {
 }
 void i18n.use(initReactI18next).init({
   resources: {
-    [Locale.En]: { common: enCommon, login: enLogin },
-    [Locale.Bn]: { common: bnCommon, login: bnLogin },
+    [Locale.En]: {
+      common: enCommon,
+      layout: enLayout,
+      datepicker: enDatepicker,
+      login: enLogin,
+      operatorDashboard: enOperatorDashboard,
+      inboxCommon: enInboxCommon,
+      inboxList: enInboxList,
+      inboxDetail: enInboxDetail,
+      fieldIncidentDetail: enFieldIncidentDetail,
+    },
+    [Locale.Bn]: {
+      common: bnCommon,
+      layout: bnLayout,
+      datepicker: bnDatepicker,
+      login: bnLogin,
+      operatorDashboard: bnOperatorDashboard,
+      inboxCommon: bnInboxCommon,
+      inboxList: bnInboxList,
+      inboxDetail: bnInboxDetail,
+      fieldIncidentDetail: bnFieldIncidentDetail,
+    },
   },
   lng: readInitialLocale(),
   fallbackLng: Locale.En,
   defaultNS: 'common',
-  ns: ['common', 'login'],
+  // Hand-maintained namespace list. Add a new entry when shipping a new
+  // page or shared chrome file (see plan: gentle-singing-torvalds).
+  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail'],
   // Stop i18next from trying to fetch /locales/{{lng}}/{{ns}}.json —
   // resources are bundled at build time via Vite's JSON import.
   partialBundledLanguages: true,

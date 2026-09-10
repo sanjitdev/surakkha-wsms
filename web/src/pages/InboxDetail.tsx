@@ -25,6 +25,7 @@
  * into the existing primitives (Container, Card, EmptyState, Modal).
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
@@ -66,7 +67,10 @@ function severityBadgeClass(sev: string): string {
   if (sev === 'T1' || sev === 't1') return 'badge badge--t1';
   return 'badge badge--t0';
 }
-function eventTitle(event: ChainEvent): string {
+function eventTitle(
+  event: ChainEvent,
+  t: (k: string, opts?: Record<string, unknown>) => string,
+): string {
   const payload = event.payload;
 
   const summary = typeof payload.summary === 'string' ? payload.summary : '';
@@ -91,26 +95,32 @@ function eventTitle(event: ChainEvent): string {
   const valueRaw = payload.value;
 
   if (event.event_type === 'IncidentCreated') {
-    return summary || title || `Incident opened (${ward})`;
+    return summary || title || t('events.incidentOpened', { ward });
   }
   if (event.event_type === 'IncidentEscalated') {
-    return `Incident escalated to ${toSeverity || severity || '?'}`;
+    return t('events.incidentEscalated', {
+      severity: toSeverity || severity || '?',
+    });
   }
   if (event.event_type === 'IncidentResolved') {
-    return note || 'Incident resolved';
+    return note || t('events.incidentResolved');
   }
   if (event.event_type === 'PublicNoticeIssued') {
-    return 'Public notice drafted';
+    return t('events.publicNotice');
   }
   if (event.event_type === 'CitizenAcknowledgement') {
-    return `Citizen acknowledgement (${ackMethod})`;
+    return t('events.citizenAck', { channel: ackMethod });
   }
   if (event.event_type === 'SensorReadingSubmitted') {
     const paramRaw = payload.parameter;
     const parameter =
       typeof paramRaw === 'string' || typeof paramRaw === 'number' ? String(paramRaw) : '';
 
-    return `Sensor ${sensorId} reading: ${typeof valueRaw === 'number' ? valueRaw : '?'} ${parameter}`;
+    return t('events.sensorReading', {
+      sensorId,
+      value: typeof valueRaw === 'number' ? valueRaw : '?',
+      parameter,
+    });
   }
   return event.event_type;
 }interface AssignTechModalProps {
@@ -129,6 +139,7 @@ function eventTitle(event: ChainEvent): string {
 }
 
 function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTechModalProps) {
+  const { t: tDetail } = useTranslation('inboxDetail');
   const [techId, setTechId] = useState<TechId>(TECH_ROSTER[0].id);
   const [priority, setPriority] = useState<'P1' | 'P2' | 'P3'>('P1');
   const [eta, setEta] = useState<string>('30');
@@ -167,19 +178,23 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
   };
 
   return (
-    <Modal open={open} onClose={handleClose} testId="assign-tech-modal" ariaLabel="Assign field technician">
+    <Modal
+      open={open}
+      onClose={handleClose}
+      testId="assign-tech-modal"
+      ariaLabel={tDetail('assignModal.ariaLabel')}
+    >
       <form onSubmit={handleSubmit} data-testid="assign-tech-form">
         <header style={{ marginBottom: 'var(--space-md)' }}>
-          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Assign field technician</h2>
+          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('assignModal.title')}</h2>
           <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
-            Dispatches a work order onto the chain for incident{' '}
-            <span className="mono">{incidentId.slice(0, 8)}</span>.
+            {tDetail('assignModal.description', { id: incidentId.slice(0, 8) })}
           </p>
         </header>
 
         <div className="submit-form__row">
           <label htmlFor="assign-tech-tech" className="submit-form__label">
-            Technician
+            {tDetail('assignModal.technicianLabel')}
           </label>
           <select
             id="assign-tech-tech"
@@ -202,7 +217,7 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
         <div className="submit-form__row submit-form__row--split">
           <div>
             <label htmlFor="assign-tech-priority" className="submit-form__label">
-              Priority
+              {tDetail('assignModal.priorityLabel')}
             </label>
             <select
               id="assign-tech-priority"
@@ -214,14 +229,14 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
               }}
               disabled={busy}
             >
-              <option value="P1">P1 · urgent</option>
-              <option value="P2">P2 · same day</option>
-              <option value="P3">P3 · scheduled</option>
+              <option value="P1">{tDetail('assignModal.priorityP1')}</option>
+              <option value="P2">{tDetail('assignModal.priorityP2')}</option>
+              <option value="P3">{tDetail('assignModal.priorityP3')}</option>
             </select>
           </div>
           <div>
             <label htmlFor="assign-tech-eta" className="submit-form__label">
-              ETA (minutes)
+              {tDetail('assignModal.etaLabel')}
             </label>
             <input
               id="assign-tech-eta"
@@ -241,7 +256,7 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
 
         <div className="submit-form__row">
           <label htmlFor="assign-tech-summary" className="submit-form__label">
-            Work order summary
+            {tDetail('assignModal.summaryLabel')}
           </label>
           <textarea
             id="assign-tech-summary"
@@ -252,11 +267,11 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
               setSummary(e.target.value);
             }}
             rows={3}
-            placeholder="Replace chlorine pump #4, verify output"
+            placeholder={tDetail('assignModal.summaryPlaceholder')}
             disabled={busy}
             required
           />
-          <p className="submit-form__hint">What the tech will do on site. Min 5 characters.</p>
+          <p className="submit-form__hint">{tDetail('assignModal.summaryHint')}</p>
         </div>
 
         <div className="submit-form__actions">
@@ -267,7 +282,7 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
             disabled={!canSubmit}
             testId="assign-tech-submit"
           >
-            {busy ? 'Dispatching…' : 'Dispatch work order'}
+            {busy ? tDetail('assignModal.dispatching') : tDetail('assignModal.submit')}
           </Button>
           <Button
             type="button"
@@ -277,7 +292,7 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
             disabled={busy}
             testId="assign-tech-cancel"
           >
-            Cancel
+            {tDetail('assignModal.cancel')}
           </Button>
         </div>
       </form>
@@ -296,6 +311,7 @@ function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTe
 }
 
 function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestAckModalProps) {
+  const { t: tDetail } = useTranslation('inboxDetail');
   const [channel, setChannel] = useState<'sms' | 'whatsapp' | 'voice'>('sms');
   const [summary, setSummary] = useState<string>('');
 
@@ -324,19 +340,23 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
   };
 
   return (
-    <Modal open={open} onClose={handleClose} testId="request-ack-modal" ariaLabel="Request citizen acknowledgement">
+    <Modal
+      open={open}
+      onClose={handleClose}
+      testId="request-ack-modal"
+      ariaLabel={tDetail('ackModal.ariaLabel')}
+    >
       <form onSubmit={handleSubmit} data-testid="request-ack-form">
         <header style={{ marginBottom: 'var(--space-md)' }}>
-          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Request citizen acknowledgement</h2>
+          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('ackModal.title')}</h2>
           <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
-            Sends a notice via the chosen channel for incident{' '}
-            <span className="mono">{incidentId.slice(0, 8)}</span>.
+            {tDetail('ackModal.description', { id: incidentId.slice(0, 8) })}
           </p>
         </header>
 
         <div className="submit-form__row">
           <label htmlFor="request-ack-channel" className="submit-form__label">
-            Channel
+            {tDetail('ackModal.channelLabel')}
           </label>
           <select
             id="request-ack-channel"
@@ -348,15 +368,15 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
             }}
             disabled={busy}
           >
-            <option value="sms">SMS</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="voice">Voice</option>
+            <option value="sms">{tDetail('ackModal.channelSms')}</option>
+            <option value="whatsapp">{tDetail('ackModal.channelWhatsapp')}</option>
+            <option value="voice">{tDetail('ackModal.channelVoice')}</option>
           </select>
         </div>
 
         <div className="submit-form__row">
           <label htmlFor="request-ack-summary" className="submit-form__label">
-            Notice copy
+            {tDetail('ackModal.copyLabel')}
           </label>
           <textarea
             id="request-ack-summary"
@@ -367,11 +387,11 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
               setSummary(e.target.value);
             }}
             rows={4}
-            placeholder="Please confirm your tap water is now safe."
+            placeholder={tDetail('ackModal.copyPlaceholder')}
             disabled={busy}
             required
           />
-          <p className="submit-form__hint">Sent verbatim to the citizen. Min 5 characters.</p>
+          <p className="submit-form__hint">{tDetail('ackModal.copyHint')}</p>
         </div>
 
         <div className="submit-form__actions">
@@ -382,7 +402,7 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
             disabled={!canSubmit}
             testId="request-ack-submit"
           >
-            {busy ? 'Sending…' : 'Send ack request'}
+            {busy ? tDetail('ackModal.sending') : tDetail('ackModal.submit')}
           </Button>
           <Button
             type="button"
@@ -392,7 +412,7 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
             disabled={busy}
             testId="request-ack-cancel"
           >
-            Cancel
+            {tDetail('ackModal.cancel')}
           </Button>
         </div>
       </form>
@@ -403,6 +423,7 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
   const { incidents, loading: incLoading, error: incError } = useIncidents();
   const { format: formatTime } = useDateFormatter();
   const actions = useIncidentActions();
+  const { t: tDetail } = useTranslation('inboxDetail');
   const [events, setEvents] = useState<ChainEvent[]>([]);
   const [assignOpen, setAssignOpen] = useState(false);
   const [ackOpen, setAckOpen] = useState(false);
@@ -473,9 +494,9 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
                 }}
                 data-testid="back-to-inbox"
               >
-                ← Back to inbox
+                {tDetail('header.backToInbox')}
               </Link>
-              <h1 style={{ marginTop: 'var(--space-md)' }}>Loading…</h1>
+              <h1 style={{ marginTop: 'var(--space-md)' }}>{tDetail('header.loading')}</h1>
             </div>
           </div>
         </div>
@@ -499,11 +520,11 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
                 }}
                 data-testid="back-to-inbox"
               >
-                ← Back to inbox
+                {tDetail('header.backToInbox')}
               </Link>
-              <h1 style={{ marginTop: 'var(--space-md)' }}>Incident not found</h1>
+              <h1 style={{ marginTop: 'var(--space-md)' }}>{tDetail('notFound.title')}</h1>
               <p className="page-header__sub">
-                The incident <span className="mono">{id}</span> is not in the current chain.
+                {tDetail('notFound.body', { id })}
               </p>
             </div>
           </div>
@@ -511,8 +532,8 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
         <Card>
           <EmptyState
             icon={<InboxIcon />}
-            heading="No matching incident"
-            body="This thread may have been pruned from the read-model or never existed."
+            heading={tDetail('notFound.emptyHeading')}
+            body={tDetail('notFound.emptyBody')}
           />
         </Card>
       </Container>
@@ -534,20 +555,23 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
               }}
               data-testid="back-to-inbox"
             >
-              ← Back to inbox
+              {tDetail('header.backToInbox')}
             </Link>
             <div className="thread-head__row1" style={{ marginTop: 'var(--space-sm)' }}>
               <span className={severityBadgeClass(incident.severity)}>
-                {incident.severity} urgent
+                {tDetail('header.severityUrgent', { severity: incident.severity })}
               </span>
               <span className={`badge badge--${incident.status}`}>{incident.status}</span>
             </div>
             <h1 data-testid="inbox-detail-title" style={{ marginTop: 'var(--space-md)' }}>
-              Incident {incident.incident_id.slice(0, 8)}
+              {tDetail('header.incidentTitle', { id: incident.incident_id.slice(0, 8) })}
             </h1>
             <p className="page-header__sub">
-              Ward {incident.ward_id ?? '—'} · block #{incident.last_block_height} ·{' '}
-              {incident.last_event_type}
+              {tDetail('header.metaLine', {
+                ward: incident.ward_id ?? '—',
+                block: incident.last_block_height,
+                eventType: incident.last_event_type,
+              })}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
@@ -559,7 +583,7 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
               }}
               testId="inbox-assign-tech"
             >
-              Assign field tech
+              {tDetail('actions.assignTech')}
             </Button>
             <Button
               variant="primary"
@@ -569,7 +593,7 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
               }}
               testId="inbox-request-ack"
             >
-              Request citizen ack →
+              {tDetail('actions.requestAck')}
             </Button>
           </div>
         </div>
@@ -587,33 +611,36 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
                 marginBottom: 'var(--space-md)',
               }}
             >
-              <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Thread timeline</h3>
+              <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('timeline.title')}</h3>
               <span
                 className="mono"
                 style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
               >
-                {threadEvents.length} {threadEvents.length === 1 ? 'event' : 'events'}
+                {tDetail(
+                  threadEvents.length === 1 ? 'timeline.eventCount_one' : 'timeline.eventCount_other',
+                  { count: threadEvents.length },
+                )}
               </span>
             </div>
             {threadEvents.length === 0 ? (
               <EmptyState
                 icon={<AlertIcon />}
-                heading="No events yet"
-                body="Once actions land on the chain for this incident, they show here."
+                heading={tDetail('timeline.emptyHeading')}
+                body={tDetail('timeline.emptyBody')}
               />
             ) : (
               <ul className="timeline" data-testid="inbox-detail-timeline-list">
                 {threadEvents.map((e) => (
                   <li key={e.event_id}>
                     <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
-                    <p className="timeline__title">{eventTitle(e)}</p>
+                    <p className="timeline__title">{eventTitle(e, tDetail)}</p>
                     <div
                       className="timeline__meta"
                       style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}
                     >
-                      <span className="mono">{e.actor_identity?.display ?? '—'}</span>
-                      <span className="mono">·</span>
-                      <span className="mono">block #{e.height}</span>
+                      <span className="mono">{e.actor_identity?.display ?? tDetail('timeline.unknownActor')}</span>
+                      <span className="mono">{tDetail('timeline.separator')}</span>
+                      <span className="mono">{tDetail('timeline.blockRef', { height: e.height })}</span>
                     </div>
                   </li>
                 ))}
@@ -626,20 +653,22 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
         <div className="col-5" data-testid="inbox-detail-related">
           <Card>
             <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>
-              Related incidents · ward {incident.ward_id}
+              {tDetail('related.title', { ward: incident.ward_id })}
             </h3>
             <p
               className="page-header__sub"
               style={{ marginTop: 'var(--space-xs)', marginBottom: 'var(--space-md)' }}
             >
-              {related.length} sibling {related.length === 1 ? 'incident' : 'incidents'} in this
-              ward
+              {tDetail(
+                related.length === 1 ? 'related.subtitle_one' : 'related.subtitle_other',
+                { count: related.length },
+              )}
             </p>
             {related.length === 0 ? (
               <EmptyState
                 icon={<InboxIcon />}
-                heading="No siblings"
-                body="This is the only active incident in the ward."
+                heading={tDetail('related.emptyHeading')}
+                body={tDetail('related.emptyBody')}
               />
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -665,7 +694,10 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
                           className="row-sub"
                           style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
                         >
-                          {r.last_event_type} · block #{r.last_block_height}
+                          {tDetail('related.rowMeta', {
+                            eventType: r.last_event_type,
+                            height: r.last_block_height,
+                          })}
                         </div>
                       </span>
                     </Link>

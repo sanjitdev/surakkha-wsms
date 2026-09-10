@@ -1,0 +1,52 @@
+{
+  "page": {
+    "title": "Inbox",
+    "subtitle": "{{count}} threads · {{t3}} T3 broadcast · {{sig}} awaiting your sig"
+  },
+  "actions": {
+    "exportQueue": "Export queue",
+    "newDraft": "New draft"
+  },
+  "toolbar": {
+    "filterAriaLabel": "Filter inbox",
+    "searchPlaceholder": "Search by ward, sensor, hash, or citizen name…",
+    "searchAriaLabel": "Search inbox"
+  },
+  "filters": {
+    "all": "All",
+    "t3Urgent": "T3 urgent",
+    "awaitingSigs": "Awaiting sigs",
+    "myDrafts": "My drafts",
+    "citizenReports": "Citizen reports",
+    "resolvedToday": "Resolved · today"
+  },
+  "columns": {
+    "severityDot": "",
+    "thread": "Thread",
+    "where": "Where",
+    "owner": "Owner",
+    "ownerUnknown": "?",
+    "severity": "Severity",
+    "action": ""
+  },
+  "card": {
+    "title": "Action queue",
+    "meta": "{{count}} · last updated {{time}}",
+    "metaFallback": "—"
+  },
+  "empty": {
+    "icon": "○",
+    "heading": "No incidents",
+    "body": "Chain unreachable — pull-to-refresh in Phase 2"
+  },
+  "bulkBar": {
+    "count_one": "{{count}} selected",
+    "count_other": "{{count}} selected",
+    "assignToMe": "Assign to me",
+    "markReviewed": "Mark reviewed",
+    "archive": "Archive"
+  },
+  "pager": {
+    "meta": "{{visible}} of {{total}}"
+  }
+}

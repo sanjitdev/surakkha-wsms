@@ -11,6 +11,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
@@ -36,6 +37,7 @@ import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRa
 
 export function InboxList() {
   const { format: formatTime, locale } = useDateFormatter();
+  const { t: tInbox } = useTranslation('inboxList');
   const actions = useIncidentActions();
   const [rows, setRows] = useState<InboxRowType[]>([]);
   const [recent, setRecent] = useState<RecentDecision[]>([]);
@@ -146,7 +148,7 @@ export function InboxList() {
     () => [
       {
         key: 'severity-dot',
-        header: '',
+        header: tInbox('columns.severityDot'),
         render: (r) => (
           <span
             className="row-severity-dot"
@@ -167,7 +169,7 @@ export function InboxList() {
       },
       {
         key: 'thread',
-        header: 'Thread',
+        header: tInbox('columns.thread'),
         render: (r) => (
           <div
             className={`data-table--inbox__tr${r.isUrgent ? ' row-urgent' : ''}${
@@ -187,7 +189,7 @@ export function InboxList() {
       },
       {
         key: 'where',
-        header: 'Where',
+        header: tInbox('columns.where'),
         render: (r) => (
           <>
             <span className="mono">{r.where}</span>
@@ -198,7 +200,7 @@ export function InboxList() {
       },
       {
         key: 'ownerName',
-        header: 'Owner',
+        header: tInbox('columns.owner'),
         render: (r) => (
           <>
             <span
@@ -217,7 +219,7 @@ export function InboxList() {
               }}
               aria-hidden="true"
             >
-              {r.ownerName ? r.ownerName.slice(0, 2) : '?'}
+              {r.ownerName ? r.ownerName.slice(0, 2) : tInbox('columns.ownerUnknown')}
             </span>
             {r.ownerName}
           </>
@@ -226,7 +228,7 @@ export function InboxList() {
       },
       {
         key: 'severity',
-        header: 'Severity',
+        header: tInbox('columns.severity'),
         render: (r) => (
           <span className={`badge badge--${r.severity.toLowerCase()}`}>{r.severity}</span>
         ),
@@ -234,12 +236,12 @@ export function InboxList() {
       },
       {
         key: 'action',
-        header: '',
+        header: tInbox('columns.action'),
         render: (r) => <a href={r.action.href}>{r.action.label} →</a>,
         className: 'col-action',
       },
     ],
-    [selectedRows],
+    [selectedRows, tInbox],
   );
 
   return (
@@ -247,26 +249,29 @@ export function InboxList() {
       <div className="page-header">
         <div className="page-header__row">
           <div>
-            <h1>Inbox</h1>
+            <h1>{tInbox('page.title')}</h1>
             <div className="page-header__sub">
-              {rows.length} threads · {chipCounts.T3} T3 broadcast · {chipCounts.sig} awaiting your
-              sig
+              {tInbox('page.subtitle', {
+                count: rows.length,
+                t3: chipCounts.T3,
+                sig: chipCounts.sig,
+              })}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
             <Button variant="secondary" size="sm">
-              Export queue
+              {tInbox('actions.exportQueue')}
             </Button>
             <Button variant="primary" size="sm">
-              New draft
+              {tInbox('actions.newDraft')}
             </Button>
           </div>
         </div>
       </div>
       <div className="inbox-toolbar">
-        <div className="filter-chips" role="tablist" aria-label="Filter inbox">
+        <div className="filter-chips" role="tablist" aria-label={tInbox('toolbar.filterAriaLabel')}>
           <FilterChip
-            label="All"
+            label={tInbox('filters.all')}
             count={chipCounts.all}
             active={filter === 'all'}
             onClick={() => {
@@ -274,7 +279,7 @@ export function InboxList() {
             }}
           />
           <FilterChip
-            label="T3 urgent"
+            label={tInbox('filters.t3Urgent')}
             count={chipCounts.T3}
             dotColor="var(--danger)"
             active={filter === 'T3'}
@@ -283,7 +288,7 @@ export function InboxList() {
             }}
           />
           <FilterChip
-            label="Awaiting sigs"
+            label={tInbox('filters.awaitingSigs')}
             count={chipCounts.sig}
             active={filter === 'sig'}
             onClick={() => {
@@ -291,7 +296,7 @@ export function InboxList() {
             }}
           />
           <FilterChip
-            label="My drafts"
+            label={tInbox('filters.myDrafts')}
             count={chipCounts.drafts}
             active={filter === 'drafts'}
             onClick={() => {
@@ -299,7 +304,7 @@ export function InboxList() {
             }}
           />
           <FilterChip
-            label="Citizen reports"
+            label={tInbox('filters.citizenReports')}
             count={chipCounts.citizen}
             active={filter === 'citizen'}
             onClick={() => {
@@ -307,7 +312,7 @@ export function InboxList() {
             }}
           />
           <FilterChip
-            label="Resolved · today"
+            label={tInbox('filters.resolvedToday')}
             count={chipCounts.resolved}
             active={filter === 'resolved'}
             onClick={() => {
@@ -322,8 +327,8 @@ export function InboxList() {
           <input
             type="search"
             className="inbox-search__input"
-            placeholder="Search by ward, sensor, hash, or citizen name…"
-            aria-label="Search inbox"
+            placeholder={tInbox('toolbar.searchPlaceholder')}
+            aria-label={tInbox('toolbar.searchAriaLabel')}
           />
         </div>
       </div>
@@ -339,10 +344,14 @@ export function InboxList() {
                 justifyContent: 'space-between',
               }}
             >
-              <h3 className="data-card__title">Action queue</h3>
+              <h3 className="data-card__title">{tInbox('card.title')}</h3>
               <span className="data-card__meta">
-                {visibleRows.length} · last updated{' '}
-                {rows[0]?.timestamp ? formatTime('time-24', rows[0].timestamp) : '—'}
+                {tInbox('card.meta', {
+                  count: visibleRows.length,
+                  time: rows[0]?.timestamp
+                    ? formatTime('time-24', rows[0].timestamp)
+                    : tInbox('card.metaFallback'),
+                })}
               </span>
             </div>
             {loading ? (
@@ -367,9 +376,9 @@ export function InboxList() {
                 onSelectionChange={setSelectedRows}
                 emptyState={
                   <EmptyState
-                    icon={<span>○</span>}
-                    heading="No incidents"
-                    body="Chain unreachable — pull-to-refresh in Phase 2"
+                    icon={<span>{tInbox('empty.icon')}</span>}
+                    heading={tInbox('empty.heading')}
+                    body={tInbox('empty.body')}
                   />
                 }
               />
@@ -387,11 +396,11 @@ export function InboxList() {
             )}
             <div className="inbox-bulkbar" hidden={selectedRows.size === 0}>
               <span className="inbox-bulkbar__count">
-                <strong>{selectedRows.size}</strong> selected
+                <strong>{selectedRows.size}</strong> {tInbox(selectedRows.size === 1 ? 'bulkBar.count_one' : 'bulkBar.count_other', { count: selectedRows.size })}
               </span>
               <div className="inbox-bulkbar__actions">
                 <Button variant="secondary" size="sm" disabled>
-                  Assign to me
+                  {tInbox('bulkBar.assignToMe')}
                 </Button>
                 <Button
                   variant="secondary"
@@ -402,17 +411,17 @@ export function InboxList() {
                   }}
                   testId="bulk-mark-reviewed"
                 >
-                  Mark reviewed
+                  {tInbox('bulkBar.markReviewed')}
                 </Button>
                 <Button variant="danger" size="sm" disabled>
-                  Archive
+                  {tInbox('bulkBar.archive')}
                 </Button>
               </div>
             </div>
           </Card>
           <div className="inbox-pager">
             <span className="inbox-pager__meta">
-              {visibleRows.length} of {rows.length}
+              {tInbox('pager.meta', { visible: visibleRows.length, total: rows.length })}
             </span>
           </div>
         </div>

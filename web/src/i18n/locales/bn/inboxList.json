@@ -1,0 +1,52 @@
+{
+  "page": {
+    "title": "ইনবক্স",
+    "subtitle": "{{count}}টি থ্রেড · {{t3}} T3 প্রচার · {{sig}} আপনার স্বাক্ষরের অপেক্ষায়"
+  },
+  "actions": {
+    "exportQueue": "সারি রপ্তানি",
+    "newDraft": "নতুন খসড়া"
+  },
+  "toolbar": {
+    "filterAriaLabel": "ইনবক্স ফিল্টার",
+    "searchPlaceholder": "ওয়ার্ড, সেন্সর, হ্যাশ বা নাগরিকের নাম দিয়ে খুঁজুন…",
+    "searchAriaLabel": "ইনবক্স অনুসন্ধান"
+  },
+  "filters": {
+    "all": "সব",
+    "t3Urgent": "T3 জরুরি",
+    "awaitingSigs": "স্বাক্ষরের অপেক্ষায়",
+    "myDrafts": "আমার খসড়া",
+    "citizenReports": "নাগরিক প্রতিবেদন",
+    "resolvedToday": "আজ সমাধান"
+  },
+  "columns": {
+    "severityDot": "",
+    "thread": "থ্রেড",
+    "where": "কোথায়",
+    "owner": "মালিক",
+    "ownerUnknown": "?",
+    "severity": "তীব্রতা",
+    "action": ""
+  },
+  "card": {
+    "title": "পদক্ষেপ সারি",
+    "meta": "{{count}} · সর্বশেষ আপডেট {{time}}",
+    "metaFallback": "—"
+  },
+  "empty": {
+    "icon": "○",
+    "heading": "কোনো ঘটনা নেই",
+    "body": "চেইন অনুপলব্ধ — ফেজ ২-এ পুল-টু-রিফ্রেশ"
+  },
+  "bulkBar": {
+    "count_one": "{{count}} নির্বাচিত",
+    "count_other": "{{count}} নির্বাচিত",
+    "assignToMe": "আমাকে নিযুক্ত করুন",
+    "markReviewed": "পর্যালোচিত হিসেবে চিহ্নিত",
+    "archive": "আর্কাইভ"
+  },
+  "pager": {
+    "meta": "{{total}} এর মধ্যে {{visible}}"
+  }
+}

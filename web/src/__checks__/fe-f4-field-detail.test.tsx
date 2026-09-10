@@ -19,8 +19,10 @@
 /* eslint-disable @typescript-eslint/require-await, @typescript-eslint/no-unnecessary-type-assertion */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { FieldIncidentDetailPage } from '../pages/FieldIncidentDetailPage';
+import i18n from '../i18n';
 import { LocaleProvider } from '../hooks/useLocale';
 import { ToastProvider } from '../components/ui/ToastProvider';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
@@ -108,24 +110,26 @@ function renderPage(role: string, workOrderId: string) {
   const path = `/field/incident-detail${search}`;
 
   return render(
-    <LocaleProvider>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[path]}>
-          <AppLayoutContext.Provider
-            value={{
-              session: makeSession(role),
-              chainHead: null,
-              chainFreshSeconds: 0,
-              logout: () => Promise.resolve(),
-            }}
-          >
-            <Routes>
-              <Route path="/field/incident-detail" element={<FieldIncidentDetailPage />} />
-            </Routes>
-          </AppLayoutContext.Provider>
-        </MemoryRouter>
-      </ToastProvider>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[path]}>
+            <AppLayoutContext.Provider
+              value={{
+                session: makeSession(role),
+                chainHead: null,
+                chainFreshSeconds: 0,
+                logout: () => Promise.resolve(),
+              }}
+            >
+              <Routes>
+                <Route path="/field/incident-detail" element={<FieldIncidentDetailPage />} />
+              </Routes>
+            </AppLayoutContext.Provider>
+          </MemoryRouter>
+        </ToastProvider>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 

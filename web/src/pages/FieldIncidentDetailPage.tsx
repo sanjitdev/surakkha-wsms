@@ -34,6 +34,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
@@ -60,14 +61,6 @@ type Step = 'assigned' | 'onsite' | 'diagnosis' | 'fix' | 'resolved';
 
 const STEP_ORDER: Step[] = ['assigned', 'onsite', 'diagnosis', 'fix', 'resolved'];
 
-const STEP_LABELS: Record<Step, string> = {
-  assigned: 'Dispatched',
-  onsite: 'On site',
-  diagnosis: 'Diagnosis',
-  fix: 'Fix submitted',
-  resolved: 'Operator confirmed',
-};
-
 function nextStepFromEvents(events: ChainEventLite[], incidentId: string): Step {
   const types = new Set(
     events.filter((e) => (e.payload as { incident_id?: string }).incident_id === incidentId)
@@ -86,6 +79,7 @@ function nextStepFromEvents(events: ChainEventLite[], incidentId: string): Step 
 export function FieldIncidentDetailPage() {
   const { session } = useAppLayout();
   const { format } = useDateFormatter();
+  const { t: tField } = useTranslation('fieldIncidentDetail');
   const actions = useIncidentActions();
   const [searchParams] = useSearchParams();
   const workOrderId = searchParams.get('work_order') ?? '';
@@ -160,13 +154,13 @@ export function FieldIncidentDetailPage() {
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Work order</h1>
+          <h1>{tField('header.pageTitle')}</h1>
         </div>
         <Card>
           <EmptyState
             icon={<AlertIcon />}
-            heading="Field-tech only"
-            body={`You are signed in as ${session.role}. Sign in as Karim to access work orders.`}
+            heading={tField('header.fieldTechOnly.heading')}
+            body={tField('header.fieldTechOnly.body', { role: session.role })}
           />
         </Card>
       </Container>
@@ -187,9 +181,9 @@ export function FieldIncidentDetailPage() {
             }}
             data-testid="back-to-field"
           >
-            ← Back to queue
+            {tField('header.backToQueue')}
           </Link>
-          <h1 style={{ marginTop: 'var(--space-md)' }}>Loading work order…</h1>
+          <h1 style={{ marginTop: 'var(--space-md)' }}>{tField('header.loading')}</h1>
         </div>
       </Container>
     );
@@ -209,15 +203,19 @@ export function FieldIncidentDetailPage() {
             }}
             data-testid="back-to-field"
           >
-            ← Back to queue
+            {tField('header.backToQueue')}
           </Link>
-          <h1 style={{ marginTop: 'var(--space-md)' }}>Work order not found</h1>
+          <h1 style={{ marginTop: 'var(--space-md)' }}>{tField('header.notFound')}</h1>
         </div>
         <Card>
           <EmptyState
             icon={<AlertIcon />}
-            heading="No matching work order"
-            body={workOrderId ? `Event ${workOrderId.slice(-6)} is not in the current chain.` : 'No work_order id supplied in the URL.'}
+            heading={tField('header.notFoundEmptyHeading')}
+            body={
+              workOrderId
+                ? tField('header.notFoundEvent', { id: workOrderId.slice(-6) })
+                : tField('header.notFoundNoId')
+            }
           />
         </Card>
       </Container>
@@ -231,7 +229,7 @@ export function FieldIncidentDetailPage() {
   };
   const priority = payload.priority ?? 'P3';
   const etaMin = payload.eta_target_minutes ?? 30;
-  const summary = payload.work_order_summary ?? '(no summary)';
+  const summary = payload.work_order_summary ?? tField('header.workOrderFallback');
   const techId = session.actor_ref;
 
   // Per-step action handlers
@@ -307,22 +305,28 @@ export function FieldIncidentDetailPage() {
           }}
           data-testid="back-to-field"
         >
-          ← Back to queue
+          {tField('header.backToQueue')}
         </Link>
         <div style={{ marginTop: 'var(--space-sm)', display: 'flex', gap: 'var(--space-sm)', alignItems: 'center' }}>
           <span className={`tech-job__priority tech-job__priority--${priority.toLowerCase()}`}>
             {priority}
           </span>
           <span className="mono" style={{ fontSize: 'var(--font-size-sm)', color: 'var(--fg-secondary)' }}>
-            Work order {workOrderId.slice(-6)} · incident {incidentId.slice(-6)}
+            {tField('meta.workOrderRef', {
+              workOrder: workOrderId.slice(-6),
+              incident: incidentId.slice(-6),
+            })}
           </span>
         </div>
         <h1 data-testid="field-detail-title" style={{ marginTop: 'var(--space-md)' }}>
           {summary}
         </h1>
         <p className="page-header__sub">
-          Dispatched {format('date-short', assignedEvent.occurred_at)} ·{' '}
-          {format('time', assignedEvent.occurred_at)} · ETA {etaMin} min
+          {tField('meta.dispatched', {
+            date: format('date-short', assignedEvent.occurred_at),
+            time: format('time', assignedEvent.occurred_at),
+            eta: etaMin,
+          })}
         </p>
       </div>
 
@@ -341,8 +345,8 @@ export function FieldIncidentDetailPage() {
                 }`}
                 data-testid={`field-step-${s}`}
               >
-                <span className="verify-step__num">Step {STEP_ORDER.indexOf(s) + 1}</span>
-                <span className="verify-step__label">{STEP_LABELS[s]}</span>
+                <span className="verify-step__num">{tField('steps.stepNumber', { n: STEP_ORDER.indexOf(s) + 1 })}</span>
+                <span className="verify-step__label">{tField(`steps.labels.${s}`)}</span>
               </li>
             );
           })}
@@ -353,9 +357,9 @@ export function FieldIncidentDetailPage() {
       <div style={{ marginTop: 'var(--space-lg)' }}>
         {step === 'onsite' && (
           <Card testId="field-step-onsite-card">
-            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Mark arrived on site</h3>
+            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tField('actions.markArrivedHeading')}</h3>
             <p className="page-header__sub">
-              Logs your arrival on the incident&apos;s chain thread.
+              {tField('actions.markArrivedBody')}
             </p>
             <div className="submit-form__actions">
               <Button
@@ -365,7 +369,7 @@ export function FieldIncidentDetailPage() {
                 onClick={onMarkArrived}
                 testId="field-mark-arrived"
               >
-                {actions.busy ? 'Sealing…' : 'Mark arrived on site'}
+                {actions.busy ? tField('actions.sealing') : tField('actions.markArrivedSubmit')}
               </Button>
             </div>
           </Card>
@@ -373,9 +377,9 @@ export function FieldIncidentDetailPage() {
 
         {step === 'diagnosis' && (
           <Card testId="field-step-diagnosis-card">
-            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Submit diagnosis</h3>
+            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tField('actions.diagnosisHeading')}</h3>
             <p className="page-header__sub">
-              What you found on site; the operator reads this before authorising the fix.
+              {tField('actions.diagnosisBody')}
             </p>
             <form
               onSubmit={(e) => {
@@ -386,7 +390,7 @@ export function FieldIncidentDetailPage() {
             >
               <div className="submit-form__row">
                 <label htmlFor="field-diagnosis" className="submit-form__label">
-                  Diagnosis
+                  {tField('actions.diagnosisLabel')}
                 </label>
                 <textarea
                   id="field-diagnosis"
@@ -397,13 +401,13 @@ export function FieldIncidentDetailPage() {
                   onChange={(e) => {
                     setDiagnosis(e.target.value);
                   }}
-                  placeholder="Chlorine pump #4 dead — needs replacement"
+                  placeholder={tField('actions.diagnosisPlaceholder')}
                 />
-                <p className="submit-form__hint">Min 5 characters.</p>
+                <p className="submit-form__hint">{tField('actions.diagnosisHint')}</p>
               </div>
               <div className="submit-form__row">
                 <label htmlFor="field-parts" className="submit-form__label">
-                  Parts needed (comma-separated)
+                  {tField('actions.partsLabel')}
                 </label>
                 <input
                   id="field-parts"
@@ -413,7 +417,7 @@ export function FieldIncidentDetailPage() {
                   onChange={(e) => {
                     setPartsCsv(e.target.value);
                   }}
-                  placeholder="chlorine pump #4, 1/2 inch washer"
+                  placeholder={tField('actions.partsPlaceholder')}
                 />
               </div>
               <div className="submit-form__actions">
@@ -424,7 +428,7 @@ export function FieldIncidentDetailPage() {
                   disabled={!canSubmitDiagnosis}
                   testId="field-submit-diagnosis"
                 >
-                  {actions.busy ? 'Sealing…' : 'Submit diagnosis'}
+                  {actions.busy ? tField('actions.sealing') : tField('actions.diagnosisSubmit')}
                 </Button>
               </div>
             </form>
@@ -433,9 +437,9 @@ export function FieldIncidentDetailPage() {
 
         {step === 'fix' && (
           <Card testId="field-step-fix-card">
-            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Submit fix</h3>
+            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tField('actions.fixHeading')}</h3>
             <p className="page-header__sub">
-              Operator reviews this and either confirms or sends you back.
+              {tField('actions.fixBody')}
             </p>
             <form
               onSubmit={(e) => {
@@ -446,7 +450,7 @@ export function FieldIncidentDetailPage() {
             >
               <div className="submit-form__row">
                 <label htmlFor="field-fix-summary" className="submit-form__label">
-                  Fix summary
+                  {tField('actions.fixSummaryLabel')}
                 </label>
                 <textarea
                   id="field-fix-summary"
@@ -457,13 +461,13 @@ export function FieldIncidentDetailPage() {
                   onChange={(e) => {
                     setFixSummary(e.target.value);
                   }}
-                  placeholder="Replaced chlorine pump #4; output verified at 1.5 ppm."
+                  placeholder={tField('actions.fixSummaryPlaceholder')}
                 />
-                <p className="submit-form__hint">Min 5 characters.</p>
+                <p className="submit-form__hint">{tField('actions.fixSummaryHint')}</p>
               </div>
               <div className="submit-form__row">
                 <label htmlFor="field-resolution-note" className="submit-form__label">
-                  Resolution note
+                  {tField('actions.resolutionLabel')}
                 </label>
                 <textarea
                   id="field-resolution-note"
@@ -474,12 +478,12 @@ export function FieldIncidentDetailPage() {
                   onChange={(e) => {
                     setResolutionNote(e.target.value);
                   }}
-                  placeholder="Optional — handed off to PHA for monitoring."
+                  placeholder={tField('actions.resolutionPlaceholder')}
                 />
               </div>
               <div className="submit-form__row">
                 <label htmlFor="field-photo-url" className="submit-form__label">
-                  Photo URL
+                  {tField('actions.photoLabel')}
                 </label>
                 <input
                   id="field-photo-url"
@@ -490,7 +494,7 @@ export function FieldIncidentDetailPage() {
                   onChange={(e) => {
                     setPhotoUrl(e.target.value);
                   }}
-                  placeholder="https://example.com/site.jpg"
+                  placeholder={tField('actions.photoPlaceholder')}
                 />
               </div>
               <div className="submit-form__actions">
@@ -501,7 +505,7 @@ export function FieldIncidentDetailPage() {
                   disabled={!canSubmitFix}
                   testId="field-submit-fix"
                 >
-                  {actions.busy ? 'Sealing…' : 'Submit fix'}
+                  {actions.busy ? tField('actions.sealing') : tField('actions.fixSubmit')}
                 </Button>
               </div>
             </form>
@@ -510,13 +514,13 @@ export function FieldIncidentDetailPage() {
 
         {step === 'resolved' && (
           <Card testId="field-step-resolved-card">
-            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Operator confirmed</h3>
+            <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tField('actions.resolvedHeading')}</h3>
             <p className="page-header__sub">
-              The fix is sealed; the next step is the citizen&apos;s acknowledgement.
+              {tField('actions.resolvedBody')}
             </p>
             <div className="submit-form__row">
               <label htmlFor="field-resolve-note" className="submit-form__label">
-                Operator resolution note
+                {tField('actions.resolveLabel')}
               </label>
               <textarea
                 id="field-resolve-note"
@@ -527,7 +531,7 @@ export function FieldIncidentDetailPage() {
                 onChange={(e) => {
                   setResolveNote(e.target.value);
                 }}
-                placeholder="Optional — seal a public notice; defaults to &quot;Operator confirmed fix&quot;."
+                placeholder={tField('actions.resolvePlaceholder')}
               />
             </div>
             <div className="submit-form__actions">
@@ -538,7 +542,7 @@ export function FieldIncidentDetailPage() {
                 onClick={onResolve}
                 testId="field-resolve"
               >
-                {actions.busy ? 'Sealing…' : 'Confirm resolution'}
+                {actions.busy ? tField('actions.sealing') : tField('actions.resolveSubmit')}
               </Button>
             </div>
           </Card>
@@ -548,8 +552,8 @@ export function FieldIncidentDetailPage() {
       {/* Sidebar: thread timeline for the incident. */}
       <div style={{ marginTop: 'var(--space-lg)' }}>
         <Card testId="field-thread-card">
-          <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Thread timeline</h3>
-          <ThreadEvents incidentId={incidentId} events={events} formatTime={format} />
+          <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tField('timeline.title')}</h3>
+          <ThreadEvents incidentId={incidentId} events={events} formatTime={format} t={tField} />
         </Card>
       </div>
     </Container>
@@ -559,9 +563,10 @@ interface ThreadEventsProps {
   incidentId: string;
   events: ChainEventLite[];
   formatTime: (mode: 'time', input: string | number | Date | null | undefined) => string;
+  t: (k: string, opts?: Record<string, unknown>) => string;
 }
 
-function ThreadEvents({ incidentId, events, formatTime }: ThreadEventsProps) {
+function ThreadEvents({ incidentId, events, formatTime, t }: ThreadEventsProps) {
   const list = useMemo(() => events
       .filter((e) => (e.payload as { incident_id?: string }).incident_id === incidentId)
       .sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime()), [events, incidentId]);
@@ -569,7 +574,7 @@ function ThreadEvents({ incidentId, events, formatTime }: ThreadEventsProps) {
   if (!incidentId) {
     return (
       <p className="page-header__sub" style={{ marginTop: 'var(--space-md)' }}>
-        No incident id resolved yet.
+        {t('timeline.noIncidentId')}
       </p>
     );
   }
@@ -577,8 +582,8 @@ function ThreadEvents({ incidentId, events, formatTime }: ThreadEventsProps) {
     return (
       <EmptyState
         icon={<AlertIcon />}
-        heading="No events yet"
-        body="Once the technician submits status updates they show here."
+        heading={t('timeline.emptyHeading')}
+        body={t('timeline.emptyBody')}
       />
     );
   }
@@ -588,7 +593,7 @@ function ThreadEvents({ incidentId, events, formatTime }: ThreadEventsProps) {
         <li key={e.event_id}>
           <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
           <p className="timeline__title">{e.event_type}</p>
-          <div className="timeline__meta mono">{e.actor_identity?.display ?? '—'}</div>
+          <div className="timeline__meta mono">{e.actor_identity?.display ?? t('timeline.unknownActor')}</div>
         </li>
       ))}
     </ul>

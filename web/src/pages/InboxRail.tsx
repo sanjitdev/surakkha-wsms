@@ -10,6 +10,7 @@
  * computed.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Card } from '../components/ui/Card';
 import type { InboxRow } from '../types/inbox';
 import type { RecentDecision } from './inboxListModel';
@@ -44,20 +45,22 @@ interface SevProps {
   total: number;
 }
 export function SeverityRail({ T3, T2, T1, T0, total }: SevProps) {
+  const { t } = useTranslation('inboxCommon');
   return (
-    <Card heading="Queue by severity">
-      <Hbar label="T3 urgent" value={T3} total={total} colour="var(--danger)" />
-      <Hbar label="T2 elevated" value={T2} total={total} colour="var(--warning)" />
-      <Hbar label="T1 review" value={T1} total={total} colour="var(--info)" />
-      <Hbar label="T0 info" value={T0} total={total} colour="var(--band-medium)" last />
+    <Card heading={t('severityRail.heading')}>
+      <Hbar label={t('severityRail.t3')} value={T3} total={total} colour="var(--danger)" />
+      <Hbar label={t('severityRail.t2')} value={T2} total={total} colour="var(--warning)" />
+      <Hbar label={t('severityRail.t1')} value={T1} total={total} colour="var(--info)" />
+      <Hbar label={t('severityRail.t0')} value={T0} total={total} colour="var(--band-medium)" last />
     </Card>
   );
 }
 export function AwaitingActionRail({ rows }: { rows: InboxRow[] }) {
+  const { t } = useTranslation('inboxCommon');
   const top = rows.slice(0, 2);
 
   return (
-    <Card heading="Awaiting your action" modifier="with-heading">
+    <Card heading={t('awaitingActionRail.heading')} modifier="with-heading">
       <table className="data-table" style={{ fontSize: 'var(--font-size-xs)', width: '100%' }}>
         <tbody>
           {top.map((r) => (
@@ -70,7 +73,9 @@ export function AwaitingActionRail({ rows }: { rows: InboxRow[] }) {
               </td>
               <td>
                 <strong style={{ fontSize: 'var(--font-size-sm)' }}>
-                  {r.severity === 'T3' ? 'Citizen ack needed' : 'Send draft'}
+                  {r.severity === 'T3'
+                    ? t('awaitingActionRail.citizenAckNeeded')
+                    : t('awaitingActionRail.sendDraft')}
                 </strong>
                 <div className="row-sub">
                   {r.where} · {r.severity}
@@ -84,13 +89,14 @@ export function AwaitingActionRail({ rows }: { rows: InboxRow[] }) {
   );
 }
 export function RecentDecisionsRail({ recent }: { recent: RecentDecision[] }) {
+  const { t } = useTranslation('inboxCommon');
   return (
-    <Card heading="Recent decisions" modifier="with-heading">
+    <Card heading={t('recentDecisionsRail.heading')} modifier="with-heading">
       <ul className="recent-decisions">
         {recent.length === 0 ? (
           <li>
-            <span className="recent-decisions__time mono">—</span>
-            <span className="recent-decisions__text">No decisions yet</span>
+            <span className="recent-decisions__time mono">{t('recentDecisionsRail.emptyTime')}</span>
+            <span className="recent-decisions__text">{t('recentDecisionsRail.emptyText')}</span>
           </li>
         ) : (
           recent.map((d, i) => (

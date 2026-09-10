@@ -1,0 +1,19 @@
+{
+  "severityRail": {
+    "heading": "তীব্রতা অনুযায়ী সারি",
+    "t3": "T3 জরুরি",
+    "t2": "T2 উচ্চ",
+    "t1": "T1 পর্যালোচনা",
+    "t0": "T0 তথ্য"
+  },
+  "awaitingActionRail": {
+    "heading": "আপনার পদক্ষেপের অপেক্ষায়",
+    "citizenAckNeeded": "নাগরিক স্বীকৃতি প্রয়োজন",
+    "sendDraft": "খসড়া পাঠান"
+  },
+  "recentDecisionsRail": {
+    "heading": "সাম্প্রতিক সিদ্ধান্ত",
+    "emptyTime": "—",
+    "emptyText": "এখনও কোনো সিদ্ধান্ত নেই"
+  }
+}

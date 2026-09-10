@@ -1,0 +1,66 @@
+{
+  "header": {
+    "backToQueue": "← Back to queue",
+    "workOrderFallback": "(no summary)",
+    "pageTitle": "Work order",
+    "loading": "Loading work order…",
+    "notFound": "Work order not found",
+    "notFoundEvent": "Event {{id}} is not in the current chain.",
+    "notFoundNoId": "No work_order id supplied in the URL.",
+    "notFoundEmptyHeading": "No matching work order",
+    "fieldTechOnly": {
+      "heading": "Field-tech only",
+      "body": "You are signed in as {{role}}. Sign in as Karim to access work orders."
+    }
+  },
+  "meta": {
+    "workOrderRef": "Work order {{workOrder}} · incident {{incident}}",
+    "dispatched": "Dispatched {{date}} · {{time}} · ETA {{eta}} min"
+  },
+  "steps": {
+    "stepNumber": "Step {{n}}",
+    "labels": {
+      "assigned": "Dispatched",
+      "onsite": "On site",
+      "diagnosis": "Diagnosis",
+      "fix": "Fix submitted",
+      "resolved": "Operator confirmed"
+    }
+  },
+  "actions": {
+    "sealing": "Sealing…",
+    "markArrivedHeading": "Mark arrived on site",
+    "markArrivedBody": "Logs your arrival on the incident's chain thread.",
+    "markArrivedSubmit": "Mark arrived on site",
+    "diagnosisHeading": "Submit diagnosis",
+    "diagnosisBody": "What you found on site; the operator reads this before authorising the fix.",
+    "diagnosisLabel": "Diagnosis",
+    "diagnosisPlaceholder": "Chlorine pump #4 dead — needs replacement",
+    "diagnosisHint": "Min 5 characters.",
+    "diagnosisSubmit": "Submit diagnosis",
+    "partsLabel": "Parts needed (comma-separated)",
+    "partsPlaceholder": "chlorine pump #4, 1/2 inch washer",
+    "fixHeading": "Submit fix",
+    "fixBody": "Operator reviews this and either confirms or sends you back.",
+    "fixSummaryLabel": "Fix summary",
+    "fixSummaryPlaceholder": "Replaced chlorine pump #4; output verified at 1.5 ppm.",
+    "fixSummaryHint": "Min 5 characters.",
+    "resolutionLabel": "Resolution note",
+    "resolutionPlaceholder": "Optional — handed off to PHA for monitoring.",
+    "photoLabel": "Photo URL",
+    "photoPlaceholder": "https://example.com/site.jpg",
+    "fixSubmit": "Submit fix",
+    "resolvedHeading": "Operator confirmed",
+    "resolvedBody": "The fix is sealed; the next step is the citizen's acknowledgement.",
+    "resolveLabel": "Operator resolution note",
+    "resolvePlaceholder": "Optional — seal a public notice; defaults to \"Operator confirmed fix\".",
+    "resolveSubmit": "Confirm resolution"
+  },
+  "timeline": {
+    "title": "Thread timeline",
+    "noIncidentId": "No incident id resolved yet.",
+    "emptyHeading": "No events yet",
+    "emptyBody": "Once the technician submits status updates they show here.",
+    "unknownActor": "—"
+  }
+}

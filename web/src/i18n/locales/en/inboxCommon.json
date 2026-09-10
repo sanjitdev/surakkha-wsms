@@ -1,0 +1,19 @@
+{
+  "severityRail": {
+    "heading": "Queue by severity",
+    "t3": "T3 urgent",
+    "t2": "T2 elevated",
+    "t1": "T1 review",
+    "t0": "T0 info"
+  },
+  "awaitingActionRail": {
+    "heading": "Awaiting your action",
+    "citizenAckNeeded": "Citizen ack needed",
+    "sendDraft": "Send draft"
+  },
+  "recentDecisionsRail": {
+    "heading": "Recent decisions",
+    "emptyTime": "—",
+    "emptyText": "No decisions yet"
+  }
+}

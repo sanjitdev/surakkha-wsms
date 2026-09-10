@@ -1,0 +1,66 @@
+{
+  "header": {
+    "backToQueue": "← কিউতে ফিরুন",
+    "workOrderFallback": "(কোনো সারাংশ নেই)",
+    "pageTitle": "কাজের আদেশ",
+    "loading": "কাজের আদেশ লোড হচ্ছে…",
+    "notFound": "কাজের আদেশ পাওয়া যায়নি",
+    "notFoundEvent": "ইভেন্ট {{id}} বর্তমান চেইনে নেই।",
+    "notFoundNoId": "URL-এ কোনো work_order আইডি দেওয়া হয়নি।",
+    "notFoundEmptyHeading": "কোনো মিলে যাওয়া কাজের আদেশ নেই",
+    "fieldTechOnly": {
+      "heading": "শুধুমাত্র ফিল্ড-টেক",
+      "body": "আপনি {{role}} হিসেবে সাইন ইন করেছেন। কাজের আদেশ দেখতে করিম হিসেবে সাইন ইন করুন।"
+    }
+  },
+  "meta": {
+    "workOrderRef": "কাজের আদেশ {{workOrder}} · ঘটনা {{incident}}",
+    "dispatched": "প্রেরণ {{date}} · {{time}} · ETA {{eta}} মিনিট"
+  },
+  "steps": {
+    "stepNumber": "ধাপ {{n}}",
+    "labels": {
+      "assigned": "প্রেরিত",
+      "onsite": "মাঠে",
+      "diagnosis": "রোগ নির্ণয়",
+      "fix": "মেরামত জমা",
+      "resolved": "অপারেটর নিশ্চিত"
+    }
+  },
+  "actions": {
+    "sealing": "সিল করা হচ্ছে…",
+    "markArrivedHeading": "মাঠে পৌঁছেছেন চিহ্নিত করুন",
+    "markArrivedBody": "ঘটনার চেইন থ্রেডে আপনার আগমন লগ করে।",
+    "markArrivedSubmit": "মাঠে পৌঁছেছেন চিহ্নিত করুন",
+    "diagnosisHeading": "রোগ নির্ণয় জমা দিন",
+    "diagnosisBody": "মাঠে আপনি কী পেয়েছেন; অপারেটর মেরামত অনুমোদনের আগে এটি পড়বেন।",
+    "diagnosisLabel": "রোগ নির্ণয়",
+    "diagnosisPlaceholder": "ক্লোরিন পাম্প #৪ অকার্যকর — প্রতিস্থাপন প্রয়োজন",
+    "diagnosisHint": "ন্যূনতম ৫ অক্ষর।",
+    "diagnosisSubmit": "রোগ নির্ণয় জমা দিন",
+    "partsLabel": "প্রয়োজনীয় যন্ত্রাংশ (কমা-দ্বারা পৃথক)",
+    "partsPlaceholder": "ক্লোরিন পাম্প #৪, ১/২ ইঞ্চি ওয়াশার",
+    "fixHeading": "মেরামত জমা দিন",
+    "fixBody": "অপারেটর এটি পর্যালোচনা করে নিশ্চিত করবেন বা আপনাকে ফেরত পাঠাবেন।",
+    "fixSummaryLabel": "মেরামতের সারাংশ",
+    "fixSummaryPlaceholder": "ক্লোরিন পাম্প #৪ প্রতিস্থাপিত; আউটপুট ১.৫ পিপিএম-এ যাচাই।",
+    "fixSummaryHint": "ন্যূনতম ৫ অক্ষর।",
+    "resolutionLabel": "সমাধান নোট",
+    "resolutionPlaceholder": "ঐচ্ছিক — পর্যবেক্ষণের জন্য PHA-তে হস্তান্তর।",
+    "photoLabel": "ছবির URL",
+    "photoPlaceholder": "https://example.com/site.jpg",
+    "fixSubmit": "মেরামত জমা দিন",
+    "resolvedHeading": "অপারেটর নিশ্চিত",
+    "resolvedBody": "মেরামত সিল করা হয়েছে; পরবর্তী ধাপ নাগরিকের স্বীকৃতি।",
+    "resolveLabel": "অপারেটর সমাধান নোট",
+    "resolvePlaceholder": "ঐচ্ছিক — পাবলিক নোটিশ সিল; ডিফল্ট \"অপারেটর মেরামত নিশ্চিত\"।",
+    "resolveSubmit": "সমাধান নিশ্চিত করুন"
+  },
+  "timeline": {
+    "title": "থ্রেড টাইমলাইন",
+    "noIncidentId": "এখনও কোনো ঘটনা আইডি সমাধান হয়নি।",
+    "emptyHeading": "এখনও কোনো ইভেন্ট নেই",
+    "emptyBody": "টেকনিশিয়ান স্ট্যাটাস আপডেট জমা দিলে এখানে দেখা যাবে।",
+    "unknownActor": "—"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "header": {
+    "backToInbox": "← ইনবক্সে ফিরুন",
+    "loading": "লোড হচ্ছে…",
+    "severityUrgent": "{{severity}} জরুরি",
+    "incidentTitle": "ঘটনা {{id}}",
+    "metaLine": "ওয়ার্ড {{ward}} · ব্লক #{{block}} · {{eventType}}"
+  },
+  "notFound": {
+    "title": "ঘটনা পাওয়া যায়নি",
+    "body": "ঘটনা {{id}} বর্তমান চেইনে নেই।",
+    "emptyHeading": "কোনো মিলে যাওয়া ঘটনা নেই",
+    "emptyBody": "এই থ্রেডটি রিড-মডেল থেকে মুছে ফেলা হয়েছে বা কখনও ছিল না।"
+  },
+  "actions": {
+    "assignTech": "ফিল্ড টেকনিশিয়ান নিযুক্ত করুন",
+    "requestAck": "নাগরিক স্বীকৃতি অনুরোধ →"
+  },
+  "timeline": {
+    "title": "থ্রেড টাইমলাইন",
+    "eventCount_one": "{{count}}টি ইভেন্ট",
+    "eventCount_other": "{{count}}টি ইভেন্ট",
+    "emptyHeading": "এখনও কোনো ইভেন্ট নেই",
+    "emptyBody": "এই ঘটনার জন্য চেইনে পদক্ষেপ এলে এখানে দেখা যাবে।",
+    "unknownActor": "—",
+    "separator": "·",
+    "blockRef": "ব্লক #{{height}}"
+  },
+  "events": {
+    "incidentOpened": "ঘটনা খোলা হয়েছে ({{ward}})",
+    "incidentEscalated": "ঘটনা {{severity}}-এ ত্বরান্বিত",
+    "incidentResolved": "ঘটনা সমাধান",
+    "publicNotice": "পাবলিক নোটিশ খসড়া",
+    "citizenAck": "নাগরিক স্বীকৃতি ({{channel}})",
+    "sensorReading": "সেন্সর {{sensorId}} রিডিং: {{value}} {{parameter}}"
+  },
+  "related": {
+    "title": "সম্পর্কিত ঘটনা · ওয়ার্ড {{ward}}",
+    "subtitle_one": "এই ওয়ার্ডে {{count}}টি সহোদর ঘটনা",
+    "subtitle_other": "এই ওয়ার্ডে {{count}}টি সহোদর ঘটনা",
+    "emptyHeading": "কোনো সহোদর নেই",
+    "emptyBody": "এটি এই ওয়ার্ডের একমাত্র সক্রিয় ঘটনা।",
+    "rowMeta": "{{eventType}} · ব্লক #{{height}}"
+  },
+  "assignModal": {
+    "ariaLabel": "ফিল্ড টেকনিশিয়ান নিযুক্ত করুন",
+    "title": "ফিল্ড টেকনিশিয়ান নিযুক্ত করুন",
+    "description": "ঘটনা {{id}}-এর জন্য চেইনে একটি কাজের আদেশ প্রেরণ।",
+    "technicianLabel": "টেকনিশিয়ান",
+    "priorityLabel": "অগ্রাধিকার",
+    "priorityP1": "P1 · জরুরি",
+    "priorityP2": "P2 · একই দিন",
+    "priorityP3": "P3 · নির্ধারিত",
+    "etaLabel": "ETA (মিনিট)",
+    "summaryLabel": "কাজের আদেশের সারাংশ",
+    "summaryPlaceholder": "ক্লোরিন পাম্প #৪ প্রতিস্থাপন, আউটপুট যাচাই",
+    "summaryHint": "টেকনিশিয়ান মাঠে কী করবে। ন্যূনতম ৫ অক্ষর।",
+    "dispatching": "প্রেরণ হচ্ছে…",
+    "submit": "কাজের আদেশ প্রেরণ",
+    "cancel": "বাতিল"
+  },
+  "ackModal": {
+    "ariaLabel": "নাগরিক স্বীকৃতি অনুরোধ",
+    "title": "নাগরিক স্বীকৃতি অনুরোধ",
+    "description": "ঘটনা {{id}}-এর জন্য নির্বাচিত চ্যানেলে নোটিশ প্রেরণ।",
+    "channelLabel": "চ্যানেল",
+    "channelSms": "SMS",
+    "channelWhatsapp": "WhatsApp",
+    "channelVoice": "ভয়েস",
+    "copyLabel": "নোটিশের কপি",
+    "copyPlaceholder": "আপনার নলের পানি এখন নিরাপদ কিনা নিশ্চিত করুন।",
+    "copyHint": "নাগরিককে হুবহু পাঠানো হবে। ন্যূনতম ৫ অক্ষর।",
+    "sending": "পাঠানো হচ্ছে…",
+    "submit": "স্বীকৃতির অনুরোধ পাঠান",
+    "cancel": "বাতিল"
+  }
+}

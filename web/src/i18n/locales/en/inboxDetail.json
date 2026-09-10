@@ -1,0 +1,77 @@
+{
+  "header": {
+    "backToInbox": "← Back to inbox",
+    "loading": "Loading…",
+    "severityUrgent": "{{severity}} urgent",
+    "incidentTitle": "Incident {{id}}",
+    "metaLine": "Ward {{ward}} · block #{{block}} · {{eventType}}"
+  },
+  "notFound": {
+    "title": "Incident not found",
+    "body": "The incident {{id}} is not in the current chain.",
+    "emptyHeading": "No matching incident",
+    "emptyBody": "This thread may have been pruned from the read-model or never existed."
+  },
+  "actions": {
+    "assignTech": "Assign field tech",
+    "requestAck": "Request citizen ack →"
+  },
+  "timeline": {
+    "title": "Thread timeline",
+    "eventCount_one": "{{count}} event",
+    "eventCount_other": "{{count}} events",
+    "emptyHeading": "No events yet",
+    "emptyBody": "Once actions land on the chain for this incident, they show here.",
+    "unknownActor": "—",
+    "separator": "·",
+    "blockRef": "block #{{height}}"
+  },
+  "events": {
+    "incidentOpened": "Incident opened ({{ward}})",
+    "incidentEscalated": "Incident escalated to {{severity}}",
+    "incidentResolved": "Incident resolved",
+    "publicNotice": "Public notice drafted",
+    "citizenAck": "Citizen acknowledgement ({{channel}})",
+    "sensorReading": "Sensor {{sensorId}} reading: {{value}} {{parameter}}"
+  },
+  "related": {
+    "title": "Related incidents · ward {{ward}}",
+    "subtitle_one": "{{count}} sibling incident in this ward",
+    "subtitle_other": "{{count}} sibling incidents in this ward",
+    "emptyHeading": "No siblings",
+    "emptyBody": "This is the only active incident in the ward.",
+    "rowMeta": "{{eventType}} · block #{{height}}"
+  },
+  "assignModal": {
+    "ariaLabel": "Assign field technician",
+    "title": "Assign field technician",
+    "description": "Dispatches a work order onto the chain for incident {{id}}.",
+    "technicianLabel": "Technician",
+    "priorityLabel": "Priority",
+    "priorityP1": "P1 · urgent",
+    "priorityP2": "P2 · same day",
+    "priorityP3": "P3 · scheduled",
+    "etaLabel": "ETA (minutes)",
+    "summaryLabel": "Work order summary",
+    "summaryPlaceholder": "Replace chlorine pump #4, verify output",
+    "summaryHint": "What the tech will do on site. Min 5 characters.",
+    "dispatching": "Dispatching…",
+    "submit": "Dispatch work order",
+    "cancel": "Cancel"
+  },
+  "ackModal": {
+    "ariaLabel": "Request citizen acknowledgement",
+    "title": "Request citizen acknowledgement",
+    "description": "Sends a notice via the chosen channel for incident {{id}}.",
+    "channelLabel": "Channel",
+    "channelSms": "SMS",
+    "channelWhatsapp": "WhatsApp",
+    "channelVoice": "Voice",
+    "copyLabel": "Notice copy",
+    "copyPlaceholder": "Please confirm your tap water is now safe.",
+    "copyHint": "Sent verbatim to the citizen. Min 5 characters.",
+    "sending": "Sending…",
+    "submit": "Send ack request",
+    "cancel": "Cancel"
+  }
+}
