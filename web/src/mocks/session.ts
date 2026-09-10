@@ -92,6 +92,15 @@ export const PERSONAS: Persona[] = [
 function mintToken(personaId: string): string {
   return `mock.${personaId}.${ulid()}`;
 }
+/** Stable actor_refs for personas whose identity must match a hardcoded
+ *  roster (e.g. Karim's id appears in the AssignTechModal's TECH_ROSTER
+ *  + the FieldQueuePage's per-tech filter). Other personas still get
+ *  fresh ULIDs because their chain writes are tagged with actor_ref but
+ *  no consumer filters by it. */
+const STABLE_ACTOR_REFS: Record<string, string> = {
+  karim: 'karim_actor',
+};
+
 /** Log in as a persona. Idempotent — re-calling refreshes the token. */
 export async function loginAs(personaId: string): Promise<SessionRow> {
   const persona = PERSONAS.find((p) => p.id === personaId);
@@ -100,7 +109,7 @@ export async function loginAs(personaId: string): Promise<SessionRow> {
 
   const row: SessionRow = {
     actor_id: persona.id,
-    actor_ref: ulid(),
+    actor_ref: STABLE_ACTOR_REFS[persona.id] ?? ulid(),
     display_name: persona.display_name,
     role: persona.role,
     token: mintToken(persona.id),

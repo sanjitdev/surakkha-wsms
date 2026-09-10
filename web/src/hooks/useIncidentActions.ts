@@ -23,6 +23,7 @@
 import { useCallback, useState } from 'react';
 import { useToast } from '../components/ui/ToastProvider';
 import { getSession } from '../mocks/idb';
+import { ulid } from '../mocks/canonical';
 
 export interface IncidentActionEnvelope<T = unknown> {
   event_type: string;
@@ -89,7 +90,6 @@ export interface UseIncidentActionsResult {
   /** Operator marks an inbox row reviewed (bulk action). */
   markReviewed: (input: { incident_ids: string[] }) => Promise<boolean>;
 }
-
 export function useIncidentActions(): UseIncidentActionsResult {
   const toast = useToast();
   const [busy, setBusy] = useState<boolean>(false);
@@ -103,6 +103,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       setBusy(true);
       setLastError(null);
       const sessionPromise = getSession();
+
       try {
         const sess = await sessionPromise;
         const res = await fetch('/api/events', {
@@ -120,16 +121,19 @@ export function useIncidentActions(): UseIncidentActionsResult {
               : undefined,
           }),
         });
+
         if (!res.ok) {
-          const errBody = (await res.json().catch(() => ({}))) as {
+          const errBody = (await res.json().catch(() => {return {}})) as {
             error?: string;
             reason?: string;
           };
+
           throw new Error(
             errBody.reason ? `${errBody.error}: ${errBody.reason}` : `HTTP ${res.status}`,
           );
         }
         const body = (await res.json()) as { event_id: string };
+
         // Trigger a soft refresh so consumers' IncidentSummary tables update.
         // No-op for endpoints that don't read /api/incidents (e.g. tech queue
         // reads /api/events?event_type=... directly).
@@ -137,6 +141,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
         return { event_id: body.event_id };
       } catch (err) {
         const e = err instanceof Error ? err : new Error(String(err));
+
         setLastError(e);
         toast.danger(`Action failed: ${e.message}`);
         return null;
@@ -160,6 +165,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           work_order_summary: input.work_order_summary,
         },
       });
+
       if (result) {
         toast.success(`Assigned to ${input.technician_name}`);
         return true;
@@ -184,6 +190,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           body: input.summary,
         },
       });
+
       if (!notice) return false;
       const ackDelivered = await post({
         event_type: 'AnjaliAcknowledgeDelivered',
@@ -192,6 +199,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           channel: input.channel,
         },
       });
+
       if (ackDelivered) {
         toast.success(`Ack request sent via ${input.channel}`);
         return true;
@@ -203,9 +211,15 @@ export function useIncidentActions(): UseIncidentActionsResult {
 
   const submitReport = useCallback<UseIncidentActionsResult['submitReport']>(
     async (input) => {
-      const result = await post({
+      // Mint the incident_id client-side so the AnjaliReportSubmitted +
+      // IncidentCreated pair share the same anchor. Both land on chain
+      // and the operator inbox (IncidentCreated) + the citizen ack flow
+      // (AnjaliReportSubmitted) can join on incident_id.
+      const incident_id = ulid();
+      const report = await post({
         event_type: 'AnjaliReportSubmitted',
         payload: {
+          incident_id,
           title: input.title,
           severity: input.severity,
           ward_id: input.ward_id,
@@ -213,12 +227,36 @@ export function useIncidentActions(): UseIncidentActionsResult {
           photo_url: input.photo_url ?? null,
           voice_url: input.voice_url ?? null,
           gps: input.gps ?? null,
-          // Auto-create the incident from the report so the chain has a
-          // single anchor for the operator's view.
-          incident_followup: 'IncidentCreated',
         },
       });
-      if (result) {
+
+      if (!report) return false;
+      const created = await post({
+        event_type: 'IncidentCreated',
+        payload: {
+          incident_id,
+          severity: input.severity,
+          ward_id: input.ward_id,
+          title: input.title,
+          summary: input.description,
+          // The inbox-row model (buildRows in inboxListModel.ts) reads
+          // payload.inbox for owner/status/triage hint. Default the new
+          // incident to "needs operator review".
+          inbox: {
+            owner_kind: 'operator',
+            owner_display: 'Priya',
+            status: 'awaiting_ack',
+            title: input.title,
+            summary: input.description.slice(0, 140),
+            isUrgent: input.severity === 'T3',
+            isAwaitingSig: false,
+          },
+          source: 'citizen_report',
+          source_event_id: report.event_id,
+        },
+      });
+
+      if (created) {
         toast.success('Report submitted to the chain');
         return true;
       }
@@ -236,6 +274,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           technician_id: input.technician_id,
         },
       });
+
       if (result) {
         toast.success('Marked on site');
         return true;
@@ -256,6 +295,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           parts_needed: input.parts_needed ?? [],
         },
       });
+
       if (result) {
         toast.success('Diagnosis recorded');
         return true;
@@ -277,6 +317,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           photo_url: input.photo_url ?? null,
         },
       });
+
       if (result) {
         toast.success('Fix submitted for operator review');
         return true;
@@ -296,6 +337,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           closed_by: 'operator',
         },
       });
+
       if (result) {
         toast.success('Incident closed — awaiting citizen ack');
         return true;
@@ -315,6 +357,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
           approve: input.approve,
         },
       });
+
       if (!ack) return false;
       // Citizen ack with approve=true seals the closure as final. With
       // approve=false the incident reopens with parent link to the
@@ -334,6 +377,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       // One SignatureAttestation per selected incident. Chain records each
       // review action atomically.
       let ok = true;
+
       for (const incident_id of input.incident_ids) {
         const r = await post({
           event_type: 'SignatureAttestation',
@@ -342,6 +386,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
             action: 'reviewed_by_operator',
           },
         });
+
         if (!r) ok = false;
       }
       if (ok) toast.success(`Marked ${input.incident_ids.length} row(s) reviewed`);

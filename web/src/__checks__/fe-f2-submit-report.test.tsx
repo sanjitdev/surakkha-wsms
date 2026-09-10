@@ -49,7 +49,7 @@ function makeActionsStub(
     busy: initial.busy,
     lastError: initial.lastError,
     submitReport: initial.submitReport,
-    post: vi.fn(async () => ({ event_id: '01STUB' })),
+    post: vi.fn(async () => {return { event_id: '01STUB' }}),
     assignTech: vi.fn(async () => true),
     requestAck: vi.fn(async () => true),
     techArrived: vi.fn(async () => true),
@@ -104,9 +104,9 @@ let currentActions: UseIncidentActionsResult = makeActionsStub({
   submitReport: vi.fn(async () => true),
 });
 
-vi.mock('../hooks/useIncidentActions', () => ({
+vi.mock('../hooks/useIncidentActions', () => {return {
   useIncidentActions: () => currentActions,
-}));
+}});
 
 beforeEach(() => {
   currentActions = makeActionsStub({
@@ -137,10 +137,10 @@ describe('FE-F2 /submit Anjali role gating', () => {
 
     expect(screen.getByTestId('submit-form')).toBeTruthy();
     expect(screen.getByTestId('submit-form-card')).toBeTruthy();
-    const severity = screen.getByTestId('submit-severity') as HTMLSelectElement;
+    const severity = screen.getByTestId('submit-severity');
 
     expect(severity.value).toBe('T2');
-    const ward = screen.getByTestId('submit-ward') as HTMLSelectElement;
+    const ward = screen.getByTestId('submit-ward');
 
     expect(ward.value).toBe('W01');
     expect(screen.getByTestId('submit-submit').hasAttribute('disabled')).toBe(true);
@@ -152,7 +152,7 @@ describe('FE-F2 /submit form validation', () => {
   it('submit_button_disabled_until_minimums_met: title<5 OR desc<10 keeps disabled', () => {
     renderSubmitPage({ role: 'anjali', actions: currentActions });
 
-    const submit = screen.getByTestId('submit-submit') as HTMLButtonElement;
+    const submit = screen.getByTestId('submit-submit');
 
     expect(submit.disabled).toBe(true);
 
@@ -199,7 +199,7 @@ describe('FE-F2 /submit form validation', () => {
     await waitFor(() => {
       expect(submitReport).toHaveBeenCalledTimes(1);
     });
-    const calls = submitReport.mock.calls as unknown as Array<[Record<string, unknown>]>;
+    const calls = submitReport.mock.calls as unknown as [Record<string, unknown>][];
     const arg = calls[0]?.[0];
 
     expect(arg).toEqual({
@@ -257,8 +257,8 @@ describe('FE-F2 /submit success state', () => {
     fireEvent.click(screen.getByTestId('submit-another'));
 
     expect(screen.getByTestId('submit-form')).toBeTruthy();
-    expect((screen.getByTestId('submit-title') as HTMLInputElement).value).toBe('');
-    expect((screen.getByTestId('submit-description') as HTMLTextAreaElement).value).toBe('');
+    expect((screen.getByTestId('submit-title')).value).toBe('');
+    expect((screen.getByTestId('submit-description')).value).toBe('');
   });
 });
 

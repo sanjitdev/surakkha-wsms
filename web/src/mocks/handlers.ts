@@ -150,6 +150,7 @@ const chainHandlers = [
       'AnjaliReportSubmitted',
       'AnjaliSentinelReadingSubmitted',
       'AnjaliAcknowledgeDelivered',
+      'CitizenAcknowledgement',
       'IncidentCreated',
       'IncidentEscalated',
       'IncidentResolved',

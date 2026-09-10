@@ -36,7 +36,7 @@ import { handlers } from '../mocks/handlers';
 // The MSW handler falls back to its own session when actor_identity is
 // absent from the request, so we don't need to return a real session
 // row — the wire test cares about event_type + payload, not identity.
-vi.mock('../mocks/idb', () => ({
+vi.mock('../mocks/idb', () => {return {
   getSession: () => Promise.resolve(null),
   setSession: () => Promise.resolve(),
   wipeAll: () => Promise.resolve(),
@@ -44,7 +44,7 @@ vi.mock('../mocks/idb', () => ({
   appendBlock: () => Promise.resolve(),
   getChainHead: () => Promise.resolve(null),
   setChainHead: () => Promise.resolve(),
-}));
+}});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <ToastProvider>{children}</ToastProvider>
@@ -182,18 +182,17 @@ describe('FE-F1 useIncidentActions', () => {
     expect(captured).toEqual(['PublicNoticeIssued', 'AnjaliAcknowledgeDelivered']);
   });
 
-  it('submitReport POSTs AnjaliReportSubmitted with title/severity/ward', async () => {
+  it('submitReport POSTs AnjaliReportSubmitted + IncidentCreated with shared incident_id', async () => {
     const { result } = renderHook(() => useIncidentActions(), { wrapper });
-    const captured: { event_type: string; payload: Record<string, unknown> } = {
-      event_type: '',
-      payload: {},
-    };
+    const captured: { event_type: string; payload: Record<string, unknown> }[] = [];
     server.use(
       http.post('/api/events', async ({ request }) => {
-        Object.assign(
-          captured,
-          (await request.json()) as { event_type: string; payload: Record<string, unknown> },
-        );
+        const body = (await request.json()) as {
+          event_type: string;
+          payload: Record<string, unknown>;
+        };
+
+        captured.push(body);
         return HttpResponse.json({ event_id: '01ABC' }, { status: 201 });
       }),
     );
@@ -205,13 +204,26 @@ describe('FE-F1 useIncidentActions', () => {
         ward_id: 'W04',
         description: 'Reported by 3 households since 6am',
       });
+
       expect(ok).toBe(true);
     });
 
-    expect(captured.event_type).toBe('AnjaliReportSubmitted');
-    expect(captured.payload.title).toBe('Brown water in ward 4');
-    expect(captured.payload.severity).toBe('T2');
-    expect(captured.payload.ward_id).toBe('W04');
+    // (1) AnjaliReportSubmitted event with the citizen's input.
+    const report = captured.find((c) => c.event_type === 'AnjaliReportSubmitted');
+
+    expect(report).toBeDefined();
+    expect(report?.payload.title).toBe('Brown water in ward 4');
+    expect(report?.payload.severity).toBe('T2');
+    expect(report?.payload.ward_id).toBe('W04');
+    // (2) IncidentCreated event with the same incident_id so the
+    // inbox projection joins them.
+    const created = captured.find((c) => c.event_type === 'IncidentCreated');
+
+    expect(created).toBeDefined();
+    const incidentId = (report?.payload as { incident_id?: string }).incident_id;
+
+    expect((created?.payload as { incident_id?: string }).incident_id).toBe(incidentId);
+    expect((created?.payload as { source?: string }).source).toBe('citizen_report');
   });
 
   it('techArrived POSTs TechnicianArrived with technician_id', async () => {
@@ -416,12 +428,10 @@ describe('FE-F1 useIncidentActions', () => {
   it('lastError + danger toast when the server returns 4xx', async () => {
     const { result } = renderHook(() => useIncidentActions(), { wrapper });
     server.use(
-      http.post('/api/events', () => {
-        return HttpResponse.json(
+      http.post('/api/events', () => HttpResponse.json(
           { error: 'CommandRejected', reason: 'TestFailure' },
           { status: 409 },
-        );
-      }),
+        )),
     );
 
     await act(async () => {
