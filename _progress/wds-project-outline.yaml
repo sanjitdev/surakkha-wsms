@@ -6,7 +6,18 @@ rendering-tool: excalidraw
 phases:
   product-brief: complete
   trigger-map: complete
-  ux-scenarios: not-started
+  ux-scenarios: complete
+    scenarios:
+      - 01-priya-triage-verify-assign
+      - 02-adi-mark-resolved-handoff
+      - 03-anjali-citizen-arc-report-ack-progress-close
+      - 04-karim-onsite-ack-diagnose-submit-proof
+      - 05-pia-data-contract-pha-deferred
+      - 06-audit-chain-timeline-cross-cutting
+    gap-screens-identified:
+      - citizen-status-timeline
+      - hotline-intake-modal
+      - per-incident-chain-segment-viewer
   ux-design: not-started
   development: not-started
 
