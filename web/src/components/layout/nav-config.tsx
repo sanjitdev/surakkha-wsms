@@ -45,29 +45,29 @@ import type { SidebarNavItem } from './Sidebar';
 
 export const NAV_BY_ROLE: Record<string, readonly SidebarNavItem[]> = {
   utility_operator: [
-    { label: 'Dashboard', href: '/dashboard', icon: <DashboardIcon /> },
-    { label: 'Handover', href: '/handover', icon: <HandoverIcon /> },
-    { label: 'Inbox', href: '/inbox', icon: <InboxIcon /> },
-    { label: 'Verify', href: '/verify-flow', icon: <VerifyIcon /> },
-    { label: 'Notices', href: '/notices', icon: <NoticesIcon /> },
-    { label: 'Sensors', href: '/sensors', icon: <SensorsIcon /> },
-    { label: 'Audit', href: '/audit-log', icon: <AuditIcon /> },
-    { label: 'Settings', href: '/settings', icon: <SettingsIcon /> },
+    { labelKey: 'layout:nav.utility_operator.dashboard', href: '/dashboard', icon: <DashboardIcon /> },
+    { labelKey: 'layout:nav.utility_operator.handover', href: '/handover', icon: <HandoverIcon /> },
+    { labelKey: 'layout:nav.utility_operator.inbox', href: '/inbox', icon: <InboxIcon /> },
+    { labelKey: 'layout:nav.utility_operator.verifyFlow', href: '/verify-flow', icon: <VerifyIcon /> },
+    { labelKey: 'layout:nav.utility_operator.notices', href: '/notices', icon: <NoticesIcon /> },
+    { labelKey: 'layout:nav.utility_operator.sensors', href: '/sensors', icon: <SensorsIcon /> },
+    { labelKey: 'layout:nav.utility_operator.audit', href: '/audit-log', icon: <AuditIcon /> },
+    { labelKey: 'layout:nav.utility_operator.settings', href: '/settings', icon: <SettingsIcon /> },
   ],
   field_technician: [
-    { label: 'Work queue', href: '/field', icon: <ClipboardListIcon /> },
-    { label: 'My day', href: '/field/my-day', icon: <CalendarIcon /> },
-    { label: 'Incident detail', href: '/field/incident', icon: <AlertIcon /> },
-    { label: 'History', href: '/field/history', icon: <LineChartIcon /> },
+    { labelKey: 'layout:nav.field_technician.workQueue', href: '/field', icon: <ClipboardListIcon /> },
+    { labelKey: 'layout:nav.field_technician.myDay', href: '/field/my-day', icon: <CalendarIcon /> },
+    { labelKey: 'layout:nav.field_technician.incidentDetail', href: '/field/incident', icon: <AlertIcon /> },
+    { labelKey: 'layout:nav.field_technician.history', href: '/field/history', icon: <LineChartIcon /> },
   ],
-  anjali: [{ label: 'Submit report', href: '/submit', icon: <SendIcon /> }],
+  anjali: [{ labelKey: 'layout:nav.anjali.submit', href: '/submit', icon: <SendIcon /> }],
   pha_approver: [
-    { label: 'Approve', href: '/approve', icon: <CheckIcon /> },
-    { label: 'Audit', href: '/audit', icon: <AuditIcon /> },
+    { labelKey: 'layout:nav.pha_approver.approve', href: '/approve', icon: <CheckIcon /> },
+    { labelKey: 'layout:nav.pha_approver.audit', href: '/audit', icon: <AuditIcon /> },
   ],
-  pha_viewer: [{ label: 'Audit', href: '/audit', icon: <AuditIcon /> }],
-  vendor: [{ label: 'Submit batch', href: '/vendor', icon: <UploadIcon /> }],
-  utility_message_desk: [{ label: 'Inbox', href: '/inbox', icon: <InboxIcon /> }],
+  pha_viewer: [{ labelKey: 'layout:nav.pha_viewer.audit', href: '/audit', icon: <AuditIcon /> }],
+  vendor: [{ labelKey: 'layout:nav.vendor.vendor', href: '/vendor', icon: <UploadIcon /> }],
+  utility_message_desk: [{ labelKey: 'layout:nav.utility_message_desk.inbox', href: '/inbox', icon: <InboxIcon /> }],
 };
 /**
  * Resolve the persona's default landing route. Used for the sidebar

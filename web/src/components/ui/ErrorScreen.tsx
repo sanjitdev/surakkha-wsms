@@ -11,6 +11,7 @@
  * with a textarea fallback so it works in any browser context.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface ErrorScreenProps {
   error: Error;
@@ -58,6 +59,7 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
   const dev = import.meta.env.DEV;
   const reveal = showStack ?? dev;
   const [copied, setCopied] = useState(false);
+  const { t } = useTranslation('common');
 
   const onCopy = async () => {
     const text = format(buildDiagnostics(error, componentStack));
@@ -99,20 +101,18 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
   return (
     <div className="error-screen" role="alert" aria-live="assertive">
       <div className="error-screen__panel">
-        <h1 className="error-screen__title">Something went wrong</h1>
-        <p className="error-screen__subtitle">
-          The app hit an unexpected error and recovered itself. Your work in this tab may be lost.
-        </p>
+        <h1 className="error-screen__title">{t('errorScreen.title')}</h1>
+        <p className="error-screen__subtitle">{t('errorScreen.subtitle')}</p>
         <p className="error-screen__message" data-testid="error-screen-message">
           <strong>{error.name}:</strong> {error.message}
         </p>
         {reveal && error.stack && (
           <details className="error-screen__stack">
-            <summary>Show stack trace</summary>
+            <summary>{t('errorScreen.showStack')}</summary>
             <pre>{error.stack}</pre>
             {componentStack && (
               <>
-                <h3>Component stack</h3>
+                <h3>{t('errorScreen.componentStack')}</h3>
                 <pre>{componentStack}</pre>
               </>
             )}
@@ -120,7 +120,7 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
         )}
         <div className="error-screen__actions">
           <button type="button" className="button button--primary" onClick={onReload}>
-            Reload page
+            {t('errorScreen.reload')}
           </button>
           <button
             type="button"
@@ -129,7 +129,7 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
               void onCopy();
             }}
           >
-            {copied ? 'Copied' : 'Copy diagnostics'}
+            {copied ? t('errorScreen.copied') : t('errorScreen.copyDiagnostics')}
           </button>
         </div>
       </div>

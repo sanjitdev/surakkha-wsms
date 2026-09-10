@@ -13,6 +13,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useState } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../i18n';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { ErrorScreen } from '../components/ui/ErrorScreen';
 import { ToastProvider, useToast } from '../components/ui/ToastProvider';
@@ -148,9 +150,11 @@ describe('ErrorBoundary', () => {
 
   it('renders children when no error is thrown', () => {
     render(
-      <ErrorBoundary>
-        <div>normal</div>
-      </ErrorBoundary>,
+      <I18nextProvider i18n={i18n}>
+        <ErrorBoundary>
+          <div>normal</div>
+        </ErrorBoundary>
+      </I18nextProvider>,
     );
     expect(screen.getByText('normal')).toBeTruthy();
   });
@@ -158,9 +162,11 @@ describe('ErrorBoundary', () => {
   it('reveals ErrorScreen when a descendant throws', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     render(
-      <ErrorBoundary>
-        <Boom />
-      </ErrorBoundary>,
+      <I18nextProvider i18n={i18n}>
+        <ErrorBoundary>
+          <Boom />
+        </ErrorBoundary>
+      </I18nextProvider>,
     );
     expect(screen.getByRole('alert')).toBeTruthy();
     expect(screen.getByText(/Something went wrong/)).toBeTruthy();
@@ -253,7 +259,11 @@ describe('ErrorBoundary', () => {
 describe('ErrorScreen', () => {
   it('renders the error name and message', () => {
     const err = new TypeError('kaboom');
-    render(<ErrorScreen error={err} />);
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ErrorScreen error={err} />
+      </I18nextProvider>,
+    );
     const msg = screen.getByTestId('error-screen-message');
     expect(msg.textContent).toMatch(/TypeError:/);
     expect(msg.textContent).toMatch(/kaboom/);
@@ -268,7 +278,11 @@ describe('ErrorScreen', () => {
       configurable: true,
     });
     const err = new Error('copy-me');
-    render(<ErrorScreen error={err} />);
+    render(
+      <I18nextProvider i18n={i18n}>
+        <ErrorScreen error={err} />
+      </I18nextProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: /Copy diagnostics/i }));
     expect(writeText).toHaveBeenCalledTimes(1);
     const payload = writeText.mock.calls[0][0];

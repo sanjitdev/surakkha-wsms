@@ -19,6 +19,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { OperatorDashboard } from '../pages/OperatorDashboard';
@@ -29,6 +30,7 @@ import { ToastProvider } from '../components/ui/ToastProvider';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
 import { handlers } from '../mocks/handlers';
+import i18n from '../i18n';
 
 const server = setupServer(...handlers);
 
@@ -68,11 +70,13 @@ function renderInRouter(node: React.ReactNode, withAppLayout = false) {
   );
 
   return render(
-    <LocaleProvider>
-      <ToastProvider>
-        <MemoryRouter>{inner}</MemoryRouter>
-      </ToastProvider>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <ToastProvider>
+          <MemoryRouter>{inner}</MemoryRouter>
+        </ToastProvider>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 

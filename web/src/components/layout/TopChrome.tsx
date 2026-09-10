@@ -1,8 +1,10 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface TopChromeProps {
   personaLabel: string;
-  /** Brand label in the left slot. Defaults to "Surakkha"; pass to override. */
+  /** Brand label in the left slot. Defaults to translated "Surakkha";
+   *  pass to override. */
   brand?: string;
   chainFreshSeconds?: number;
   navSlot?: ReactNode;
@@ -10,22 +12,25 @@ export interface TopChromeProps {
 }
 export function TopChrome({
   personaLabel,
-  brand = 'Surakkha',
+  brand,
   chainFreshSeconds,
   navSlot,
   testId,
 }: TopChromeProps) {
+  const { t } = useTranslation('layout');
   return (
     <header className="top-chrome" data-testid={testId ?? 'top-chrome'}>
       <div className="top-chrome__left">
-        <span className="top-chrome__brand">{brand}</span>
+        <span className="top-chrome__brand">{brand ?? t('topChrome.brand')}</span>
         <span className="top-chrome__sep" aria-hidden="true">
           ·
         </span>
         <span className="top-chrome__chain">
           <span className="pulse-dot" aria-hidden="true" />
           <span className="mono">
-            chain {chainFreshSeconds !== undefined ? `${chainFreshSeconds}s` : 'fresh'}
+            {chainFreshSeconds !== undefined
+              ? t('topChrome.chainSeconds', { seconds: chainFreshSeconds })
+              : t('topChrome.chainFresh')}
           </span>
         </span>
       </div>

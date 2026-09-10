@@ -6,6 +6,7 @@
  * `page`/`pageSize`/`total` props.
  */
 import { type ReactNode, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from './Button';
 import { Dropdown, type DropdownOption } from './Dropdown';
 import { DropdownMode } from '../../types/domain';
@@ -29,6 +30,7 @@ export function Pagination(props: PaginationProps): ReactNode {
     onPageSizeChange,
     testId = 'pagination',
   } = props;
+  const { t } = useTranslation('common');
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = clamp(page, 1, totalPages);
@@ -46,9 +48,14 @@ export function Pagination(props: PaginationProps): ReactNode {
     return arr;
   }, [totalPages, safePage]);
 
-  const sizeOptions: DropdownOption<number>[] = useMemo(() => pageSizeOptions.map((n) => {
-      return { value: n, label: `${n} / page` };
-    }), [pageSizeOptions]);
+  const sizeOptions: DropdownOption<number>[] = useMemo(
+    () =>
+      pageSizeOptions.map((n) => ({
+        value: n,
+        label: t('pagination.pageSizeItem', { n }),
+      })),
+    [pageSizeOptions, t],
+  );
 
   const prevDisabled = safePage <= 1;
   const nextDisabled = safePage >= totalPages;
@@ -56,10 +63,10 @@ export function Pagination(props: PaginationProps): ReactNode {
   const showingTo = Math.min(total, safePage * pageSize);
 
   return (
-    <nav className="pagination" data-testid={testId} aria-label="Pagination">
+    <nav className="pagination" data-testid={testId} aria-label={t('pagination.aria')}>
       <div className="pagination__summary" data-testid={`${testId}-summary`}>
         <span>
-          Showing <strong>{showingFrom}</strong>–<strong>{showingTo}</strong> of <strong>{total}</strong>
+          {t('pagination.summary', { from: showingFrom, to: showingTo, total })}
         </span>
       </div>
       <div className="pagination__controls">
@@ -72,7 +79,7 @@ export function Pagination(props: PaginationProps): ReactNode {
           }}
           testId={`${testId}-prev`}
         >
-          ← Prev
+          {t('pagination.prev')}
         </Button>
         <ol className="pagination__chips" data-testid={`${testId}-chips`}>
           {chips.map((p, idx) => {
@@ -110,7 +117,7 @@ export function Pagination(props: PaginationProps): ReactNode {
           }}
           testId={`${testId}-next`}
         >
-          Next →
+          {t('pagination.next')}
         </Button>
       </div>
       {onPageSizeChange !== undefined ? (
@@ -122,7 +129,7 @@ export function Pagination(props: PaginationProps): ReactNode {
             onChange={(v) => {
               if (v !== null) onPageSizeChange(v);
             }}
-            placeholder="Page size"
+            placeholder={t('pagination.pageSize')}
             testId={`${testId}-size`}
           />
         </div>
