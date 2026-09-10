@@ -19,8 +19,10 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { I18nextProvider } from 'react-i18next';
 import { MemoryRouter } from 'react-router-dom';
 import { SubmitReportPage } from '../pages/SubmitReportPage';
+import i18n from '../i18n';
 import { LocaleProvider } from '../hooks/useLocale';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
@@ -69,20 +71,22 @@ interface RenderOpts {
 
 function renderSubmitPage(opts: RenderOpts) {
   return render(
-    <LocaleProvider>
-      <MemoryRouter>
-        <AppLayoutContext.Provider
-          value={{
-            session: makeSession(opts.role, opts.displayName),
-            chainHead: null,
-            chainFreshSeconds: 0,
-            logout: () => Promise.resolve(),
-          }}
-        >
-          <SubmitReportPageWithActions actions={opts.actions} />
-        </AppLayoutContext.Provider>
-      </MemoryRouter>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <MemoryRouter>
+          <AppLayoutContext.Provider
+            value={{
+              session: makeSession(opts.role, opts.displayName),
+              chainHead: null,
+              chainFreshSeconds: 0,
+              logout: () => Promise.resolve(),
+            }}
+          >
+            <SubmitReportPageWithActions actions={opts.actions} />
+          </AppLayoutContext.Provider>
+        </MemoryRouter>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 

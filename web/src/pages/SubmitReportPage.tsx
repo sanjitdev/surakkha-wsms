@@ -25,6 +25,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/submit.css';
 import { Container } from '../components/layout/Container';
@@ -53,6 +54,7 @@ interface SubmissionReceipt {
 export function SubmitReportPage() {
   const { session } = useAppLayout();
   const { format: formatTime } = useDateFormatter();
+  const { t: tSubmit } = useTranslation('submitReport');
   const actions = useIncidentActions();
   const isAnjali = session.role === 'anjali';
 
@@ -111,16 +113,16 @@ export function SubmitReportPage() {
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Submit report</h1>
+          <h1>{tSubmit('header.title')}</h1>
           <p className="page-header__sub">
-            Citizen-report intake is reserved for the Anjali persona.
+            {tSubmit('roleGate.subtitle')}
           </p>
         </div>
         <Card>
           <EmptyState
             icon={<SendIcon />}
-            heading="Wrong persona"
-            body={`You are signed in as ${session.role}. Sign in as Anjali to submit a citizen report.`}
+            heading={tSubmit('roleGate.heading')}
+            body={tSubmit('roleGate.body', { role: session.role })}
           />
         </Card>
       </Container>
@@ -131,8 +133,8 @@ export function SubmitReportPage() {
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Submit report</h1>
-          <p className="page-header__sub">Your report has landed on the chain.</p>
+          <h1>{tSubmit('header.title')}</h1>
+          <p className="page-header__sub">{tSubmit('receipt.subtitle')}</p>
         </div>
         <Card testId="submit-receipt-card">
           <div className="submit-receipt">
@@ -141,15 +143,15 @@ export function SubmitReportPage() {
             </span>
             <h2 className="submit-receipt__title">{receipt.title}</h2>
             <dl className="submit-receipt__meta">
-              <dt>Ward</dt>
+              <dt>{tSubmit('receipt.ward')}</dt>
               <dd>
                 <span className="mono">{receipt.ward_id}</span>
               </dd>
-              <dt>Submitted</dt>
+              <dt>{tSubmit('receipt.submittedAt')}</dt>
               <dd>
                 <span className="mono">{formatTime('time-full', receipt.submitted_at)}</span>
               </dd>
-              <dt>Chain ref</dt>
+              <dt>{tSubmit('receipt.chainRef')}</dt>
               <dd>
                 <span className="mono" data-testid="submit-receipt-event-id">
                   {receipt.event_id}
@@ -157,8 +159,7 @@ export function SubmitReportPage() {
               </dd>
             </dl>
             <p className="submit-receipt__hint">
-              The operator will see this on their inbox shortly. You can submit another
-              report or close the browser — your report is already sealed.
+              {tSubmit('receipt.hint')}
             </p>
             <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
               <Button
@@ -167,7 +168,7 @@ export function SubmitReportPage() {
                 onClick={onSubmitAnother}
                 testId="submit-another"
               >
-                Submit another report
+                {tSubmit('receipt.submitAnother')}
               </Button>
             </div>
           </div>
@@ -179,16 +180,16 @@ export function SubmitReportPage() {
   return (
     <Container width={ContainerWidth.Bangla}>
       <div className="page-header">
-        <h1>Submit report</h1>
+        <h1>{tSubmit('header.title')}</h1>
         <p className="page-header__sub">
-          {session.display_name} · Anjali citizen report · lands on the operator's inbox
+          {tSubmit('header.subtitle', { name: session.display_name })}
         </p>
       </div>
       <Card testId="submit-form-card">
         <form onSubmit={onSubmit} data-testid="submit-form">
           <div className="submit-form__row">
             <label htmlFor="submit-title" className="submit-form__label">
-              Title
+              {tSubmit('form.titleLabel')}
             </label>
             <input
               id="submit-title"
@@ -199,17 +200,17 @@ export function SubmitReportPage() {
               onChange={(e) => {
                 setTitle(e.target.value);
               }}
-              placeholder="Brown water in tap since morning"
+              placeholder={tSubmit('form.titlePlaceholder')}
               maxLength={120}
               required
             />
-            <p className="submit-form__hint">A short summary; the operator reads this first.</p>
+            <p className="submit-form__hint">{tSubmit('form.titleHint')}</p>
           </div>
 
           <div className="submit-form__row submit-form__row--split">
             <div>
               <label htmlFor="submit-severity" className="submit-form__label">
-                Severity
+                {tSubmit('form.severityLabel')}
               </label>
               <select
                 id="submit-severity"
@@ -220,21 +221,16 @@ export function SubmitReportPage() {
                   setSeverity(e.target.value as Severity);
                 }}
               >
-                {SEVERITIES.map((s) => {
-                  const label =
-                    s === 'T1' ? 'T1 · low concern' : s === 'T2' ? 'T2 · concerning' : 'T3 · urgent';
-
-                  return (
-                    <option key={s} value={s}>
-                      {label}
-                    </option>
-                  );
-                })}
+                {SEVERITIES.map((s) => (
+                  <option key={s} value={s}>
+                    {tSubmit(`form.severityOptions.${s}`)}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
               <label htmlFor="submit-ward" className="submit-form__label">
-                Ward
+                {tSubmit('form.wardLabel')}
               </label>
               <select
                 id="submit-ward"
@@ -256,7 +252,7 @@ export function SubmitReportPage() {
 
           <div className="submit-form__row">
             <label htmlFor="submit-description" className="submit-form__label">
-              Description
+              {tSubmit('form.descriptionLabel')}
             </label>
             <textarea
               id="submit-description"
@@ -266,21 +262,21 @@ export function SubmitReportPage() {
               onChange={(e) => {
                 setDescription(e.target.value);
               }}
-              placeholder="What did you see, when did it start, how many households are affected?"
+              placeholder={tSubmit('form.descriptionPlaceholder')}
               rows={5}
               maxLength={2000}
               required
             />
             <p className="submit-form__hint">
-              Bangla or English — the operator triages both. Min 10 characters.
+              {tSubmit('form.descriptionHint')}
             </p>
           </div>
 
           <details className="submit-form__details">
-            <summary className="submit-form__details-summary">Optional attachments</summary>
+            <summary className="submit-form__details-summary">{tSubmit('form.detailsSummary')}</summary>
             <div className="submit-form__row">
               <label htmlFor="submit-photo" className="submit-form__label">
-                Photo URL
+                {tSubmit('form.photoLabel')}
               </label>
               <input
                 id="submit-photo"
@@ -291,12 +287,12 @@ export function SubmitReportPage() {
                 onChange={(e) => {
                   setPhotoUrl(e.target.value);
                 }}
-                placeholder="https://example.com/photo.jpg"
+                placeholder={tSubmit('form.photoPlaceholder')}
               />
             </div>
             <div className="submit-form__row">
               <label htmlFor="submit-voice" className="submit-form__label">
-                Voice note URL
+                {tSubmit('form.voiceLabel')}
               </label>
               <input
                 id="submit-voice"
@@ -307,7 +303,7 @@ export function SubmitReportPage() {
                 onChange={(e) => {
                   setVoiceUrl(e.target.value);
                 }}
-                placeholder="https://example.com/voice.mp3"
+                placeholder={tSubmit('form.voicePlaceholder')}
               />
             </div>
           </details>
@@ -320,10 +316,10 @@ export function SubmitReportPage() {
               disabled={!canSubmit}
               testId="submit-submit"
             >
-              Submit report →
+              {tSubmit('form.submit')}
             </Button>
             <span className="submit-form__action-hint">
-              {actions.busy ? 'Sealing on the chain…' : 'Sealed in one chain write'}
+              {actions.busy ? tSubmit('form.submitBusy') : tSubmit('form.submitIdle')}
             </span>
           </div>
         </form>

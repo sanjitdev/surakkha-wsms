@@ -24,6 +24,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidents } from '../hooks/useIncidents';
@@ -65,6 +66,7 @@ export function OperatorDashboard() {
   const { format: formatTime } = useDateFormatter();
   const { formatRelative } = useRelativeTime();
   const { format: formatNum } = useNumberFormatter();
+  const { t: tDash } = useTranslation('operatorDashboard');
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
   const { incidents, loading: incLoading } = useIncidents();
@@ -152,7 +154,7 @@ export function OperatorDashboard() {
       },
       {
         key: 'sensor_id',
-        header: 'Ward / Sensor',
+        header: tDash('sensors.table.colTitle'),
         className: 'col-title',
         render: (s: SensorRow) => (
           <>
@@ -160,62 +162,62 @@ export function OperatorDashboard() {
           </>
         ),
       },
-      { key: 'parameter', header: 'Issue', className: 'col-sensor' },
+      { key: 'parameter', header: tDash('sensors.table.colIssue'), className: 'col-sensor' },
       {
         key: 'last_value',
-        header: 'Reading',
+        header: tDash('sensors.table.colReading'),
         className: 'col-value',
         render: (s: SensorRow) =>
           typeof s.last_value === 'number' ? s.last_value.toFixed(1) : String(s.last_value),
       },
       {
         key: 'last_at',
-        header: 'Detected',
+        header: tDash('sensors.table.colDetected'),
         className: 'col-time',
         render: (s: SensorRow) => formatTime('time', s.last_at),
       },
       {
         key: 'severity-badge',
-        header: 'Severity',
+        header: tDash('sensors.table.colSeverity'),
         className: 'col-status',
-        render: () => <span className="badge badge--t2">T2</span>,
+        render: () => <span className="badge badge--t2">{tDash('sensors.table.severityBadgeT2')}</span>,
       },
       {
         key: 'action',
         header: '',
         className: 'col-action',
-        render: () => <a href="/sensors">Inspect →</a>,
+        render: () => <a href="/sensors">{tDash('sensors.table.inspectAction')}</a>,
       },
     ],
-    [formatTime],
+    [formatTime, tDash],
   );
 
   const chainColumns: TableColumn<ChainEventLite>[] = useMemo(
     () => [
       {
         key: 'occurred_at',
-        header: 'Time',
+        header: tDash('chain.table.colTime'),
         className: 'col-time',
         render: (e) => formatTime('time', e.occurred_at),
       },
-      { key: 'event_type', header: 'What happened', render: (e) => summarizeEvent(e) },
+      { key: 'event_type', header: tDash('chain.table.colWhat'), render: (e) => summarizeEvent(e, tDash) },
       {
         key: 'where',
-        header: 'Where',
-        render: (e) => (e.payload as { ward_id?: string }).ward_id ?? '—',
+        header: tDash('chain.table.colWhere'),
+        render: (e) => (e.payload as { ward_id?: string }).ward_id ?? tDash('common.emDash'),
       },
       {
         key: 'status',
-        header: 'Status',
+        header: tDash('chain.table.colStatus'),
         className: 'col-status',
         render: (e) => (
           <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
-            {statusBadgeLabel(e.event_type)}
+            {statusBadgeLabel(e.event_type, tDash)}
           </span>
         ),
       },
     ],
-    [formatTime],
+    [formatTime, tDash],
   );
 
   const threadColumns: TableColumn<IncidentSummary>[] = useMemo(
@@ -233,23 +235,25 @@ export function OperatorDashboard() {
       },
       {
         key: 'incident_id',
-        header: 'Thread',
-        render: (i) => `${i.ward_id ?? '—'} incident`,
+        header: tDash('threads.table.colThread'),
+        render: (i) => tDash('threads.table.threadLabel', {
+          ward: i.ward_id ?? tDash('common.emDash'),
+        }),
       },
       {
         key: 'status',
-        header: 'Status / blocker',
+        header: tDash('threads.table.colStatusBlocker'),
         render: (i) => i.status,
       },
       {
         key: 'last_occurred_at',
-        header: 'Opened',
+        header: tDash('threads.table.colOpened'),
         className: 'col-time',
         render: (i) => formatRelative(i.last_occurred_at),
       },
       {
         key: 'severity-badge',
-        header: 'Severity',
+        header: tDash('threads.table.colSeverity'),
         className: 'col-status',
         render: (i) => (
           <span className={`badge badge--${severityBadgeClass(i.severity)}`}>{i.severity}</span>
@@ -259,10 +263,10 @@ export function OperatorDashboard() {
         key: 'action',
         header: '',
         className: 'col-action',
-        render: () => <a href="/inbox">Open →</a>,
+        render: () => <a href="/inbox">{tDash('threads.table.openAction')}</a>,
       },
     ],
-    [formatRelative],
+    [formatRelative, tDash],
   );
 
   const threadColumnsCompact: TableColumn<IncidentSummary>[] = useMemo(
@@ -280,18 +284,20 @@ export function OperatorDashboard() {
       },
       {
         key: 'incident_id',
-        header: 'Thread',
-        render: (i) => `${i.ward_id ?? '—'} incident`,
+        header: tDash('threads.tableCompact.colThread'),
+        render: (i) => tDash('threads.tableCompact.threadLabel', {
+          ward: i.ward_id ?? tDash('common.emDash'),
+        }),
       },
       {
         key: 'last_occurred_at',
-        header: 'Opened',
+        header: tDash('threads.tableCompact.colOpened'),
         className: 'col-time',
         render: (i) => formatRelative(i.last_occurred_at),
       },
       {
         key: 'severity-badge',
-        header: 'Sev.',
+        header: tDash('threads.tableCompact.colSeverity'),
         className: 'col-status',
         render: (i) => (
           <span className={`badge badge--${severityBadgeClass(i.severity)}`}>{i.severity}</span>
@@ -301,33 +307,33 @@ export function OperatorDashboard() {
         key: 'action',
         header: '',
         className: 'col-action',
-        render: () => <a href="/inbox">Open →</a>,
+        render: () => <a href="/inbox">{tDash('threads.tableCompact.openAction')}</a>,
       },
     ],
-    [formatRelative],
+    [formatRelative, tDash],
   );
 
   const chainColumnsCompact: TableColumn<ChainEventLite>[] = useMemo(
     () => [
       {
         key: 'occurred_at',
-        header: 'Time',
+        header: tDash('chain.tableCompact.colTime'),
         className: 'col-time',
         render: (e) => formatTime('time', e.occurred_at),
       },
-      { key: 'event_type', header: 'What', render: (e) => summarizeEvent(e) },
+      { key: 'event_type', header: tDash('chain.tableCompact.colWhat'), render: (e) => summarizeEvent(e, tDash) },
       {
         key: 'status',
-        header: 'Status',
+        header: tDash('chain.tableCompact.colStatus'),
         className: 'col-status',
         render: (e) => (
           <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
-            {statusBadgeLabel(e.event_type)}
+            {statusBadgeLabel(e.event_type, tDash)}
           </span>
         ),
       },
     ],
-    [formatTime],
+    [formatTime, tDash],
   );
 
   // Pre-FE-1.6a the page returned <div className="app-shell"><aside
@@ -339,13 +345,16 @@ export function OperatorDashboard() {
       <div className="page-header">
         <div className="page-header__row">
           <div>
-            <h1>Dashboard</h1>
+            <h1>{tDash('pageHeader.title')}</h1>
             <div className="page-header__sub">
-              {formatNum(openIncidents.length)} {openIncidents.length === 1 ? 'ward' : 'wards'} ·{' '}
-              {formatNum(sensors.length)} sensors online
+              {tDash('pageHeader.subtitle', {
+                count: openIncidents.length,
+                unit: tDash(openIncidents.length === 1 ? 'pageHeader.subtitleUnit_one' : 'pageHeader.subtitleUnit_other'),
+              })}{' '}
+              {tDash('pageHeader.sensorsOnline', { count: sensors.length })}
             </div>
           </div>
-          <div className="layout-toggle" role="radiogroup" aria-label="Dashboard layout">
+          <div className="layout-toggle" role="radiogroup" aria-label={tDash('layoutToggle.ariaLabel')}>
             {(['a', 'b', 'c'] as Layout[]).map((opt) => (
               <button
                 key={opt}
@@ -358,14 +367,18 @@ export function OperatorDashboard() {
                 }}
               >
                 {opt.toUpperCase()} ·{' '}
-                {opt === 'a' ? 'grid' : opt === 'b' ? 'editorial' : 'status-board'}
+                {opt === 'a'
+                  ? tDash('layoutToggle.optionA')
+                  : opt === 'b'
+                    ? tDash('layoutToggle.optionB')
+                    : tDash('layoutToggle.optionC')}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="tabs" role="tablist" aria-label="Dashboard sections">
+      <div className="tabs" role="tablist" aria-label={tDash('tabs.ariaLabel')}>
         <button
           type="button"
           role="tab"
@@ -375,7 +388,7 @@ export function OperatorDashboard() {
             setTab('overview');
           }}
         >
-          Overview
+          {tDash('tabs.overview')}
         </button>
         <button
           type="button"
@@ -386,7 +399,7 @@ export function OperatorDashboard() {
             setTab('sensors');
           }}
         >
-          Sensors
+          {tDash('tabs.sensors')}
         </button>
         <button
           type="button"
@@ -397,7 +410,7 @@ export function OperatorDashboard() {
             setTab('wards');
           }}
         >
-          Wards
+          {tDash('tabs.wards')}
         </button>
       </div>
 
@@ -414,46 +427,46 @@ export function OperatorDashboard() {
             <div className="kpi-row">
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Active incidents</span>
+                  <span className="kpi__label">{tDash('kpi.activeIncidents.label')}</span>
                 </div>
                 <div className="kpi__value">
                   {formatNum(openIncidents.length)}
-                  <span className="kpi__unit">open</span>
+                  <span className="kpi__unit">{tDash('kpi.activeIncidents.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">pH city avg</span>
+                  <span className="kpi__label">{tDash('kpi.phAvg.label')}</span>
                 </div>
                 <div className="kpi__value">
-                  {pHAvg !== null ? pHAvg.toFixed(1) : '—'}
-                  <span className="kpi__unit">pH</span>
+                  {pHAvg !== null ? pHAvg.toFixed(1) : tDash('common.emDash')}
+                  <span className="kpi__unit">{tDash('kpi.phAvg.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Response time</span>
+                  <span className="kpi__label">{tDash('kpi.responseTime.label')}</span>
                 </div>
                 <div className="kpi__value">
-                  2.4<span className="kpi__unit">min</span>
+                  2.4<span className="kpi__unit">{tDash('kpi.responseTime.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Pending signatures</span>
+                  <span className="kpi__label">{tDash('kpi.pendingSignatures.label')}</span>
                 </div>
                 <div className="kpi__value">
                   {formatNum(pendingSigs)}
-                  <span className="kpi__unit">awaiting</span>
+                  <span className="kpi__unit">{tDash('kpi.pendingSignatures.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Notices issued</span>
+                  <span className="kpi__label">{tDash('kpi.noticesIssued.label')}</span>
                 </div>
                 <div className="kpi__value">
                   {formatNum(noticesToday)}
-                  <span className="kpi__unit">today</span>
+                  <span className="kpi__unit">{tDash('kpi.noticesIssued.unit')}</span>
                 </div>
               </div>
             </div>
@@ -461,7 +474,7 @@ export function OperatorDashboard() {
             <div className="dense-row">
               <div className="card data-card">
                 <div className="data-card__head">
-                  <h3 className="data-card__title">Sensor fleet</h3>
+                  <h3 className="data-card__title">{tDash('sensors.cardTitle')}</h3>
                 </div>
                 <Table<SensorRow>
                   columns={sensorColumns}
@@ -474,7 +487,7 @@ export function OperatorDashboard() {
 
               <div className="card data-card">
                 <div className="data-card__head">
-                  <h3 className="data-card__title">Today on chain</h3>
+                  <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
                 </div>
                 <Table<ChainEventLite>
                   columns={chainColumns}
@@ -489,7 +502,7 @@ export function OperatorDashboard() {
             <div className="dense-foot">
               <div className="card data-card">
                 <div className="data-card__head">
-                  <h3 className="data-card__title">Open threads</h3>
+                  <h3 className="data-card__title">{tDash('threads.cardTitle')}</h3>
                 </div>
                 <Table<IncidentSummary>
                   columns={threadColumns}
@@ -507,21 +520,21 @@ export function OperatorDashboard() {
             <div className="editorial-hero">
               <div className="card handover-card kpi--hero">
                 <div className="kpi__head">
-                  <span className="kpi__label">Active incidents</span>
+                  <span className="kpi__label">{tDash('kpi.activeIncidents.label')}</span>
                 </div>
                 <div className="kpi__value">
                   {formatNum(openIncidents.length)}
-                  <span className="kpi__unit">open</span>
+                  <span className="kpi__unit">{tDash('kpi.activeIncidents.unit')}</span>
                 </div>
                 <div style={{ marginTop: 'var(--space-md)' }}>
                   <a className="handover-list__action" href="/inbox">
-                    Triage all →
+                    {tDash('editorial.triageAll')}
                   </a>
                 </div>
               </div>
               <div className="card data-card">
                 <div className="data-card__head">
-                  <h3 className="data-card__title">Today on chain</h3>
+                  <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
                 </div>
                 <Table<ChainEventLite>
                   columns={chainColumns}
@@ -532,41 +545,41 @@ export function OperatorDashboard() {
                 />
               </div>
             </div>
-            <p className="section-label">Today at a glance</p>
+            <p className="section-label">{tDash('editorial.sectionLabel')}</p>
             <div className="editorial-second">
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">pH city avg</span>
+                  <span className="kpi__label">{tDash('kpi.phAvg.label')}</span>
                 </div>
                 <div className="kpi__value">
-                  {pHAvg !== null ? pHAvg.toFixed(1) : '—'}
-                  <span className="kpi__unit">pH</span>
+                  {pHAvg !== null ? pHAvg.toFixed(1) : tDash('common.emDash')}
+                  <span className="kpi__unit">{tDash('kpi.phAvg.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Response time</span>
+                  <span className="kpi__label">{tDash('kpi.responseTime.label')}</span>
                 </div>
                 <div className="kpi__value">
-                  2.4<span className="kpi__unit">min</span>
+                  2.4<span className="kpi__unit">{tDash('kpi.responseTime.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Pending sigs</span>
+                  <span className="kpi__label">{tDash('kpi.pendingSignatures.shortLabel')}</span>
                 </div>
                 <div className="kpi__value">
                   {formatNum(pendingSigs)}
-                  <span className="kpi__unit">awaiting</span>
+                  <span className="kpi__unit">{tDash('kpi.pendingSignatures.unit')}</span>
                 </div>
               </div>
               <div className="kpi">
                 <div className="kpi__head">
-                  <span className="kpi__label">Notices issued</span>
+                  <span className="kpi__label">{tDash('kpi.noticesIssued.label')}</span>
                 </div>
                 <div className="kpi__value">
                   {formatNum(noticesToday)}
-                  <span className="kpi__unit">today</span>
+                  <span className="kpi__unit">{tDash('kpi.noticesIssued.unit')}</span>
                 </div>
               </div>
             </div>
@@ -576,44 +589,44 @@ export function OperatorDashboard() {
           <div data-layout-only="c" className="status-board" hidden={layout !== 'c'}>
             <div className="kpi-strip">
               <div className="kpi-strip__cell kpi">
-                <div className="kpi__label">Active incidents</div>
+                <div className="kpi__label">{tDash('kpi.activeIncidents.label')}</div>
                 <div className="kpi__value">
                   {formatNum(openIncidents.length)}
-                  <span className="kpi__unit">open</span>
+                  <span className="kpi__unit">{tDash('kpi.activeIncidents.unit')}</span>
                 </div>
               </div>
               <div className="kpi-strip__cell kpi">
-                <div className="kpi__label">pH city avg</div>
+                <div className="kpi__label">{tDash('kpi.phAvg.label')}</div>
                 <div className="kpi__value">
-                  {pHAvg !== null ? pHAvg.toFixed(1) : '—'}
-                  <span className="kpi__unit">pH</span>
+                  {pHAvg !== null ? pHAvg.toFixed(1) : tDash('common.emDash')}
+                  <span className="kpi__unit">{tDash('kpi.phAvg.unit')}</span>
                 </div>
               </div>
               <div className="kpi-strip__cell kpi">
-                <div className="kpi__label">Response time</div>
+                <div className="kpi__label">{tDash('kpi.responseTime.label')}</div>
                 <div className="kpi__value">
-                  2.4<span className="kpi__unit">min</span>
+                  2.4<span className="kpi__unit">{tDash('kpi.responseTime.unit')}</span>
                 </div>
               </div>
               <div className="kpi-strip__cell kpi">
-                <div className="kpi__label">Pending sigs</div>
+                <div className="kpi__label">{tDash('kpi.pendingSignatures.shortLabel')}</div>
                 <div className="kpi__value">
                   {formatNum(pendingSigs)}
-                  <span className="kpi__unit">awaiting</span>
+                  <span className="kpi__unit">{tDash('kpi.pendingSignatures.unit')}</span>
                 </div>
               </div>
               <div className="kpi-strip__cell kpi">
-                <div className="kpi__label">Notices issued</div>
+                <div className="kpi__label">{tDash('kpi.noticesIssued.label')}</div>
                 <div className="kpi__value">
                   {formatNum(noticesToday)}
-                  <span className="kpi__unit">today</span>
+                  <span className="kpi__unit">{tDash('kpi.noticesIssued.unit')}</span>
                 </div>
               </div>
             </div>
             <div className="split-pane">
               <div className="card data-card">
                 <div className="data-card__head">
-                  <h3 className="data-card__title">Sensor fleet</h3>
+                  <h3 className="data-card__title">{tDash('sensors.cardTitle')}</h3>
                 </div>
                 <Table<SensorRow>
                   columns={sensorColumns}
@@ -626,7 +639,7 @@ export function OperatorDashboard() {
               <div className="right-rail">
                 <div className="card data-card">
                   <div className="data-card__head">
-                    <h3 className="data-card__title">Open threads</h3>
+                    <h3 className="data-card__title">{tDash('threads.cardTitle')}</h3>
                   </div>
                   <Table<IncidentSummary>
                     columns={threadColumnsCompact}
@@ -638,7 +651,7 @@ export function OperatorDashboard() {
                 </div>
                 <div className="card data-card">
                   <div className="data-card__head">
-                    <h3 className="data-card__title">Today on chain</h3>
+                    <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
                   </div>
                   <Table<ChainEventLite>
                     columns={chainColumnsCompact}
@@ -664,15 +677,17 @@ export function OperatorDashboard() {
             <div className="col-8">
               <div className="chart-card">
                 <div className="chart-card__head">
-                  <h3 className="chart-card__title">Sensor history — last 24h</h3>
-                  <span className="chart-card__meta">{formatNum(sensors.length)} sensors · live</span>
+                  <h3 className="chart-card__title">{tDash('sensors.historyChart.title')}</h3>
+                  <span className="chart-card__meta">
+                    {tDash('sensors.historyChart.meta', { count: sensors.length })}
+                  </span>
                 </div>
                 <div className="chart-card__body">
                   <svg
                     viewBox="0 0 800 220"
                     width="100%"
                     height="100%"
-                    aria-label="24h multi-sensor time series"
+                    aria-label={tDash('sensors.historyChart.ariaLabel')}
                   >
                     <g stroke="var(--border-subtle)" strokeWidth="1">
                       <line x1="0" y1="40" x2="800" y2="40" />
@@ -681,19 +696,19 @@ export function OperatorDashboard() {
                     </g>
                     <g fontFamily="var(--font-family-mono)" fontSize="10" fill="var(--fg-tertiary)">
                       <text x="0" y="218">
-                        00:00
+                        {tDash('sensors.historyChart.axis.0')}
                       </text>
                       <text x="200" y="218">
-                        06:00
+                        {tDash('sensors.historyChart.axis.6')}
                       </text>
                       <text x="400" y="218">
-                        12:00
+                        {tDash('sensors.historyChart.axis.12')}
                       </text>
                       <text x="600" y="218">
-                        18:00
+                        {tDash('sensors.historyChart.axis.18')}
                       </text>
                       <text x="775" y="218" textAnchor="end">
-                        now
+                        {tDash('sensors.historyChart.axis.now')}
                       </text>
                     </g>
                     <path
@@ -721,15 +736,15 @@ export function OperatorDashboard() {
                     >
                       <rect x="640" y="10" width="12" height="3" fill="var(--brand-500)" />
                       <text x="656" y="14">
-                        pH (×10)
+                        {tDash('sensors.historyChart.legend.ph')}
                       </text>
                       <rect x="640" y="22" width="12" height="3" fill="var(--success)" />
                       <text x="656" y="26">
-                        Chlorine
+                        {tDash('sensors.historyChart.legend.chlorine')}
                       </text>
                       <rect x="720" y="22" width="12" height="3" fill="var(--warning)" />
                       <text x="736" y="26">
-                        Turbidity
+                        {tDash('sensors.historyChart.legend.turbidity')}
                       </text>
                     </g>
                   </svg>
@@ -739,15 +754,15 @@ export function OperatorDashboard() {
             <div className="col-4">
               <div className="chart-card">
                 <div className="chart-card__head">
-                  <h3 className="chart-card__title">Band distribution</h3>
-                  <span className="chart-card__meta">last 7 days</span>
+                  <h3 className="chart-card__title">{tDash('sensors.bandDistribution.title')}</h3>
+                  <span className="chart-card__meta">{tDash('sensors.bandDistribution.meta')}</span>
                 </div>
                 <div className="chart-card__body donut-body">
                   <svg
                     viewBox="0 0 200 200"
                     width="180"
                     height="180"
-                    aria-label="Band distribution donut"
+                    aria-label={tDash('sensors.bandDistribution.ariaLabel')}
                   >
                     <circle
                       cx="100"
@@ -800,7 +815,7 @@ export function OperatorDashboard() {
                       fill="var(--fg-tertiary)"
                       fontFamily="var(--font-family-sans)"
                     >
-                      readings
+                      {tDash('sensors.bandDistribution.totalLabel')}
                     </text>
                   </svg>
                 </div>
@@ -810,21 +825,21 @@ export function OperatorDashboard() {
                       className="donut-legend__dot"
                       style={{ background: 'var(--band-high)' }}
                     ></span>
-                    High 12%
+                    {tDash('sensors.bandDistribution.legend.high')}
                   </span>
                   <span>
                     <span
                       className="donut-legend__dot"
                       style={{ background: 'var(--band-medium)' }}
                     ></span>
-                    Med 9%
+                    {tDash('sensors.bandDistribution.legend.medium')}
                   </span>
                   <span>
                     <span
                       className="donut-legend__dot"
                       style={{ background: 'var(--band-low)' }}
                     ></span>
-                    Low 58%
+                    {tDash('sensors.bandDistribution.legend.low')}
                   </span>
                 </div>
               </div>
@@ -838,8 +853,8 @@ export function OperatorDashboard() {
             <div className="col-12">
               <div className="chart-card">
                 <div className="chart-card__head">
-                  <h3 className="chart-card__title">Slowest wards — response time, last 7 days</h3>
-                  <span className="chart-card__meta">12 wards</span>
+                  <h3 className="chart-card__title">{tDash('wards.chart.title')}</h3>
+                  <span className="chart-card__meta">{tDash('wards.chart.meta')}</span>
                 </div>
                 <div className="chart-card__body chart-card__body--auto">
                   <WardRanking incidents={incidents} />
@@ -860,44 +875,46 @@ function computePHAvg(sensors: SensorRow[]): number | null {
   if (ph.length === 0) return null;
   return ph.reduce((sum, s) => sum + s.last_value, 0) / ph.length;
 }
-function summarizeEvent(e: ChainEventLite): string {
+function summarizeEvent(e: ChainEventLite, t: (k: string, opts?: Record<string, unknown>) => string): string {
   switch (e.event_type) {
     case 'SensorReadingSubmitted':
-      return `Sensor reading · ${(e.payload as { parameter?: string }).parameter ?? '—'}`;
+      return t('chain.eventTypes.sensorReading', {
+        parameter: (e.payload as { parameter?: string }).parameter ?? t('common.emDash'),
+      });
     case 'AnjaliReportSubmitted':
-      return 'Citizen report (Anjali)';
+      return t('chain.eventTypes.anjaliReport');
     case 'IncidentCreated':
-      return `Incident opened`;
+      return t('chain.eventTypes.incidentCreated');
     case 'IncidentEscalated':
-      return `Incident escalated`;
+      return t('chain.eventTypes.incidentEscalated');
     case 'IncidentResolved':
-      return `Incident resolved`;
+      return t('chain.eventTypes.incidentResolved');
     case 'PublicNoticeIssued':
-      return 'Public notice issued';
+      return t('chain.eventTypes.publicNoticeIssued');
     case 'PublicNoticeRetracted':
-      return 'Public notice retracted';
+      return t('chain.eventTypes.publicNoticeRetracted');
     case 'SignatureAttestation':
-      return 'Signature attestation';
+      return t('chain.eventTypes.signatureAttestation');
     case 'OperatorAuthenticated':
-      return 'Operator login';
+      return t('chain.eventTypes.operatorAuthenticated');
     case 'OperatorAccessLogged':
-      return 'Operator access';
+      return t('chain.eventTypes.operatorAccessLogged');
     case 'PlaybookStepExecuted':
-      return 'Playbook step';
+      return t('chain.eventTypes.playbookStepExecuted');
     case 'DeviationCaptured':
-      return 'Deviation captured';
+      return t('chain.eventTypes.deviationCaptured');
     case 'SensorSilenceObserved':
-      return 'Sensor silence observed';
+      return t('chain.eventTypes.sensorSilenceObserved');
     case 'ChainVerificationFailed':
-      return 'Chain verification failed';
+      return t('chain.eventTypes.chainVerificationFailed');
     case 'TechnicianAssigned':
-      return 'Technician assigned';
+      return t('chain.eventTypes.technicianAssigned');
     case 'TechnicianArrived':
-      return 'Technician arrived';
+      return t('chain.eventTypes.technicianArrived');
     case 'DiagnosisSubmitted':
-      return 'Diagnosis submitted';
+      return t('chain.eventTypes.diagnosisSubmitted');
     case 'FixSubmitted':
-      return 'Fix submitted';
+      return t('chain.eventTypes.fixSubmitted');
     default:
       return e.event_type.replace(/([A-Z])/g, ' $1').trim();
   }
@@ -926,20 +943,23 @@ function statusBadgeClass(eventType: string): string {
   if (eventType === 'PlaybookStepExecuted') return 'tier';
   return 't1';
 }
-function statusBadgeLabel(eventType: string): string {
-  if (eventType.includes('Resolved') || eventType.includes('Retracted')) return 'done';
-  if (eventType.includes('Notice') || eventType.includes('Acknowledge')) return 'broadcast';
-  if (eventType.includes('Escalated')) return 'esc';
-  if (eventType === 'ChainVerificationFailed' || eventType === 'DeviationCaptured') return 'err';
-  if (eventType.includes('Report')) return 'inbox';
-  if (eventType === 'OperatorAuthenticated' || eventType === 'OperatorAccessLogged') return 'auth';
-  if (eventType === 'SignatureAttestation') return 'signed';
-  if (eventType === 'PlaybookStepExecuted') return 'exec';
-  if (eventType.includes('Reading')) return 'data';
-  if (eventType === 'TechnicianAssigned') return 'dispatch';
-  if (eventType === 'TechnicianArrived') return 'onsite';
-  if (eventType === 'DiagnosisSubmitted') return 'diag';
-  if (eventType === 'FixSubmitted') return 'fix';
+function statusBadgeLabel(
+  eventType: string,
+  t: (k: string, opts?: Record<string, unknown>) => string,
+): string {
+  if (eventType.includes('Resolved') || eventType.includes('Retracted')) return t('chain.badge.done');
+  if (eventType.includes('Notice') || eventType.includes('Acknowledge')) return t('chain.badge.broadcast');
+  if (eventType.includes('Escalated')) return t('chain.badge.esc');
+  if (eventType === 'ChainVerificationFailed' || eventType === 'DeviationCaptured') return t('chain.badge.err');
+  if (eventType.includes('Report')) return t('chain.badge.inbox');
+  if (eventType === 'OperatorAuthenticated' || eventType === 'OperatorAccessLogged') return t('chain.badge.auth');
+  if (eventType === 'SignatureAttestation') return t('chain.badge.signed');
+  if (eventType === 'PlaybookStepExecuted') return t('chain.badge.exec');
+  if (eventType.includes('Reading')) return t('chain.badge.data');
+  if (eventType === 'TechnicianAssigned') return t('chain.badge.dispatch');
+  if (eventType === 'TechnicianArrived') return t('chain.badge.onsite');
+  if (eventType === 'DiagnosisSubmitted') return t('chain.badge.diag');
+  if (eventType === 'FixSubmitted') return t('chain.badge.fix');
   return eventType
     .replace(/([A-Z])/g, ' $1')
     .trim()
@@ -962,6 +982,7 @@ function severityBadgeClass(sev: string): string {
 // whatever the chain has — falls back to the locked static layout if
 // no incidents are reported yet.
 function WardRanking({ incidents }: { incidents: IncidentSummary[] }) {
+  const { t: tDash } = useTranslation('operatorDashboard');
   // group incidents by ward_id and count by severity
   const byWard = new Map<string, { count: number; weighted: number }>();
 
@@ -985,49 +1006,49 @@ function WardRanking({ incidents }: { incidents: IncidentSummary[] }) {
     return (
       <>
         <div className="hbar-row">
-          <span className="hbar-label">Dhanmondi</span>
+          <span className="hbar-label">{tDash('wards.fallback.dhanmondi')}</span>
           <div className="hbar-track">
             <div className="hbar-fill" style={{ width: '78%', background: 'var(--danger)' }}></div>
           </div>
-          <span className="mono hbar-value">4.2 min</span>
+          <span className="mono hbar-value">{tDash('wards.fallback.dhanmondiValue')}</span>
         </div>
         <div className="hbar-row">
-          <span className="hbar-label">Mirpur</span>
+          <span className="hbar-label">{tDash('wards.fallback.mirpur')}</span>
           <div className="hbar-track">
             <div className="hbar-fill" style={{ width: '62%', background: 'var(--warning)' }}></div>
           </div>
-          <span className="mono hbar-value">3.4 min</span>
+          <span className="mono hbar-value">{tDash('wards.fallback.mirpurValue')}</span>
         </div>
         <div className="hbar-row">
-          <span className="hbar-label">Uttara</span>
+          <span className="hbar-label">{tDash('wards.fallback.uttara')}</span>
           <div className="hbar-track">
             <div className="hbar-fill" style={{ width: '48%', background: 'var(--warning)' }}></div>
           </div>
-          <span className="mono hbar-value">2.6 min</span>
+          <span className="mono hbar-value">{tDash('wards.fallback.uttaraValue')}</span>
         </div>
         <div className="hbar-row">
-          <span className="hbar-label">Mohammadpur</span>
+          <span className="hbar-label">{tDash('wards.fallback.mohammadpur')}</span>
           <div className="hbar-track">
             <div
               className="hbar-fill"
               style={{ width: '36%', background: 'var(--band-medium)' }}
             ></div>
           </div>
-          <span className="mono hbar-value">2.0 min</span>
+          <span className="mono hbar-value">{tDash('wards.fallback.mohammadpurValue')}</span>
         </div>
         <div className="hbar-row">
-          <span className="hbar-label">Tejgaon</span>
+          <span className="hbar-label">{tDash('wards.fallback.tejgaon')}</span>
           <div className="hbar-track">
             <div className="hbar-fill" style={{ width: '24%', background: 'var(--success)' }}></div>
           </div>
-          <span className="mono hbar-value">1.4 min</span>
+          <span className="mono hbar-value">{tDash('wards.fallback.tejgaonValue')}</span>
         </div>
         <div className="hbar-row">
-          <span className="hbar-label">Gulshan</span>
+          <span className="hbar-label">{tDash('wards.fallback.gulshan')}</span>
           <div className="hbar-track">
             <div className="hbar-fill" style={{ width: '18%', background: 'var(--success)' }}></div>
           </div>
-          <span className="mono hbar-value">1.1 min</span>
+          <span className="mono hbar-value">{tDash('wards.fallback.gulshanValue')}</span>
         </div>
       </>
     );
@@ -1053,7 +1074,10 @@ function WardRanking({ incidents }: { incidents: IncidentSummary[] }) {
               <div className="hbar-fill" style={{ width: `${width}%`, background: bg }}></div>
             </div>
             <span className="mono hbar-value">
-              {r.count} {r.count === 1 ? 'incident' : 'incidents'}
+              {tDash('wards.row.count', {
+                count: r.count,
+                unit: tDash(r.count === 1 ? 'wards.row.unit_one' : 'wards.row.unit_other'),
+              })}
             </span>
           </div>
         );
