@@ -25,6 +25,7 @@ import { OperatorDashboard } from '../pages/OperatorDashboard';
 import { InboxList } from '../pages/InboxList';
 import { AuditLog } from '../pages/AuditLog';
 import { LocaleProvider } from '../hooks/useLocale';
+import { ToastProvider } from '../components/ui/ToastProvider';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
 import { handlers } from '../mocks/handlers';
@@ -68,7 +69,9 @@ function renderInRouter(node: React.ReactNode, withAppLayout = false) {
 
   return render(
     <LocaleProvider>
-      <MemoryRouter>{inner}</MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter>{inner}</MemoryRouter>
+      </ToastProvider>
     </LocaleProvider>,
   );
 }

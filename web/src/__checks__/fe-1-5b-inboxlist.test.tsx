@@ -28,6 +28,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { InboxList } from '../pages/InboxList';
 import { LocaleProvider } from '../hooks/useLocale';
+import { ToastProvider } from '../components/ui/ToastProvider';
 import { handlers } from '../mocks/handlers';
 
 const server = setupServer(...handlers);
@@ -175,9 +176,11 @@ async function renderInboxAndWaitForRows() {
   overrideEventsHandler();
   render(
     <LocaleProvider>
-      <MemoryRouter>
-        <InboxList />
-      </MemoryRouter>
+      <ToastProvider>
+        <MemoryRouter>
+          <InboxList />
+        </MemoryRouter>
+      </ToastProvider>
     </LocaleProvider>,
   );
   await waitFor(() => {
@@ -305,9 +308,11 @@ describe('InboxList I/O matrix', () => {
 
     render(
       <LocaleProvider>
-        <MemoryRouter>
-          <InboxList />
-        </MemoryRouter>
+        <ToastProvider>
+          <MemoryRouter>
+            <InboxList />
+          </MemoryRouter>
+        </ToastProvider>
       </LocaleProvider>,
     );
 

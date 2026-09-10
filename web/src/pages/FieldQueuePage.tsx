@@ -21,7 +21,7 @@
  *   than the chrome.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
@@ -60,6 +60,7 @@ export function FieldQueuePage() {
   const technicianId = session.actor_ref;
   const [rows, setRows] = useState<WorkOrderRow[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
+  const [sortMode, setSortMode] = useState<'manual' | 'sla'>('manual');
   const [loading, setLoading] = useState(true);
 
   // 1. fetch chain events for Karim
@@ -91,13 +92,54 @@ export function FieldQueuePage() {
   const personaName = session.display_name.replace(' — Field Technician', '');
   const personaRole = 'field tech · NE zone';
 
-  const visible = rows.filter((r) => {
-    if (filter === 'all') return true;
-    if (filter === 'P1' || filter === 'P2' || filter === 'P3') return r.priority === filter;
-    if (filter === 'enroute') return r.status === 'enroute';
-    // filter is `'onsite'` here — TS exhaustively narrowed via prior returns
-    return r.status === 'onsite';
-  });
+  const visible = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (filter === 'all') return true;
+        if (filter === 'P1' || filter === 'P2' || filter === 'P3') return r.priority === filter;
+        if (filter === 'enroute') return r.status === 'enroute';
+        // filter is `'onsite'` here — TS exhaustively narrowed via prior returns
+        return r.status === 'onsite';
+      }),
+    [rows, filter],
+  );
+
+  // SLA sort key: priority tier (P1=0 first), then overdue flag
+  // (overdue → 0, on-track → 1), then status order (en route → on
+  // site → assigned → resolved). Stable: Array#sort is stable per
+  // ES2019, so ties preserve buildRows() arrival order.
+  const slaSortKey = (r: WorkOrderRow): [number, number, number] => {
+    const priorityRank =
+      r.priority === 'P1' ? 0 : r.priority === 'P2' ? 1 : r.priority === 'P3' ? 2 : 3;
+    const overdueRank = r.timeIsOverdue && !r.isDone ? 0 : 1;
+    const statusRank =
+      r.status === 'enroute'
+        ? 0
+        : r.status === 'onsite'
+          ? 1
+          : r.status === 'assigned'
+            ? 2
+            : 3;
+
+    return [priorityRank, overdueRank, statusRank];
+  };
+
+  const sortedVisible = useMemo(() => {
+    if (sortMode !== 'sla') return visible;
+    return [...visible].sort((a, b) => {
+      const ka = slaSortKey(a);
+      const kb = slaSortKey(b);
+
+      if (ka[0] !== kb[0]) return ka[0] - kb[0];
+      if (ka[1] !== kb[1]) return ka[1] - kb[1];
+      return ka[2] - kb[2];
+    });
+  }, [visible, sortMode]);
+
+  const onOptimizeRoute = (): void => {
+    setFilter('all');
+    setSortMode('sla');
+  };
 
   const chipCounts: Record<Filter, number> = {
     all: rows.length,
@@ -135,11 +177,22 @@ export function FieldQueuePage() {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            <button className="button button--secondary" type="button" disabled title="Phase 2">
+            <button
+              className="button button--secondary"
+              type="button"
+              disabled={sortMode === 'sla'}
+              onClick={onOptimizeRoute}
+              data-testid="field-optimize-route"
+            >
               Optimize route
             </button>
           </div>
         </div>
+        {sortMode === 'sla' && (
+          <div className="page-header__sub" data-testid="field-optimized-subtitle">
+            Optimized — SLA order
+          </div>
+        )}
       </div>
 
       <div className="tech-today">
@@ -208,7 +261,7 @@ export function FieldQueuePage() {
             loading queue from chain…
           </div>
         )}
-        {!loading && visible.length === 0 && (
+        {!loading && sortedVisible.length === 0 && (
           <div
             style={{
               padding: 'var(--space-lg)',
@@ -220,7 +273,7 @@ export function FieldQueuePage() {
             no jobs in this filter
           </div>
         )}
-        {visible.map((r) => (
+        {sortedVisible.map((r) => (
           <a
             key={r.id}
             href={`/field/incident-detail?work_order=${r.id}`}

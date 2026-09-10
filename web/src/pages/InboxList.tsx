@@ -10,7 +10,7 @@
  *   The page returns a <Container> directly, no .app-shell wrapper.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
@@ -24,6 +24,7 @@ import { FilterChip } from '../components/pages/FilterChip';
 import type { InboxRowFilter, InboxRow as InboxRowType } from '../types/inbox';
 import { ContainerWidth } from '../types/domain';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { useIncidentActions } from '../hooks/useIncidentActions';
 import {
   type ChainEventLite,
   type RecentDecision,
@@ -35,6 +36,7 @@ import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRa
 
 export function InboxList() {
   const { format: formatTime, locale } = useDateFormatter();
+  const actions = useIncidentActions();
   const [rows, setRows] = useState<InboxRowType[]>([]);
   const [recent, setRecent] = useState<RecentDecision[]>([]);
   const [filter, setFilter] = useState<InboxRowFilter>('all');
@@ -42,21 +44,26 @@ export function InboxList() {
   const [loading, setLoading] = useState(true);
 
   // (1) inbox rows — gated on chain head & recent fetches via separate effects
-  useEffect(() => {
-    void (async () => {
-      try {
-        const r = await fetch('/api/events?event_type=IncidentCreated&limit=100');
-        const data = (await r.json()) as { events: ChainEventLite[] };
+  // refetchRows is pulled out so the bulk-bar Mark-reviewed CTA can call it
+  // after a successful SignatureAttestation chain write to refresh the table
+  // + AwaitingActionRail (each review drops isAwaitingSig to false).
+  const refetchRows = useCallback(async (): Promise<void> => {
+    try {
+      const r = await fetch('/api/events?event_type=IncidentCreated&limit=100');
+      const data = (await r.json()) as { events: ChainEventLite[] };
 
-        setRows(buildRows(data.events));
-      } catch (err) {
-        console.error('[surakkha] inbox fetch failed', err);
-        setRows([]);
-      } finally {
-        setLoading(false);
-      }
-    })();
+      setRows(buildRows(data.events));
+    } catch (err) {
+      console.error('[surakkha] inbox fetch failed', err);
+      setRows([]);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void refetchRows();
+  }, [refetchRows]);
 
   // (2) recent decisions — 4 parallel fetches via Promise.all
   // Chain freshness polling moved to AppLayout (single source of truth).
@@ -118,6 +125,22 @@ export function InboxList() {
     };
   }, [rows]);
   const total = Math.max(1, rows.length);
+
+  // Bulk-bar Mark-reviewed CTA handler. F1's markReviewed posts one
+  // SignatureAttestation(action: reviewed_by_operator) per selected
+  // incident; on success we clear the selection + refetch the inbox
+  // so each row drops out of AwaitingActionRail (isAwaitingSig → false).
+  const onMarkReviewed = async (): Promise<void> => {
+    if (selectedRows.size === 0) return;
+
+    const incidentIds = Array.from(selectedRows);
+    const ok = await actions.markReviewed({ incident_ids: incidentIds });
+
+    if (ok) {
+      setSelectedRows(new Set());
+      await refetchRows();
+    }
+  };
 
   const inboxColumns: TableColumn<InboxRowType>[] = useMemo(
     () => [
@@ -370,7 +393,15 @@ export function InboxList() {
                 <Button variant="secondary" size="sm" disabled>
                   Assign to me
                 </Button>
-                <Button variant="secondary" size="sm" disabled>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={actions.busy || selectedRows.size === 0}
+                  onClick={() => {
+                    void onMarkReviewed();
+                  }}
+                  testId="bulk-mark-reviewed"
+                >
                   Mark reviewed
                 </Button>
                 <Button variant="danger" size="sm" disabled>
