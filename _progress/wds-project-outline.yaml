@@ -1,0 +1,13 @@
+wds-version: "1.0.0"
+project: ""
+created: "2026-09-10"
+rendering-tool: excalidraw
+
+phases:
+  product-brief: complete
+  trigger-map: complete
+  ux-scenarios: not-started
+  ux-design: not-started
+  development: not-started
+
+output-folder: docs
