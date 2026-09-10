@@ -1,5 +1,5 @@
 /**
- * InboxDetail.tsx — FE-1.5a.
+ * InboxDetail.tsx — FE-1.5a + FE-F3.
  *
  * 2-pane incident detail at /inbox/:id. Per dim 5 §7.4:
  *   - Container width="bangla" (1080 px) for the mixed Latin/Bangla body.
@@ -7,14 +7,22 @@
  *   - Right col-span-5: related incident list (sibling incidents by ward).
  *   - Drops to single pane below <bp-lg> (768 px).
  *
+ * Header CTAs (FE-F3):
+ *   - "Assign field tech" opens <AssignTechModal>: pick a tech from the
+ *     team list, choose P1/P2/P3 priority, set ETA + work-order summary,
+ *     submit `actions.assignTech(...)`. Closes on success.
+ *   - "Request citizen ack →" opens <RequestAckModal>: choose channel
+ *     (sms/whatsapp/voice) + summary copy, submit
+ *     `actions.requestAck(...)`. Closes on success.
+ *
  * Data sources:
  *   - GET /api/incidents → finds the matching row by id.
- *   - GET /api/events?event_type=IncidentCreated (then filtered client-side
- *     by payload.incident_id === params.id).
+ *   - GET /api/events?limit=200 → filtered client-side by
+ *     payload.incident_id === params.id.
  *
  * The page is intentionally lightweight — composition only. Heavy lifting
  * lives in the fixtures + handlers; this component just maps wire data
- * into the existing primitives (Container, Card, EmptyState).
+ * into the existing primitives (Container, Card, EmptyState, Modal).
  */
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -24,10 +32,12 @@ import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
+import { Modal } from '../components/ui/Modal';
 import { AlertIcon, InboxIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { useIncidentActions } from '../hooks/useIncidentActions';
 
 interface ChainEvent {
   event_id: string;
@@ -38,6 +48,17 @@ interface ChainEvent {
   block_hash: string;
   height: number;
 }
+
+/** Hardcoded field-tech roster for the demo. In production this would
+ *  come from GET /api/field/technicians. Karim is the seed persona;
+ *  Rashid + Sumi round out the dispatch team. */
+const TECH_ROSTER = [
+  { id: 'karim_actor', name: 'Karim Hossain' },
+  { id: 'rashid_actor', name: 'Rashid Ahmed' },
+  { id: 'sumi_actor', name: 'Sumi Akter' },
+] as const;
+
+type TechId = (typeof TECH_ROSTER)[number]['id'];
 
 function severityBadgeClass(sev: string): string {
   if (sev === 'T3' || sev === 't3') return 'badge badge--t3';
@@ -92,12 +113,299 @@ function eventTitle(event: ChainEvent): string {
     return `Sensor ${sensorId} reading: ${typeof valueRaw === 'number' ? valueRaw : '?'} ${parameter}`;
   }
   return event.event_type;
+}interface AssignTechModalProps {
+  open: boolean;
+  onClose: () => void;
+  incidentId: string;
+  busy: boolean;
+  onSubmit: (input: {
+    incident_id: string;
+    technician_id: string;
+    technician_name: string;
+    priority: 'P1' | 'P2' | 'P3';
+    eta_target_minutes: number;
+    work_order_summary: string;
+  }) => Promise<boolean>;
 }
-export function InboxDetail() {
+
+function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTechModalProps) {
+  const [techId, setTechId] = useState<TechId>(TECH_ROSTER[0].id);
+  const [priority, setPriority] = useState<'P1' | 'P2' | 'P3'>('P1');
+  const [eta, setEta] = useState<string>('30');
+  const [summary, setSummary] = useState<string>('');
+
+  const tech = TECH_ROSTER.find((t) => t.id === techId);
+  const etaNum = Number(eta);
+  const summaryTrim = summary.trim();
+  const canSubmit = !busy && tech !== undefined && Number.isFinite(etaNum) && etaNum > 0 && summaryTrim.length >= 5;
+
+  const handleClose = () => {
+    if (busy) return;
+    onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    const ok = await onSubmit({
+      incident_id: incidentId,
+      technician_id: tech.id,
+      technician_name: tech.name,
+      priority,
+      eta_target_minutes: etaNum,
+      work_order_summary: summaryTrim,
+    });
+
+    if (ok) {
+      // Reset on success so the next open starts fresh.
+      setSummary('');
+      setEta('30');
+      setPriority('P1');
+      setTechId(TECH_ROSTER[0].id);
+      onClose();
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} testId="assign-tech-modal" ariaLabel="Assign field technician">
+      <form onSubmit={handleSubmit} data-testid="assign-tech-form">
+        <header style={{ marginBottom: 'var(--space-md)' }}>
+          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Assign field technician</h2>
+          <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
+            Dispatches a work order onto the chain for incident{' '}
+            <span className="mono">{incidentId.slice(0, 8)}</span>.
+          </p>
+        </header>
+
+        <div className="submit-form__row">
+          <label htmlFor="assign-tech-tech" className="submit-form__label">
+            Technician
+          </label>
+          <select
+            id="assign-tech-tech"
+            data-testid="assign-tech-tech"
+            className="submit-form__input"
+            value={techId}
+            onChange={(e) => {
+              setTechId(e.target.value as TechId);
+            }}
+            disabled={busy}
+          >
+            {TECH_ROSTER.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="submit-form__row submit-form__row--split">
+          <div>
+            <label htmlFor="assign-tech-priority" className="submit-form__label">
+              Priority
+            </label>
+            <select
+              id="assign-tech-priority"
+              data-testid="assign-tech-priority"
+              className="submit-form__input"
+              value={priority}
+              onChange={(e) => {
+                setPriority(e.target.value as 'P1' | 'P2' | 'P3');
+              }}
+              disabled={busy}
+            >
+              <option value="P1">P1 · urgent</option>
+              <option value="P2">P2 · same day</option>
+              <option value="P3">P3 · scheduled</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="assign-tech-eta" className="submit-form__label">
+              ETA (minutes)
+            </label>
+            <input
+              id="assign-tech-eta"
+              data-testid="assign-tech-eta"
+              type="number"
+              min={1}
+              max={1440}
+              className="submit-form__input"
+              value={eta}
+              onChange={(e) => {
+                setEta(e.target.value);
+              }}
+              disabled={busy}
+            />
+          </div>
+        </div>
+
+        <div className="submit-form__row">
+          <label htmlFor="assign-tech-summary" className="submit-form__label">
+            Work order summary
+          </label>
+          <textarea
+            id="assign-tech-summary"
+            data-testid="assign-tech-summary"
+            className="submit-form__textarea"
+            value={summary}
+            onChange={(e) => {
+              setSummary(e.target.value);
+            }}
+            rows={3}
+            placeholder="Replace chlorine pump #4, verify output"
+            disabled={busy}
+            required
+          />
+          <p className="submit-form__hint">What the tech will do on site. Min 5 characters.</p>
+        </div>
+
+        <div className="submit-form__actions">
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            disabled={!canSubmit}
+            testId="assign-tech-submit"
+          >
+            {busy ? 'Dispatching…' : 'Dispatch work order'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="md"
+            onClick={handleClose}
+            disabled={busy}
+            testId="assign-tech-cancel"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}interface RequestAckModalProps {
+  open: boolean;
+  onClose: () => void;
+  incidentId: string;
+  busy: boolean;
+  onSubmit: (input: {
+    incident_id: string;
+    channel: 'sms' | 'whatsapp' | 'voice';
+    summary: string;
+  }) => Promise<boolean>;
+}
+
+function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestAckModalProps) {
+  const [channel, setChannel] = useState<'sms' | 'whatsapp' | 'voice'>('sms');
+  const [summary, setSummary] = useState<string>('');
+
+  const summaryTrim = summary.trim();
+  const canSubmit = !busy && summaryTrim.length >= 5;
+
+  const handleClose = () => {
+    if (busy) return;
+    onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!canSubmit) return;
+    const ok = await onSubmit({
+      incident_id: incidentId,
+      channel,
+      summary: summaryTrim,
+    });
+
+    if (ok) {
+      setSummary('');
+      setChannel('sms');
+      onClose();
+    }
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} testId="request-ack-modal" ariaLabel="Request citizen acknowledgement">
+      <form onSubmit={handleSubmit} data-testid="request-ack-form">
+        <header style={{ marginBottom: 'var(--space-md)' }}>
+          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Request citizen acknowledgement</h2>
+          <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
+            Sends a notice via the chosen channel for incident{' '}
+            <span className="mono">{incidentId.slice(0, 8)}</span>.
+          </p>
+        </header>
+
+        <div className="submit-form__row">
+          <label htmlFor="request-ack-channel" className="submit-form__label">
+            Channel
+          </label>
+          <select
+            id="request-ack-channel"
+            data-testid="request-ack-channel"
+            className="submit-form__input"
+            value={channel}
+            onChange={(e) => {
+              setChannel(e.target.value as 'sms' | 'whatsapp' | 'voice');
+            }}
+            disabled={busy}
+          >
+            <option value="sms">SMS</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="voice">Voice</option>
+          </select>
+        </div>
+
+        <div className="submit-form__row">
+          <label htmlFor="request-ack-summary" className="submit-form__label">
+            Notice copy
+          </label>
+          <textarea
+            id="request-ack-summary"
+            data-testid="request-ack-summary"
+            className="submit-form__textarea"
+            value={summary}
+            onChange={(e) => {
+              setSummary(e.target.value);
+            }}
+            rows={4}
+            placeholder="Please confirm your tap water is now safe."
+            disabled={busy}
+            required
+          />
+          <p className="submit-form__hint">Sent verbatim to the citizen. Min 5 characters.</p>
+        </div>
+
+        <div className="submit-form__actions">
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            disabled={!canSubmit}
+            testId="request-ack-submit"
+          >
+            {busy ? 'Sending…' : 'Send ack request'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="md"
+            onClick={handleClose}
+            disabled={busy}
+            testId="request-ack-cancel"
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}export function InboxDetail() {
   const { id = '' } = useParams<{ id: string }>();
   const { incidents, loading: incLoading, error: incError } = useIncidents();
   const { format: formatTime } = useDateFormatter();
+  const actions = useIncidentActions();
   const [events, setEvents] = useState<ChainEvent[]>([]);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [ackOpen, setAckOpen] = useState(false);
 
   useEffect(() => {
     // Chain poll is owned by AppLayout; this page only fetches the
@@ -243,10 +551,24 @@ export function InboxDetail() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            <Button variant="secondary" size="md">
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => {
+                setAssignOpen(true);
+              }}
+              testId="inbox-assign-tech"
+            >
               Assign field tech
             </Button>
-            <Button variant="primary" size="md">
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => {
+                setAckOpen(true);
+              }}
+              testId="inbox-request-ack"
+            >
               Request citizen ack →
             </Button>
           </div>
@@ -354,6 +676,28 @@ export function InboxDetail() {
           </Card>
         </div>
       </div>
+
+      {/* FE-F3 action modals — mounted at the page root so the
+          Modal portal target is consistent and Escape/click-outside
+          dismissal is shared. */}
+      <AssignTechModal
+        open={assignOpen}
+        onClose={() => {
+          setAssignOpen(false);
+        }}
+        incidentId={incident.incident_id}
+        busy={actions.busy}
+        onSubmit={actions.assignTech}
+      />
+      <RequestAckModal
+        open={ackOpen}
+        onClose={() => {
+          setAckOpen(false);
+        }}
+        incidentId={incident.incident_id}
+        busy={actions.busy}
+        onSubmit={actions.requestAck}
+      />
     </Container>
   );
 }
