@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "utility_operator": {
+      "dashboard": "ড্যাশবোর্ড",
+      "handover": "হ্যান্ডওভার",
+      "inbox": "ইনবক্স",
+      "verifyFlow": "যাচাই",
+      "notices": "বিজ্ঞপ্তি",
+      "sensors": "সেন্সর",
+      "audit": "অডিট",
+      "settings": "সেটিংস"
+    },
+    "field_technician": {
+      "workQueue": "কাজের তালিকা",
+      "myDay": "আমার দিন",
+      "incidentDetail": "ইনসিডেন্ট বিস্তারিত",
+      "history": "ইতিহাস"
+    },
+    "anjali": {
+      "submit": "রিপোর্ট জমা দিন"
+    },
+    "pha_approver": {
+      "approve": "অনুমোদন",
+      "audit": "অডিট"
+    },
+    "pha_viewer": {
+      "audit": "অডিট"
+    },
+    "vendor": {
+      "vendor": "ব্যাচ জমা দিন"
+    },
+    "utility_message_desk": {
+      "inbox": "ইনবক্স"
+    }
+  },
+  "topChrome": {
+    "brand": "সুরক্ষা",
+    "chainFresh": "চেইন প্রাণবন্ত",
+    "chainSeconds": "চেইন {{seconds}}সে"
+  },
+  "sidebar": {
+    "logout": "লগআউট",
+    "ariaBrand": "সুরক্ষা হোম",
+    "ariaPrimary": "প্রাইমারি"
+  },
+  "appLayout": {
+    "ariaMain": "মূল অংশ"
+  }
+}

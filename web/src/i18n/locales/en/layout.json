@@ -1,0 +1,49 @@
+{
+  "nav": {
+    "utility_operator": {
+      "dashboard": "Dashboard",
+      "handover": "Handover",
+      "inbox": "Inbox",
+      "verifyFlow": "Verify",
+      "notices": "Notices",
+      "sensors": "Sensors",
+      "audit": "Audit",
+      "settings": "Settings"
+    },
+    "field_technician": {
+      "workQueue": "Work queue",
+      "myDay": "My day",
+      "incidentDetail": "Incident detail",
+      "history": "History"
+    },
+    "anjali": {
+      "submit": "Submit report"
+    },
+    "pha_approver": {
+      "approve": "Approve",
+      "audit": "Audit"
+    },
+    "pha_viewer": {
+      "audit": "Audit"
+    },
+    "vendor": {
+      "vendor": "Submit batch"
+    },
+    "utility_message_desk": {
+      "inbox": "Inbox"
+    }
+  },
+  "topChrome": {
+    "brand": "Surakkha",
+    "chainFresh": "chain fresh",
+    "chainSeconds": "chain {{seconds}}s"
+  },
+  "sidebar": {
+    "logout": "Logout",
+    "ariaBrand": "Surakkha home",
+    "ariaPrimary": "Primary"
+  },
+  "appLayout": {
+    "ariaMain": "Main"
+  }
+}

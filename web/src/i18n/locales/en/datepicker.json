@@ -1,0 +1,14 @@
+{
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "previousYear": "Previous year",
+  "nextYear": "Next year",
+  "selectDate": "Select a date",
+  "selectRange": "Select a date range",
+  "startDate": "Start date",
+  "endDate": "End date",
+  "clear": "Clear",
+  "today": "Today",
+  "weekdays": "Sun, Mon, Tue, Wed, Thu, Fri, Sat",
+  "months": "January, February, March, April, May, June, July, August, September, October, November, December"
+}

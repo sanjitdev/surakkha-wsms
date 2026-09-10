@@ -1,0 +1,183 @@
+{
+  "pageHeader": {
+    "title": "Dashboard",
+    "subtitle": "{{count}} {{unit}} ·",
+    "subtitleUnit_one": "ward",
+    "subtitleUnit_other": "wards",
+    "sensorsOnline": "{{count}} sensors online"
+  },
+  "layoutToggle": {
+    "ariaLabel": "Dashboard layout",
+    "optionA": "grid",
+    "optionB": "editorial",
+    "optionC": "status-board"
+  },
+  "tabs": {
+    "ariaLabel": "Dashboard sections",
+    "overview": "Overview",
+    "sensors": "Sensors",
+    "wards": "Wards"
+  },
+  "kpi": {
+    "activeIncidents": {
+      "label": "Active incidents",
+      "unit": "open"
+    },
+    "phAvg": {
+      "label": "pH city avg",
+      "unit": "pH"
+    },
+    "responseTime": {
+      "label": "Response time",
+      "unit": "min"
+    },
+    "pendingSignatures": {
+      "label": "Pending signatures",
+      "shortLabel": "Pending sigs",
+      "unit": "awaiting"
+    },
+    "noticesIssued": {
+      "label": "Notices issued",
+      "unit": "today"
+    }
+  },
+  "sensors": {
+    "cardTitle": "Sensor fleet",
+    "historyChart": {
+      "title": "Sensor history — last 24h",
+      "meta": "{{count}} sensors · live",
+      "ariaLabel": "24h multi-sensor time series",
+      "axis": {
+        "0": "00:00",
+        "6": "06:00",
+        "12": "12:00",
+        "18": "18:00",
+        "now": "now"
+      },
+      "legend": {
+        "ph": "pH (×10)",
+        "chlorine": "Chlorine",
+        "turbidity": "Turbidity"
+      }
+    },
+    "bandDistribution": {
+      "title": "Band distribution",
+      "meta": "last 7 days",
+      "ariaLabel": "Band distribution donut",
+      "totalLabel": "readings",
+      "legend": {
+        "high": "High 12%",
+        "medium": "Med 9%",
+        "low": "Low 58%"
+      }
+    },
+    "table": {
+      "colTitle": "Ward / Sensor",
+      "colIssue": "Issue",
+      "colReading": "Reading",
+      "colDetected": "Detected",
+      "colSeverity": "Severity",
+      "severityBadgeT2": "T2",
+      "inspectAction": "Inspect →"
+    }
+  },
+  "chain": {
+    "cardTitle": "Today on chain",
+    "table": {
+      "colTime": "Time",
+      "colWhat": "What happened",
+      "colWhere": "Where",
+      "colStatus": "Status"
+    },
+    "tableCompact": {
+      "colTime": "Time",
+      "colWhat": "What",
+      "colStatus": "Status"
+    },
+    "eventTypes": {
+      "sensorReading": "Sensor reading · {{parameter}}",
+      "anjaliReport": "Citizen report (Anjali)",
+      "incidentCreated": "Incident opened",
+      "incidentEscalated": "Incident escalated",
+      "incidentResolved": "Incident resolved",
+      "publicNoticeIssued": "Public notice issued",
+      "publicNoticeRetracted": "Public notice retracted",
+      "signatureAttestation": "Signature attestation",
+      "operatorAuthenticated": "Operator login",
+      "operatorAccessLogged": "Operator access",
+      "playbookStepExecuted": "Playbook step",
+      "deviationCaptured": "Deviation captured",
+      "sensorSilenceObserved": "Sensor silence observed",
+      "chainVerificationFailed": "Chain verification failed",
+      "technicianAssigned": "Technician assigned",
+      "technicianArrived": "Technician arrived",
+      "diagnosisSubmitted": "Diagnosis submitted",
+      "fixSubmitted": "Fix submitted"
+    },
+    "badge": {
+      "done": "done",
+      "broadcast": "broadcast",
+      "esc": "esc",
+      "err": "err",
+      "inbox": "inbox",
+      "auth": "auth",
+      "signed": "signed",
+      "exec": "exec",
+      "data": "data",
+      "dispatch": "dispatch",
+      "onsite": "onsite",
+      "diag": "diag",
+      "fix": "fix"
+    }
+  },
+  "threads": {
+    "cardTitle": "Open threads",
+    "table": {
+      "colThread": "Thread",
+      "threadLabel": "{{ward}} incident",
+      "colStatusBlocker": "Status / blocker",
+      "colOpened": "Opened",
+      "colSeverity": "Severity",
+      "openAction": "Open →"
+    },
+    "tableCompact": {
+      "colThread": "Thread",
+      "threadLabel": "{{ward}} incident",
+      "colOpened": "Opened",
+      "colSeverity": "Sev.",
+      "openAction": "Open →"
+    }
+  },
+  "wards": {
+    "chart": {
+      "title": "Slowest wards — response time, last 7 days",
+      "meta": "12 wards"
+    },
+    "row": {
+      "count": "{{count}} {{unit}}",
+      "unit_one": "incident",
+      "unit_other": "incidents"
+    },
+    "fallback": {
+      "dhanmondi": "Dhanmondi",
+      "dhanmondiValue": "4.2 min",
+      "mirpur": "Mirpur",
+      "mirpurValue": "3.4 min",
+      "uttara": "Uttara",
+      "uttaraValue": "2.6 min",
+      "mohammadpur": "Mohammadpur",
+      "mohammadpurValue": "2.0 min",
+      "tejgaon": "Tejgaon",
+      "tejgaonValue": "1.4 min",
+      "gulshan": "Gulshan",
+      "gulshanValue": "1.1 min"
+    }
+  },
+  "editorial": {
+    "triageAll": "Triage all →",
+    "sectionLabel": "Today at a glance"
+  },
+  "common": {
+    "emDash": "—"
+  }
+}

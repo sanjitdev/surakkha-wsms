@@ -1,0 +1,183 @@
+{
+  "pageHeader": {
+    "title": "ড্যাশবোর্ড",
+    "subtitle": "{{count}} {{unit}} ·",
+    "subtitleUnit_one": "ওয়ার্ড",
+    "subtitleUnit_other": "ওয়ার্ড",
+    "sensorsOnline": "{{count}}টি সেন্সর অনলাইন"
+  },
+  "layoutToggle": {
+    "ariaLabel": "ড্যাশবোর্ড লেআউট",
+    "optionA": "গ্রিড",
+    "optionB": "এডিটোরিয়াল",
+    "optionC": "স্ট্যাটাস বোর্ড"
+  },
+  "tabs": {
+    "ariaLabel": "ড্যাশবোর্ড বিভাগ",
+    "overview": "সারসংক্ষেপ",
+    "sensors": "সেন্সর",
+    "wards": "ওয়ার্ডসমূহ"
+  },
+  "kpi": {
+    "activeIncidents": {
+      "label": "সক্রিয় ঘটনা",
+      "unit": "খোলা"
+    },
+    "phAvg": {
+      "label": "শহরের গড় পিএইচ",
+      "unit": "পিএইচ"
+    },
+    "responseTime": {
+      "label": "প্রতিক্রিয়া সময়",
+      "unit": "মিনিট"
+    },
+    "pendingSignatures": {
+      "label": "বিচারাধীন স্বাক্ষর",
+      "shortLabel": "বিচারাধীন স্বাক্ষর",
+      "unit": "অপেক্ষমাণ"
+    },
+    "noticesIssued": {
+      "label": "প্রদত্ত নোটিশ",
+      "unit": "আজ"
+    }
+  },
+  "sensors": {
+    "cardTitle": "সেন্সর পার্ক",
+    "historyChart": {
+      "title": "সেন্সর ইতিহাস — গত ২৪ ঘণ্টা",
+      "meta": "{{count}}টি সেন্সর · লাইভ",
+      "ariaLabel": "২৪ ঘণ্টার মাল্টি-সেন্সর টাইম সিরিজ",
+      "axis": {
+        "0": "০০:০০",
+        "6": "০৬:০০",
+        "12": "১২:০০",
+        "18": "১৮:০০",
+        "now": "এখন"
+      },
+      "legend": {
+        "ph": "পিএইচ (×১০)",
+        "chlorine": "ক্লোরিন",
+        "turbidity": "ঘোলাত্ব"
+      }
+    },
+    "bandDistribution": {
+      "title": "ব্যান্ড বণ্টন",
+      "meta": "গত ৭ দিন",
+      "ariaLabel": "ব্যান্ড বণ্টন ডোনাট",
+      "totalLabel": "রিডিং",
+      "legend": {
+        "high": "উচ্চ ১২%",
+        "medium": "মাঝারি ৯%",
+        "low": "নিম্ন ৫৮%"
+      }
+    },
+    "table": {
+      "colTitle": "ওয়ার্ড / সেন্সর",
+      "colIssue": "সমস্যা",
+      "colReading": "রিডিং",
+      "colDetected": "সনাক্ত হয়েছে",
+      "colSeverity": "তীব্রতা",
+      "severityBadgeT2": "T2",
+      "inspectAction": "পরীক্ষা করুন →"
+    }
+  },
+  "chain": {
+    "cardTitle": "আজ চেইনে",
+    "table": {
+      "colTime": "সময়",
+      "colWhat": "কী ঘটেছে",
+      "colWhere": "কোথায়",
+      "colStatus": "অবস্থা"
+    },
+    "tableCompact": {
+      "colTime": "সময়",
+      "colWhat": "কী",
+      "colStatus": "অবস্থা"
+    },
+    "eventTypes": {
+      "sensorReading": "সেন্সর রিডিং · {{parameter}}",
+      "anjaliReport": "নাগরিক প্রতিবেদন (অঞ্জলি)",
+      "incidentCreated": "ঘটনা খোলা হয়েছে",
+      "incidentEscalated": "ঘটনা ত্বরান্বিত",
+      "incidentResolved": "ঘটনা সমাধান",
+      "publicNoticeIssued": "পাবলিক নোটিশ জারি",
+      "publicNoticeRetracted": "পাবলিক নোটিশ প্রত্যাহার",
+      "signatureAttestation": "স্বাক্ষর সত্যায়ন",
+      "operatorAuthenticated": "অপারেটর লগইন",
+      "operatorAccessLogged": "অপারেটর অ্যাক্সেস",
+      "playbookStepExecuted": "প্লেবুক ধাপ",
+      "deviationCaptured": "বিচ্যুতি ক্যাপচার",
+      "sensorSilenceObserved": "সেন্সর নীরবতা পরিলক্ষিত",
+      "chainVerificationFailed": "চেইন যাচাই ব্যর্থ",
+      "technicianAssigned": "টেকনিশিয়ান নিযুক্ত",
+      "technicianArrived": "টেকনিশিয়ান পৌঁছেছেন",
+      "diagnosisSubmitted": "রোগ নির্ণয় জমা",
+      "fixSubmitted": "সমাধান জমা"
+    },
+    "badge": {
+      "done": "সম্পন্ন",
+      "broadcast": "প্রচার",
+      "esc": "ত্বরা",
+      "err": "ত্রুটি",
+      "inbox": "ইনবক্স",
+      "auth": "প্রমাণ",
+      "signed": "স্বাক্ষরিত",
+      "exec": "সম্পাদন",
+      "data": "ডেটা",
+      "dispatch": "প্রেরণ",
+      "onsite": "মাঠে",
+      "diag": "নির্ণয়",
+      "fix": "সমাধান"
+    }
+  },
+  "threads": {
+    "cardTitle": "খোলা থ্রেড",
+    "table": {
+      "colThread": "থ্রেড",
+      "threadLabel": "{{ward}} ঘটনা",
+      "colStatusBlocker": "অবস্থা / বাধা",
+      "colOpened": "খোলা হয়েছে",
+      "colSeverity": "তীব্রতা",
+      "openAction": "খুলুন →"
+    },
+    "tableCompact": {
+      "colThread": "থ্রেড",
+      "threadLabel": "{{ward}} ঘটনা",
+      "colOpened": "খোলা হয়েছে",
+      "colSeverity": "তীব্র.",
+      "openAction": "খুলুন →"
+    }
+  },
+  "wards": {
+    "chart": {
+      "title": "সবচেয়ে ধীর ওয়ার্ড — প্রতিক্রিয়া সময়, গত ৭ দিন",
+      "meta": "১২টি ওয়ার্ড"
+    },
+    "row": {
+      "count": "{{count}} {{unit}}",
+      "unit_one": "ঘটনা",
+      "unit_other": "ঘটনা"
+    },
+    "fallback": {
+      "dhanmondi": "ধানমন্দি",
+      "dhanmondiValue": "৪.২ মিনিট",
+      "mirpur": "মিরপুর",
+      "mirpurValue": "৩.৪ মিনিট",
+      "uttara": "উত্তারা",
+      "uttaraValue": "২.৬ মিনিট",
+      "mohammadpur": "মোহাম্মদপুর",
+      "mohammadpurValue": "২.০ মিনিট",
+      "tejgaon": "তেজগাঁও",
+      "tejgaonValue": "১.৪ মিনিট",
+      "gulshan": "গুলশান",
+      "gulshanValue": "১.১ মিনিট"
+    }
+  },
+  "editorial": {
+    "triageAll": "সব ট্রায়াজ →",
+    "sectionLabel": "আজ এক নজরে"
+  },
+  "common": {
+    "emDash": "—"
+  }
+}

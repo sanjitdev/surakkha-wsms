@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "Work queue",
+    "subtitle": "{{name}} · {{role}} · {{count}} jobs · {{date}} · 07:00–15:00",
+    "subtitleRole": "field tech · NE zone",
+    "optimizedSubtitle": "Optimized — SLA order"
+  },
+  "today": {
+    "todayLabel": "Today",
+    "remainingSuffix_one": "{{count}} remaining",
+    "remainingSuffix_other": "{{count}} remaining",
+    "inProgressLabel": "In progress",
+    "inProgressEnRoute": "{{count}} en route",
+    "inProgressOnSite": "{{count}} on site",
+    "inProgressEmDash": "—",
+    "overdueLabel": "Overdue",
+    "closedLabel": "Closed this week",
+    "closedAvgClose": "avg close —"
+  },
+  "filters": {
+    "all": "All",
+    "P1": "P1 critical",
+    "P2": "P2",
+    "P3": "P3",
+    "enroute": "En route",
+    "onsite": "On site"
+  },
+  "loading": "loading queue from chain…",
+  "empty": "no jobs in this filter",
+  "optimizeRoute": "Optimize route",
+  "pill": {
+    "assigned": "Assigned",
+    "enroute": "En route",
+    "onsite": "On site",
+    "resolved": "Resolved"
+  },
+  "buildRows": {
+    "noSummary": "(no summary)",
+    "titleFallback": "Incident {{id}} — {{summary}}",
+    "titleUnknown": "?",
+    "subtitleActive": "priority {{priority}} · ETA {{eta}} min · {{age}}m since dispatch",
+    "etaUnknown": "?",
+    "summaryTitle": "{{fix}}",
+    "summaryUnknown": "Resolved",
+    "noFixSummary": ""
+  }
+}

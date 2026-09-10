@@ -1,0 +1,38 @@
+{
+  "header": {
+    "title": "Citizen acknowledgement"
+  },
+  "roleGate": {
+    "heading": "Wrong persona",
+    "body": "You are signed in as {{role}}. Sign in as Anjali to acknowledge an incident."
+  },
+  "loading": "Loading incident…",
+  "notFound": {
+    "heading": "Incident not found",
+    "body": "No active incident matches {{id}}."
+  },
+  "submitted": {
+    "subtitle": "Recorded on the chain.",
+    "approveHeading": "You approved the fix",
+    "disputeHeading": "You disputed the fix",
+    "approveBody": "Thank you. The operator will seal the incident as resolved on the chain.",
+    "disputeBody": "Thank you. The operator will reopen the incident for review.",
+    "approvedBadge": "APPROVED",
+    "disputedBadge": "DISPUTED",
+    "incidentLabel": "Incident",
+    "channelLabel": "Channel",
+    "decidedLabel": "Decided"
+  },
+  "form": {
+    "subtitle": "{{name}} · incident {{id}} · ward {{ward}} · see inbox detail",
+    "noticeHeading": "Operator notice",
+    "noticeMetaSent": "Sent via {{channel}} · {{time}}",
+    "noticeMetaNone": "No notice was sent. You can still respond to the operator.",
+    "noticeFallback": "The operator confirmed the fix for incident {{id}}.",
+    "decisionHeading": "Did the fix resolve the issue?",
+    "decisionBody": "Approve to close the incident. Dispute to reopen it for review.",
+    "approve": "✅ Approve & close",
+    "dispute": "❌ Dispute & reopen",
+    "sealing": "Sealing…"
+  }
+}

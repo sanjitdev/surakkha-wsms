@@ -1,0 +1,47 @@
+{
+  "page": {
+    "title": "কাজের সারি",
+    "subtitle": "{{name}} · {{role}} · {{count}}টি কাজ · {{date}} · ০৭:০০–১৫:০০",
+    "subtitleRole": "ফিল্ড টেক · উত্তর-পূর্ব জোন",
+    "optimizedSubtitle": "অপ্টিমাইজ — SLA ক্রম"
+  },
+  "today": {
+    "todayLabel": "আজ",
+    "remainingSuffix_one": "{{count}}টি বাকি",
+    "remainingSuffix_other": "{{count}}টি বাকি",
+    "inProgressLabel": "চলমান",
+    "inProgressEnRoute": "{{count}}টি পথে",
+    "inProgressOnSite": "{{count}}টি মাঠে",
+    "inProgressEmDash": "—",
+    "overdueLabel": "বিলম্বিত",
+    "closedLabel": "এই সপ্তাহে বন্ধ",
+    "closedAvgClose": "গড় বন্ধ —"
+  },
+  "filters": {
+    "all": "সব",
+    "P1": "P1 গুরুতর",
+    "P2": "P2",
+    "P3": "P3",
+    "enroute": "পথে",
+    "onsite": "মাঠে"
+  },
+  "loading": "চেইন থেকে সারি লোড হচ্ছে…",
+  "empty": "এই ফিল্টারে কোনো কাজ নেই",
+  "optimizeRoute": "রুট অপ্টিমাইজ করুন",
+  "pill": {
+    "assigned": "নিযুক্ত",
+    "enroute": "পথে",
+    "onsite": "মাঠে",
+    "resolved": "সমাধান"
+  },
+  "buildRows": {
+    "noSummary": "(কোনো সারাংশ নেই)",
+    "titleFallback": "ঘটনা {{id}} — {{summary}}",
+    "titleUnknown": "?",
+    "subtitleActive": "অগ্রাধিকার {{priority}} · ETA {{eta}} মিনিট · প্রেরণের পর {{age}} মিনিট",
+    "etaUnknown": "?",
+    "summaryTitle": "{{fix}}",
+    "summaryUnknown": "সমাধান",
+    "noFixSummary": ""
+  }
+}
