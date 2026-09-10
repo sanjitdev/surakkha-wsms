@@ -73,7 +73,14 @@ function renderInRouter(node: React.ReactNode, withAppLayout = false) {
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
         <ToastProvider>
-          <MemoryRouter>{inner}</MemoryRouter>
+          <MemoryRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+            {inner}
+          </MemoryRouter>
         </ToastProvider>
       </LocaleProvider>
     </I18nextProvider>,

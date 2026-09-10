@@ -19,7 +19,7 @@
  * a follow-up spec; this file will gain more `describe` groups then.
  */
 
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
@@ -180,7 +180,12 @@ async function renderInboxAndWaitForRows() {
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
         <ToastProvider>
-          <MemoryRouter>
+          <MemoryRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
             <InboxList />
           </MemoryRouter>
         </ToastProvider>
@@ -296,6 +301,10 @@ describe('InboxList I/O matrix', () => {
   });
 
   it('fetch_fail: 500 from /api/events renders <EmptyState heading="No incidents" />', async () => {
+    // Silence the intentional [surakkha] inbox fetch failed log so the
+    // stderr channel stays quiet for this case. The component still
+    // logs in production; the test just doesn't want the noise.
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     // Override /api/events: IncidentCreated → 500 (triggers the catch path),
     // everything else → empty array (so the recent-decisions rail stays
     // honest instead of mirroring the failed fetch). The `beforeEach`
@@ -314,7 +323,12 @@ describe('InboxList I/O matrix', () => {
       <I18nextProvider i18n={i18n}>
         <LocaleProvider>
           <ToastProvider>
-            <MemoryRouter>
+            <MemoryRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true,
+              }}
+            >
               <InboxList />
             </MemoryRouter>
           </ToastProvider>
@@ -329,6 +343,7 @@ describe('InboxList I/O matrix', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'No incidents' })).toBeTruthy();
     expect(screen.queryAllByTestId('inbox-row').length).toBe(0);
     expect(document.querySelector('.inbox-bulkbar')?.hasAttribute('hidden')).toBe(true);
+    errSpy.mockRestore();
   });
 
   it('locale_bangla: setting body[data-locale=bn] before render leaves it set and renders rows', async () => {

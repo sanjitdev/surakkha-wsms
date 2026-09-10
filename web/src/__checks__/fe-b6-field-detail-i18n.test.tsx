@@ -96,7 +96,13 @@ function renderPage(locale: Locale, role: string, workOrderId: string) {
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
         <ToastProvider>
-          <MemoryRouter initialEntries={[path]}>
+          <MemoryRouter
+            initialEntries={[path]}
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
             <AppLayoutContext.Provider
               value={{
                 session: makeSession(role),

@@ -13,6 +13,10 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: false,
+    // Filter the NO_I18NEXT_INSTANCE warning that fires for foundation
+    // components (Dropdown, Sidebar, Table, useIncidentActions) which
+    // intentionally render without an <I18nextProvider> ancestor.
+    setupFiles: ['./src/__checks__/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
     // B1.5 — coverage is reported but does NOT fail the run.
     // We don't enforce a threshold yet because the existing test surface

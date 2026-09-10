@@ -578,7 +578,12 @@ describe('AC-11 (Sidebar duplicate-href safety)', () => {
 
     // Sidebar renders react-router-dom <Link>s, which require a Router ancestor.
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <Sidebar navItems={navItems} currentPath="/x" />
       </MemoryRouter>,
     );

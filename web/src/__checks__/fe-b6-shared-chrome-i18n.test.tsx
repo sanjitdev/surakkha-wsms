@@ -48,7 +48,12 @@ afterEach(() => {
  *  boilerplate. */
 function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <MemoryRouter>
+    <MemoryRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
       <I18nextProvider i18n={i18n}>
         <LocaleProvider>{children}</LocaleProvider>
       </I18nextProvider>

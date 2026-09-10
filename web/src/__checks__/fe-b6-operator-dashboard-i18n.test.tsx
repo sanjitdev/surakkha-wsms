@@ -91,7 +91,12 @@ function renderDashboard() {
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
         <ToastProvider>
-          <MemoryRouter>
+          <MemoryRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
             <AppLayoutContext.Provider
               value={{
                 session: SESSION_FIXTURE,

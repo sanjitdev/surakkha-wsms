@@ -43,7 +43,12 @@ function renderSettings(role: 'priya' | 'anjali' = 'priya') {
   return render(
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
-        <MemoryRouter>
+        <MemoryRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <AppLayoutContext.Provider
             value={{
               session,

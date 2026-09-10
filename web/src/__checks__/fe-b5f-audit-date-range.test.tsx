@@ -141,7 +141,12 @@ function renderAuditLog() {
   return render(
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
-        <MemoryRouter>
+        <MemoryRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <AppLayoutContext.Provider
             value={{
               session: SESSION_FIXTURE,
@@ -333,7 +338,12 @@ describe('FE-B5f AuditLog date-range filter', () => {
   it('harness_smoke_render: harness mounts with the expected testIds', () => {
     render(
       <LocaleProvider>
-        <MemoryRouter>
+        <MemoryRouter
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <AppLayoutContext.Provider
             value={{
               session: SESSION_FIXTURE,

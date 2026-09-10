@@ -115,7 +115,13 @@ function renderInboxDetail() {
   return render(
     <LocaleProvider>
       <ToastProvider>
-        <MemoryRouter initialEntries={['/inbox/inc_test_001']}>
+        <MemoryRouter
+          initialEntries={['/inbox/inc_test_001']}
+          future={{
+            v7_startTransition: true,
+            v7_relativeSplatPath: true,
+          }}
+        >
           <AppLayoutContext.Provider
             value={{
               session: makeSession(),

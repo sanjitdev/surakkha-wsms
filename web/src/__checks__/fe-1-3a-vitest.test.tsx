@@ -53,7 +53,12 @@ describe('FE-1.3a · InboxRow', () => {
 
   it('(1) renders the row title, meta line, and a T3 priority pill', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <table>
           <tbody>
             <InboxRow row={buildRow()} selected={false} onToggle={() => {}} />
@@ -76,7 +81,12 @@ describe('FE-1.3a · InboxRow', () => {
 
   it('(2) wraps the title in a <Link href="/inbox-detail">', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <table>
           <tbody>
             <InboxRow row={buildRow()} selected={false} onToggle={() => {}} />
@@ -94,7 +104,12 @@ describe('FE-1.3a · InboxRow', () => {
 
   it('(3) trailing action column renders the action label as a Link href when `action` set', () => {
     render(
-      <MemoryRouter>
+      <MemoryRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <table>
           <tbody>
             <InboxRow
