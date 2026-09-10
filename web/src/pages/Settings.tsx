@@ -21,6 +21,7 @@
  *     login-time only.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/settings.css';
 import { Container } from '../components/layout/Container';
@@ -35,6 +36,7 @@ import { DatePicker } from '../components/ui/DatePicker';
 import { ContainerWidth, Locale, Theme } from '../types/domain';
 
 export function Settings() {
+  const { t: tSettings } = useTranslation('settings');
   const { theme, setTheme } = useTheme();
   const { locale, setLocale } = useLocale();
   const { from: anjaliFrom, setFrom: setAnjaliFrom, clear: clearAnjaliFrom } = useAnjaliFilter();
@@ -57,9 +59,9 @@ export function Settings() {
   return (
     <Container width={ContainerWidth.Bangla}>
       <div className="page-header" data-testid="settings-header">
-        <h1>Settings</h1>
+        <h1>{tSettings('header.title')}</h1>
         <p className="page-header__sub">
-          Preferences for this device · {session.display_name} · {session.role}
+          {tSettings('header.subtitle', { name: session.display_name, role: session.role })}
         </p>
       </div>
 
@@ -67,15 +69,13 @@ export function Settings() {
       <Card testId="settings-theme-card">
         <div className="settings-row">
           <div className="settings-row__label">
-            <h3 className="settings-row__title">Theme</h3>
-            <p className="settings-row__sub">
-              Switch between light and dark mode. Choice is remembered on this device.
-            </p>
+            <h3 className="settings-row__title">{tSettings('theme.title')}</h3>
+            <p className="settings-row__sub">{tSettings('theme.subtitle')}</p>
           </div>
           <div
             className="settings-row__control"
             role="group"
-            aria-label="Theme"
+            aria-label={tSettings('theme.ariaLabel')}
             data-testid="settings-theme-control"
           >
             <Button
@@ -86,7 +86,7 @@ export function Settings() {
               }}
               testId="settings-theme-light"
             >
-              Light
+              {tSettings('theme.light')}
             </Button>
             <Button
               variant={theme === Theme.Dark ? 'primary' : 'secondary'}
@@ -96,7 +96,7 @@ export function Settings() {
               }}
               testId="settings-theme-dark"
             >
-              Dark
+              {tSettings('theme.dark')}
             </Button>
           </div>
         </div>
@@ -106,15 +106,13 @@ export function Settings() {
       <Card testId="settings-locale-card">
         <div className="settings-row">
           <div className="settings-row__label">
-            <h3 className="settings-row__title">Language</h3>
-            <p className="settings-row__sub">
-              Switch between English and বাংলা (Bangla). Affects all UI copy on this device.
-            </p>
+            <h3 className="settings-row__title">{tSettings('language.title')}</h3>
+            <p className="settings-row__sub">{tSettings('language.subtitle')}</p>
           </div>
           <div
             className="settings-row__control"
             role="group"
-            aria-label="Language"
+            aria-label={tSettings('language.ariaLabel')}
             data-testid="settings-locale-control"
           >
             <Button
@@ -125,7 +123,7 @@ export function Settings() {
               }}
               testId="settings-locale-en"
             >
-              English
+              {tSettings('language.english')}
             </Button>
             <Button
               variant={locale === Locale.Bn ? 'primary' : 'secondary'}
@@ -135,7 +133,7 @@ export function Settings() {
               }}
               testId="settings-locale-bn"
             >
-              বাংলা
+              {tSettings('language.bangla')}
             </Button>
           </div>
         </div>
@@ -146,18 +144,15 @@ export function Settings() {
         <Card testId="settings-anjali-card">
           <div className="settings-row">
             <div className="settings-row__label">
-              <h3 className="settings-row__title">Citizen reports</h3>
-              <p className="settings-row__sub">
-                Scope citizen reports to those filed from this date forward. Affects the reports
-                you see on the dashboard. Persists on this device.
-              </p>
+              <h3 className="settings-row__title">{tSettings('anjali.title')}</h3>
+              <p className="settings-row__sub">{tSettings('anjali.subtitle')}</p>
             </div>
             <div className="settings-row__control" data-testid="settings-anjali-control">
               <DatePicker
                 value={anjaliFrom}
                 onChange={setAnjaliFrom}
                 testId="settings-anjali-from"
-                aria-label="Filter citizen reports from date"
+                aria-label={tSettings('anjali.ariaFrom')}
               />
               <Button
                 variant="secondary"
@@ -166,7 +161,7 @@ export function Settings() {
                 disabled={anjaliFrom === null}
                 testId="settings-anjali-clear"
               >
-                Clear
+                {tSettings('anjali.clear')}
               </Button>
             </div>
           </div>
@@ -177,11 +172,8 @@ export function Settings() {
       <Card testId="settings-role-card">
         <div className="settings-row">
           <div className="settings-row__label">
-            <h3 className="settings-row__title">Persona</h3>
-            <p className="settings-row__sub">
-              The role you logged in with. To switch persona, log out and pick another from the
-              sign-in screen.
-            </p>
+            <h3 className="settings-row__title">{tSettings('persona.title')}</h3>
+            <p className="settings-row__sub">{tSettings('persona.subtitle')}</p>
           </div>
           <div
             className="settings-row__control settings-row__readout"
@@ -199,11 +191,8 @@ export function Settings() {
       <Card testId="settings-reset-card">
         <div className="settings-row">
           <div className="settings-row__label">
-            <h3 className="settings-row__title">Reset demo</h3>
-            <p className="settings-row__sub">
-              Clears the local chain, session, and theme/locale prefs, then reloads the page. Use
-              this when you want to start fresh from the seeded fixtures.
-            </p>
+            <h3 className="settings-row__title">{tSettings('reset.title')}</h3>
+            <p className="settings-row__sub">{tSettings('reset.subtitle')}</p>
           </div>
           <div className="settings-row__control">
             <Button
@@ -215,7 +204,7 @@ export function Settings() {
               disabled={resetting}
               testId="settings-reset-button"
             >
-              {resetting ? 'Resetting…' : 'Reset everything'}
+              {resetting ? tSettings('reset.buttonBusy') : tSettings('reset.buttonIdle')}
             </Button>
           </div>
         </div>

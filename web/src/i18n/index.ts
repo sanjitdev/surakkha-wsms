@@ -48,6 +48,8 @@ import enAuditLog from './locales/en/auditLog.json';
 import bnAuditLog from './locales/bn/auditLog.json';
 import enVerifyFlow from './locales/en/verifyFlow.json';
 import bnVerifyFlow from './locales/bn/verifyFlow.json';
+import enSettings from './locales/en/settings.json';
+import bnSettings from './locales/bn/settings.json';
 
 export const SUPPORTED_LOCALES: readonly Locale[] = [Locale.En, Locale.Bn];
 export const STORAGE_KEY = 'surakkha.locale';
@@ -79,6 +81,7 @@ void i18n.use(initReactI18next).init({
       fieldQueue: enFieldQueue,
       auditLog: enAuditLog,
       verifyFlow: enVerifyFlow,
+      settings: enSettings,
     },
     [Locale.Bn]: {
       common: bnCommon,
@@ -95,6 +98,7 @@ void i18n.use(initReactI18next).init({
       fieldQueue: bnFieldQueue,
       auditLog: bnAuditLog,
       verifyFlow: bnVerifyFlow,
+      settings: bnSettings,
     },
   },
   lng: readInitialLocale(),
@@ -102,7 +106,7 @@ void i18n.use(initReactI18next).init({
   defaultNS: 'common',
   // Hand-maintained namespace list. Add a new entry when shipping a new
   // page or shared chrome file (see plan: gentle-singing-torvalds).
-  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow'],
+  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow', 'settings'],
   // Stop i18next from trying to fetch /locales/{{lng}}/{{ns}}.json —
   // resources are bundled at build time via Vite's JSON import.
   partialBundledLanguages: true,

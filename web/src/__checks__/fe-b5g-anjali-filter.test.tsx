@@ -17,10 +17,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, render, renderHook, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
 import { Settings } from '../pages/Settings';
 import { LocaleProvider } from '../hooks/useLocale';
 import { useAnjaliFilter } from '../hooks/useAnjaliFilter';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
+import i18n from '../i18n';
 import type { SessionRow } from '../mocks/idb';
 
 const STORAGE_KEY = 'surakkha.anjali.incidentDateFrom';
@@ -39,20 +41,22 @@ function makeSession(role: string): SessionRow {
 
 function renderSettings(role: string) {
   return render(
-    <LocaleProvider>
-      <MemoryRouter>
-        <AppLayoutContext.Provider
-          value={{
-            session: makeSession(role),
-            chainHead: null,
-            chainFreshSeconds: 0,
-            logout: () => Promise.resolve(),
-          }}
-        >
-          <Settings />
-        </AppLayoutContext.Provider>
-      </MemoryRouter>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <MemoryRouter>
+          <AppLayoutContext.Provider
+            value={{
+              session: makeSession(role),
+              chainHead: null,
+              chainFreshSeconds: 0,
+              logout: () => Promise.resolve(),
+            }}
+          >
+            <Settings />
+          </AppLayoutContext.Provider>
+        </MemoryRouter>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 

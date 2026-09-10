@@ -1,0 +1,36 @@
+{
+  "header": {
+    "title": "Settings",
+    "subtitle": "Preferences for this device · {{name}} · {{role}}"
+  },
+  "theme": {
+    "title": "Theme",
+    "subtitle": "Switch between light and dark mode. Choice is remembered on this device.",
+    "ariaLabel": "Theme",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "title": "Language",
+    "subtitle": "Switch between English and বাংলা (Bangla). Affects all UI copy on this device.",
+    "ariaLabel": "Language",
+    "english": "English",
+    "bangla": "বাংলা"
+  },
+  "anjali": {
+    "title": "Citizen reports",
+    "subtitle": "Scope citizen reports to those filed from this date forward. Affects the reports you see on the dashboard. Persists on this device.",
+    "ariaFrom": "Filter citizen reports from date",
+    "clear": "Clear"
+  },
+  "persona": {
+    "title": "Persona",
+    "subtitle": "The role you logged in with. To switch persona, log out and pick another from the sign-in screen."
+  },
+  "reset": {
+    "title": "Reset demo",
+    "subtitle": "Clears the local chain, session, and theme/locale prefs, then reloads the page. Use this when you want to start fresh from the seeded fixtures.",
+    "buttonIdle": "Reset everything",
+    "buttonBusy": "Resetting…"
+  }
+}
