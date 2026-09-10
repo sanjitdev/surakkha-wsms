@@ -1,5 +1,6 @@
 import type { DropdownOption } from './Dropdown.types';
 import type { KeyboardEvent, MutableRefObject } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface DropdownPopoverProps<T> {
   rootId: string;
@@ -41,6 +42,7 @@ export function DropdownPopover<T>({
   testId,
   placement,
 }: DropdownPopoverProps<T>) {
+  const { t } = useTranslation('common');
   return (
     <div className="dropdown__popover" data-testid={`${testId}-popover`} data-placement={placement}>
       {searchable ? (
@@ -50,7 +52,7 @@ export function DropdownPopover<T>({
             type="text"
             id={searchInputId}
             className="dropdown__search-input"
-            placeholder="Type to filter…"
+            placeholder={t('dropdown.searchPlaceholder')}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -74,7 +76,7 @@ export function DropdownPopover<T>({
         data-testid={`${testId}-listbox`}
       >
         {filtered.length === 0 ? (
-          <li className="dropdown__empty">No matches</li>
+          <li className="dropdown__empty">{t('dropdown.empty')}</li>
         ) : (
           filtered.map((opt, i) => {
             const isSelected = selectedSet.has(opt.value);

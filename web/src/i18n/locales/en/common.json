@@ -1,24 +1,81 @@
 {
   "app": {
-    "name": "সুরক্ষা"
+    "name": "Surakkha"
   },
   "common": {
-    "loading": "লোড হচ্ছে…",
-    "error": "কিছু ভুল হয়েছে",
-    "retry": "আবার চেষ্টা করুন"
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "yes": "Yes",
+    "no": "No"
   },
-  "datepicker": {
-    "previousMonth": "Previous month",
-    "nextMonth": "Next month",
-    "previousYear": "Previous year",
-    "nextYear": "Next year",
-    "selectDate": "Select a date",
-    "selectRange": "Select a date range",
-    "startDate": "Start date",
-    "endDate": "End date",
-    "clear": "Clear",
-    "today": "Today",
-    "weekdays": "Sun, Mon, Tue, Wed, Thu, Fri, Sat",
-    "months": "January, February, March, April, May, June, July, August, September, October, November, December"
+  "empty": {
+    "heading": "Nothing here yet",
+    "body": "When something lands, it will show up here."
+  },
+  "toast": {
+    "regionLabel": "Notifications",
+    "reportSubmitted": "Report submitted to the chain",
+    "markedOnSite": "Marked on site",
+    "diagnosisRecorded": "Diagnosis recorded",
+    "fixSubmitted": "Fix submitted for operator review",
+    "incidentClosedAwaitingAck": "Incident closed — awaiting citizen ack",
+    "citizenApproved": "✅ Citizen approved — incident closed",
+    "citizenDisputed": "❌ Citizen disputed — incident reopened for review",
+    "assignedTo": "Assigned to {{name}}",
+    "ackRequestSent": "Ack request sent via {{channel}}",
+    "markedReviewed": "Marked {{count}} row(s) reviewed",
+    "markedReviewed_one": "Marked 1 row reviewed",
+    "markedReviewed_other": "Marked {{count}} rows reviewed"
+  },
+  "modal": {
+    "ariaFallback": "Dialog",
+    "close": "Close"
+  },
+  "errorScreen": {
+    "title": "Something went wrong",
+    "subtitle": "The app hit an unexpected error and recovered itself. Your work in this tab may be lost.",
+    "showStack": "Show stack trace",
+    "componentStack": "Component stack",
+    "reload": "Reload page",
+    "copyDiagnostics": "Copy diagnostics",
+    "copied": "Copied"
+  },
+  "pagination": {
+    "aria": "Pagination",
+    "summary": "Showing {{from}}–{{to}} of {{total}}",
+    "prev": "← Prev",
+    "next": "Next →",
+    "pageSize": "Page size",
+    "pageSizeItem": "{{n}} / page"
+  },
+  "input": {
+    "search": "search"
+  },
+  "dropdown": {
+    "empty": "No matches",
+    "searchPlaceholder": "Type to filter…"
+  },
+  "band": {
+    "high": "High",
+    "medium": "Medium",
+    "low": "Low",
+    "ariaTrustBand": "{{band}} trust band"
+  },
+  "status": {
+    "active": "active",
+    "inactive": "inactive",
+    "pending": "pending",
+    "escalated": "escalated",
+    "resolved": "resolved",
+    "open": "open"
+  },
+  "severity": {
+    "T1": "T1",
+    "T2": "T2",
+    "T3": "T3"
   }
 }

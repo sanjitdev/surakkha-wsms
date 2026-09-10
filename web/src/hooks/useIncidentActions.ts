@@ -21,6 +21,7 @@
 //     with zero code change at the call site.
 
 import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useToast } from '../components/ui/ToastProvider';
 import { getSession } from '../mocks/idb';
 import { ulid } from '../mocks/canonical';
@@ -92,6 +93,7 @@ export interface UseIncidentActionsResult {
 }
 export function useIncidentActions(): UseIncidentActionsResult {
   const toast = useToast();
+  const { t: tCommon } = useTranslation('common');
   const [busy, setBusy] = useState<boolean>(false);
   const [lastError, setLastError] = useState<Error | null>(null);
 
@@ -167,7 +169,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (result) {
-        toast.success(`Assigned to ${input.technician_name}`);
+        toast.success(tCommon('toast.assignedTo', { name: input.technician_name }));
         return true;
       }
       return false;
@@ -201,7 +203,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (ackDelivered) {
-        toast.success(`Ack request sent via ${input.channel}`);
+        toast.success(tCommon('toast.ackRequestSent', { channel: input.channel }));
         return true;
       }
       return false;
@@ -257,7 +259,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (created) {
-        toast.success('Report submitted to the chain');
+        toast.success(tCommon('toast.reportSubmitted'));
         return true;
       }
       return false;
@@ -276,7 +278,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (result) {
-        toast.success('Marked on site');
+        toast.success(tCommon('toast.markedOnSite'));
         return true;
       }
       return false;
@@ -297,7 +299,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (result) {
-        toast.success('Diagnosis recorded');
+        toast.success(tCommon('toast.diagnosisRecorded'));
         return true;
       }
       return false;
@@ -319,7 +321,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (result) {
-        toast.success('Fix submitted for operator review');
+        toast.success(tCommon('toast.fixSubmitted'));
         return true;
       }
       return false;
@@ -339,7 +341,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
       });
 
       if (result) {
-        toast.success('Incident closed — awaiting citizen ack');
+        toast.success(tCommon('toast.incidentClosedAwaitingAck'));
         return true;
       }
       return false;
@@ -363,9 +365,9 @@ export function useIncidentActions(): UseIncidentActionsResult {
       // approve=false the incident reopens with parent link to the
       // original closure.
       if (input.approve) {
-        toast.success('✅ Citizen approved — incident closed');
+        toast.success(tCommon('toast.citizenApproved'));
       } else {
-        toast.warning('❌ Citizen disputed — incident reopened for review');
+        toast.warning(tCommon('toast.citizenDisputed'));
       }
       return true;
     },
@@ -389,7 +391,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
 
         if (!r) ok = false;
       }
-      if (ok) toast.success(`Marked ${input.incident_ids.length} row(s) reviewed`);
+      if (ok) toast.success(tCommon('toast.markedReviewed', { count: input.incident_ids.length }));
       return ok;
     },
     [post, toast],

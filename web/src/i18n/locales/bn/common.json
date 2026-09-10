@@ -1,24 +1,80 @@
 {
   "app": {
-    "name": "Surakkha"
+    "name": "সুরক্ষা"
   },
   "common": {
-    "loading": "Loading…",
-    "error": "Something went wrong",
-    "retry": "Retry"
+    "loading": "লোড হচ্ছে…",
+    "error": "কিছু ভুল হয়েছে",
+    "retry": "আবার চেষ্টা করুন",
+    "cancel": "বাতিল",
+    "close": "বন্ধ",
+    "save": "সংরক্ষণ",
+    "yes": "হ্যাঁ",
+    "no": "না"
   },
-  "datepicker": {
-    "previousMonth": "আগের মাস",
-    "nextMonth": "পরের মাস",
-    "previousYear": "আগের বছর",
-    "nextYear": "পরের বছর",
-    "selectDate": "একটি তারিখ নির্বাচন করুন",
-    "selectRange": "একটি তারিখের পরিসর নির্বাচন করুন",
-    "startDate": "শুরুর তারিখ",
-    "endDate": "শেষের তারিখ",
-    "clear": "মুছুন",
-    "today": "আজ",
-    "weekdays": "রবি, সোম, মঙ্গল, বুধ, বৃহঃ, শুক্র, শনি",
-    "months": "জানুয়ারি, ফেব্রুয়ারি, মার্চ, এপ্রিল, মে, জুন, জুলাই, আগস্ট, সেপ্টেম্বর, অক্টোবর, নভেম্বর, ডিসেম্বর"
+  "empty": {
+    "heading": "এখানে এখনো কিছু নেই",
+    "body": "নতুন কিছু আসলে এখানে দেখা যাবে।"
+  },
+  "toast": {
+    "regionLabel": "বিজ্ঞপ্তি",
+    "reportSubmitted": "রিপোর্ট চেইনে জমা দেওয়া হয়েছে",
+    "markedOnSite": "সাইটে চিহ্নিত",
+    "diagnosisRecorded": "রোগ নির্ণয় রেকর্ড করা হয়েছে",
+    "fixSubmitted": "ফিক্স অপারেটর পর্যালোচনার জন্য জমা দেওয়া হয়েছে",
+    "incidentClosedAwaitingAck": "ইনসিডেন্ট বন্ধ — নাগরিকের স্বীকৃতির জন্য অপেক্ষমান",
+    "citizenApproved": "✅ নাগরিক অনুমোদিত — ইনসিডেন্ট বন্ধ",
+    "citizenDisputed": "❌ নাগরিক বিতর্কিত — পর্যালোচনার জন্য ইনসিডেন্ট পুনরায় খোলা হয়েছে",
+    "assignedTo": "{{name}}-কে বরাদ্দ করা হয়েছে",
+    "ackRequestSent": "{{channel}} মাধ্যমে অ্যাক অনুরোধ পাঠানো হয়েছে",
+    "markedReviewed_one": "1টি সারি পর্যালোচিত হিসেবে চিহ্নিত",
+    "markedReviewed_other": "{{count}}টি সারি পর্যালোচিত হিসেবে চিহ্নিত"
+  },
+  "modal": {
+    "ariaFallback": "ডায়ালগ",
+    "close": "বন্ধ"
+  },
+  "errorScreen": {
+    "title": "কিছু ভুল হয়েছে",
+    "subtitle": "অ্যাপ একটি অপ্রত্যাশিত ত্রুটির সম্মুখীন হয়েছে এবং নিজেই পুনরুদ্ধার করেছে। এই ট্যাবের কাজ হারিয়ে যেতে পারে।",
+    "showStack": "স্ট্যাক ট্রেস দেখান",
+    "componentStack": "কম্পোনেন্ট স্ট্যাক",
+    "reload": "পেজ রিলোড করুন",
+    "copyDiagnostics": "ডায়াগনস্টিকস কপি করুন",
+    "copied": "কপি হয়েছে"
+  },
+  "pagination": {
+    "aria": "পেজিনেশন",
+    "summary": "দেখাচ্ছে {{from}}–{{to}}, মোট {{total}}",
+    "prev": "← আগের",
+    "next": "পরের →",
+    "pageSize": "পেজের আকার",
+    "pageSizeItem": "প্রতি পেজে {{n}}টি"
+  },
+  "input": {
+    "search": "অনুসন্ধান"
+  },
+  "dropdown": {
+    "empty": "কোনো মিল নেই",
+    "searchPlaceholder": "ফিল্টার করতে টাইপ করুন…"
+  },
+  "band": {
+    "high": "উচ্চ",
+    "medium": "মাঝারি",
+    "low": "নিম্ন",
+    "ariaTrustBand": "{{band}} ট্রাস্ট ব্যান্ড"
+  },
+  "status": {
+    "active": "সক্রিয়",
+    "inactive": "নিষ্ক্রিয়",
+    "pending": "অপেক্ষমান",
+    "escalated": "এসকেলেটেড",
+    "resolved": "সমাধান হয়েছে",
+    "open": "খোলা"
+  },
+  "severity": {
+    "T1": "T1",
+    "T2": "T2",
+    "T3": "T3"
   }
 }
