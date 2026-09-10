@@ -28,6 +28,7 @@ import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { useRelativeTime } from '../hooks/useRelativeTime';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
 import type { IncidentSummary } from '../types/domain';
@@ -61,6 +62,7 @@ export function OperatorDashboard() {
   // page renders, the role check is implicit.
   const { session } = useAppLayout();
   const { format: formatTime } = useDateFormatter();
+  const { formatRelative } = useRelativeTime();
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
   const { incidents, loading: incLoading } = useIncidents();
@@ -241,7 +243,7 @@ export function OperatorDashboard() {
         key: 'last_occurred_at',
         header: 'Opened',
         className: 'col-time',
-        render: (i) => relativeTime(i.last_occurred_at),
+        render: (i) => formatRelative(i.last_occurred_at),
       },
       {
         key: 'severity-badge',
@@ -258,7 +260,7 @@ export function OperatorDashboard() {
         render: () => <a href="/inbox">Open →</a>,
       },
     ],
-    [],
+    [formatRelative],
   );
 
   const threadColumnsCompact: TableColumn<IncidentSummary>[] = useMemo(
@@ -283,7 +285,7 @@ export function OperatorDashboard() {
         key: 'last_occurred_at',
         header: 'Opened',
         className: 'col-time',
-        render: (i) => relativeTime(i.last_occurred_at),
+        render: (i) => formatRelative(i.last_occurred_at),
       },
       {
         key: 'severity-badge',
@@ -300,7 +302,7 @@ export function OperatorDashboard() {
         render: () => <a href="/inbox">Open →</a>,
       },
     ],
-    [],
+    [formatRelative],
   );
 
   const chainColumnsCompact: TableColumn<ChainEventLite>[] = useMemo(
@@ -952,14 +954,6 @@ function severityBadgeClass(sev: string): string {
   if (sev === 'T2' || sev === 't2') return 't2';
   if (sev === 'T1' || sev === 't1') return 't1';
   return 'tier';
-}
-function relativeTime(iso: string): string {
-  const ms = Date.now() - new Date(iso).getTime();
-
-  if (ms < 60_000) return 'just now';
-  if (ms < 3_600_000) return `${Math.round(ms / 60_000)}m ago`;
-  if (ms < 86_400_000) return `${Math.round(ms / 3_600_000)}h ago`;
-  return `${Math.round(ms / 86_400_000)}d ago`;
 }
 // Renders the dim 5b §14 HorizontalBar chart for the Wards tab.
 // Synthesises a ranking from incident data so the chart populates with
