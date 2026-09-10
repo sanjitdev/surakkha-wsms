@@ -42,6 +42,7 @@ import { InboxDetail } from './pages/InboxDetail';
 import { VerifyFlow } from './pages/VerifyFlow';
 import { AuditLog } from './pages/AuditLog';
 import { Settings } from './pages/Settings';
+import { SubmitReportPage } from './pages/SubmitReportPage';
 import { type SessionRow, getSession } from './mocks/idb';
 import { SESSION_CHANGED_EVENT } from './mocks/session-bus';
 import { useTheme } from './hooks/useTheme';
@@ -70,11 +71,6 @@ interface Placeholder {
   description: string;
 }
 const PLACEHOLDERS: Placeholder[] = [
-  {
-    path: '/submit',
-    landing: '/submit',
-    description: 'Anjali submits a citizen water-safety report (SMS / WhatsApp / voice / photo).',
-  },
   {
     path: '/approve',
     landing: '/approve',
@@ -156,6 +152,10 @@ function RoutedSurface() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/field" element={<FieldQueuePage />} />
         <Route path="/field/*" element={<FieldQueuePage />} />
+        {/* /submit is role-gated inside <SubmitReportPage /> so the
+            route stays registered for every persona but the page
+            renders an EmptyState for non-Anjali roles. */}
+        <Route path="/submit" element={<SubmitReportPage />} />
 
         {/* Placeholder persona landings — ComingSoonPage reads session
             from useAppLayout() inside the shell. */}

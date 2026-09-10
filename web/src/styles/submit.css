@@ -1,0 +1,160 @@
+/* ════════════════════════════════════════════════════════════════════
+   submit.css — Anjali /submit form + receipt composition.
+
+   Tokens only. The form follows the settings-row pattern (label +
+   control stacked vertically per field) but with the fields occupying
+   the full card width instead of a 2-col split — submit is the user's
+   primary action on this page, not a settings toggle.
+
+   Receipt surface mirrors inbox-detail's meta dl pattern so the
+   "Chain ref" / "Ward" / "Submitted" triplets look consistent across
+   operator surfaces and Anjali's submission feedback.
+
+   The badge & mono-text classes (.badge, .mono) live in dashboard.css
+   and inbox.css — this file only composes submit-specific layout.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Form rows — stacked label + control, full card width. ───────── */
+.submit-form__row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-lg);
+}
+
+.submit-form__row--split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 768px) {
+  .submit-form__row--split {
+    grid-template-columns: 1fr;
+  }
+}
+
+.submit-form__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-default);
+}
+
+.submit-form__input,
+.submit-form__textarea {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+  transition:
+    border-color var(--motion-press-120) var(--ease-out),
+    box-shadow var(--motion-press-120) var(--ease-out);
+}
+
+.submit-form__input:focus,
+.submit-form__textarea:focus {
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-500) 20%, transparent);
+}
+
+.submit-form__textarea {
+  resize: vertical;
+  min-height: calc(var(--height-control-lg) * 3);
+  font-family: inherit;
+}
+
+.submit-form__hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  line-height: var(--line-height-body);
+}
+
+/* Collapsible optional-attachments section. Mirrors the operator
+   detail's <details> pattern in inbox-detail. ──────────────────── */
+.submit-form__details {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  background: var(--bg-inset);
+}
+
+.submit-form__details-summary {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-default);
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Submit action row — primary CTA + transient status text. ──────── */
+.submit-form__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.submit-form__action-hint {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-mono);
+  letter-spacing: 0.02em;
+}
+
+/* ── Receipt surface — same dl-meta pattern as InboxDetail. ────── */
+.submit-receipt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.submit-receipt__title {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+  line-height: var(--line-height-tight);
+}
+
+.submit-receipt__meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: var(--space-lg);
+  row-gap: var(--space-sm);
+  margin: 0;
+  padding: var(--space-md);
+  background: var(--bg-inset);
+  border-radius: var(--radius-sm);
+}
+
+.submit-receipt__meta dt {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  align-self: center;
+}
+
+.submit-receipt__meta dd {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  align-self: center;
+}
+
+.submit-receipt__hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+  line-height: var(--line-height-body);
+}
