@@ -52,11 +52,11 @@ test.describe('i18n locale switching — real browser', () => {
     await page.reload();
     await page.getByTestId('persona-priya').click();
     await page.getByRole('button', { name: /এগিয়ে যান|Continue/i }).click();
-    // AppLayout mounts → sidebar labels should be in English (the
-    // chrome strings are not yet translated in B3 — only the picker
-    // has bn strings today). We assert the English sidebar label
-    // "Inbox" is present regardless, proving the bridge didn't
-    // break the layout.
-    await expect(page.getByTestId('sidebar-link-inbox')).toBeVisible({ timeout: 10_000 });
+    // AppLayout mounts → sidebar labels should be in Bangla now (the
+    // chrome strings are translated to bn via layout.json). We assert
+    // by href (stable across locales) rather than the testid, which
+    // is derived from the resolved label and therefore flips with the
+    // locale (sidebar-link-inbox → sidebar-link-ইনবক্স).
+    await expect(page.locator('a[href="/inbox"]').first()).toBeVisible({ timeout: 10_000 });
   });
 });
