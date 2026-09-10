@@ -51,6 +51,23 @@ export function useTableSort<T>(): UseTableSortResult<T> {
         const av = (a as Record<string, unknown>)[key];
         const bv = (b as Record<string, unknown>)[key];
 
+        // Null/undefined always sort last (NULLS LAST) — most databases do
+        // NULLS LAST by default, which matches Surakkha's "missing = bottom"
+        // dashboard convention. Same direction handling for asc + desc.
+        const aNull = av === null || av === undefined;
+        const bNull = bv === null || bv === undefined;
+
+        if (aNull && !bNull) return 1;
+        if (!aNull && bNull) return -1;
+        if (aNull && bNull) return 0;
+
+        // Date branch — chronological compare via getTime() (avoids locale
+        // ordering of Date#toString). Only triggers when BOTH values are
+        // Date instances; mixed Date + string falls through to stringify.
+        if (av instanceof Date && bv instanceof Date) {
+          return (av.getTime() - bv.getTime()) * mul;
+        }
+
         if (typeof av === 'number' && typeof bv === 'number') {
           return (av - bv) * mul;
         }

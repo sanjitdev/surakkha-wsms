@@ -54,6 +54,16 @@ export function Table<T>(props: TableProps<T>): ReactNode {
     return pageKeys.every((k) => selectedRows.has(k));
   }, [selectable, pageKeys, selectedRows]);
 
+  // B5b-3: tri-state — "some but not all" selected. Drives the indeterminate
+  // DOM property + aria-checked="mixed" on the select-all checkbox.
+  const partialSelected = useMemo(() => {
+    if (!selectable || pageKeys.length === 0 || selectedRows === undefined) return false;
+    if (allSelected) return false;
+    return pageKeys.some((k) => selectedRows.has(k));
+  }, [selectable, pageKeys, selectedRows, allSelected]);
+
+  const ariaChecked = allSelected ? 'true' : partialSelected ? 'mixed' : 'false';
+
   const onToggleAll = useCallback(() => {
     if (onSelectionChange === undefined) return;
     if (allSelected) {
@@ -122,8 +132,11 @@ export function Table<T>(props: TableProps<T>): ReactNode {
           onToggleSort={onToggle}
           widths={resize.widths}
           onResizeStart={resize.onResizeStart}
+          onResizeAdjust={resize.onResizeAdjust}
           selectable={selectable}
           allSelected={allSelected}
+          partialSelected={partialSelected}
+          ariaChecked={ariaChecked}
           onToggleAll={onToggleAll}
           activeResizeColumn={resize.activeColumn}
           testId={testId}

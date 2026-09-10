@@ -6,7 +6,7 @@
  * Space/Enter on the sort button toggles sort, matching the W3C ARIA APG
  * sortable column pattern.
  */
-import type { KeyboardEvent, ReactNode } from 'react';
+import { type KeyboardEvent, type ReactNode, useEffect, useRef } from 'react';
 import type { ResizeState, SortState, TableColumn } from './Table.types';
 
 export interface TableHeaderProps<T> {
@@ -15,8 +15,14 @@ export interface TableHeaderProps<T> {
   onToggleSort: (key: string) => void;
   widths: ResizeState;
   onResizeStart: (columnKey: string, initialWidthPx: number) => (e: React.MouseEvent<HTMLSpanElement>) => void;
+  /** B5b-4: keyboard resize from the focused column header. */
+  onResizeAdjust?: (columnKey: string, deltaPx: number) => void;
   selectable: boolean;
   allSelected?: boolean;
+  /** B5b-3: partial selection — drives `indeterminate` DOM property. */
+  partialSelected?: boolean;
+  /** B5b-3: ARIA tri-state — `'true' | 'mixed' | 'false'`. */
+  ariaChecked?: 'true' | 'mixed' | 'false';
   onToggleAll?: () => void;
   /** Currently active column being resized (for ARIA on the handle). */
   activeResizeColumn: string | null;
@@ -35,13 +41,25 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
     onToggleSort,
     widths,
     onResizeStart,
+    onResizeAdjust,
     selectable,
     allSelected = false,
+    partialSelected = false,
+    ariaChecked,
     onToggleAll,
     activeResizeColumn,
     testId,
   } = props;
   const rootTestId = testId ?? 'table';
+  // B5b-3: tri-state select-all — indeterminate is a DOM property, not an
+  // attribute. React doesn't support it as a prop, so we toggle via ref.
+  const selectAllRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate = partialSelected && !allSelected;
+    }
+  }, [partialSelected, allSelected]);
 
   return (
     <thead className="table__head" data-testid={`${rootTestId}-head`}>
@@ -49,11 +67,13 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
         {selectable ? (
           <th scope="col" className="table__select-cell table__head-select">
             <input
+              ref={selectAllRef}
               type="checkbox"
               className="table__select-checkbox"
               data-testid={`${rootTestId}-select-all`}
               aria-label="Select all rows on this page"
               checked={allSelected}
+              aria-checked={ariaChecked ?? (allSelected ? 'true' : 'false')}
               onChange={() => {
                 if (onToggleAll !== undefined) onToggleAll();
               }}
@@ -81,6 +101,21 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
           const sortIndicator =
             ariaSort === 'ascending' ? '▲' : ariaSort === 'descending' ? '▼' : '';
 
+          // B5b-4: keyboard resize — focusable <th> + ArrowLeft/ArrowRight.
+          // Shift = larger step (matches Figma / common design-tool convention).
+          const onKey = (e: KeyboardEvent<HTMLTableCellElement>) => {
+            if (!isResizable || onResizeAdjust === undefined) return;
+            const step = e.shiftKey ? 32 : 8;
+
+            if (e.key === 'ArrowLeft') {
+              e.preventDefault();
+              onResizeAdjust(key, -step);
+            } else if (e.key === 'ArrowRight') {
+              e.preventDefault();
+              onResizeAdjust(key, step);
+            }
+          };
+
           return (
             <th
               key={key}
@@ -88,6 +123,8 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
               className={`table__header-cell ${col.className ?? ''}`.trim()}
               data-testid={`${rootTestId}-th-${key}`}
               aria-sort={isSortable ? ariaSort : undefined}
+              tabIndex={isResizable ? 0 : undefined}
+              onKeyDown={isResizable ? onKey : undefined}
               style={thStyle}
             >
               {isSortable ? (
