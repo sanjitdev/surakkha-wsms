@@ -1,0 +1,42 @@
+{
+  "header": {
+    "title": "Verify flow",
+    "subtotalLabel": "3-step chain verification",
+    "currentLabel": "current: Step {{num}}"
+  },
+  "steps": {
+    "ariaLabel": "Verification steps",
+    "stepLabel": "Step {{num}}: {{title}}",
+    "stepCardHeading": "Step {{num}}: {{title}}",
+    "backLabel": "← Back",
+    "continueLabel": "Continue to Step {{num}}: {{title}} →",
+    "sealLabel": "Seal verification"
+  },
+  "sensorCluster": {
+    "title": "Sensor cluster",
+    "subtitle": "Confirm the readings that anchor this verification.",
+    "bullets": {
+      "pickSensors": "Pick at least 2 sensors within the affected ward (3+ preferred).",
+      "last24h": "Last 24 h of readings auto-load — look for the breach window.",
+      "crossCheck": "Cross-check the cluster against the published calibration log."
+    }
+  },
+  "anjaliCorroboration": {
+    "title": "Anjali corroboration",
+    "subtitle": "Attach the citizen report to the same hash envelope.",
+    "bullets": {
+      "waitAck": "Wait for Anjali (or her proxy) to acknowledge the broadcast.",
+      "citizenSig": "Citizen signature links to the same block — chain-verify will walk it.",
+      "escalate": "If 6 h passes with no ack, escalate to PHA (this step turns amber)."
+    }
+  },
+  "councillorNotify": {
+    "title": "Councillor notify",
+    "subtitle": "Broadcast to the ward councillor for political sign-off.",
+    "bullets": {
+      "sms": "One-tap SMS to the assigned councillor — no editing.",
+      "publicKey": "Councillor’s public key signs the same envelope, completing the chain.",
+      "allSigners": "All 4 signers are pinned in the block once this step is sealed."
+    }
+  }
+}

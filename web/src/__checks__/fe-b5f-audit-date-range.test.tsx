@@ -33,9 +33,11 @@ import {
 } from 'vitest';
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
 import { HttpResponse, http } from 'msw';
 import { setupServer } from 'msw/node';
 import { useState } from 'react';
+import i18n from '../i18n';
 import { AuditLog } from '../pages/AuditLog';
 import { LocaleProvider } from '../hooks/useLocale';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
@@ -137,20 +139,22 @@ function installAuditHandler() {
 
 function renderAuditLog() {
   return render(
-    <LocaleProvider>
-      <MemoryRouter>
-        <AppLayoutContext.Provider
-          value={{
-            session: SESSION_FIXTURE,
-            chainHead: null,
-            chainFreshSeconds: 0,
-            logout: () => Promise.resolve(),
-          }}
-        >
-          <AuditLog />
-        </AppLayoutContext.Provider>
-      </MemoryRouter>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <MemoryRouter>
+          <AppLayoutContext.Provider
+            value={{
+              session: SESSION_FIXTURE,
+              chainHead: null,
+              chainFreshSeconds: 0,
+              logout: () => Promise.resolve(),
+            }}
+          >
+            <AuditLog />
+          </AppLayoutContext.Provider>
+        </MemoryRouter>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 

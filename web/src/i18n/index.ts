@@ -40,6 +40,14 @@ import enFieldIncidentDetail from './locales/en/fieldIncidentDetail.json';
 import bnFieldIncidentDetail from './locales/bn/fieldIncidentDetail.json';
 import enSubmitReport from './locales/en/submitReport.json';
 import bnSubmitReport from './locales/bn/submitReport.json';
+import enCitizenAck from './locales/en/citizenAck.json';
+import bnCitizenAck from './locales/bn/citizenAck.json';
+import enFieldQueue from './locales/en/fieldQueue.json';
+import bnFieldQueue from './locales/bn/fieldQueue.json';
+import enAuditLog from './locales/en/auditLog.json';
+import bnAuditLog from './locales/bn/auditLog.json';
+import enVerifyFlow from './locales/en/verifyFlow.json';
+import bnVerifyFlow from './locales/bn/verifyFlow.json';
 
 export const SUPPORTED_LOCALES: readonly Locale[] = [Locale.En, Locale.Bn];
 export const STORAGE_KEY = 'surakkha.locale';
@@ -67,6 +75,10 @@ void i18n.use(initReactI18next).init({
       inboxDetail: enInboxDetail,
       fieldIncidentDetail: enFieldIncidentDetail,
       submitReport: enSubmitReport,
+      citizenAck: enCitizenAck,
+      fieldQueue: enFieldQueue,
+      auditLog: enAuditLog,
+      verifyFlow: enVerifyFlow,
     },
     [Locale.Bn]: {
       common: bnCommon,
@@ -79,6 +91,10 @@ void i18n.use(initReactI18next).init({
       inboxDetail: bnInboxDetail,
       fieldIncidentDetail: bnFieldIncidentDetail,
       submitReport: bnSubmitReport,
+      citizenAck: bnCitizenAck,
+      fieldQueue: bnFieldQueue,
+      auditLog: bnAuditLog,
+      verifyFlow: bnVerifyFlow,
     },
   },
   lng: readInitialLocale(),
@@ -86,7 +102,7 @@ void i18n.use(initReactI18next).init({
   defaultNS: 'common',
   // Hand-maintained namespace list. Add a new entry when shipping a new
   // page or shared chrome file (see plan: gentle-singing-torvalds).
-  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport'],
+  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow'],
   // Stop i18next from trying to fetch /locales/{{lng}}/{{ns}}.json —
   // resources are bundled at build time via Vite's JSON import.
   partialBundledLanguages: true,

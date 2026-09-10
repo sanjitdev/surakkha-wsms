@@ -22,6 +22,7 @@
  *     comes when the backend lands.
  */
 import { type ReactElement, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/verify.css';
 import { Container } from '../components/layout/Container';
@@ -36,58 +37,67 @@ import {
 import { ContainerWidth } from '../types/domain';
 
 type StepIndex = 0 | 1 | 2;
+type StepKey = 'sensorCluster' | 'anjaliCorroboration' | 'councillorNotify';
+
 interface Step {
+  /** Translation key suffix — used by `getSteps(t)` to resolve labels. */
+  key: StepKey;
   id: string;
   num: number;
-  title: string;
-  subtitle: string;
   icon: ReactElement;
-  bullets: string[];
 }
+
 const STEPS: readonly Step[] = [
-  {
-    id: 'sensor-cluster',
-    num: 1,
-    title: 'Sensor cluster',
-    subtitle: 'Confirm the readings that anchor this verification.',
-    icon: <ClipboardListIcon />,
-    bullets: [
-      'Pick at least 2 sensors within the affected ward (3+ preferred).',
-      'Last 24 h of readings auto-load — look for the breach window.',
-      'Cross-check the cluster against the published calibration log.',
-    ],
-  },
-  {
-    id: 'anjali-corroboration',
-    num: 2,
-    title: 'Anjali corroboration',
-    subtitle: 'Attach the citizen report to the same hash envelope.',
-    icon: <InboxIcon />,
-    bullets: [
-      'Wait for Anjali (or her proxy) to acknowledge the broadcast.',
-      'Citizen signature links to the same block — chain-verify will walk it.',
-      'If 6 h passes with no ack, escalate to PHA (this step turns amber).',
-    ],
-  },
-  {
-    id: 'councillor-notify',
-    num: 3,
-    title: 'Councillor notify',
-    subtitle: 'Broadcast to the ward councillor for political sign-off.',
-    icon: <SendIcon />,
-    bullets: [
-      'One-tap SMS to the assigned councillor — no editing.',
-      'Councillor’s public key signs the same envelope, completing the chain.',
-      'All 4 signers are pinned in the block once this step is sealed.',
-    ],
-  },
+  { key: 'sensorCluster', id: 'sensor-cluster', num: 1, icon: <ClipboardListIcon /> },
+  { key: 'anjaliCorroboration', id: 'anjali-corroboration', num: 2, icon: <InboxIcon /> },
+  { key: 'councillorNotify', id: 'councillor-notify', num: 3, icon: <SendIcon /> },
 ];
 
+type TFn = (key: string, opts?: Record<string, unknown>) => string;
+
+interface ResolvedStep {
+  id: string;
+  num: number;
+  icon: ReactElement;
+  title: string;
+  subtitle: string;
+  bullets: string[];
+}
+
+function resolveSteps(t: TFn): ResolvedStep[] {
+  return STEPS.map((s) => {
+    const bullets = t(`${s.key}.bullets`, { returnObjects: true }) as unknown as
+      | string[]
+      | Record<string, string>;
+
+    // i18next returns either an array (when the JSON value is an array
+    // of strings) or an object (when the JSON is keyed — e.g. our
+    // `bullets: { pickSensors, last24h, crossCheck }`). We support
+    // both shapes here so the JSON can be edited without code churn.
+    const bulletArr = Array.isArray(bullets)
+      ? bullets
+      : bullets && typeof bullets === 'object'
+        ? Object.values(bullets)
+        : [];
+
+    return {
+      id: s.id,
+      num: s.num,
+      icon: s.icon,
+      title: t(`${s.key}.title`),
+      subtitle: t(`${s.key}.subtitle`),
+      bullets: bulletArr,
+    };
+  });
+}
+
 export function VerifyFlow() {
+  const { t } = useTranslation('verifyFlow');
   const [step, setStep] = useState<StepIndex>(0);
-  const current = STEPS[step];
+  const steps = resolveSteps(t);
+  const current = steps[step];
   const isFirst = step === 0;
-  const isLast = step === STEPS.length - 1;
+  const isLast = step === steps.length - 1;
 
   const advance = () => {
     if (!isLast) setStep((s) => (s + 1) as StepIndex);
@@ -96,18 +106,25 @@ export function VerifyFlow() {
     if (!isFirst) setStep((s) => (s - 1) as StepIndex);
   };
 
+  const next = !isLast ? steps[step + 1] : null;
+
   return (
     <Container width={ContainerWidth.Narrow}>
       <div className="page-header" data-testid="verify-flow-header">
-        <h1>Verify flow</h1>
+        <h1>{t('header.title')}</h1>
         <p className="page-header__sub">
-          3-step chain verification · {STEPS.length} steps · current: Step {current.num}
+          {t('header.subtotalLabel')} · {steps.length} steps ·{' '}
+          {t('header.currentLabel', { num: current.num })}
         </p>
       </div>
 
       {/* Step indicator — dim 5 §7.5 calls for a 3-step header. */}
-      <ol className="verify-steps" aria-label="Verification steps" data-testid="verify-steps">
-        {STEPS.map((s) => {
+      <ol
+        className="verify-steps"
+        aria-label={t('steps.ariaLabel')}
+        data-testid="verify-steps"
+      >
+        {steps.map((s) => {
           const isActive = s.num === current.num;
           const isDone = s.num < current.num;
 
@@ -132,7 +149,7 @@ export function VerifyFlow() {
           </span>
           <div>
             <h2 style={{ margin: 0, fontSize: 'var(--font-size-xl)' }}>
-              Step {current.num}: {current.title}
+              {t('steps.stepCardHeading', { num: current.num, title: current.title })}
             </h2>
             <p
               className="page-header__sub"
@@ -151,7 +168,7 @@ export function VerifyFlow() {
 
         <div className="verify-step__actions">
           <Button variant="secondary" size="md" onClick={rewind} disabled={isFirst}>
-            ← Back
+            {t('steps.backLabel')}
           </Button>
           {isLast ? (
             <Button
@@ -160,21 +177,23 @@ export function VerifyFlow() {
               onClick={() => {
                 /* Final step — submit is out of scope (Phase 2 backend). */
               }}
-              data-testid="verify-seal"
+              testId="verify-seal"
             >
               <span style={{ marginRight: 'var(--space-sm)' }}>
                 <CheckIcon />
               </span>
-              Seal verification
+              {t('steps.sealLabel')}
             </Button>
           ) : (
             <Button
               variant="primary"
               size="md"
               onClick={advance}
-              data-testid={`verify-advance-${STEPS[step + 1].id}`}
+              testId={`verify-advance-${next?.id ?? ''}`}
             >
-              Continue to Step {current.num + 1}: {STEPS[step + 1].title} →
+              {next
+                ? t('steps.continueLabel', { num: current.num + 1, title: next.title })
+                : ''}
             </Button>
           )}
         </div>

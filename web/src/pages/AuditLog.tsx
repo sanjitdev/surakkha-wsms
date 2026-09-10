@@ -13,6 +13,7 @@
  * + pagination, but Phase 1 ships the structure not the backend.
  */
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/audit.css';
 import { Container } from '../components/layout/Container';
@@ -42,45 +43,46 @@ interface ChainEvent {
 type FilterId = 'all' | 'errors' | 'signatures' | 'sensor' | 'citizen' | 'notices' | 'auth';
 interface ChipDef {
   id: FilterId;
-  label: string;
+  /** i18n key suffix under `filters.*` — resolved at render time. */
+  labelKey: FilterId;
   testId: string;
   match: (e: ChainEvent) => boolean;
 }
 const CHIPS: readonly ChipDef[] = [
-  { id: 'all', label: 'All events', testId: 'chip-all', match: () => true },
+  { id: 'all', labelKey: 'all', testId: 'chip-all', match: () => true },
   {
     id: 'errors',
-    label: 'Errors',
+    labelKey: 'errors',
     testId: 'chip-errors',
     match: (e) => /escalated|failed|breach|tamper/i.test(e.event_type),
   },
   {
     id: 'signatures',
-    label: 'Signatures',
+    labelKey: 'signatures',
     testId: 'chip-sig',
     match: (e) => /Signature|Attestation|Endorsement|Acknowledgement/i.test(e.event_type),
   },
   {
     id: 'sensor',
-    label: 'Sensor data',
+    labelKey: 'sensor',
     testId: 'chip-sensor',
     match: (e) => e.event_type === 'SensorReadingSubmitted',
   },
   {
     id: 'citizen',
-    label: 'Citizen reports',
+    labelKey: 'citizen',
     testId: 'chip-citizen',
     match: (e) => /Citizen|CitizenComplaint/i.test(e.event_type),
   },
   {
     id: 'notices',
-    label: 'Notices',
+    labelKey: 'notices',
     testId: 'chip-notices',
     match: (e) => /PublicNotice/i.test(e.event_type),
   },
   {
     id: 'auth',
-    label: 'Auth',
+    labelKey: 'auth',
     testId: 'chip-auth',
     match: (e) => /Login|Logout|Session/i.test(e.event_type),
   },
@@ -98,6 +100,7 @@ async function copyToClipboard(value: string): Promise<void> {
 }
 export function AuditLog() {
   const { chainHead } = useAppLayout();
+  const { t: tAudit } = useTranslation('auditLog');
   const { format: formatTime } = useDateFormatter();
   const { locale } = useLocale();
   const [events, setEvents] = useState<ChainEvent[]>([]);
@@ -146,7 +149,7 @@ export function AuditLog() {
     () => [
       {
         key: 'occurred_at',
-        header: 'Time',
+        header: tAudit('table.headerTime'),
         sortable: true,
         className: 'col-time',
         render: (e) => <span className="mono">{formatTime('time-24', e.occurred_at)}</span>,
@@ -169,7 +172,7 @@ export function AuditLog() {
       },
       {
         key: 'event_type',
-        header: 'Event',
+        header: tAudit('table.headerEvent'),
         sortable: true,
         render: (e) => (
           <>
@@ -178,17 +181,17 @@ export function AuditLog() {
               className="row-sub"
               style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
             >
-              block #{e.height}
+              {tAudit('table.blockPrefix', { height: e.height })}
             </div>
           </>
         ),
       },
       {
         key: 'block_hash',
-        header: 'Ward / chain-ref',
+        header: tAudit('table.headerWard'),
         className: 'col-where',
         render: (e) => {
-          const ward = (e.payload as { ward_id?: string }).ward_id ?? '—';
+          const ward = (e.payload as { ward_id?: string }).ward_id ?? tAudit('table.actorEmDash');
 
           return (
             <>
@@ -202,12 +205,16 @@ export function AuditLog() {
       },
       {
         key: 'actor_identity',
-        header: 'Actor',
-        render: (e) => <span className="mono">{e.actor_identity?.display ?? '—'}</span>,
+        header: tAudit('table.headerActor'),
+        render: (e) => (
+          <span className="mono">
+            {e.actor_identity?.display ?? tAudit('table.actorEmDash')}
+          </span>
+        ),
       },
       {
         key: 'type-badge',
-        header: 'Type',
+        header: tAudit('table.headerType'),
         className: 'col-status',
         render: (e) => (
           <span className="badge badge--tier">{e.event_type.split(/(?=[A-Z])/)[0]}</span>
@@ -224,15 +231,15 @@ export function AuditLog() {
             onClick={() => {
               void copyToClipboard(e.block_hash);
             }}
-            title="Copy block hash"
+            title={tAudit('table.blockHashTitle')}
             data-testid={`audit-copy-${e.event_id}`}
           >
-            Copy
+            {tAudit('table.copy')}
           </button>
         ),
       },
     ],
-    [formatTime],
+    [formatTime, tAudit],
   );
 
   return (
@@ -240,19 +247,26 @@ export function AuditLog() {
       <div className="page-header">
         <div className="page-header__row">
           <div>
-            <h1>Audit log</h1>
+            <h1>{tAudit('header.title')}</h1>
             <p className="page-header__sub" data-testid="audit-log-summary">
               {rangeActive
-                ? `${visible.length} of ${events.length} events · chain head block #${chainHead?.height ?? '—'}`
-                : `${events.length} events · chain head block #${chainHead?.height ?? '—'}`}
+                ? tAudit('header.summaryWithRange', {
+                    visible: visible.length,
+                    total: events.length,
+                    height: chainHead?.height ?? tAudit('header.heightEmDash'),
+                  })
+                : tAudit('header.summaryFull', {
+                    total: events.length,
+                    height: chainHead?.height ?? tAudit('header.heightEmDash'),
+                  })}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
             <Button variant="secondary" size="md">
-              Export CSV
+              {tAudit('actions.exportCsv')}
             </Button>
             <Button variant="secondary" size="md">
-              Export PDF
+              {tAudit('actions.exportPdf')}
             </Button>
           </div>
         </div>
@@ -278,9 +292,11 @@ export function AuditLog() {
                   color: 'var(--fg-default)',
                 }}
               >
-                Chain head · block #{chainHead.height} ·{' '}
+                {tAudit('chainHead.headLabel')}
+                {chainHead.height}
+                {' · '}
                 <span data-testid="chain-head-hash">
-                  {chainHead.block_hash ? truncateHash(chainHead.block_hash) : '—'}
+                  {chainHead.block_hash ? truncateHash(chainHead.block_hash) : tAudit('table.actorEmDash')}
                 </span>
               </div>
               <div
@@ -291,9 +307,12 @@ export function AuditLog() {
                   marginTop: 'var(--space-xs)',
                 }}
               >
-                prev {chainHead.prev_hash ? truncateHash(chainHead.prev_hash) : '—'}
-                {chainHead.sealed_at ? ` · sealed ${formatTime('time-full', chainHead.sealed_at)}` : ''}
-                {' · root ok'}
+                {tAudit('chainHead.prevLabel')}{' '}
+                {chainHead.prev_hash ? truncateHash(chainHead.prev_hash) : tAudit('table.actorEmDash')}
+                {chainHead.sealed_at
+                  ? `${tAudit('chainHead.sealedLabel')}${formatTime('time-full', chainHead.sealed_at)}`
+                  : ''}
+                {tAudit('chainHead.rootOk')}
               </div>
             </div>
             <div
@@ -312,7 +331,7 @@ export function AuditLog() {
               >
                 {events.length}
               </div>
-              <div>events total</div>
+              <div>{tAudit('chainHead.eventsTotal')}</div>
             </div>
             <div
               style={{
@@ -330,7 +349,7 @@ export function AuditLog() {
               >
                 {chainHead.height}
               </div>
-              <div>blocks</div>
+              <div>{tAudit('chainHead.blocks')}</div>
             </div>
           </div>
         </Card>
@@ -341,13 +360,13 @@ export function AuditLog() {
         className="inbox-toolbar"
         style={{ marginTop: 'var(--space-md)' }}
         role="tablist"
-        aria-label="Filter audit log"
+        aria-label={tAudit('filters.ariaLabel')}
         data-testid="audit-filters"
       >
         {CHIPS.map((chip) => (
           <FilterChip
             key={chip.id}
-            label={`${chip.label} ${counts.get(chip.id) ?? 0}`}
+            label={`${tAudit(`filters.${chip.labelKey}`)} ${counts.get(chip.id) ?? 0}`}
             active={filter === chip.id}
             onClick={() => {
               setFilter(chip.id);
@@ -360,7 +379,7 @@ export function AuditLog() {
       {/* Date range — two DatePickers + Clear button. AND-combined with chip. */}
       <div className="audit-range" data-testid="audit-range">
         <div>
-          <span className="audit-range__label">From</span>
+          <span className="audit-range__label">{tAudit('range.fromLabel')}</span>
           <DatePicker
             value={range.from}
             onChange={(d) => {
@@ -369,11 +388,11 @@ export function AuditLog() {
               });
             }}
             testId="audit-range-from"
-            aria-label="Filter from date"
+            aria-label={tAudit('range.fromAria')}
           />
         </div>
         <div>
-          <span className="audit-range__label">To</span>
+          <span className="audit-range__label">{tAudit('range.toLabel')}</span>
           <DatePicker
             value={range.to}
             onChange={(d) => {
@@ -382,7 +401,7 @@ export function AuditLog() {
               });
             }}
             testId="audit-range-to"
-            aria-label="Filter to date"
+            aria-label={tAudit('range.toAria')}
           />
         </div>
         <Button
@@ -394,7 +413,7 @@ export function AuditLog() {
           disabled={!rangeActive}
           testId="audit-range-clear"
         >
-          Clear range
+          {tAudit('range.clear')}
         </Button>
       </div>
 
@@ -411,14 +430,14 @@ export function AuditLog() {
             rangeActive ? (
               <EmptyState
                 icon={<AuditIcon />}
-                heading="No matching events"
-                body="No events in the selected range."
+                heading={tAudit('empty.heading')}
+                body={tAudit('empty.bodyWithRange')}
               />
             ) : (
               <EmptyState
                 icon={<AuditIcon />}
-                heading="No matching events"
-                body="No events match the current filter. Reset to ‘All events’ to see the full chain."
+                heading={tAudit('empty.heading')}
+                body={tAudit('empty.bodyWithFilter')}
               />
             )
           }

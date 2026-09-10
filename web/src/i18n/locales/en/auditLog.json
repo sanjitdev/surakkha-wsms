@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "Audit log",
+    "summaryWithRange": "{{visible}} of {{total}} events · chain head block #{{height}}",
+    "summaryFull": "{{total}} events · chain head block #{{height}}",
+    "heightEmDash": "—"
+  },
+  "actions": {
+    "exportCsv": "Export CSV",
+    "exportPdf": "Export PDF"
+  },
+  "chainHead": {
+    "headLabel": "Chain head · block #",
+    "prevLabel": "prev",
+    "sealedLabel": " · sealed ",
+    "rootOk": " · root ok",
+    "eventsTotal": "events total",
+    "blocks": "blocks"
+  },
+  "filters": {
+    "ariaLabel": "Filter audit log",
+    "all": "All events",
+    "errors": "Errors",
+    "signatures": "Signatures",
+    "sensor": "Sensor data",
+    "citizen": "Citizen reports",
+    "notices": "Notices",
+    "auth": "Auth"
+  },
+  "range": {
+    "fromLabel": "From",
+    "fromAria": "Filter from date",
+    "toLabel": "To",
+    "toAria": "Filter to date",
+    "clear": "Clear range"
+  },
+  "table": {
+    "headerTime": "Time",
+    "headerEvent": "Event",
+    "headerWard": "Ward / chain-ref",
+    "headerActor": "Actor",
+    "headerType": "Type",
+    "blockHashTitle": "Copy block hash",
+    "blockPrefix": "block #",
+    "actorEmDash": "—",
+    "copy": "Copy",
+    "truncateHash": "{{start}}…{{end}}"
+  },
+  "empty": {
+    "heading": "No matching events",
+    "bodyWithRange": "No events in the selected range.",
+    "bodyWithFilter": "No events match the current filter. Reset to ‘All events’ to see the full chain."
+  }
+}

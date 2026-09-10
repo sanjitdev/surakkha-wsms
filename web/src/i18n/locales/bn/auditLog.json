@@ -1,0 +1,54 @@
+{
+  "header": {
+    "title": "অডিট লগ",
+    "summaryWithRange": "{{total}} ইভেন্টের মধ্যে {{visible}}টি · চেইন হেড ব্লক #{{height}}",
+    "summaryFull": "{{total}}টি ইভেন্ট · চেইন হেড ব্লক #{{height}}",
+    "heightEmDash": "—"
+  },
+  "actions": {
+    "exportCsv": "CSV রপ্তানি",
+    "exportPdf": "PDF রপ্তানি"
+  },
+  "chainHead": {
+    "headLabel": "চেইন হেড · ব্লক #",
+    "prevLabel": "পূর্ববর্তী",
+    "sealedLabel": " · সিল ",
+    "rootOk": " · রুট ঠিক আছে",
+    "eventsTotal": "মোট ইভেন্ট",
+    "blocks": "ব্লক"
+  },
+  "filters": {
+    "ariaLabel": "অডিট লগ ফিল্টার",
+    "all": "সব ইভেন্ট",
+    "errors": "ত্রুটি",
+    "signatures": "স্বাক্ষর",
+    "sensor": "সেন্সর ডেটা",
+    "citizen": "নাগরিক রিপোর্ট",
+    "notices": "নোটিশ",
+    "auth": "প্রমাণীকরণ"
+  },
+  "range": {
+    "fromLabel": "থেকে",
+    "fromAria": "শুরুর তারিখ ফিল্টার",
+    "toLabel": "পর্যন্ত",
+    "toAria": "শেষ তারিখ ফিল্টার",
+    "clear": "পরিসর মুছুন"
+  },
+  "table": {
+    "headerTime": "সময়",
+    "headerEvent": "ইভেন্ট",
+    "headerWard": "ওয়ার্ড / চেইন-রেফ",
+    "headerActor": "অভিনেতা",
+    "headerType": "ধরন",
+    "blockHashTitle": "ব্লক হ্যাশ কপি",
+    "blockPrefix": "ব্লক #",
+    "actorEmDash": "—",
+    "copy": "কপি",
+    "truncateHash": "{{start}}…{{end}}"
+  },
+  "empty": {
+    "heading": "কোনো মিলে যাওয়া ইভেন্ট নেই",
+    "bodyWithRange": "নির্বাচিত পরিসরে কোনো ইভেন্ট নেই।",
+    "bodyWithFilter": "বর্তমান ফিল্টারের সাথে কোনো ইভেন্ট মেলে না। পুরো চেইন দেখতে ‘সব ইভেন্ট’-এ রিসেট করুন।"
+  }
+}
