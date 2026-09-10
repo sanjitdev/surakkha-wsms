@@ -40,6 +40,7 @@
  */
 import { type ReactNode, useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { TopChrome } from './TopChrome';
 import { Sidebar } from './Sidebar';
 import { AppLayoutContext, type ChainHead } from './AppLayoutContext';
@@ -50,6 +51,7 @@ import { LogoutIcon } from '../icons/sidebar-icons';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const { t: tLayout } = useTranslation('layout');
 
   // (1) session — read once on mount. Pages don't fetch it.
   const [session, setSession] = useState<SessionRow | null>(null);
@@ -133,7 +135,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="sidebar__icon" aria-hidden="true">
                 <LogoutIcon />
               </span>
-              <span>Logout</span>
+              <span>{tLayout('sidebar.logout')}</span>
             </button>
           }
         />
