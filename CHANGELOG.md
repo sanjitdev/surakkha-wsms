@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **FE-B5f:** AuditLog: date-range filter (From / To) using the shipped DatePicker primitive. Inclusive day-granularity bounds, AND-combines with the existing chip filter. `Clear range` button resets. Summary count updates to `'N of M events'` when range is active. Empty state copy adapts to "No events in the selected range." when range is the cause of empty.
+
 ### Changed
 
 - Migrated OperatorDashboard (7 tables across 3 layouts), InboxList (action queue), and AuditLog (events) from hand-rolled `<table className="data-table">` markup to the shipped `<Table>` primitive. Gains: column sort (AuditLog `event_type` + `occurred_at`), column resize, tri-state select-all (InboxList), built-in loading skeleton + empty-state. No visual or behavioural changes to non-table portions of each page (KPIs, tabs, charts, filters, bulk-bar, copy buttons). All existing testIds preserved (`audit-row-*`, `audit-copy-*`, `inbox-row-*`, `inbox-row-check-*`) so Playwright selectors + existing test files continue to work.
@@ -61,6 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **FE-B5d:** 5 duplicate `formatTime`/`fmtTime` helpers consolidated into one shared `useDateFormatter` hook + pure `formatDate` function. Net: −24 LoC across InboxList / InboxDetail / AuditLog / FieldQueuePage / OperatorDashboard / inboxListModel.
 
 ### Tests
+
+- **FE-B5f:** 15 new cases in `web/src/__checks__/fe-b5f-audit-date-range.test.tsx` lock the AuditLog date-range contract. 7 AuditLog integration cases (smoke render + filter predicate AND-chain + clear button disabled-until-active + summary format + from-after-to yields empty + harness mounts with expected testIds), and 8 predicate unit cases for the extracted `isInRange(occurred_at, from, to, locale)` helper (bound-inclusive on both ends, invalid date passthrough, From > To → false). New helper `web/src/hooks/auditDateRange.ts` extracts the day-key + predicate so they can be unit-tested without rendering the page. Vitest suite 143 → 158 cases. Zero new deps.
 
 - **FE-B5e:** 9 new cases in `web/src/__checks__/fe-b5e-relative-time.test.tsx` lock the I/O matrix: (1) `just_now_within_30s` — 15s delta → `'just now'` (regardless of locale); (2) `seconds_under_1_minute` — 45s ago → `'45 seconds ago'` (not `'1 minute ago'`); (3) `minutes` — 5m ago → `'5 minutes ago'`; (4) `hours` — 3h ago → `'3 hours ago'`; (5) `days` — 2d ago → `'2 days ago'`; (6) `future_minutes` — 5m future → `'in 5 minutes'`; (7) `null_returns_dash` — `null` input → `'—'`; (8) `invalid_date_returns_dash` — `'foo'` → `'—'`; (9) `bangla_locale_returns_localized` — `formatRelativeTime('bn', ...)` returns a string containing non-ASCII characters (regex match `/[^\x00-\x7F]/`). Vitest suite 134 → 143 cases. Zero new deps.
 

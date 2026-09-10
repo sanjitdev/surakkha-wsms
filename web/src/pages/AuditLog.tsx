@@ -22,10 +22,13 @@ import { FilterChip } from '../components/pages/FilterChip';
 import { Button } from '../components/ui/Button';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
+import { DatePicker } from '../components/ui/DatePicker';
 import { AuditIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { useLocale } from '../hooks/useLocale';
+import { isInRange } from '../hooks/auditDateRange';
 
 interface ChainEvent {
   event_id: string;
@@ -96,9 +99,15 @@ async function copyToClipboard(value: string): Promise<void> {
 export function AuditLog() {
   const { chainHead } = useAppLayout();
   const { format: formatTime } = useDateFormatter();
+  const { locale } = useLocale();
   const [events, setEvents] = useState<ChainEvent[]>([]);
   const [filter, setFilter] = useState<FilterId>('all');
   const [loading, setLoading] = useState(true);
+  const [range, setRange] = useState<{ from: Date | null; to: Date | null }>({
+    from: null,
+    to: null,
+  });
+  const rangeActive = range.from !== null || range.to !== null;
 
   useEffect(() => {
     void (async () => {
@@ -128,8 +137,10 @@ export function AuditLog() {
   const visible = useMemo(() => {
     const chip = CHIPS.find((c) => c.id === filter) ?? CHIPS[0];
 
-    return events.filter(chip.match);
-  }, [events, filter]);
+    return events
+      .filter(chip.match)
+      .filter((e) => isInRange(e.occurred_at, range.from, range.to, locale));
+  }, [events, filter, range.from, range.to, locale]);
 
   const auditColumns: TableColumn<ChainEvent>[] = useMemo(
     () => [
@@ -231,7 +242,9 @@ export function AuditLog() {
           <div>
             <h1>Audit log</h1>
             <p className="page-header__sub" data-testid="audit-log-summary">
-              {events.length} events · chain head block #{chainHead?.height ?? '—'}
+              {rangeActive
+                ? `${visible.length} of ${events.length} events · chain head block #${chainHead?.height ?? '—'}`
+                : `${events.length} events · chain head block #${chainHead?.height ?? '—'}`}
             </p>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
@@ -344,6 +357,47 @@ export function AuditLog() {
         ))}
       </div>
 
+      {/* Date range — two DatePickers + Clear button. AND-combined with chip. */}
+      <div className="audit-range" data-testid="audit-range">
+        <div>
+          <span className="audit-range__label">From</span>
+          <DatePicker
+            value={range.from}
+            onChange={(d) => {
+              setRange((r) => {
+                return { ...r, from: d };
+              });
+            }}
+            testId="audit-range-from"
+            aria-label="Filter from date"
+          />
+        </div>
+        <div>
+          <span className="audit-range__label">To</span>
+          <DatePicker
+            value={range.to}
+            onChange={(d) => {
+              setRange((r) => {
+                return { ...r, to: d };
+              });
+            }}
+            testId="audit-range-to"
+            aria-label="Filter to date"
+          />
+        </div>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => {
+            setRange({ from: null, to: null });
+          }}
+          disabled={!rangeActive}
+          testId="audit-range-clear"
+        >
+          Clear range
+        </Button>
+      </div>
+
       {/* Events table */}
       <Card>
         <Table<ChainEvent>
@@ -354,11 +408,19 @@ export function AuditLog() {
           loading={loading}
           className="data-table audit-table"
           emptyState={
-            <EmptyState
-              icon={<AuditIcon />}
-              heading="No matching events"
-              body="No events match the current filter. Reset to ‘All events’ to see the full chain."
-            />
+            rangeActive ? (
+              <EmptyState
+                icon={<AuditIcon />}
+                heading="No matching events"
+                body="No events in the selected range."
+              />
+            ) : (
+              <EmptyState
+                icon={<AuditIcon />}
+                heading="No matching events"
+                body="No events match the current filter. Reset to ‘All events’ to see the full chain."
+              />
+            )
           }
         />
       </Card>
