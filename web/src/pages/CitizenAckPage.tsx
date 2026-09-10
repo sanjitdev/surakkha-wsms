@@ -21,6 +21,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/submit.css';
 import '../styles/inbox.css';
@@ -51,6 +52,7 @@ export function CitizenAckPage() {
   const actions = useIncidentActions();
   const [submitted, setSubmitted] = useState<{ approve: boolean; method: Method } | null>(null);
   const [ackEvents, setAckEvents] = useState<AckEvent[]>([]);
+  const { t: tAck } = useTranslation('citizenAck');
 
   const isAnjali = session.role === 'anjali';
   const incident = useMemo(
@@ -111,13 +113,13 @@ export function CitizenAckPage() {
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Citizen acknowledgement</h1>
+          <h1>{tAck('header.title')}</h1>
         </div>
         <Card>
           <EmptyState
             icon={<SendIcon />}
-            heading="Wrong persona"
-            body={`You are signed in as ${session.role}. Sign in as Anjali to acknowledge an incident.`}
+            heading={tAck('roleGate.heading')}
+            body={tAck('roleGate.body', { role: session.role })}
           />
         </Card>
       </Container>
@@ -128,8 +130,8 @@ export function CitizenAckPage() {
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Citizen acknowledgement</h1>
-          <p className="page-header__sub">Loading incident…</p>
+          <h1>{tAck('header.title')}</h1>
+          <p className="page-header__sub">{tAck('loading')}</p>
         </div>
       </Container>
     );
@@ -139,13 +141,13 @@ export function CitizenAckPage() {
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Citizen acknowledgement</h1>
+          <h1>{tAck('header.title')}</h1>
         </div>
         <Card>
           <EmptyState
             icon={<AlertIcon />}
-            heading="Incident not found"
-            body={`No active incident matches ${incidentId.slice(0, 12)}.`}
+            heading={tAck('notFound.heading')}
+            body={tAck('notFound.body', { id: incidentId.slice(0, 12) })}
           />
         </Card>
       </Container>
@@ -153,32 +155,34 @@ export function CitizenAckPage() {
   }
 
   if (submitted) {
-    const heading = submitted.approve ? 'You approved the fix' : 'You disputed the fix';
-    const body = submitted.approve
-      ? 'Thank you. The operator will seal the incident as resolved on the chain.'
-      : 'Thank you. The operator will reopen the incident for review.';
+    const heading = submitted.approve
+      ? tAck('submitted.approveHeading')
+      : tAck('submitted.disputeHeading');
+    const body = submitted.approve ? tAck('submitted.approveBody') : tAck('submitted.disputeBody');
     const badge = submitted.approve ? 'badge badge--t1' : 'badge badge--t3';
 
     return (
       <Container width={ContainerWidth.Bangla}>
         <div className="page-header">
-          <h1>Citizen acknowledgement</h1>
-          <p className="page-header__sub">Recorded on the chain.</p>
+          <h1>{tAck('header.title')}</h1>
+          <p className="page-header__sub">{tAck('submitted.subtitle')}</p>
         </div>
         <Card testId="ack-submitted-card">
           <div className="submit-receipt">
-            <span className={badge}>{submitted.approve ? 'APPROVED' : 'DISPUTED'}</span>
+            <span className={badge}>
+              {submitted.approve ? tAck('submitted.approvedBadge') : tAck('submitted.disputedBadge')}
+            </span>
             <h2 className="submit-receipt__title">{heading}</h2>
             <dl className="submit-receipt__meta">
-              <dt>Incident</dt>
+              <dt>{tAck('submitted.incidentLabel')}</dt>
               <dd>
                 <span className="mono">{incidentId.slice(0, 12)}</span>
               </dd>
-              <dt>Channel</dt>
+              <dt>{tAck('submitted.channelLabel')}</dt>
               <dd>
                 <span className="mono">{submitted.method}</span>
               </dd>
-              <dt>Decided</dt>
+              <dt>{tAck('submitted.decidedLabel')}</dt>
               <dd>
                 <span className="mono">{format('time-full', new Date().toISOString())}</span>
               </dd>
@@ -194,27 +198,30 @@ export function CitizenAckPage() {
   const summaryRaw =
     lastAckRequest !== null ? (lastAckRequest.payload as { summary?: string }).summary : null;
   const noticeSummary =
-    summaryRaw ?? `The operator confirmed the fix for incident ${incident.incident_id.slice(0, 12)}.`;
+    summaryRaw ?? tAck('form.noticeFallback', { id: incident.incident_id.slice(0, 12) });
 
   return (
     <Container width={ContainerWidth.Bangla}>
       <div className="page-header">
-        <h1 data-testid="ack-page-title">Citizen acknowledgement</h1>
+        <h1 data-testid="ack-page-title">{tAck('header.title')}</h1>
         <p className="page-header__sub">
-          {session.display_name} · incident{' '}
-          <Link to={`/inbox/${incidentId}`} className="mono">
-            {incidentId.slice(0, 12)}
-          </Link>{' '}
-          · ward {incident.ward_id ?? '—'}
+          {tAck('form.subtitle', {
+            name: session.display_name,
+            id: incidentId.slice(0, 12),
+            ward: incident.ward_id ?? '—',
+          })}
         </p>
       </div>
 
       <Card testId="ack-notice-card">
-        <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Operator notice</h3>
+        <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tAck('form.noticeHeading')}</h3>
         <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
           {lastAckRequest !== null
-            ? `Sent via ${(lastAckRequest.payload as { channel?: string }).channel ?? 'in-app'} · ${format('time-full', lastAckRequest.occurred_at)}`
-            : 'No notice was sent. You can still respond to the operator.'}
+            ? tAck('form.noticeMetaSent', {
+                channel: (lastAckRequest.payload as { channel?: string }).channel ?? 'in-app',
+                time: format('time-full', lastAckRequest.occurred_at),
+              })
+            : tAck('form.noticeMetaNone')}
         </p>
         <blockquote
           className="page-header__sub"
@@ -236,9 +243,9 @@ export function CitizenAckPage() {
 
       <div style={{ marginTop: 'var(--space-lg)' }}>
         <Card testId="ack-decision-card">
-          <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>Did the fix resolve the issue?</h3>
+          <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tAck('form.decisionHeading')}</h3>
           <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
-            Approve to close the incident. Dispute to reopen it for review.
+            {tAck('form.decisionBody')}
           </p>
 
           <div className="submit-form__actions">
@@ -251,7 +258,7 @@ export function CitizenAckPage() {
               }}
               testId="ack-approve"
             >
-              {actions.busy ? 'Sealing…' : '✅ Approve & close'}
+              {actions.busy ? tAck('form.sealing') : tAck('form.approve')}
             </Button>
             <Button
               variant="secondary"
@@ -262,7 +269,7 @@ export function CitizenAckPage() {
               }}
               testId="ack-dispute"
             >
-              {actions.busy ? 'Sealing…' : '❌ Dispute & reopen'}
+              {actions.busy ? tAck('form.sealing') : tAck('form.dispute')}
             </Button>
           </div>
         </Card>

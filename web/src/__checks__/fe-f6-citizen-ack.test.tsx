@@ -18,12 +18,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
 import { CitizenAckPage } from '../pages/CitizenAckPage';
 import { LocaleProvider } from '../hooks/useLocale';
 import { ToastProvider } from '../components/ui/ToastProvider';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
 import type { UseIncidentActionsResult } from '../hooks/useIncidentActions';
+import i18n from '../i18n';
 
 function makeSession(role: string): SessionRow {
   return {
@@ -125,25 +127,27 @@ function renderAck(role: string, incidentId: string) {
   const path = incidentId ? `/ack/${incidentId}` : '/ack';
 
   return render(
-    <LocaleProvider>
-      <ToastProvider>
-        <MemoryRouter initialEntries={[path]}>
-          <AppLayoutContext.Provider
-            value={{
-              session: makeSession(role),
-              chainHead: null,
-              chainFreshSeconds: 0,
-              logout: () => Promise.resolve(),
-            }}
-          >
-            <Routes>
-              <Route path="/ack/:incident_id" element={<CitizenAckPage />} />
-              <Route path="/ack" element={<CitizenAckPage />} />
-            </Routes>
-          </AppLayoutContext.Provider>
-        </MemoryRouter>
-      </ToastProvider>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <ToastProvider>
+          <MemoryRouter initialEntries={[path]}>
+            <AppLayoutContext.Provider
+              value={{
+                session: makeSession(role),
+                chainHead: null,
+                chainFreshSeconds: 0,
+                logout: () => Promise.resolve(),
+              }}
+            >
+              <Routes>
+                <Route path="/ack/:incident_id" element={<CitizenAckPage />} />
+                <Route path="/ack" element={<CitizenAckPage />} />
+              </Routes>
+            </AppLayoutContext.Provider>
+          </MemoryRouter>
+        </ToastProvider>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 
