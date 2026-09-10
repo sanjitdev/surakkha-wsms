@@ -35,6 +35,7 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'rea
 import { LoginPage } from './pages/LoginPage';
 import { ComingSoonPage } from './pages/ComingSoonPage';
 import { FieldQueuePage } from './pages/FieldQueuePage';
+import { FieldIncidentDetailPage } from './pages/FieldIncidentDetailPage';
 import { OperatorDashboard } from './pages/OperatorDashboard';
 import { StyleguidePage } from './pages/StyleguidePage';
 import { InboxList } from './pages/InboxList';
@@ -151,6 +152,7 @@ function RoutedSurface() {
         <Route path="/audit-log" element={<AuditLog />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/field" element={<FieldQueuePage />} />
+        <Route path="/field/incident-detail" element={<FieldIncidentDetailPage />} />
         <Route path="/field/*" element={<FieldQueuePage />} />
         {/* /submit is role-gated inside <SubmitReportPage /> so the
             route stays registered for every persona but the page
