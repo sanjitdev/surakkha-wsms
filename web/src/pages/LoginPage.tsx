@@ -113,7 +113,6 @@ export function LoginPage() {
         <div className="brand-panel__live">
           <span className="brand-panel__live-dot" aria-hidden="true"></span>
           <span>
-            chain{' '}
             {status === 'ready' && chainHeight !== null
               ? t('login:chain.liveWithCount', { count: chainHeight })
               : status === 'pending'
