@@ -28,13 +28,16 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useTheme } from '../hooks/useTheme';
 import { useLocale } from '../hooks/useLocale';
+import { useAnjaliFilter } from '../hooks/useAnjaliFilter';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { resetEverything } from '../mocks/reset';
+import { DatePicker } from '../components/ui/DatePicker';
 import { ContainerWidth, Locale, Theme } from '../types/domain';
 
 export function Settings() {
   const { theme, setTheme } = useTheme();
   const { locale, setLocale } = useLocale();
+  const { from: anjaliFrom, setFrom: setAnjaliFrom, clear: clearAnjaliFrom } = useAnjaliFilter();
   const { session } = useAppLayout();
   const [resetting, setResetting] = useState(false);
 
@@ -137,6 +140,38 @@ export function Settings() {
           </div>
         </div>
       </Card>
+
+      {/* ── Anjali IncidentDate filter (role-gated) ────────────── */}
+      {session.role === 'anjali' ? (
+        <Card testId="settings-anjali-card">
+          <div className="settings-row">
+            <div className="settings-row__label">
+              <h3 className="settings-row__title">Citizen reports</h3>
+              <p className="settings-row__sub">
+                Scope citizen reports to those filed from this date forward. Affects the reports
+                you see on the dashboard. Persists on this device.
+              </p>
+            </div>
+            <div className="settings-row__control" data-testid="settings-anjali-control">
+              <DatePicker
+                value={anjaliFrom}
+                onChange={setAnjaliFrom}
+                testId="settings-anjali-from"
+                aria-label="Filter citizen reports from date"
+              />
+              <Button
+                variant="secondary"
+                size="md"
+                onClick={clearAnjaliFrom}
+                disabled={anjaliFrom === null}
+                testId="settings-anjali-clear"
+              >
+                Clear
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ) : null}
 
       {/* ── Role / persona section (read-only) ─────────────────── */}
       <Card testId="settings-role-card">

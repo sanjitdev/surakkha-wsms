@@ -29,6 +29,7 @@ import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
 import { useRelativeTime } from '../hooks/useRelativeTime';
+import { useNumberFormatter } from '../hooks/useNumberFormatter';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
 import type { IncidentSummary } from '../types/domain';
@@ -63,6 +64,7 @@ export function OperatorDashboard() {
   const { session } = useAppLayout();
   const { format: formatTime } = useDateFormatter();
   const { formatRelative } = useRelativeTime();
+  const { format: formatNum } = useNumberFormatter();
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
   const { incidents, loading: incLoading } = useIncidents();
@@ -339,8 +341,8 @@ export function OperatorDashboard() {
           <div>
             <h1>Dashboard</h1>
             <div className="page-header__sub">
-              {openIncidents.length} {openIncidents.length === 1 ? 'ward' : 'wards'} ·{' '}
-              {sensors.length} sensors online
+              {formatNum(openIncidents.length)} {openIncidents.length === 1 ? 'ward' : 'wards'} ·{' '}
+              {formatNum(sensors.length)} sensors online
             </div>
           </div>
           <div className="layout-toggle" role="radiogroup" aria-label="Dashboard layout">
@@ -415,7 +417,7 @@ export function OperatorDashboard() {
                   <span className="kpi__label">Active incidents</span>
                 </div>
                 <div className="kpi__value">
-                  {openIncidents.length}
+                  {formatNum(openIncidents.length)}
                   <span className="kpi__unit">open</span>
                 </div>
               </div>
@@ -441,7 +443,7 @@ export function OperatorDashboard() {
                   <span className="kpi__label">Pending signatures</span>
                 </div>
                 <div className="kpi__value">
-                  {pendingSigs}
+                  {formatNum(pendingSigs)}
                   <span className="kpi__unit">awaiting</span>
                 </div>
               </div>
@@ -450,7 +452,7 @@ export function OperatorDashboard() {
                   <span className="kpi__label">Notices issued</span>
                 </div>
                 <div className="kpi__value">
-                  {noticesToday}
+                  {formatNum(noticesToday)}
                   <span className="kpi__unit">today</span>
                 </div>
               </div>
@@ -508,7 +510,7 @@ export function OperatorDashboard() {
                   <span className="kpi__label">Active incidents</span>
                 </div>
                 <div className="kpi__value">
-                  {openIncidents.length}
+                  {formatNum(openIncidents.length)}
                   <span className="kpi__unit">open</span>
                 </div>
                 <div style={{ marginTop: 'var(--space-md)' }}>
@@ -554,7 +556,7 @@ export function OperatorDashboard() {
                   <span className="kpi__label">Pending sigs</span>
                 </div>
                 <div className="kpi__value">
-                  {pendingSigs}
+                  {formatNum(pendingSigs)}
                   <span className="kpi__unit">awaiting</span>
                 </div>
               </div>
@@ -563,7 +565,7 @@ export function OperatorDashboard() {
                   <span className="kpi__label">Notices issued</span>
                 </div>
                 <div className="kpi__value">
-                  {noticesToday}
+                  {formatNum(noticesToday)}
                   <span className="kpi__unit">today</span>
                 </div>
               </div>
@@ -576,7 +578,7 @@ export function OperatorDashboard() {
               <div className="kpi-strip__cell kpi">
                 <div className="kpi__label">Active incidents</div>
                 <div className="kpi__value">
-                  {openIncidents.length}
+                  {formatNum(openIncidents.length)}
                   <span className="kpi__unit">open</span>
                 </div>
               </div>
@@ -596,14 +598,14 @@ export function OperatorDashboard() {
               <div className="kpi-strip__cell kpi">
                 <div className="kpi__label">Pending sigs</div>
                 <div className="kpi__value">
-                  {pendingSigs}
+                  {formatNum(pendingSigs)}
                   <span className="kpi__unit">awaiting</span>
                 </div>
               </div>
               <div className="kpi-strip__cell kpi">
                 <div className="kpi__label">Notices issued</div>
                 <div className="kpi__value">
-                  {noticesToday}
+                  {formatNum(noticesToday)}
                   <span className="kpi__unit">today</span>
                 </div>
               </div>
@@ -663,7 +665,7 @@ export function OperatorDashboard() {
               <div className="chart-card">
                 <div className="chart-card__head">
                   <h3 className="chart-card__title">Sensor history — last 24h</h3>
-                  <span className="chart-card__meta">{sensors.length} sensors · live</span>
+                  <span className="chart-card__meta">{formatNum(sensors.length)} sensors · live</span>
                 </div>
                 <div className="chart-card__body">
                   <svg
