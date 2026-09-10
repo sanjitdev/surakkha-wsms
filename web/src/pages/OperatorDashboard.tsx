@@ -23,11 +23,13 @@
  *     inline aside/top-chrome.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { Table } from '../components/ui/Table';
+import type { TableColumn } from '../components/ui/Table.types';
 import type { IncidentSummary } from '../types/domain';
 
 type Layout = 'a' | 'b' | 'c';
@@ -131,6 +133,198 @@ export function OperatorDashboard() {
   ).length;
   const pendingSigs = recent.filter((e) => e.event_type === 'SignatureAttestation').length; // rough proxy
   const pHAvg = computePHAvg(sensors);
+
+  // FE-B5b-migrate: column descriptors for the 3 dashboard tables. Each
+  // preserves the original `<th>` class names + custom cell renderers
+  // (severity dots, badges, action links) so the visual layout is identical
+  // post-migration. Cards' `<thead>` is now owned by Table primitive.
+  const sensorColumns: TableColumn<SensorRow>[] = useMemo(
+    () => [
+      {
+        key: 'severity',
+        header: '',
+        className: 'col-warn',
+        render: () => <span className="row-severity-dot" style={{ background: 'var(--warning)' }} />,
+      },
+      {
+        key: 'sensor_id',
+        header: 'Ward / Sensor',
+        className: 'col-title',
+        render: (s: SensorRow) => (
+          <>
+            {s.ward_id} · <span className="mono">{s.sensor_id}</span>
+          </>
+        ),
+      },
+      { key: 'parameter', header: 'Issue', className: 'col-sensor' },
+      {
+        key: 'last_value',
+        header: 'Reading',
+        className: 'col-value',
+        render: (s: SensorRow) =>
+          typeof s.last_value === 'number' ? s.last_value.toFixed(1) : String(s.last_value),
+      },
+      {
+        key: 'last_at',
+        header: 'Detected',
+        className: 'col-time',
+        render: (s: SensorRow) => formatTime('time', s.last_at),
+      },
+      {
+        key: 'severity-badge',
+        header: 'Severity',
+        className: 'col-status',
+        render: () => <span className="badge badge--t2">T2</span>,
+      },
+      {
+        key: 'action',
+        header: '',
+        className: 'col-action',
+        render: () => <a href="/sensors">Inspect →</a>,
+      },
+    ],
+    [formatTime],
+  );
+
+  const chainColumns: TableColumn<ChainEventLite>[] = useMemo(
+    () => [
+      {
+        key: 'occurred_at',
+        header: 'Time',
+        className: 'col-time',
+        render: (e) => formatTime('time', e.occurred_at),
+      },
+      { key: 'event_type', header: 'What happened', render: (e) => summarizeEvent(e) },
+      {
+        key: 'where',
+        header: 'Where',
+        render: (e) => (e.payload as { ward_id?: string }).ward_id ?? '—',
+      },
+      {
+        key: 'status',
+        header: 'Status',
+        className: 'col-status',
+        render: (e) => (
+          <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
+            {statusBadgeLabel(e.event_type)}
+          </span>
+        ),
+      },
+    ],
+    [formatTime],
+  );
+
+  const threadColumns: TableColumn<IncidentSummary>[] = useMemo(
+    () => [
+      {
+        key: 'severity-dot',
+        header: '',
+        className: 'col-warn',
+        render: (i) => (
+          <span
+            className="row-severity-dot"
+            style={{ background: severityColor(i.severity) }}
+          />
+        ),
+      },
+      {
+        key: 'incident_id',
+        header: 'Thread',
+        render: (i) => `${i.ward_id ?? '—'} incident`,
+      },
+      {
+        key: 'status',
+        header: 'Status / blocker',
+        render: (i) => i.status,
+      },
+      {
+        key: 'last_occurred_at',
+        header: 'Opened',
+        className: 'col-time',
+        render: (i) => relativeTime(i.last_occurred_at),
+      },
+      {
+        key: 'severity-badge',
+        header: 'Severity',
+        className: 'col-status',
+        render: (i) => (
+          <span className={`badge badge--${severityBadgeClass(i.severity)}`}>{i.severity}</span>
+        ),
+      },
+      {
+        key: 'action',
+        header: '',
+        className: 'col-action',
+        render: () => <a href="/inbox">Open →</a>,
+      },
+    ],
+    [],
+  );
+
+  const threadColumnsCompact: TableColumn<IncidentSummary>[] = useMemo(
+    () => [
+      {
+        key: 'severity-dot',
+        header: '',
+        className: 'col-warn',
+        render: (i) => (
+          <span
+            className="row-severity-dot"
+            style={{ background: severityColor(i.severity) }}
+          />
+        ),
+      },
+      {
+        key: 'incident_id',
+        header: 'Thread',
+        render: (i) => `${i.ward_id ?? '—'} incident`,
+      },
+      {
+        key: 'last_occurred_at',
+        header: 'Opened',
+        className: 'col-time',
+        render: (i) => relativeTime(i.last_occurred_at),
+      },
+      {
+        key: 'severity-badge',
+        header: 'Sev.',
+        className: 'col-status',
+        render: (i) => (
+          <span className={`badge badge--${severityBadgeClass(i.severity)}`}>{i.severity}</span>
+        ),
+      },
+      {
+        key: 'action',
+        header: '',
+        className: 'col-action',
+        render: () => <a href="/inbox">Open →</a>,
+      },
+    ],
+    [],
+  );
+
+  const chainColumnsCompact: TableColumn<ChainEventLite>[] = useMemo(
+    () => [
+      {
+        key: 'occurred_at',
+        header: 'Time',
+        className: 'col-time',
+        render: (e) => formatTime('time', e.occurred_at),
+      },
+      { key: 'event_type', header: 'What', render: (e) => summarizeEvent(e) },
+      {
+        key: 'status',
+        header: 'Status',
+        className: 'col-status',
+        render: (e) => (
+          <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
+            {statusBadgeLabel(e.event_type)}
+          </span>
+        ),
+      },
+    ],
+    [formatTime],
+  );
 
   // Pre-FE-1.6a the page returned <div className="app-shell"><aside
   // className="sidebar">...<header className="top-chrome">...</header>{children}.
@@ -265,111 +459,26 @@ export function OperatorDashboard() {
                 <div className="data-card__head">
                   <h3 className="data-card__title">Sensor fleet</h3>
                 </div>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="col-warn" aria-label="Severity"></th>
-                      <th>Ward / Sensor</th>
-                      <th className="col-sensor">Issue</th>
-                      <th className="col-value">Reading</th>
-                      <th className="col-time">Detected</th>
-                      <th className="col-status">Severity</th>
-                      <th className="col-action"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sensors.slice(0, 4).map((s) => (
-                      <tr key={s.sensor_id}>
-                        <td className="col-warn">
-                          <span
-                            className="row-severity-dot"
-                            style={{ background: 'var(--warning)' }}
-                          ></span>
-                        </td>
-                        <td className="col-title">
-                          {s.ward_id} · <span className="mono">{s.sensor_id}</span>
-                        </td>
-                        <td className="col-sensor">{s.parameter}</td>
-                        <td className="col-value">
-                          {typeof s.last_value === 'number'
-                            ? s.last_value.toFixed(1)
-                            : s.last_value}
-                        </td>
-                        <td className="col-time">
-                          {formatTime('time', s.last_at)}
-                        </td>
-                        <td className="col-status">
-                          <span className="badge badge--t2">T2</span>
-                        </td>
-                        <td className="col-action">
-                          <a href="/sensors">Inspect →</a>
-                        </td>
-                      </tr>
-                    ))}
-                    {sensors.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={7}
-                          style={{
-                            textAlign: 'center',
-                            fontFamily: 'var(--font-family-mono)',
-                            fontSize: 10,
-                            color: 'var(--fg-tertiary)',
-                          }}
-                        >
-                          no sensors reported
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <Table<SensorRow>
+                  columns={sensorColumns}
+                  rows={sensors.slice(0, 4)}
+                  rowKey="sensor_id"
+                  testId="table-sensors"
+                  className="data-table"
+                />
               </div>
 
               <div className="card data-card">
                 <div className="data-card__head">
                   <h3 className="data-card__title">Today on chain</h3>
                 </div>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="col-time">Time</th>
-                      <th>What happened</th>
-                      <th>Where</th>
-                      <th className="col-status">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recent.slice(0, 6).map((e) => (
-                      <tr key={e.event_id}>
-                        <td className="col-time">
-                          {formatTime('time', e.occurred_at)}
-                        </td>
-                        <td>{summarizeEvent(e)}</td>
-                        <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
-                        <td className="col-status">
-                          <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
-                            {statusBadgeLabel(e.event_type)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                    {recent.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={4}
-                          style={{
-                            textAlign: 'center',
-                            fontFamily: 'var(--font-family-mono)',
-                            fontSize: 10,
-                            color: 'var(--fg-tertiary)',
-                          }}
-                        >
-                          chain empty
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <Table<ChainEventLite>
+                  columns={chainColumns}
+                  rows={recent.slice(0, 6)}
+                  rowKey="event_id"
+                  testId="table-chain"
+                  className="data-table"
+                />
               </div>
             </div>
 
@@ -378,56 +487,13 @@ export function OperatorDashboard() {
                 <div className="data-card__head">
                   <h3 className="data-card__title">Open threads</h3>
                 </div>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="col-warn" aria-label="Severity"></th>
-                      <th>Thread</th>
-                      <th>Status / blocker</th>
-                      <th className="col-time">Opened</th>
-                      <th className="col-status">Severity</th>
-                      <th className="col-action"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {openIncidents.slice(0, 3).map((i) => (
-                      <tr key={i.incident_id}>
-                        <td className="col-warn">
-                          <span
-                            className="row-severity-dot"
-                            style={{ background: severityColor(i.severity) }}
-                          ></span>
-                        </td>
-                        <td>{i.ward_id ?? '—'} incident</td>
-                        <td>{i.status}</td>
-                        <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
-                        <td className="col-status">
-                          <span className={`badge badge--${severityBadgeClass(i.severity)}`}>
-                            {i.severity}
-                          </span>
-                        </td>
-                        <td className="col-action">
-                          <a href="/inbox">Open →</a>
-                        </td>
-                      </tr>
-                    ))}
-                    {openIncidents.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          style={{
-                            textAlign: 'center',
-                            fontFamily: 'var(--font-family-mono)',
-                            fontSize: 10,
-                            color: 'var(--fg-tertiary)',
-                          }}
-                        >
-                          no open threads — chain is clean
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                <Table<IncidentSummary>
+                  columns={threadColumns}
+                  rows={openIncidents.slice(0, 3)}
+                  rowKey="incident_id"
+                  testId="table-threads"
+                  className="data-table"
+                />
               </div>
             </div>
           </div>
@@ -453,32 +519,13 @@ export function OperatorDashboard() {
                 <div className="data-card__head">
                   <h3 className="data-card__title">Today on chain</h3>
                 </div>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="col-time">Time</th>
-                      <th>What happened</th>
-                      <th>Where</th>
-                      <th className="col-status">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recent.slice(0, 6).map((e) => (
-                      <tr key={e.event_id}>
-                        <td className="col-time">
-                          {formatTime('time', e.occurred_at)}
-                        </td>
-                        <td>{summarizeEvent(e)}</td>
-                        <td>{(e.payload as { ward_id?: string }).ward_id ?? '—'}</td>
-                        <td className="col-status">
-                          <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
-                            {statusBadgeLabel(e.event_type)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <Table<ChainEventLite>
+                  columns={chainColumns}
+                  rows={recent.slice(0, 6)}
+                  rowKey="event_id"
+                  testId="table-chain"
+                  className="data-table"
+                />
               </div>
             </div>
             <p className="section-label">Today at a glance</p>
@@ -564,117 +611,38 @@ export function OperatorDashboard() {
                 <div className="data-card__head">
                   <h3 className="data-card__title">Sensor fleet</h3>
                 </div>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th className="col-warn"></th>
-                      <th>Ward / Sensor</th>
-                      <th className="col-sensor">Issue</th>
-                      <th className="col-value">Reading</th>
-                      <th className="col-time">Detected</th>
-                      <th className="col-status">Severity</th>
-                      <th className="col-action"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sensors.slice(0, 4).map((s) => (
-                      <tr key={s.sensor_id}>
-                        <td className="col-warn">
-                          <span
-                            className="row-severity-dot"
-                            style={{ background: 'var(--warning)' }}
-                          ></span>
-                        </td>
-                        <td className="col-title">
-                          {s.ward_id} · <span className="mono">{s.sensor_id}</span>
-                        </td>
-                        <td className="col-sensor">{s.parameter}</td>
-                        <td className="col-value">
-                          {typeof s.last_value === 'number'
-                            ? s.last_value.toFixed(1)
-                            : s.last_value}
-                        </td>
-                        <td className="col-time">
-                          {formatTime('time', s.last_at)}
-                        </td>
-                        <td className="col-status">
-                          <span className="badge badge--t2">T2</span>
-                        </td>
-                        <td className="col-action">
-                          <a href="/sensors">Inspect →</a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <Table<SensorRow>
+                  columns={sensorColumns}
+                  rows={sensors.slice(0, 4)}
+                  rowKey="sensor_id"
+                  testId="table-sensors"
+                  className="data-table"
+                />
               </div>
               <div className="right-rail">
                 <div className="card data-card">
                   <div className="data-card__head">
                     <h3 className="data-card__title">Open threads</h3>
                   </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th className="col-warn"></th>
-                        <th>Thread</th>
-                        <th className="col-time">Opened</th>
-                        <th className="col-status">Sev.</th>
-                        <th className="col-action"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {openIncidents.slice(0, 3).map((i) => (
-                        <tr key={i.incident_id}>
-                          <td className="col-warn">
-                            <span
-                              className="row-severity-dot"
-                              style={{ background: severityColor(i.severity) }}
-                            ></span>
-                          </td>
-                          <td>{i.ward_id ?? '—'} incident</td>
-                          <td className="col-time">{relativeTime(i.last_occurred_at)}</td>
-                          <td className="col-status">
-                            <span className={`badge badge--${severityBadgeClass(i.severity)}`}>
-                              {i.severity}
-                            </span>
-                          </td>
-                          <td className="col-action">
-                            <a href="/inbox">Open →</a>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Table<IncidentSummary>
+                    columns={threadColumnsCompact}
+                    rows={openIncidents.slice(0, 3)}
+                    rowKey="incident_id"
+                    testId="table-threads"
+                    className="data-table"
+                  />
                 </div>
                 <div className="card data-card">
                   <div className="data-card__head">
                     <h3 className="data-card__title">Today on chain</h3>
                   </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr>
-                        <th className="col-time">Time</th>
-                        <th>What</th>
-                        <th className="col-status">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {recent.slice(0, 6).map((e) => (
-                        <tr key={e.event_id}>
-                          <td className="col-time">
-                            {formatTime('time', e.occurred_at)}
-                          </td>
-                          <td>{summarizeEvent(e)}</td>
-                          <td className="col-status">
-                            <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
-                              {statusBadgeLabel(e.event_type)}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <Table<ChainEventLite>
+                    columns={chainColumnsCompact}
+                    rows={recent.slice(0, 6)}
+                    rowKey="event_id"
+                    testId="table-chain"
+                    className="data-table"
+                  />
                 </div>
               </div>
             </div>

@@ -11,13 +11,15 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
-import { InboxRow } from '../components/pages/InboxRow';
+import { Table } from '../components/ui/Table';
+import type { TableColumn } from '../components/ui/Table.types';
 import { FilterChip } from '../components/pages/FilterChip';
 import type { InboxRowFilter, InboxRow as InboxRowType } from '../types/inbox';
 import { ContainerWidth } from '../types/domain';
@@ -115,22 +117,107 @@ export function InboxList() {
       T0: rows.filter((r) => r.severity === 'T0').length,
     };
   }, [rows]);
-  const allSelected = visibleRows.length > 0 && visibleRows.every((r) => selectedRows.has(r.id));
-  const toggleAll = () => {
-    const next = new Set(selectedRows);
-
-    if (allSelected) visibleRows.forEach((r) => next.delete(r.id));
-    else visibleRows.forEach((r) => next.add(r.id));
-    setSelectedRows(next);
-  };
-  const toggleOne = (id: string) => {
-    const next = new Set(selectedRows);
-
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    setSelectedRows(next);
-  };
   const total = Math.max(1, rows.length);
+
+  const inboxColumns: TableColumn<InboxRowType>[] = useMemo(
+    () => [
+      {
+        key: 'severity-dot',
+        header: '',
+        render: (r) => (
+          <span
+            className="row-severity-dot"
+            style={{
+              background:
+                r.severity === 'T3'
+                  ? 'var(--danger)'
+                  : r.severity === 'T2'
+                    ? 'var(--warning)'
+                    : r.severity === 'T1'
+                      ? 'var(--info)'
+                      : 'var(--band-medium)',
+            }}
+            aria-hidden="true"
+          />
+        ),
+        className: 'col-warn',
+      },
+      {
+        key: 'thread',
+        header: 'Thread',
+        render: (r) => (
+          <div
+            className={`data-table--inbox__tr${r.isUrgent ? ' row-urgent' : ''}${
+              selectedRows.has(r.id) ? ' is-selected' : ''
+            }`}
+            data-testid="inbox-row"
+            data-priority={r.severity.toLowerCase()}
+            data-read={r.read ? 'true' : 'false'}
+          >
+            <Link to={r.href} className="inbox-row__title-link">
+              <strong>{r.title}</strong>
+              <div className="row-sub">{r.meta}</div>
+            </Link>
+          </div>
+        ),
+        className: 'col-title',
+      },
+      {
+        key: 'where',
+        header: 'Where',
+        render: (r) => (
+          <>
+            <span className="mono">{r.where}</span>
+            <div className="row-sub">{r.whereSub}</div>
+          </>
+        ),
+        className: 'col-where',
+      },
+      {
+        key: 'ownerName',
+        header: 'Owner',
+        render: (r) => (
+          <>
+            <span
+              className="avatar-dot"
+              style={{
+                background:
+                  r.ownerKind === 'reporter'
+                    ? 'var(--success)'
+                    : r.ownerKind === 'tech'
+                      ? 'var(--brand-500)'
+                      : r.ownerKind === 'system'
+                        ? 'var(--fg-tertiary)'
+                        : r.ownerKind === 'vendor'
+                          ? 'var(--warning)'
+                          : 'var(--brand-500)',
+              }}
+              aria-hidden="true"
+            >
+              {r.ownerName ? r.ownerName.slice(0, 2) : '?'}
+            </span>
+            {r.ownerName}
+          </>
+        ),
+        className: 'col-owner',
+      },
+      {
+        key: 'severity',
+        header: 'Severity',
+        render: (r) => (
+          <span className={`badge badge--${r.severity.toLowerCase()}`}>{r.severity}</span>
+        ),
+        className: 'col-status',
+      },
+      {
+        key: 'action',
+        header: '',
+        render: (r) => <a href={r.action.href}>{r.action.label} →</a>,
+        className: 'col-action',
+      },
+    ],
+    [selectedRows],
+  );
 
   return (
     <Container width={ContainerWidth.Wide}>
@@ -236,55 +323,44 @@ export function InboxList() {
               </span>
             </div>
             {loading ? (
-              <div
-                style={{
-                  padding: 'var(--space-lg)',
-                  fontFamily: 'var(--font-family-mono)',
-                  fontSize: 10,
-                  color: 'var(--fg-tertiary)',
-                }}
-              >
-                loading queue from chain…
-              </div>
+              <Table<InboxRowType>
+                columns={inboxColumns}
+                rows={visibleRows}
+                rowKey="id"
+                testId="table-inbox"
+                selectable
+                selectedRows={selectedRows}
+                onSelectionChange={setSelectedRows}
+                loading
+              />
             ) : rows.length === 0 ? (
-              <EmptyState
-                icon={<span>○</span>}
-                heading="No incidents"
-                body="Chain unreachable — pull-to-refresh in Phase 2"
+              <Table<InboxRowType>
+                columns={inboxColumns}
+                rows={visibleRows}
+                rowKey="id"
+                testId="table-inbox"
+                selectable
+                selectedRows={selectedRows}
+                onSelectionChange={setSelectedRows}
+                emptyState={
+                  <EmptyState
+                    icon={<span>○</span>}
+                    heading="No incidents"
+                    body="Chain unreachable — pull-to-refresh in Phase 2"
+                  />
+                }
               />
             ) : (
-              <table className="data-table data-table--inbox" style={{ width: '100%' }}>
-                <thead>
-                  <tr>
-                    <th className="col-check">
-                      <input
-                        type="checkbox"
-                        aria-label="Select all"
-                        checked={allSelected}
-                        onChange={toggleAll}
-                      />
-                    </th>
-                    <th className="col-warn" aria-label="Severity" />
-                    <th>Thread</th>
-                    <th className="col-where">Where</th>
-                    <th className="col-owner">Owner</th>
-                    <th className="col-status">Severity</th>
-                    <th className="col-action" />
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleRows.map((r) => (
-                    <InboxRow
-                      key={r.id}
-                      row={r}
-                      selected={selectedRows.has(r.id)}
-                      onToggle={() => {
-                        toggleOne(r.id);
-                      }}
-                    />
-                  ))}
-                </tbody>
-              </table>
+              <Table<InboxRowType>
+                columns={inboxColumns}
+                rows={visibleRows}
+                rowKey="id"
+                testId="table-inbox"
+                selectable
+                selectedRows={selectedRows}
+                onSelectionChange={setSelectedRows}
+                className="data-table--inbox"
+              />
             )}
             <div className="inbox-bulkbar" hidden={selectedRows.size === 0}>
               <span className="inbox-bulkbar__count">

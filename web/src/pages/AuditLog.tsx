@@ -20,6 +20,8 @@ import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
 import { FilterChip } from '../components/pages/FilterChip';
 import { Button } from '../components/ui/Button';
+import { Table } from '../components/ui/Table';
+import type { TableColumn } from '../components/ui/Table.types';
 import { AuditIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
@@ -128,6 +130,99 @@ export function AuditLog() {
 
     return events.filter(chip.match);
   }, [events, filter]);
+
+  const auditColumns: TableColumn<ChainEvent>[] = useMemo(
+    () => [
+      {
+        key: 'occurred_at',
+        header: 'Time',
+        sortable: true,
+        className: 'col-time',
+        render: (e) => <span className="mono">{formatTime('time-24', e.occurred_at)}</span>,
+      },
+      {
+        key: 'severity-dot',
+        header: '',
+        className: 'col-warn',
+        render: (e) => (
+          <span
+            className="row-severity-dot"
+            style={{
+              background: e.event_type.includes('Error')
+                ? 'var(--danger)'
+                : 'var(--success)',
+            }}
+            aria-hidden="true"
+          />
+        ),
+      },
+      {
+        key: 'event_type',
+        header: 'Event',
+        sortable: true,
+        render: (e) => (
+          <>
+            <strong>{e.event_type}</strong>
+            <div
+              className="row-sub"
+              style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
+            >
+              block #{e.height}
+            </div>
+          </>
+        ),
+      },
+      {
+        key: 'block_hash',
+        header: 'Ward / chain-ref',
+        className: 'col-where',
+        render: (e) => {
+          const ward = (e.payload as { ward_id?: string }).ward_id ?? '—';
+
+          return (
+            <>
+              <span className="mono">{ward}</span>
+              <div className="row-sub mono" style={{ fontSize: 'var(--font-size-xs)' }}>
+                {truncateHash(e.block_hash)}
+              </div>
+            </>
+          );
+        },
+      },
+      {
+        key: 'actor_identity',
+        header: 'Actor',
+        render: (e) => <span className="mono">{e.actor_identity?.display ?? '—'}</span>,
+      },
+      {
+        key: 'type-badge',
+        header: 'Type',
+        className: 'col-status',
+        render: (e) => (
+          <span className="badge badge--tier">{e.event_type.split(/(?=[A-Z])/)[0]}</span>
+        ),
+      },
+      {
+        key: 'copy',
+        header: '',
+        className: 'col-action',
+        render: (e) => (
+          <button
+            type="button"
+            className="audit-copy"
+            onClick={() => {
+              void copyToClipboard(e.block_hash);
+            }}
+            title="Copy block hash"
+            data-testid={`audit-copy-${e.event_id}`}
+          >
+            Copy
+          </button>
+        ),
+      },
+    ],
+    [formatTime],
+  );
 
   return (
     <Container width={ContainerWidth.Wide}>
@@ -251,93 +346,21 @@ export function AuditLog() {
 
       {/* Events table */}
       <Card>
-        {loading ? (
-          <div data-testid="audit-loading">Loading…</div>
-        ) : visible.length === 0 ? (
-          <EmptyState
-            icon={<AuditIcon />}
-            heading="No matching events"
-            body="No events match the current filter. Reset to ‘All events’ to see the full chain."
-          />
-        ) : (
-          <table
-            className="data-table audit-table"
-            data-testid="audit-table"
-            aria-label="Audit events"
-          >
-            <thead>
-              <tr>
-                <th className="col-time">Time</th>
-                <th aria-label="Severity" className="col-warn"></th>
-                <th>Event</th>
-                <th className="col-where">Ward / chain-ref</th>
-                <th>Actor</th>
-                <th className="col-status">Type</th>
-                <th className="col-action"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {visible.map((e) => {
-                const ward = (e.payload as { ward_id?: string }).ward_id ?? '—';
-
-                return (
-                  <tr
-                    key={e.event_id}
-                    className="data-table--inbox__tr audit-row"
-                    data-testid={`audit-row-${e.event_id}`}
-                  >
-                    <td className="col-time mono">{formatTime('time-24', e.occurred_at)}</td>
-                    <td className="col-warn">
-                      <span
-                        className="row-severity-dot"
-                        style={{
-                          background: e.event_type.includes('Error')
-                            ? 'var(--danger)'
-                            : 'var(--success)',
-                        }}
-                        aria-hidden="true"
-                      />
-                    </td>
-                    <td>
-                      <strong>{e.event_type}</strong>
-                      <div
-                        className="row-sub"
-                        style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
-                      >
-                        block #{e.height}
-                      </div>
-                    </td>
-                    <td className="col-where">
-                      <span className="mono">{ward}</span>
-                      <div className="row-sub mono" style={{ fontSize: 'var(--font-size-xs)' }}>
-                        {truncateHash(e.block_hash)}
-                      </div>
-                    </td>
-                    <td className="mono">{e.actor_identity?.display ?? '—'}</td>
-                    <td>
-                      <span className="badge badge--tier">
-                        {e.event_type.split(/(?=[A-Z])/)[0]}
-                      </span>
-                    </td>
-                    <td className="col-action">
-                      <button
-                        type="button"
-                        className="audit-copy"
-                        onClick={() => {
-                          void copyToClipboard(e.block_hash);
-                        }}
-                        title="Copy block hash"
-                        data-testid={`audit-copy-${e.event_id}`}
-                      >
-                        Copy
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        )}
+        <Table<ChainEvent>
+          columns={auditColumns}
+          rows={visible}
+          rowKey="event_id"
+          testId="audit-table"
+          loading={loading}
+          className="data-table audit-table"
+          emptyState={
+            <EmptyState
+              icon={<AuditIcon />}
+              heading="No matching events"
+              body="No events match the current filter. Reset to ‘All events’ to see the full chain."
+            />
+          }
+        />
       </Card>
     </Container>
   );

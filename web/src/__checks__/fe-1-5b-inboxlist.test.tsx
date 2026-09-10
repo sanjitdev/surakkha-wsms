@@ -201,7 +201,7 @@ describe('InboxList bulk-bar', () => {
     // Initially hidden — no rows selected.
     expect(bulkbar?.hasAttribute('hidden')).toBe(true);
 
-    const firstRowCheck = screen.getAllByTestId(/^inbox-row-check-/).at(0);
+    const firstRowCheck = screen.getAllByTestId(/^table-inbox-select-(?!all$)/).at(0);
 
     expect(firstRowCheck).toBeDefined();
     act(() => {
@@ -221,14 +221,16 @@ describe('InboxList bulk-bar', () => {
   it('select-all toggles every visible row on click, deselects them on a second click', async () => {
     await renderInboxAndWaitForRows();
 
-    const selectAll: HTMLInputElement = screen.getByRole('checkbox', { name: 'Select all' });
+    // FE-B5b-migrate: Table primitive's select-all uses
+    // `aria-label="Select all rows on this page"` (vs. legacy "Select all").
+    // The behaviour (toggle all on/off + bulkbar visibility) is preserved.
+    const selectAll: HTMLInputElement = screen.getByTestId('table-inbox-select-all');
 
     expect(selectAll.checked).toBe(false);
 
     // First click — select-all: every visible row gets is-selected, bulk-bar
     // becomes visible with the row count, and the select-all checkbox flips
-    // to checked. Locks the `else visibleRows.forEach((r) => next.add(r.id))`
-    // branch in `InboxList.tsx:117`.
+    // to checked.
     act(() => {
       fireEvent.click(selectAll);
     });
@@ -247,11 +249,7 @@ describe('InboxList bulk-bar', () => {
     expect(selectAll.checked).toBe(true);
 
     // Second click — deselect-all: every row loses is-selected, bulk-bar
-    // hides, and the select-all checkbox returns to unchecked. Locks the
-    // `if (allSelected) visibleRows.forEach((r) => next.delete(r.id))`
-    // branch in `InboxList.tsx:117`. Without this assertion a regression
-    // that removed the deselect branch would silently pass the first
-    // half of this test (Set semantics make the missing delete a no-op).
+    // hides, and the select-all checkbox returns to unchecked.
     act(() => {
       fireEvent.click(selectAll);
     });
