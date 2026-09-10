@@ -21,7 +21,6 @@ function readStored(): Date | null {
     return null;
   }
 }
-
 function writeStored(d: Date | null): void {
   if (typeof window === 'undefined') return;
   try {
@@ -31,7 +30,6 @@ function writeStored(d: Date | null): void {
     /* ignore — localStorage may throw in privacy mode */
   }
 }
-
 export function useAnjaliFilter(): {
   from: Date | null;
   setFrom: (d: Date | null) => void;

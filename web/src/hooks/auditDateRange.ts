@@ -34,7 +34,6 @@ export function localDayKey(d: Date, _locale: string): string {
 
   return `${y}-${m}-${day}`;
 }
-
 /**
  * Returns true if `occurredAt` falls within `[from, to]` at local-day
  * granularity. `null` bounds are unbounded on that side.
@@ -46,6 +45,7 @@ export function isInRange(
   locale: string,
 ): boolean {
   const ev = new Date(occurredAt);
+
   if (Number.isNaN(ev.getTime())) return true;
   if (from && localDayKey(ev, locale) < localDayKey(from, locale)) return false;
   if (to && localDayKey(ev, locale) > localDayKey(to, locale)) return false;

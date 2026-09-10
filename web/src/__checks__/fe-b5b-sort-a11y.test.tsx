@@ -191,7 +191,7 @@ describe('FE-B5b-sort-a11y resize cleanup', () => {
       return (
         <>
           {open ? <Table<Row> columns={COLS_RESIZABLE} rows={ROWS_NULL} testId="sort-a11y" /> : null}
-          <button type="button" data-testid="unmount-trigger" onClick={() => setOpen(false)}>
+          <button type="button" data-testid="unmount-trigger" onClick={() => { setOpen(false); }}>
             unmount
           </button>
         </>
@@ -246,7 +246,7 @@ describe('FE-B5b-sort-a11y tri-state select-all', () => {
       );
     }
     render(<Harness />);
-    const cb = screen.getByTestId('sort-a11y-select-all') as HTMLInputElement;
+    const cb = screen.getByTestId('sort-a11y-select-all');
 
     expect(cb.indeterminate).toBe(true);
     expect(cb.getAttribute('aria-checked')).toBe('mixed');
@@ -270,7 +270,7 @@ describe('FE-B5b-sort-a11y tri-state select-all', () => {
       );
     }
     render(<Harness />);
-    const cb = screen.getByTestId('sort-a11y-select-all') as HTMLInputElement;
+    const cb = screen.getByTestId('sort-a11y-select-all');
 
     expect(cb.indeterminate).toBe(false);
     expect(cb.getAttribute('aria-checked')).toBe('true');
@@ -293,7 +293,7 @@ describe('FE-B5b-sort-a11y tri-state select-all', () => {
       );
     }
     render(<Harness />);
-    const cb = screen.getByTestId('sort-a11y-select-all') as HTMLInputElement;
+    const cb = screen.getByTestId('sort-a11y-select-all');
 
     expect(cb.indeterminate).toBe(false);
     expect(cb.getAttribute('aria-checked')).toBe('false');

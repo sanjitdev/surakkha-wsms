@@ -255,7 +255,7 @@ describe('FE-B5b-migrate InboxList', () => {
       fireEvent.click(checks[0]);
       fireEvent.click(checks[1]);
     });
-    const selectAll = screen.getByTestId('table-inbox-select-all') as HTMLInputElement;
+    const selectAll = screen.getByTestId('table-inbox-select-all');
 
     expect(selectAll.indeterminate).toBe(true);
     expect(selectAll.getAttribute('aria-checked')).toBe('mixed');
@@ -268,7 +268,7 @@ describe('FE-B5b-migrate InboxList', () => {
     await waitFor(() => {
       expect(screen.queryAllByTestId(/^table-inbox-select-(?!all$)/).length).toBe(3);
     });
-    const selectAll = screen.getByTestId('table-inbox-select-all') as HTMLInputElement;
+    const selectAll = screen.getByTestId('table-inbox-select-all');
     const checks = screen.getAllByTestId(/^table-inbox-select-(?!all$)/);
 
     // (a) none → none.
