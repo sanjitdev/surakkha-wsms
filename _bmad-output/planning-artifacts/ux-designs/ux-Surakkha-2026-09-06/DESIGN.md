@@ -11,7 +11,7 @@ sources:
   - ../../../specs/spec-surakkha-v1/personas.md
   - ../../../specs/spec-surakkha-v1/architecture-invariants.md
   - ../../../specs/spec-surakkha-v1/escalation-policy.md
-  - ../../../planning-artifacts/epics.md
+  - ../../../planning-artifacts/epics-backend.md
 colors:
   primary:
     name: surakkha-deep-teal

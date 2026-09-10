@@ -9,13 +9,13 @@ phase: Phase 1 MVP
 companions:
   - ./workflow-phase1.html
   - ./architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md
-  - ./epics.md
+  - ./epics-backend.md
   - ../implementation-artifacts/epic-1-context.md
 ---
 
 # Surakkha v1 — Project Context
 
-> **Purpose.** This is the canonical project-grounding doc for Surakkha v1. Every BMad skill that runs on this project loads this file as a persistent fact. Read it once at workflow start and carry it forward — it is the single source for *who the system serves, what Phase 1 must prove, what is deliberately deferred, and which decisions are already settled.* New decisions do not land here; they land in companion docs (`epics.md`, `ARCHITECTURE-SPINE.md`, spec files). Gaps are flagged `[GAP]` and resolved by the appropriate workflow — do not invent answers.
+> **Purpose.** This is the canonical project-grounding doc for Surakkha v1. Every BMad skill that runs on this project loads this file as a persistent fact. Read it once at workflow start and carry it forward — it is the single source for *who the system serves, what Phase 1 must prove, what is deliberately deferred, and which decisions are already settled.* New decisions do not land here; they land in companion docs (`epics-backend.md`, `ARCHITECTURE-SPINE.md`, spec files). Gaps are flagged `[GAP]` and resolved by the appropriate workflow — do not invent answers.
 
 ---
 
@@ -137,7 +137,7 @@ Every event written through the gateway carries:
 - **Reporter reputation** — `trusted | new | caution` badge derived from prior `IncidentVerified` / `IncidentRejected` outcomes for that `reporter_id`.
 - **EXIF** — Exchangeable Image File Format metadata on photos (GPS, device, timestamp). Required on Anjali photo submissions and operator resolution proofs.
 - **Anti-abuse guard (A1)** — soft-throttle: reporters with 2+ verified-false reports in 30 days get auto-tagged `bulk_triage_routed = true` on next submission (not blocked).
-- **BR1, BR2, BR3, BR4, R1–R5** — payload-schema rules (referenced by `epics.md` and `workflow-phase1.html`). Example: R3 = `OperatorAssigned` payload must include `due_at: ISO8601`.
+- **BR1, BR2, BR3, BR4, R1–R5** — payload-schema rules (referenced by `epics-backend.md` and `workflow-phase1.html`). Example: R3 = `OperatorAssigned` payload must include `due_at: ISO8601`.
 - **Citizen loop** — `NotificationSent` after `IncidentClosed` carries ✅ / ❌ taps. ❌ → `IncidentReopened{parent}` re-enters chain at `acknowledged`.
 - **Closed Phase 1 role enum** — `{sensor, anjali, admin, operator, system}` (5 entries). Full 8-entry enum is Phase 2.
 - **Chain head** — most recent block_hash for a tenant; cached in memory by gateway; verified by chain-integrity monitor.
@@ -166,7 +166,7 @@ The training-project rule: *if a requirement is in a planning document, it is in
 - Operator UI Bangla locale (Bangla primary on Anjali + Admin; Operator stays English)
 - Anjali-mobile as a separately-deployed product (Phase 1 ships minimal submission form only)
 
-> **Re-scoping rule.** Pulling anything above into Phase 1 requires (a) updating `epics.md` with explicit story addition, (b) re-running the validation summary, (c) the user signing off on the scope expansion.
+> **Re-scoping rule.** Pulling anything above into Phase 1 requires (a) updating `epics-backend.md` with explicit story addition, (b) re-running the validation summary, (c) the user signing off on the scope expansion.
 
 ---
 
@@ -189,7 +189,7 @@ The lockdown must commit on:
 - **Bangla copy rules** — 160-char SMS budget (GSM-7) / 70-char (UCS-2); no free composition (chain fills the slots); `{CLASS}` slot must come from a pre-approved glossary; minimum 3 low-literacy readers per template before any template ships
 - **SMS char budget enforcement** — gateway-enforced at write-time (EN ≤ 160, BN ≤ 70), one SMS is the hard cap, multi-segment rejected (Phase 2 will relax to 153 × N with documented trade-off)
 
-> **Out of lockdown scope** — backend logic, event schemas, chain hash algorithm, projection rebuild rules, RBAC enforcement depth. Those live in `epics.md` and `ARCHITECTURE-SPINE.md`, not the lockdown artifact.
+> **Out of lockdown scope** — backend logic, event schemas, chain hash algorithm, projection rebuild rules, RBAC enforcement depth. Those live in `epics-backend.md` and `ARCHITECTURE-SPINE.md`, not the lockdown artifact.
 
 ---
 
@@ -201,12 +201,12 @@ The lockdown must commit on:
 | `_bmad/bmm/config.yaml` | Module config (user_name, project_name, languages, artifact folders) | Workflow activation |
 | `planning-artifacts/workflow-phase1.html` | Phase 1 lifecycle diagram, trust scoring pre-triage, swimlanes, state machine, event table | Epic-context compilation, UX lockdown |
 | `planning-artifacts/architecture/.../ARCHITECTURE-SPINE.md` | 17 architectural decisions (AD-1 through AD-17), consistency conventions, deferred items | Every epic story (read by epic-context compilation) |
-| `planning-artifacts/epics.md` | 5 epics, 19 stories, persona map, Phase 1 FR/AD coverage matrix | Every epic story |
+| `planning-artifacts/epics-backend.md` | (Backend) — 5 epics, 19 stories, persona map, Phase 1 FR/AD coverage matrix | Every epic story |
 | `implementation-artifacts/epic-N-context.md` | Per-epic compiled context (goal, stories, requirements, technical decisions, UX patterns, dependencies) | Every story in that epic |
 | `implementation-artifacts/spec-N-M-*.md` | Per-story Ready-for-Dev spec (Given/When/Then ACs, Code Map, I/O Matrix) | Story build (step-03) |
 | `implementation-artifacts/sprint-status.yaml` | 5 epics + 19 stories + 5 retrospectives status | Every status check |
 
-> **Companion ladder.** Spec kernel (`SPEC.md` + 7 companions) > Architecture spine > `epics.md` > `workflow-phase1.html` > per-epic context > per-story spec. Higher in the ladder binds; lower in the ladder elaborates.
+> **Companion ladder.** Spec kernel (`SPEC.md` + 7 companions) > Architecture spine > `epics-backend.md` > `workflow-phase1.html` > per-epic context > per-story spec. Higher in the ladder binds; lower in the ladder elaborates.
 
 ---
 
@@ -215,7 +215,7 @@ The lockdown must commit on:
 These `[GAP]`s must be closed by an explicit workflow — not invented:
 
 - `[GAP]` Concrete event schemas for each of the 15 Phase 1 event types (owned by implementing code per AD-4; first event-schema design pass is the next step after UX lockdown).
-- `[GAP]` Per-city config values: NTU threshold default (1.0 stated in epics.md, needs explicit projection-config landing), cluster window default (5 min), sensor cross-check threshold (NTU match ±15 min, 500 m radius), silence threshold (30 min), operator ack SLA (10 min), admin verify SLA, citizen ✅ / ❌ window.
+- `[GAP]` Per-city config values: NTU threshold default (1.0 stated in epics-backend.md, needs explicit projection-config landing), cluster window default (5 min), sensor cross-check threshold (NTU match ±15 min, 500 m radius), silence threshold (30 min), operator ack SLA (10 min), admin verify SLA, citizen ✅ / ❌ window.
 - `[GAP]` WHO template library content (C-14 — deferred to PRD M1 milestone, not Phase 1).
 - `[GAP]` WB evidence export format (operational, deferred).
 - `[GAP]` Identity provider / RBAC implementation choice (deferred — Story 1.2 wires the mechanism with a placeholder auth session).
@@ -225,3 +225,4 @@ These `[GAP]`s must be closed by an explicit workflow — not invented:
 ## 12. Change log
 
 - **2026-09-07** — Initial draft. Compiled from `docs/idea.md`, `epics.md` (Phase 1 trim), `ARCHITECTURE-SPINE.md`, `_bmad/bmm/config.yaml`, in-flight `epic-1-context.md`. UX lockdown gate inserted per user directive ("nothing moves before that"). No new decisions invented; gaps flagged `[GAP]`.
+- **2026-09-10** — Renamed `epics.md` → `epics-backend.md` to disambiguate from `epics-frontend.md`. All cross-references across planning-artifacts, implementation-artifacts, and ux-designs updated. No content change; companion ladder in §10 updated.

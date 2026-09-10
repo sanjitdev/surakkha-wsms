@@ -1,5 +1,5 @@
 ---
-title: Surakkha v1 — Phase 1 Epic Breakdown
+title: Surakkha v1 — Phase 1 Epic Breakdown (Backend)
 status: final
 created: 2026-09-07
 updated: 2026-09-07
@@ -41,7 +41,7 @@ deferredToPhase2:
   - Councillor trust-bridging voice
 ---
 
-# Surakkha v1 — Phase 1 Epic Breakdown
+# Surakkha v1 — Phase 1 Epic Breakdown (Backend)
 
 > **Phase 1 scope.** Single-city Dhaka, four personas (Sensor, Anjali, Admin, Operator), end-to-end incident lifecycle from detection through verified closure. The chain is the audit trail and the source of state. Trust scoring pre-triages reports before any admin sees them; the admin overrides, not re-triages. Citizens confirm or dispute closure through a tap that reopens the incident with full lineage.
 >

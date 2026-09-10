@@ -12,7 +12,7 @@ sources:
   - ../../../specs/spec-surakkha-v1/architecture-invariants.md
   - ../../../specs/spec-surakkha-v1/escalation-policy.md
   - ../../../specs/spec-surakkha-v1/playbook-lifecycle.md
-  - ../../../planning-artifacts/epics.md
+  - ../../../planning-artifacts/epics-backend.md
 ---
 
 > **Behavior, IA, and voice for Surakkha v1.** How it works. EXPERIENCE.md governs copy, state, interaction, accessibility behavior, and named-protagonist key flows. Visual identity lives in DESIGN.md. Both spines win on conflict with any mock, wireframe, or import. Cross-references use `{DESIGN.md#section}` and `{path/to/companion#section}`.
@@ -487,4 +487,4 @@ Three named-protagonist flows, tied to the success signal. Each flow names a rea
 - Persona detail (Anjali / Priya / Dr. Mensah / Ramesh / Attacker) → `{../../../specs/spec-surakkha-v1/personas.md}`
 - Escalation tier rules, acute vs chronic SLA → `{../../../specs/spec-surakkha-v1/escalation-policy.md}`
 - Playbook lifecycle, deviation-to-amendment, liability split → `{../../../specs/spec-surakkha-v1/playbook-lifecycle.md}`
-- Epic breakdown (epic-level acceptance criteria) → `{../../../planning-artifacts/epics.md}`
+- Epic breakdown (epic-level acceptance criteria) → `{../../../planning-artifacts/epics-backend.md}`

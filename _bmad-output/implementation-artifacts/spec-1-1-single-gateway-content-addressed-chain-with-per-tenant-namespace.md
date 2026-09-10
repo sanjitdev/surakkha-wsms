@@ -6,7 +6,7 @@ status: 'draft'
 review_loop_iteration: 0
 context:
   - '{project-root}/_bmad-output/implementation-artifacts/epic-1-context.md'
-  - '{project-root}/_bmad-output/planning-artifacts/epics.md'
+  - '{project-root}/_bmad-output/planning-artifacts/epics-backend.md'
   - '{project-root}/_bmad-output/planning-artifacts/architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md'
   - '{project-root}/_bmad-output/planning-artifacts/workflow-phase1.html'
 ---

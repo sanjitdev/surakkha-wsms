@@ -28,7 +28,7 @@ binds:
   - FR-FE15
 sources:
   - ../epics-frontend.md
-  - ../epics.md
+  - ../epics-backend.md
   - architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md
   - ../design/04-spacing-components-lockdown.md
   - ../design/05-grid-pages-stack-lockdown.md

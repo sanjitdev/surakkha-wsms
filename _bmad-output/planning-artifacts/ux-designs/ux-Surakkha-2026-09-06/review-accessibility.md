@@ -2,7 +2,7 @@
 
 - **Reviewer lens:** accessibility only (WCAG 2.1 AA / AAA, inclusive design, locale & channel reach).
 - **Spines reviewed:** `DESIGN.md`, `EXPERIENCE.md` (`ux-Surakkha-2026-09-06/`).
-- **Companions consulted:** `personas.md`, `escalation-policy.md`, `architecture-invariants.md`, `SPEC.md`, `epics.md`.
+- **Companions consulted:** `personas.md`, `escalation-policy.md`, `architecture-invariants.md`, `SPEC.md`, `epics-backend.md`.
 - **Verdict:** **CONCERNS** — strong accessibility floor and a credible inclusive-design stance, but two real gaps (badge color independence on small text, SMS channel accessibility) and several medium-tier items need to land in stories before the design is shippable.
 
 ---

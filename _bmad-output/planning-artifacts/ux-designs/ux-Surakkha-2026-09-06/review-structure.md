@@ -125,7 +125,7 @@ Note: prose body also uses the inline form `{EXPERIENCE.md#section}` in the intr
 - `../../../specs/spec-surakkha-v1/personas.md` ✓
 - `../../../specs/spec-surakkha-v1/architecture-invariants.md` ✓
 - `../../../specs/spec-surakkha-v1/escalation-policy.md` ✓
-- `../../../planning-artifacts/epics.md` ✓
+- `../../../planning-artifacts/epics-backend.md` ✓
 
 Path depth: `ux-designs/ux-Surakkha-2026-09-06/` → 3 levels up to repo root. `specs/spec-surakkha-v1/` and `planning-artifacts/` are sibling directories of `ux-designs/`. Path resolution consistent.
 
@@ -135,9 +135,9 @@ Path depth: `ux-designs/ux-Surakkha-2026-09-06/` → 3 levels up to repo root. `
 - `../../../specs/spec-surakkha-v1/architecture-invariants.md` ✓
 - `../../../specs/spec-surakkha-v1/escalation-policy.md` ✓
 - `../../../specs/spec-surakkha-v1/playbook-lifecycle.md` ✓
-- `../../../planning-artifacts/epics.md` ✓
+- `../../../planning-artifacts/epics-backend.md` ✓
 
-**Path-consistency check:** DESIGN.md references 5 sources (omits playbook-lifecycle); EXPERIENCE.md references 6 sources (includes playbook-lifecycle). This is correct asymmetry — DESIGN.md is not deeply about playbook lifecycle; EXPERIENCE.md owns flow content that depends on playbook lifecycle. Path prefixes identical (`../../../specs/spec-surakkha-v1/...`, `../../../planning-artifacts/epics.md`).
+**Path-consistency check:** DESIGN.md references 5 sources (omits playbook-lifecycle); EXPERIENCE.md references 6 sources (includes playbook-lifecycle). This is correct asymmetry — DESIGN.md is not deeply about playbook lifecycle; EXPERIENCE.md owns flow content that depends on playbook lifecycle. Path prefixes identical (`../../../specs/spec-surakkha-v1/...`, `../../../planning-artifacts/epics-backend.md`).
 
 Cross-reference body in EXPERIENCE.md also references these upstream files with the same `{../../../specs/spec-surakkha-v1/...}` syntax — consistent with frontmatter.
 
@@ -152,7 +152,7 @@ DESIGN.md content draws from:
 - personas.md (Anjali trust-bridge, humane-cue rationale) ✓ referenced
 - architecture-invariants.md (color reservation for T3 consumer messaging — drawn from NFR/C-* logic) ✓ referenced
 - escalation-policy.md (T3+ threshold) ✓ referenced
-- epics.md (component list alignment) ✓ referenced
+- epics-backend.md (component list alignment) ✓ referenced
 
 DESIGN.md does not visibly depend on playbook-lifecycle.md — its omission is correct.
 

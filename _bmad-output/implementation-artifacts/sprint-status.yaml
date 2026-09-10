@@ -42,7 +42,7 @@
 #
 # PHASE 1 SCOPE NOTE (regenerated 2026-09-07):
 # ============================================
-# Source: {project-root}/_bmad-output/planning-artifacts/epics.md (Phase 1 trim, status: final)
+# Source: {project-root}/_bmad-output/planning-artifacts/epics-backend.md (Phase 1 trim, status: final)
 # - 5 epics, 19 stories, 4 personas (Sensor, Anjali, Admin, Operator)
 # - Trust scoring pre-triage (cluster window + sensor cross-check + reporter-reputation)
 # - Citizen-confirmed closure loop (✅/❌ tap -> IncidentReopened branch)

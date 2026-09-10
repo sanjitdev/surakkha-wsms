@@ -20,7 +20,7 @@ validationPasses:
     verdict: PASS
 scope: Phase 1 frontend-only demo (MSW + IndexedDB), decomposition into a reusable React component library and the 6 dim-5 page templates for the operator (Priya) persona + light field-tech (Karim) componentization
 companions:
-  - ../planning-artifacts/epics.md                          # backend epics (5 epics, 19 stories) — locked 2026-09-07
+  - ../planning-artifacts/epics-backend.md                  # backend epics (5 epics, 19 stories) — locked 2026-09-07
   - ../planning-artifacts/architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md
   - ../design/04-spacing-components-lockdown.md            # dim 4 components (button, input, top-chrome, nav, card, modal, toast, band-pill)
   - ../design/05-grid-pages-stack-lockdown.md              # dim 5 grid + 6 page templates
@@ -31,7 +31,7 @@ companions:
   - ../planning-artifacts/ux-designs/ux-Surakkha-2026-09-06/DESIGN.md
   - ../planning-artifacts/ux-designs/ux-Surakkha-2026-09-06/EXPERIENCE.md
 inputDocuments:
-  - ../planning-artifacts/epics.md
+  - ../planning-artifacts/epics-backend.md
   - ../planning-artifacts/architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md
   - ../design/04-spacing-components-lockdown.md
   - ../design/05-grid-pages-stack-lockdown.md
@@ -51,9 +51,9 @@ outOfFrontendScope:
 
 # Surakkha v1 — Frontend Epic Breakdown
 
-> **Scope note.** This file is the **frontend-only** epic decomposition. The backend epic breakdown at `epics.md` (5 epics, 19 stories, locked 2026-09-07) is the load-bearing source of truth for backend behaviors; this file consumes its outputs via the MSW wire envelope. Stories here do NOT duplicate backend work — they only consume the API surface already defined.
+> **Scope note.** This file is the **frontend-only** epic decomposition. The backend epic breakdown at `epics-backend.md` (5 epics, 19 stories, locked 2026-09-07) is the load-bearing source of truth for backend behaviors; this file consumes its outputs via the MSW wire envelope. Stories here do NOT duplicate backend work — they only consume the API surface already defined.
 >
-> **Why a new epic set.** The locked `epics.md` is for the FastAPI + chain + projections backend. Frontend UI/UX stories were intentionally deferred there ("web/ frontend scaffolding is Phase 2 / Epic 3+"). We've since chosen to ship the operator UI in Phase 1 against MSW+IDB mocks (per dim 5 §17.1), which is new work. This file plans that frontend work end-to-end.
+> **Why a new epic set.** The locked `epics-backend.md` is for the FastAPI + chain + projections backend. Frontend UI/UX stories were intentionally deferred there ("web/ frontend scaffolding is Phase 2 / Epic 3+"). We've since chosen to ship the operator UI in Phase 1 against MSW+IDB mocks (per dim 5 §17.1), which is new work. This file plans that frontend work end-to-end.
 >
 > **Why decompose now.** Stories 1.2 (Field-tech Karim) and 1.3 (Operator Dashboard) were shipped as monolithic dump-the-mockup-into-React translations. User explicitly rejected that pattern on 2026-09-08: "we need to build small and manageable components and use them throughout our applications not just a chunk of code." Epic FE-1 rebuilds both pages against a proper component library and ships the 6 dim-5 page templates.
 
