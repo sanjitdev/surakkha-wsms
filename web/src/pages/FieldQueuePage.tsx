@@ -22,6 +22,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
@@ -57,6 +58,7 @@ export function FieldQueuePage() {
   // filter the chain events to Karim's jobs.
   const { session } = useAppLayout();
   const { format: formatDateLocal } = useDateFormatter();
+  const { t: tField } = useTranslation('fieldQueue');
   const technicianId = session.actor_ref;
   const [rows, setRows] = useState<WorkOrderRow[]>([]);
   const [filter, setFilter] = useState<Filter>('all');
@@ -90,7 +92,7 @@ export function FieldQueuePage() {
   // chrome. AppLayout already shows the persona chip in top-chrome;
   // this strip gives the page header a more personal subtitle.
   const personaName = session.display_name.replace(' — Field Technician', '');
-  const personaRole = 'field tech · NE zone';
+  const personaRole = tField('page.subtitleRole');
 
   const visible = useMemo(
     () =>
@@ -151,12 +153,12 @@ export function FieldQueuePage() {
   };
 
   const chipFilterLabel: Record<Filter, string> = {
-    all: 'All',
-    P1: 'P1 critical',
-    P2: 'P2',
-    P3: 'P3',
-    enroute: 'En route',
-    onsite: 'On site',
+    all: tField('filters.all'),
+    P1: tField('filters.P1'),
+    P2: tField('filters.P2'),
+    P3: tField('filters.P3'),
+    enroute: tField('filters.enroute'),
+    onsite: tField('filters.onsite'),
   };
 
   const today = new Date();
@@ -171,9 +173,14 @@ export function FieldQueuePage() {
       <div className="page-header">
         <div className="page-header__row">
           <div>
-            <h1>Work queue</h1>
+            <h1>{tField('page.title')}</h1>
             <div className="page-header__sub">
-              {personaName} · {personaRole} · {rows.length} jobs · {todayLabel} · 07:00–15:00
+              {tField('page.subtitle', {
+                name: personaName,
+                role: personaRole,
+                count: rows.length,
+                date: todayLabel,
+              })}
             </div>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
@@ -184,36 +191,38 @@ export function FieldQueuePage() {
               onClick={onOptimizeRoute}
               data-testid="field-optimize-route"
             >
-              Optimize route
+              {tField('optimizeRoute')}
             </button>
           </div>
         </div>
         {sortMode === 'sla' && (
           <div className="page-header__sub" data-testid="field-optimized-subtitle">
-            Optimized — SLA order
+            {tField('page.optimizedSubtitle')}
           </div>
         )}
       </div>
 
       <div className="tech-today">
         <div className="tech-today__cell">
-          <span className="tech-today__label">Today</span>
+          <span className="tech-today__label">{tField('today.todayLabel')}</span>
           <span className="tech-today__val">{rows.length}</span>
-          <span className="tech-today__sub">{rows.filter((r) => !r.isDone).length} remaining</span>
-        </div>
-        <div className="tech-today__cell">
-          <span className="tech-today__label">In progress</span>
-          <span className="tech-today__val">{chipCounts.enroute + chipCounts.onsite}</span>
           <span className="tech-today__sub">
-            {chipCounts.enroute > 0
-              ? `${chipCounts.enroute} en route`
-              : chipCounts.onsite > 0
-                ? `${chipCounts.onsite} on site`
-                : '—'}
+            {tField('today.remainingSuffix', { count: rows.filter((r) => !r.isDone).length })}
           </span>
         </div>
         <div className="tech-today__cell">
-          <span className="tech-today__label">Overdue</span>
+          <span className="tech-today__label">{tField('today.inProgressLabel')}</span>
+          <span className="tech-today__val">{chipCounts.enroute + chipCounts.onsite}</span>
+          <span className="tech-today__sub">
+            {chipCounts.enroute > 0
+              ? tField('today.inProgressEnRoute', { count: chipCounts.enroute })
+              : chipCounts.onsite > 0
+                ? tField('today.inProgressOnSite', { count: chipCounts.onsite })
+                : tField('today.inProgressEmDash')}
+          </span>
+        </div>
+        <div className="tech-today__cell">
+          <span className="tech-today__label">{tField('today.overdueLabel')}</span>
           <span
             className="tech-today__val"
             style={{
@@ -223,13 +232,13 @@ export function FieldQueuePage() {
             {rows.filter((r) => r.timeIsOverdue && !r.isDone).length}
           </span>
           <span className="tech-today__sub">
-            {rows.find((r) => r.timeIsOverdue && !r.isDone)?.title ?? '—'}
+            {rows.find((r) => r.timeIsOverdue && !r.isDone)?.title ?? tField('today.inProgressEmDash')}
           </span>
         </div>
         <div className="tech-today__cell">
-          <span className="tech-today__label">Closed this week</span>
+          <span className="tech-today__label">{tField('today.closedLabel')}</span>
           <span className="tech-today__val">{rows.filter((r) => r.isDone).length}</span>
-          <span className="tech-today__sub">avg close —</span>
+          <span className="tech-today__sub">{tField('today.closedAvgClose')}</span>
         </div>
       </div>
 
@@ -258,7 +267,7 @@ export function FieldQueuePage() {
               color: 'var(--fg-tertiary)',
             }}
           >
-            loading queue from chain…
+            {tField('loading')}
           </div>
         )}
         {!loading && sortedVisible.length === 0 && (
@@ -270,7 +279,7 @@ export function FieldQueuePage() {
               color: 'var(--fg-tertiary)',
             }}
           >
-            no jobs in this filter
+            {tField('empty')}
           </div>
         )}
         {sortedVisible.map((r) => (
@@ -286,7 +295,7 @@ export function FieldQueuePage() {
               <div className="tech-job__row1">
                 <span className={`t-pill t-pill--${r.status}`}>
                   <span className="t-pill__dot"></span>
-                  {pillLabel(r.status, r.timeVal)}
+                  {pillLabel(tField, r.status)}
                 </span>
                 <span className="tech-job__ticket">{r.ticket}</span>
               </div>
@@ -314,12 +323,17 @@ export function FieldQueuePage() {
   );
 }
 // ────────────────────────────────────────────── helpers ──────────────
-function pillLabel(status: WorkOrderRow['status'], timeVal: string): string {
-  if (status === 'assigned') return timeVal.endsWith('ago') ? `Assigned · ${timeVal}` : 'Assigned';
-  if (status === 'enroute') return 'En route';
-  if (status === 'onsite') return 'On site';
+// pillLabel: localized status pill text. Returns the bare status label
+// (e.g., "En route"); the time portion is appended separately by the
+// caller when applicable. The `tField` argument is the parent's
+// `useTranslation('fieldQueue')` so the label resolves in the active
+// locale.
+function pillLabel(tField: (k: string) => string, status: WorkOrderRow['status']): string {
+  if (status === 'assigned') return tField('pill.assigned');
+  if (status === 'enroute') return tField('pill.enroute');
+  if (status === 'onsite') return tField('pill.onsite');
   // status is `'resolved'` here — TS exhaustively narrowed via prior returns
-  return `Resolved · ${timeVal}`;
+  return tField('pill.resolved');
 }
 function buildRows(
   technicianId: string,

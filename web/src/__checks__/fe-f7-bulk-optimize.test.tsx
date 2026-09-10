@@ -27,6 +27,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { I18nextProvider } from 'react-i18next';
 import { InboxList } from '../pages/InboxList';
 import { FieldQueuePage } from '../pages/FieldQueuePage';
 import { LocaleProvider } from '../hooks/useLocale';
@@ -34,6 +35,7 @@ import { ToastProvider } from '../components/ui/ToastProvider';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
 import type { UseIncidentActionsResult } from '../hooks/useIncidentActions';
+import i18n from '../i18n';
 
 function makeSession(role: string): SessionRow {
   // Field-tech uses the literal Karim id so the page's
@@ -237,22 +239,24 @@ afterEach(() => {
 
 function renderInbox() {
   return render(
-    <LocaleProvider>
-      <ToastProvider>
-        <MemoryRouter>
-          <AppLayoutContext.Provider
-            value={{
-              session: makeSession('utility_operator'),
-              chainHead: null,
-              chainFreshSeconds: 0,
-              logout: () => Promise.resolve(),
-            }}
-          >
-            <InboxList />
-          </AppLayoutContext.Provider>
-        </MemoryRouter>
-      </ToastProvider>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <ToastProvider>
+          <MemoryRouter>
+            <AppLayoutContext.Provider
+              value={{
+                session: makeSession('utility_operator'),
+                chainHead: null,
+                chainFreshSeconds: 0,
+                logout: () => Promise.resolve(),
+              }}
+            >
+              <InboxList />
+            </AppLayoutContext.Provider>
+          </MemoryRouter>
+        </ToastProvider>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 
@@ -401,22 +405,24 @@ describe('FE-F7 InboxList bulk-bar Mark reviewed', () => {
 
 function renderField() {
   return render(
-    <LocaleProvider>
-      <ToastProvider>
-        <MemoryRouter>
-          <AppLayoutContext.Provider
-            value={{
-              session: makeSession('field_technician'),
-              chainHead: null,
-              chainFreshSeconds: 0,
-              logout: () => Promise.resolve(),
-            }}
-          >
-            <FieldQueuePage />
-          </AppLayoutContext.Provider>
-        </MemoryRouter>
-      </ToastProvider>
-    </LocaleProvider>,
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>
+        <ToastProvider>
+          <MemoryRouter>
+            <AppLayoutContext.Provider
+              value={{
+                session: makeSession('field_technician'),
+                chainHead: null,
+                chainFreshSeconds: 0,
+                logout: () => Promise.resolve(),
+              }}
+            >
+              <FieldQueuePage />
+            </AppLayoutContext.Provider>
+          </MemoryRouter>
+        </ToastProvider>
+      </LocaleProvider>
+    </I18nextProvider>,
   );
 }
 
