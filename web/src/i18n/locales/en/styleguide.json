@@ -1,0 +1,15 @@
+{
+  "header": {
+    "title": "Foundation Component Library",
+    "subtotal": "FE-1.1a — interactive showcase of every dim-4 primitive + dim-5 layout primitive. Theme + locale toggles are live (watch",
+    "themeToggle": "theme:",
+    "themeToggleHint": "(click to toggle)",
+    "localeToggle": "locale:",
+    "localeToggleHint": "(click to toggle)",
+    "backToLogin": "← back to login"
+  },
+  "footer": {
+    "specLabel": "Spec:",
+    "devOnlyLabel": "· Dev-only route — stripped in production builds via"
+  }
+}

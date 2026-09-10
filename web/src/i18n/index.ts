@@ -50,6 +50,10 @@ import enVerifyFlow from './locales/en/verifyFlow.json';
 import bnVerifyFlow from './locales/bn/verifyFlow.json';
 import enSettings from './locales/en/settings.json';
 import bnSettings from './locales/bn/settings.json';
+import enComingSoon from './locales/en/comingSoon.json';
+import bnComingSoon from './locales/bn/comingSoon.json';
+import enStyleguide from './locales/en/styleguide.json';
+import bnStyleguide from './locales/bn/styleguide.json';
 
 export const SUPPORTED_LOCALES: readonly Locale[] = [Locale.En, Locale.Bn];
 export const STORAGE_KEY = 'surakkha.locale';
@@ -82,6 +86,8 @@ void i18n.use(initReactI18next).init({
       auditLog: enAuditLog,
       verifyFlow: enVerifyFlow,
       settings: enSettings,
+      comingSoon: enComingSoon,
+      styleguide: enStyleguide,
     },
     [Locale.Bn]: {
       common: bnCommon,
@@ -99,6 +105,8 @@ void i18n.use(initReactI18next).init({
       auditLog: bnAuditLog,
       verifyFlow: bnVerifyFlow,
       settings: bnSettings,
+      comingSoon: bnComingSoon,
+      styleguide: bnStyleguide,
     },
   },
   lng: readInitialLocale(),
@@ -106,7 +114,7 @@ void i18n.use(initReactI18next).init({
   defaultNS: 'common',
   // Hand-maintained namespace list. Add a new entry when shipping a new
   // page or shared chrome file (see plan: gentle-singing-torvalds).
-  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow', 'settings'],
+  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow', 'settings', 'comingSoon', 'styleguide'],
   // Stop i18next from trying to fetch /locales/{{lng}}/{{ns}}.json —
   // resources are bundled at build time via Vite's JSON import.
   partialBundledLanguages: true,

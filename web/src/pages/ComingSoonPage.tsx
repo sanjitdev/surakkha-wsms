@@ -23,6 +23,7 @@
  *   specific text (landing label + description) comes from the route.
  */
 
+import { useTranslation } from 'react-i18next';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -35,6 +36,7 @@ interface ComingSoonPageProps {
 }
 
 export function ComingSoonPage({ landing, description }: ComingSoonPageProps) {
+  const { t: tComing } = useTranslation('comingSoon');
   const { session, logout } = useAppLayout();
 
   return (
@@ -44,7 +46,7 @@ export function ComingSoonPage({ landing, description }: ComingSoonPageProps) {
           <div>
             <h1>{landing}</h1>
             <div className="page-header__sub">
-              {session.role} · {session.display_name}
+              {tComing('subtitle', { role: session.role, name: session.display_name })}
             </div>
           </div>
         </div>
@@ -52,7 +54,7 @@ export function ComingSoonPage({ landing, description }: ComingSoonPageProps) {
       <Card modifier="with-heading" testId="coming-soon-card">
         <div style={{ padding: 'var(--space-lg)' }}>
           <h3 className="data-card__title" style={{ marginBottom: 'var(--space-md)' }}>
-            Coming in a later story
+            {tComing('card.title')}
           </h3>
           <p style={{ color: 'var(--fg-secondary)', marginBottom: 'var(--space-md)' }}>
             {description}
@@ -64,8 +66,7 @@ export function ComingSoonPage({ landing, description }: ComingSoonPageProps) {
               marginBottom: 'var(--space-lg)',
             }}
           >
-            This persona is wired to the chain and the session row is live — only the page surface
-            is deferred. Click below to return to the login picker and try a different persona.
+            {tComing('card.trailer')}
           </p>
           <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
             <Button
@@ -75,7 +76,7 @@ export function ComingSoonPage({ landing, description }: ComingSoonPageProps) {
                 void logout();
               }}
             >
-              ← Back to login
+              {tComing('card.back')}
             </Button>
           </div>
         </div>

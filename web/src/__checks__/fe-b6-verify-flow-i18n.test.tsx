@@ -121,8 +121,8 @@ describe('FE-B6 VerifyFlow i18n', () => {
   // (4) Key parity — en and bn JSONs expose the same key paths.
   it('key_parity_en_bn: every en key is also present (with non-empty string) in bn', () => {
     for (const section of Object.keys(enJson)) {
-      const enSection = (enJson as Record<string, Record<string, string>>)[section];
-      const bnSection = (bnJson as Record<string, Record<string, string>>)[section];
+      const enSection = (enJson as unknown as Record<string, Record<string, string>>)[section];
+      const bnSection = (bnJson as unknown as Record<string, Record<string, string>>)[section];
 
       // Skip bullets — they're object-shaped and asserted below.
       if (section === 'sensorCluster' || section === 'anjaliCorroboration' || section === 'councillorNotify') {
@@ -132,8 +132,8 @@ describe('FE-B6 VerifyFlow i18n', () => {
           expect(bnSection?.[key], `bn.${section}.${key} missing`).toBeTruthy();
         }
         // bullets: every en bullet key must exist in bn
-        const enBullets = enSection.bullets as Record<string, string>;
-        const bnBullets = bnSection.bullets as Record<string, string>;
+        const enBullets = enSection.bullets as unknown as Record<string, string>;
+        const bnBullets = bnSection.bullets as unknown as Record<string, string>;
         for (const bk of Object.keys(enBullets)) {
           expect(bnBullets[bk], `bn.${section}.bullets.${bk} missing`).toBeTruthy();
         }

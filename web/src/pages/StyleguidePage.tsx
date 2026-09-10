@@ -16,6 +16,7 @@
  * component, each showing every variant + a one-line description.
  */
 import { type ReactNode, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import '../styles/styleguide.css';
 import { Button } from '../components/ui/Button';
@@ -131,6 +132,7 @@ function makeOpenedAtRenderer(locale: 'en' | 'bn'): (row: TableRow) => ReactNode
   return (row) => fmt.format(new Date(row.openedAt));
 }
 export function StyleguidePage() {
+  const { t: tStyleguide } = useTranslation('styleguide');
   const [modalOpen, setModalOpen] = useState(false);
   const [toastKey, setToastKey] = useState(0);
   const [toastVariant, setToastVariant] = useState<ToastVariant>(ToastVariant.Success);
@@ -721,11 +723,11 @@ export function StyleguidePage() {
           <code>document.body.dataset.locale={locale}</code>
         </p>
         <p className="sg-footer__small">
-          Spec:{' '}
+          {tStyleguide('footer.specLabel')}{' '}
           <code>
             _bmad-output/implementation-artifacts/spec-fe-1-1-foundation-component-library.md
           </code>{' '}
-          · Dev-only route — stripped in production builds via <code>import.meta.env.DEV</code>.
+          {tStyleguide('footer.devOnlyLabel')} <code>import.meta.env.DEV</code>.
         </p>
       </footer>
     </>
@@ -744,21 +746,23 @@ export function StyleguidePage() {
         {containerWidth === 'full' ? (
           <div className="sg-full-bleed" data-testid="sg-full-bleed">
             <header className="sg-header">
-              <h1 className="sg-header__title">Foundation Component Library</h1>
+              <h1 className="sg-header__title">{tStyleguide('header.title')}</h1>
               <p className="sg-header__sub">
-                FE-1.1a — interactive showcase of every dim-4 primitive + dim-5 layout primitive.
-                Theme + locale toggles are live (watch
-                <code>document.body.dataset.theme</code> in DevTools).
+                {tStyleguide('header.subtotal')}
+                <code>document.body.dataset.theme</code>
+                {' '}in DevTools).
               </p>
               <div className="sg-header__controls">
                 <Button variant="secondary" size="sm" onClick={toggleTheme}>
-                  theme: <strong>{theme}</strong> (click to toggle)
+                  {tStyleguide('header.themeToggle')} <strong>{theme}</strong>{' '}
+                  {tStyleguide('header.themeToggleHint')}
                 </Button>
                 <Button variant="secondary" size="sm" onClick={toggleLocale}>
-                  locale: <strong>{locale}</strong> (click to toggle)
+                  {tStyleguide('header.localeToggle')} <strong>{locale}</strong>{' '}
+                  {tStyleguide('header.localeToggleHint')}
                 </Button>
                 <Link to="/" className="sg-header__link">
-                  ← back to login
+                  {tStyleguide('header.backToLogin')}
                 </Link>
               </div>
             </header>
@@ -767,21 +771,23 @@ export function StyleguidePage() {
         ) : (
           <Container width={containerWidth}>
             <header className="sg-header">
-              <h1 className="sg-header__title">Foundation Component Library</h1>
+              <h1 className="sg-header__title">{tStyleguide('header.title')}</h1>
               <p className="sg-header__sub">
-                FE-1.1a — interactive showcase of every dim-4 primitive + dim-5 layout primitive.
-                Theme + locale toggles are live (watch
-                <code>document.body.dataset.theme</code> in DevTools).
+                {tStyleguide('header.subtotal')}
+                <code>document.body.dataset.theme</code>
+                {' '}in DevTools).
               </p>
               <div className="sg-header__controls">
                 <Button variant="secondary" size="sm" onClick={toggleTheme}>
-                  theme: <strong>{theme}</strong> (click to toggle)
+                  {tStyleguide('header.themeToggle')} <strong>{theme}</strong>{' '}
+                  {tStyleguide('header.themeToggleHint')}
                 </Button>
                 <Button variant="secondary" size="sm" onClick={toggleLocale}>
-                  locale: <strong>{locale}</strong> (click to toggle)
+                  {tStyleguide('header.localeToggle')} <strong>{locale}</strong>{' '}
+                  {tStyleguide('header.localeToggleHint')}
                 </Button>
                 <Link to="/" className="sg-header__link">
-                  ← back to login
+                  {tStyleguide('header.backToLogin')}
                 </Link>
               </div>
             </header>
