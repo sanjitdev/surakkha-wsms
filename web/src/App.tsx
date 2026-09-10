@@ -44,6 +44,7 @@ import { VerifyFlow } from './pages/VerifyFlow';
 import { AuditLog } from './pages/AuditLog';
 import { Settings } from './pages/Settings';
 import { SubmitReportPage } from './pages/SubmitReportPage';
+import { CitizenAckPage } from './pages/CitizenAckPage';
 import { type SessionRow, getSession } from './mocks/idb';
 import { SESSION_CHANGED_EVENT } from './mocks/session-bus';
 import { useTheme } from './hooks/useTheme';
@@ -158,6 +159,8 @@ function RoutedSurface() {
             route stays registered for every persona but the page
             renders an EmptyState for non-Anjali roles. */}
         <Route path="/submit" element={<SubmitReportPage />} />
+        {/* /ack/:incident_id is the citizen ack surface — Anjali only. */}
+        <Route path="/ack/:incident_id" element={<CitizenAckPage />} />
 
         {/* Placeholder persona landings — ComingSoonPage reads session
             from useAppLayout() inside the shell. */}
