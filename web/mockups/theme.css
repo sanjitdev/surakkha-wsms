@@ -357,9 +357,9 @@ button {
 }
 
 /* ── Container widths (dim 5 §3) ────────────────────────────────── */
-.container--narrow { max-width: 720px; margin: 0 auto; padding: 0 var(--space-xl); }
-.container--bangla { max-width: 1080px; margin: 0 auto; padding: 0 var(--space-xl); }
-.container--wide   { max-width: 1280px; margin: 0 auto; padding: 0 var(--space-xl); }
+.container--narrow { max-width: 720px; margin: 0; padding: 0 var(--space-xl); }
+.container--bangla { max-width: 1080px; margin: 0; padding: 0 var(--space-xl); }
+.container--wide   { max-width: 1280px; margin: 0; padding: 0 var(--space-xl); }
 
 /* ── Theme toggle (dev affordance) ───────────────────────────────── */
 .theme-toggle {
