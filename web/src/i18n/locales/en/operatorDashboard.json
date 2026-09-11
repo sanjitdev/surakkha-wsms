@@ -199,6 +199,62 @@
     "triageAll": "Triage all →",
     "sectionLabel": "Today at a glance"
   },
+  "hotlineIntake": {
+    "title": "Log hotline call",
+    "subtitle": "Records will be added to the audit chain. Hotline-sourced incidents default to T1 (unverified) and carry a hotline reporter-badge.",
+    "sectionNotice": "Required fields below create the incident. Outcomes 'Inquiry handled' and 'Wrong number' only log the call.",
+    "sections": {
+      "reporterInfo": "Reporter info",
+      "incidentInfo": "Incident info"
+    },
+    "fields": {
+      "callerName": "Caller name",
+      "callerPhone": "Caller phone",
+      "callerPhoneHelper": "Stored as a hash. We never keep the number in plaintext.",
+      "callTime": "Call time",
+      "description": "Incident description",
+      "descriptionPlaceholder": "What did the caller describe? Free text — Bangla or English.",
+      "descriptionHelper": "20–500 characters",
+      "locationHint": "Location hint",
+      "locationHintPlaceholder": "Ward, landmark, standpipe #, or street name.",
+      "locationHintHelper": "5–200 characters. Free text — ward, landmark, standpipe #.",
+      "outcome": "Call outcome",
+      "outcomeHelper": "Use 'no incident' when the caller had a question but no contamination was reported.",
+      "callDuration": "Call duration (min)",
+      "sensitiveContent": "Mark as sensitive"
+    },
+    "outcomes": {
+      "reportedIncident": "Reported incident",
+      "noIncident": "Inquiry handled / no incident",
+      "wrongNumber": "Wrong number / disconnected"
+    },
+    "validation": {
+      "callerNameTooLong": "Caller name must be 80 characters or fewer.",
+      "phoneShape": "Phone must be E.164 (e.g. +8801712345678) or a 10-digit local number.",
+      "callTimeFuture": "Call time cannot be in the future.",
+      "descriptionLength": "Description must be 20–500 characters.",
+      "locationHintLength": "Location hint must be 5–200 characters.",
+      "outcomeRequired": "Pick an outcome.",
+      "callDurationRange": "Call duration must be 1–60 minutes."
+    },
+    "submit": "Submit",
+    "submitting": "Submitting…",
+    "cancel": "Cancel",
+    "submitDisabledTooltip": "Fill required fields to submit.",
+    "toast": {
+      "incidentCreated": "Incident created with ID {{incidentId}} (T1 default, hotline source)",
+      "incidentIdFallback": "inc_pending",
+      "callLogged": "Call logged. No incident created.",
+      "errorRetryIncident": "Couldn't create incident — submit when ready.",
+      "errorRetryCall": "Couldn't log call — submit when ready."
+    },
+    "confirmDiscard": {
+      "title": "Discard this call log?",
+      "body": "You can keep editing.",
+      "keepEditing": "Keep editing",
+      "discard": "Discard"
+    }
+  },
   "common": {
     "emDash": "—"
   }

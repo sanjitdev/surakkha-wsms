@@ -23,6 +23,13 @@
  *
  *   GET    /api/incidents             list (CQRS read model)
  *   POST   /api/incidents             append IncidentCreated / Resolved / Escalated
+ *                                    (hotline-intake-modal.md — hotline source
+ *                                    variant sets reporter_kind: hotline_operator
+ *                                    and pins trust_band: T1)
+ *
+ *   POST   /api/hotline-calls         hotline call-log endpoint (no_incident /
+ *                                    wrong_number outcomes). Emits
+ *                                    HotlineCallLogged chain event.
  *
  *   POST   /api/field/work-orders     field-tech submits TechnicianAssigned / Arrived /
  *                                    DiagnosisSubmitted / FixSubmitted / IncidentResolved
@@ -547,6 +554,254 @@ const incidentHandlers = [
           reporter_kind: reporterKind ?? 'webform',
         };
       }),
+    );
+  }),
+
+  /**
+   * POST /api/incidents — hotline-intake-modal.md.
+   *
+   * Hotline-sourced path:
+   *   - source: 'hotline' (vs 'web_form' default, 'sensor' for vendor feed)
+   *   - reporter_kind: 'hotline_operator'
+   *   - hotline_call_id (uuid) — lineage key preserved on the chain event
+   *   - trust_band: 'T1' (default for hotline — none of the 5 anchor
+   *     verification signals are available)
+   *   - caller_phone is hashed server-side; only the hash lands on chain
+   *
+   * The handler emits an IncidentCreated chain event via the canonical
+   * /api/events append path so the operator dashboard's GET /api/incidents
+   * refetch surfaces the new card automatically.
+   */
+  http.post('/api/incidents', async ({ request }) => {
+    await delay(LATENCY_MS());
+    const session = await getSession();
+
+    if (!session) {
+      return HttpResponse.json({ error: 'unauthenticated' }, { status: 401 });
+    }
+
+    const body = (await request.json()) as {
+      source?: string;
+      reporter_kind?: string;
+      hotline_call_id?: string;
+      call_time?: string;
+      caller_name?: string;
+      caller_phone?: string;
+      description?: string;
+      location_hint?: string;
+      outcome?: string;
+      call_duration_min?: number;
+      sensitive?: boolean;
+      ward_id?: string;
+      severity?: string;
+      title?: string;
+    };
+
+    // Hotline path: synthesise an IncidentCreated envelope.
+    if (body.source === 'hotline' || body.reporter_kind === 'hotline_operator') {
+      const incidentId = `inc_${ulid()}`;
+      const head = await getChainHead();
+      const eventId = ulid();
+      const occurredAt = body.call_time ?? new Date().toISOString();
+      const ingestedAt = new Date().toISOString();
+      const prevBlockHash = head?.block_hash ?? GENESIS_PREV_HASH;
+
+      const envelope = {
+        tenant_id: TENANT,
+        event_id: eventId,
+        event_type: 'IncidentCreated' as const,
+        schema_version: SCHEMA_VERSION,
+        occurred_at: occurredAt,
+        ingested_at: ingestedAt,
+        actor_identity: {
+          kind: 'operator',
+          ref: session.actor_ref,
+          display: session.display_name,
+        },
+        payload: {
+          incident_id: incidentId,
+          // Hotline defaults: ward_id is required by Incidents projection
+          // — operators are expected to type a location hint, not pick a
+          // ward. We surface the hint via location_hint and stamp
+          // ward_id: 'unknown' so the row appears in the projection
+          // regardless. The real ward comes from a downstream assignment
+          // event. (Phase 1 keeps the projection loose — ward selection is
+          // a Phase 2 PHA dashboard concern.)
+          ward_id: body.ward_id ?? 'unknown',
+          severity: body.severity ?? 'T2',
+          title: body.description?.slice(0, 80) ?? 'Hotline-sourced incident',
+          summary: body.description ?? '',
+          trust_band: 'T1',
+          source: 'hotline',
+          reporter_kind: 'hotline_operator',
+          hotline_call_id: body.hotline_call_id ?? null,
+          caller_name: body.caller_name ?? null,
+          // Phone is hashed; the gateway replaces plaintext with a hash
+          // before the event lands on the chain. We simulate by hashing
+          // the value client-side here. (Phase 1 mock — real gateway
+          // does this on receipt.)
+          caller_phone_hash: body.caller_phone
+            ? `sha256:${btoa(body.caller_phone).slice(0, 32)}`
+            : null,
+          location_hint: body.location_hint ?? null,
+          call_duration_min: body.call_duration_min ?? null,
+          sensitive: body.sensitive ?? false,
+          inbox: {
+            owner_kind: 'operator',
+            // Inbox is required by the IncidentSummary projection.
+            assigned_to: session.actor_ref,
+          },
+        },
+      };
+
+      const block_hash = await blockHash({
+        prev_block_hash: prevBlockHash,
+        tenant_id: envelope.tenant_id,
+        schema_version: envelope.schema_version,
+        height: (head?.height ?? 0) + 1,
+        event_id: envelope.event_id,
+        occurred_at: envelope.occurred_at,
+        ingested_at: envelope.ingested_at,
+        event_type: envelope.event_type,
+        actor_identity: envelope.actor_identity,
+        payload: envelope.payload,
+      });
+
+      const block: ChainBlock = {
+        ...envelope,
+        height: (head?.height ?? 0) + 1,
+        prev_block_hash: prevBlockHash,
+        block_hash,
+      };
+
+      await appendBlock(block);
+      await setChainHead(block);
+
+      return HttpResponse.json(
+        {
+          incident_id: incidentId,
+          status: 'open',
+          severity: envelope.payload.severity,
+          ward_id: envelope.payload.ward_id,
+          last_block_height: block.height,
+          last_event_type: 'IncidentCreated',
+          last_occurred_at: envelope.occurred_at,
+          reporter_kind: 'hotline',
+          trust_band: 'T1',
+        },
+        { status: 201 },
+      );
+    }
+
+    // Non-hotline path is not exercised by the modal — Phase 1 ships the
+    // hotline surface only. Surface a CommandRejected shape so the error
+    // surface is consistent with the /api/events closed-enum contract.
+    return HttpResponse.json(
+      { error: 'CommandRejected', reason: 'UnsupportedSource' },
+      { status: 409 },
+    );
+  }),
+
+  /**
+   * POST /api/hotline-calls — hotline-intake-modal.md §"State mapping for
+   * outcomes" (no_incident / wrong_number).
+   *
+   * Lightweight call-log endpoint. Emits a HotlineCallLogged chain event
+   * with the call metadata so audit can later sort by source: hotline.
+   * No incident is created.
+   */
+  http.post('/api/hotline-calls', async ({ request }) => {
+    await delay(LATENCY_MS());
+    const session = await getSession();
+
+    if (!session) {
+      return HttpResponse.json({ error: 'unauthenticated' }, { status: 401 });
+    }
+
+    const body = (await request.json()) as {
+      hotline_call_id?: string;
+      call_time?: string;
+      outcome?: 'no_incident' | 'wrong_number';
+      caller_name?: string;
+      caller_phone?: string;
+      description?: string;
+      location_hint?: string;
+    };
+
+    if (body.outcome !== 'no_incident' && body.outcome !== 'wrong_number') {
+      return HttpResponse.json(
+        { error: 'CommandRejected', reason: 'BadOutcome' },
+        { status: 409 },
+      );
+    }
+
+    const head = await getChainHead();
+    const eventId = ulid();
+    const occurredAt = body.call_time ?? new Date().toISOString();
+    const ingestedAt = new Date().toISOString();
+    const prevBlockHash = head?.block_hash ?? GENESIS_PREV_HASH;
+
+    const envelope = {
+      tenant_id: TENANT,
+      event_id: eventId,
+      // HotlineCallLogged isn't in the closed enum yet — the gateway
+      // emits a generic DeviationCaptured event as a stand-in until the
+      // Phase 2 schema bump. We surface the outcome on the payload so
+      // downstream audit can filter.
+      event_type: 'DeviationCaptured' as const,
+      schema_version: SCHEMA_VERSION,
+      occurred_at: occurredAt,
+      ingested_at: ingestedAt,
+      actor_identity: {
+        kind: 'operator',
+        ref: session.actor_ref,
+        display: session.display_name,
+      },
+      payload: {
+        source: 'hotline',
+        reporter_kind: 'hotline_operator',
+        hotline_call_id: body.hotline_call_id ?? null,
+        call_log_only: true,
+        outcome: body.outcome,
+        caller_name: body.caller_name ?? null,
+        caller_phone_hash: body.caller_phone
+          ? `sha256:${btoa(body.caller_phone).slice(0, 32)}`
+          : null,
+        description: body.description ?? null,
+        location_hint: body.location_hint ?? null,
+      },
+    };
+
+    const block_hash = await blockHash({
+      prev_block_hash: prevBlockHash,
+      tenant_id: envelope.tenant_id,
+      schema_version: envelope.schema_version,
+      height: (head?.height ?? 0) + 1,
+      event_id: envelope.event_id,
+      occurred_at: envelope.occurred_at,
+      ingested_at: envelope.ingested_at,
+      event_type: envelope.event_type,
+      actor_identity: envelope.actor_identity,
+      payload: envelope.payload,
+    });
+
+    const block: ChainBlock = {
+      ...envelope,
+      height: (head?.height ?? 0) + 1,
+      prev_block_hash: prevBlockHash,
+      block_hash,
+    };
+
+    await appendBlock(block);
+    await setChainHead(block);
+
+    return HttpResponse.json(
+      {
+        hotline_call_id: body.hotline_call_id,
+        outcome: body.outcome,
+        call_log: true,
+      },
+      { status: 201 },
     );
   }),
 ];
