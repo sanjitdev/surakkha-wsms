@@ -20,7 +20,7 @@
 7. **Chain anomaly surfacing.** Row ⚠️ + top-banner warning; Phase 1 escalates to operator; Phase 2 routes to Pia.
 8. **Filter chips are Screen 1 (`AuditLogPage`) only.** This page is read-only linkage back to Screen 1.
 9. **Hash recomputation is local + cached.** Cached per `(incident_id, last_known_seq)` for 60s.
-10. **Pass/fail badge UX.** Emerald Verified (3s auto-dismiss toast; durable in row metadata) / rose Anomaly (persistent until acknowledged; opens escalation modal).
+10. **Pass/fail badge UX.** Verified = safe-green (`--color-safe-green` `#2F6E45`) badge (3s auto-dismiss toast; durable in row metadata) / Anomaly = `--color-alert-red-reserved` (issuance path only; build-time lint-enforced; `#B23A2A`) — persistent until acknowledged; opens escalation modal.
 
 ---
 
@@ -53,7 +53,7 @@ Three months after `IncidentClosed`, Anjali disputes: *"I never reported that."*
 
 1. Renders vertical timeline. First row: `IncidentCreated{source: web_form, reporter: nid_hash, anchor: true, band: T1, created_at}` — original report's existence on the chain. ✅ verified.
 2. Second row: her own `Verified{inc, reasoning: "Two corroborating signals + reporter confirms. Assigning Karim at standard priority.", signals_state, path: A}`. **This is the line that defends her call.** ✅ verified.
-3. Clicks the bottom "Independent verification" button → emerald "Verified" badge with checkmark icon appears within 200ms. Toast auto-dismisses after 3s; badge stays in the row metadata column.
+3. Clicks the bottom "Independent verification" button → safe-green (`--color-safe-green`) "Verified" badge with `CheckCircle2` icon appears within 200ms. Toast auto-dismisses after 3s; badge stays in the row metadata column.
 4. Shows Anjali the segment. Dispute resolved in 30 seconds. Chain remembered; Priya didn't have to.
 
 ### Journey B — Adi override audit (60 seconds)
@@ -84,13 +84,13 @@ An operator opens the chain segment. One row shows ⚠️ (recomputed hash ≠ s
 
 ### 3.1 Top bar
 - Incident id (mono, copy-to-clipboard)
-- Current trust band pill (T1 / T2 / T3 / Overridden) with icon
+- Current trust band pill (lockdown glyph + text redundancy: `◔ T1`, `◑ T2`, `● T3` (issuance path only), `✓ resolved`) with reporter-badge add-on if applicable (Anchor / Phone / Edit / RadioTower Lucide). `T_overridden` is NOT a trust band — it is an override event chip (`ShieldCheck` Lucide + "Override" text) shown alongside the original band, which remains visible.
 - State pill: `OPEN` / `RESOLVED` / `CLOSED` / `REOPENED`
 - Close button (returns to `AuditLogPage` for that incident's filtered view)
 
 ### 3.2 Top banner (conditional)
 Renders only if any row fails verification.
-- Amber background (`rose-50` border, amber-600 icon)
+- Amber background (`--color-divider` border, `--color-amber` icon) — NOT `rose-*`. Lockdown §1.5 forbids `rose-*` (Tailwind palette).
 - Text: "Chain anomaly detected on `inc_01HX...` — escalate to Pia."
 - Actions: "Acknowledge" + "Escalate to Pia" (primary)
 
@@ -100,18 +100,18 @@ Chronological order: oldest at top, newest at bottom. `seq` ascending.
 **Per-row collapsed (default):**
 
 ```
-[●]  T1 dot  2026-09-08 07:35  IncidentCreated       [Anjali (reporter)]    "Report received"   │ 01HX...9A  ✅
-[●]  T2 dot  2026-09-08 07:45  Verified              [Priya (operator)]     "Two corroborating…"│ 01HX...C2  ✅
-[●]  T1 dot  2026-09-08 08:15  Assigned              [Priya → Karim]        "Dispatch at std priority"│ 01HX...F1  ✅
-[●]  T3 dot  2026-09-08 08:30  TechnicianArrived     [Karim (technician)]   "On site"            │ 01HX...B4  ✅
+[◔]  T1  2026-09-08 07:35  IncidentCreated       [Anjali (reporter)]    "Report received"   │ 01HX...9A  ✅
+[◑]  T2  2026-09-08 07:45  Verified              [Priya (operator)]     "Two corroborating…"│ 01HX...C2  ✅
+[◔]  T1  2026-09-08 08:15  Assigned              [Priya → Karim]        "Dispatch at std priority"│ 01HX...F1  ✅
+[◑]  T2  2026-09-08 08:30  TechnicianArrived     [Karim (technician)]   "On site"            │ 01HX...B4  ✅
 ```
 
-- **Left rail:** trust-band-coloured dot + event-type icon (per foundation §4.2).
-- **Center:** ISO-8601 timestamp with relative-time-on-hover (`text-xs`); event type (`text-sm-medium`); actor name + role badge; one-line summary.
-- **Right rail:** hash anchor (mono 12px, truncated to first 8 chars + ellipsis, copy-to-clipboard); ✅ verified / ⚠️ anomaly badge.
+- **Left rail:** lockdown trust-band glyph + text redundancy (`◔ T1` / `◑ T2` / `● T3` issuance-only / `✓ resolved`) — never colour alone. Glyph character per lockdown §4.1; event-type icon (Lucide, approved set per lockdown §4.2) sits beside the band glyph.
+- **Center:** ISO-8601 timestamp with relative-time-on-hover (`--font-size-1`); event type (`--font-size-2`); actor name + role badge; one-line summary.
+- **Right rail:** hash anchor (`--font-family-mono` IBM Plex Mono 14 px per lockdown §2.6, truncated to first 8 chars + ellipsis, copy-to-clipboard); ✅ verified (safe-green) / ⚠️ anomaly (alert-red-reserved) badge.
 
 **Per-row expanded (click):**
-- Full payload as collapsible JSON (`text-sm mono`), syntax-highlighted.
+- Full payload as collapsible JSON (`--font-family-mono` IBM Plex Mono 14 px, per lockdown §2.6 chain-events typography), syntax-highlighted.
 - Copy-to-clipboard for the full payload.
 - Per-row "Independent verification" button (single-click, recomputes only that row's hash).
 - Expected hash vs actual hash shown inline when ⚠️ is present.
@@ -119,7 +119,7 @@ Chronological order: oldest at top, newest at bottom. `seq` ascending.
 ### 3.4 Bottom — full-segment verification
 - Primary button: "Independent verification" (recomputes entire chain segment from genesis to last event).
 - Progress: "Verifying… (12/30)" with spinner while recomputation runs.
-- On pass: button text → "Full chain verified" with timestamp of last verification; emerald badge persists.
+- On pass: button text → "Full chain verified" with timestamp of last verification; safe-green (`--color-safe-green`) badge persists.
 - On fail: button text → "Chain anomaly detected — see banner"; opens escalation modal.
 
 ---
@@ -215,7 +215,7 @@ function verifyChainSegment(incident_id, target_seq, events):
 
 | Element | Behaviour |
 |---------|-----------|
-| **Affected row** | Background shifts to amber warning tint. ⚠️ badge replaces ✅. Tap shows both hashes inline. |
+| **Affected row** | Background shifts to amber warning tint. ⚠️ badge replaces ✅ (badge colour = `--color-alert-red-reserved` issuance path; build-time lint-enforced). Tap shows both hashes inline. |
 | **Other rows** | Pass badge ✅ unchanged. An anomaly on one row does not invalidate other rows. |
 | **Top banner** | Persistent amber banner at top of page: **"Chain anomaly detected on `inc_01HX...` — escalate to Pia."** Dismissable but persistent across page navigations until acknowledged. |
 | **TopChrome pulse-dot** | Shifts from green → amber. Tapping opens the shared `ChainIntegritySheet`. |
@@ -264,7 +264,7 @@ function verifyChainSegment(incident_id, target_seq, events):
 
 ```
 +----------------------------------------------------------------------+
-| < Back   inc_01HX...9A2F    [T1 Anchor]    [RESOLVED]      [✕ Close]  |
+| < Back   inc_01HX...9A2F    [◔ T1 ⚓]    [RESOLVED]      [✕ Close]  |
 +----------------------------------------------------------------------+
 |                                                                      |
 |  Full chain segment — 8 events                                       |
@@ -302,7 +302,7 @@ function verifyChainSegment(incident_id, target_seq, events):
 
 ```
 +----------------------------------------------------------------------+
-| < Back   inc_01HX...9A2F    [T1 Anchor]    [RESOLVED]      [✕ Close]  |
+| < Back   inc_01HX...9A2F    [◔ T1 ⚓]    [RESOLVED]      [✕ Close]  |
 +----------------------------------------------------------------------+
 | ⚠ Chain anomaly detected on inc_01HX...9A2F — escalate to Pia.       |
 |   [Acknowledge]  [Escalate to Pia]                                    |
@@ -385,8 +385,8 @@ function verifyChainSegment(incident_id, target_seq, events):
 
 Namespaces:
 
-- `chain.operator.*` — labels, button text, banners, badges, JSON copy actions (English + Bengali + Hindi)
-- `chain.public.*` — plain-language event descriptions (Bengali primary, English fallback, Hindi per locale)
+- `chain.operator.*` — labels, button text, banners, badges, JSON copy actions (English + Bangla only; Hindi removed in lockdown reconciliation 2026-09-11)
+- `chain.public.*` — plain-language event descriptions (Bangla primary, English fallback). No Hindi per lockdown §11.1.
 - `chain.anomaly.*` — anomaly banner text, escalation copy, acknowledgment confirmation
 
 Key strings (English baseline):
@@ -430,9 +430,9 @@ Hash anchors and chain event type names are **not translated** — they are tech
   - `Tab` — standard tab order for buttons
 - **`aria-live="polite"`** on the anomaly banner — announces when anomaly surfaces.
 - **`aria-live="polite"`** on the verification result toast (operator mode).
-- **High-contrast** verified/anomaly badges — emerald-600 / rose-600 on white with border (meets WCAG AA+).
-- **Focus rings** — 2px emerald-600 ring, 2px offset per foundation §9.
-- **Screen reader** — each event row has `aria-label` with full context: timestamp, event type, actor name + role, hash anchor.
+- **High-contrast** verified/anomaly badges — safe-green (`--color-safe-green` resolved, AA+) / alert-red-reserved (`--color-alert-red-reserved` issuance path only, AA+) on white with border.
+- **Focus rings** — 2px primary-tint (`--color-primary-tint`) ring, 2px offset per lockdown §10.2.
+- **Screen reader** — each event row has `aria-label` with full context: timestamp, event type, actor name + role, hash anchor. Trust band badges emit `aria-label` with the band name spelled out (lockdown §10.4).
 - **Reduced motion** — per foundation §8, replace animations with instant state changes for `prefers-reduced-motion`.
 - **No colour-only signalling** — every badge pairs colour with text + icon per foundation §1.1.
 
@@ -460,7 +460,7 @@ Hash anchors and chain event type names are **not translated** — they are tech
 
 ## 14. Test scenarios
 
-1. **Priya opens incident `inc_01HX...`, clicks "Independent verification" → emerald Verified badge within 200ms.** Verifies the verification button triggers recomputation and surfaces a pass result quickly enough for the 30s dispute-resolution use case.
+1. **Priya opens incident `inc_01HX...`, clicks "Independent verification" → safe-green Verified badge within 200ms.** Verifies the verification button triggers recomputation and surfaces a pass result quickly enough for the 30s dispute-resolution use case.
 2. **Adi opens incident, expands `TrustBandOverridden` row → full JSON payload visible.** Verifies the JSON expansion, copy-to-clipboard, and that override reasoning is rendered in context.
 3. **Anjali opens her own incident → public mode renders, no JSON, no hashes, no payloads.** Verifies the operator-vs-public render split is enforced at the data layer (not just CSS hidden).
 4. **Operator opens incident with anomaly → top banner + ⚠️ on the row.** Verifies anomaly detection surfaces per Scenario 06 locked decision #7.
@@ -514,3 +514,20 @@ _Spec produced by Saga/Freya — 2026-09-11_
 _Locked decisions applied 2026-09-11._
 _Source: Scenario 06 Screen 2 — Audit chain timeline (cross-cutting)_
 _Foundation reference: docs/D-UX-Design/01-design-system-foundation.md §1.1 (trust-band palette), §3.2 (three-column operator surface), §4.2 (chain event icons), §8 (motion), §9 (accessibility)_
+
+---
+
+## Lockdown reconciliation (2026-09-11)
+
+This spec was re-edited to bind to the bmad lockdown system. Edits applied:
+- §12 accessibility + §14 test scenarios: focus ring → `2px primary-tint (--color-primary-tint), 2px offset` (was `2px emerald-600`). Lockdown §10.2.
+- §3.4 verified badge + §14 test scenario 1: emerald-600 → **`--color-safe-green` (#2F6E45)** resolved-state colour per lockdown §1.2.
+- §3.4 anomaly badge + §3.2 top banner + §6 anomaly handling: rose-600 → **`--color-alert-red-reserved` (#B23A2A) — issuance path only, build-time lint-enforced** per lockdown `01-color-lockdown.md` §1.5 + §12 rule 4. Form validation errors remain `--color-status-warn` (amber).
+- §3.2 top banner border: `rose-50` removed; replaced with `--color-divider` border + `--color-amber` icon. Lockdown §1.5 forbids `rose-*`.
+- §3.3 hash anchor + §3.3 expanded JSON: system mono → **`--font-family-mono` (IBM Plex Mono)** 14 px per lockdown §2.6 chain-events typography.
+- §3.1 top bar + §3.3 per-row collapsed + §9.1 / §9.2 wireframes: "T1 / T2 / T3 / Overridden" Lucide icons → **lockdown glyph + text redundancy** (`◔ T1`, `◑ T2`, `● T3` issuance path only, `✓ resolved`). `T_overridden` is NOT a trust band in lockdown — it is an **override event chip** (`ShieldCheck` Lucide + "Override" text) shown alongside the original band (which remains visible). Reporter-badge add-on (Anchor / Phone / Edit / RadioTower Lucide) sits on top of the band per lockdown §1.1.
+- §11 i18n key surface: Hindi removed from `chain.operator.*` and `chain.public.*`. **English + Bangla only** per lockdown §11.1.
+- Reference: `docs/D-UX-Design/01-design-system-foundation.md` (lockdown-bound).
+- Reference: `docs/D-UX-Design/decisions/00-lockdown-audit.md`.
+
+All token references in this spec now point to lockdown tokens (not Phase 4 tokens).

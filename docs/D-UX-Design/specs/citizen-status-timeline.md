@@ -23,6 +23,7 @@
 - The timeline is a projection of the audit chain, not a separate state. **Chain is the source of truth** (foundation §11.1).
 - Public mode hides payloads, hashes, JSON. Anjali sees motion-only events.
 - 5-min dual-channel ack is on Screen 2 (SubmitForm); this surface handles beats 2 (in-progress) and the holding pattern for beat 3 (closure).
+- **Locale:** Bangla-first default on this Anjali-mobile surface (lockdown §11.2). Operators can toggle English/Bangla; preference persists per session. Bangla numerals for timestamps (lockdown `06-data-formats-lockdown.md`). Font: `--font-family-bangla` (Noto Sans Bengali) primary; body line-height `--line-height-body-bangla: 1.6`.
 
 ---
 
@@ -301,13 +302,15 @@ Skeleton rows (3 placeholder cards with shimmer). No spinner — the page should
 
 Trust band labels in `citizen.statusTimeline.bandLabel` are localized plain-language versions ("verified citizen anchor" / "verified reporter" / "hotline-sourced report" per foundation §1.1). Hash anchors and chain event type codes are **not** translated (foundation §10).
 
+**Bangla-first binding:** `citizen.statusTimeline.*` is Bangla-first on this Anjali-mobile surface; English is the toggle. Bangla numerals for relative timestamps. Strings include VS15 text-style glyph on `✓\uFE0E` and `⚠\uFE0E` (lockdown §11.3).
+
 ---
 
 ## 11. Accessibility notes
 
 - **Relative time updates** are announced via `aria-live="polite"` on the timeline container. New events arriving via the 5s chain-freshness poll trigger a polite announcement ("Field crew on the way, 12 minutes ago").
-- **Action buttons** have visible focus rings (2px emerald-600, 2px offset — foundation §9). The closure tap UI's ✅ / ❌ buttons are ≥48×48 px touch floor (foundation §3.5 + Scenario 03 locked decision #5).
-- **Motion** respects `prefers-reduced-motion` (foundation §8.1): the 200ms fade-up is replaced with an instant state change; the ✅ ack celebration (Scenario 1 closure pulse + 1s confetti) is omitted.
+- **Action buttons** have visible focus rings (2px primary-tint (`--color-primary-tint`), 2px offset — foundation §9). The closure tap UI's ✅ / ❌ buttons are ≥48×48 px touch floor (foundation §3.5 + Scenario 03 locked decision #5).
+- **Motion** respects `prefers-reduced-motion` (foundation §8.1): the 200ms fade-up is replaced with an instant state change; the ✅ ack celebration is **200ms green pulse only** (no confetti; decorative animation banned per lockdown `08-motion-lockdown.md`).
 - **Timeline rows** are not interactive — they are read-only projections. No keyboard trap risk.
 - **Color contrast** on citizen surfaces is WCAG AA+ (foundation §9). Trust band badge pairs colour + text + icon (never colour alone).
 - **Screen reader landmarks:** `<main>` wraps the timeline + ActionCall. The ActionCall is a `<section aria-labelledby="action-call-title">`.
@@ -398,7 +401,7 @@ The projection layer (the filter from 33 closed-enum events → `CitizenVisibleE
 - `CitizenAckAccepted` chain event fires.
 - The page optimistically updates: closure tap UI is replaced with "Thanks for confirming. All set."
 - A new row appears in the timeline: "You confirmed: issue resolved ✅".
-- A subtle ✅ pulse + 1s confetti animation (or instant state change if `prefers-reduced-motion`).
+- Closure celebration = 200ms green pulse only (no confetti; decorative animation banned per lockdown `08-motion-lockdown.md`). Reduced-motion: instant state change.
 - Within minutes, `IncidentClosed{closer: priya, ack: yes}` fires and the final row appears.
 
 ### Test 5 — Anjali taps ❌ Reopen
@@ -427,7 +430,7 @@ The projection layer (the filter from 33 closed-enum events → `CitizenVisibleE
 
 1. **Should `TechnicianEnRoute` be a separate event from `TechnicianArrived`?** Scenario 03's locked state list does not include `TechnicianEnRoute`; Scenario 06's `CitizenVisibleEventType` table does. If `TechnicianEnRoute` is not in the final 33-event enum, the row simply doesn't render. The "Field crew on the way" line is best-effort.
 
-2. **Band label wording on `TrustBandAssigned` for citizens.** The foundation §1.1 mandates plain language ("verified citizen anchor" / "verified reporter" / "hotline-sourced report"), but the exact localized strings across en/hi/bn need i18n review before shipping. Mapping is structural; strings are pending in the `citizen.statusTimeline.bandLabel` namespace.
+2. **Band label wording on `TrustBandAssigned` for citizens.** The foundation §1.1 mandates plain language ("verified citizen anchor" / "verified reporter" / "hotline-sourced report"); localized strings across **en + bn only** (Hindi removed in lockdown reconciliation 2026-09-11) need i18n review before shipping. Bangla-first binding per lockdown §11.2. Strings are pending in the `citizen.statusTimeline.bandLabel` namespace.
 
 3. **Should the ActionCall show in the empty state?** Current spec: hidden (nothing to act on). Deferred — depends on whether the empty state lives on this page or on a separate `/citizen/new` route.
 
@@ -440,3 +443,19 @@ The projection layer (the filter from 33 closed-enum events → `CitizenVisibleE
 _Spec produced by Saga/Freya — 2026-09-11_
 _Locked decisions applied 2026-09-11._
 _See foundation §1–§11 for locked tokens, components, and rules this spec references._
+
+---
+
+## Lockdown reconciliation (2026-09-11)
+
+This spec was re-edited to bind to the bmad lockdown system. Edits applied:
+- §11 accessibility: focus ring → `2px primary-tint (--color-primary-tint), 2px offset` (was `2px emerald-600`). Lockdown binds focus-ring token (foundation §9, lockdown §10.2).
+- §11 motion + §13 Test 4: closure celebration = 200ms green pulse ONLY; confetti removed. Decorative animation banned per lockdown `08-motion-lockdown.md`.
+- §1 Meta block: i18n narrowed to English + Bangla; Hindi removed per lockdown §11.1. Bangla-first default bound for Anjali-mobile. Bangla numerals for timestamps.
+- §1 Meta block: font bound to `--font-family-bangla` (Noto Sans Bengali) primary on Anjali-mobile; body line-height `--line-height-body-bangla: 1.6`.
+- §10 i18n key surface: Bangla-first binding called out explicitly; VS15 text-style glyph (`✓\uFE0E`, `⚠\uFE0E`) on consumer messages per lockdown §11.3.
+- §15 open question #2: language list corrected to `en + bn` only.
+- Reference: `docs/D-UX-Design/01-design-system-foundation.md` (lockdown-bound).
+- Reference: `docs/D-UX-Design/decisions/00-lockdown-audit.md`.
+
+All token references in this spec now point to lockdown tokens (not Phase 4 tokens).

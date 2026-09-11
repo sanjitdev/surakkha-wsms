@@ -13,20 +13,21 @@
 | **Source scenario** | [Scenario 01 — Priya's shift, Screen 3](../../C-UX-Scenarios/01-priya-the-pipeline-pilot-triage-verify-assign.md) |
 | **Status** | **NEW** — gap screen, mounted on `OperatorDashboard` |
 | **Priority tier** | **1** (build first — load-bearing surface) |
-| **i18n** | English (default), Hindi, Bengali |
+| **i18n** | English + Bangla. Bangla-first for hotline-text-heavy context (operator notes, location hints). No Hindi in Phase 1 (lockdown §11.1). |
+| **Locale** | Bangla-first default per lockdown §11.2; English fallback for operator dashboard chrome. Operator can toggle; preference persists per session. |
 | **Layout primitive** | Modal layer (foundation §3.4) — 640px wide, centred |
 
 ### Locked decisions (10, from Scenario 01)
 
 1. **Mounted from OperatorDashboard top-chrome.** Single button "Log hotline call" in the dashboard's action bar. NOT a separate page.
-2. **T3 default trust band.** Hotline-sourced incidents always default to T3 (lowest trust band) — none of the five anchor/verification signals are available.
+2. **T1 default trust band + hotline reporter-badge.** Hotline-sourced incidents always default to **T1 (unverified, divider neutral)** — none of the five anchor/verification signals are available. The hotline source is captured via the `reporter_kind: hotline_operator` reporter-badge attribute on the chain, surfaced in Priya's inbox as the deep-teal-tint `--color-reporter-hotline` chip (`Phone` Lucide icon). T3 is reserved for consumer-notice issuance only (lockdown `01-color-lockdown.md`).
 3. **Six fields captured** — caller name (optional), caller phone (optional), call time (default now, editable), incident description (required, 500 char), location hint (free text, required), call outcome (required, dropdown). Only the first four fields create an incident; outcomes 2 and 3 do NOT create an incident but DO log the call.
 4. **Hotline reporter lineage preserved.** `reporter_kind: hotline_operator` and `hotline_call_id` carried on the created incident so Scenario 05's metrics can distinguish hotline-sourced from web-form-sourced reports throughout their lifecycle.
 5. **Submit only enabled when required fields are filled.** Description, location hint, and outcome are required.
-6. **On submit:** modal closes, toast confirms "Incident created with ID `inc_01HX...` (T3 default)", and the new incident appears at the top of Priya's inbox with a phone icon and amber trust-band badge. `IncidentCreated` lands on the chain.
+6. **On submit:** modal closes, toast confirms "Incident created with ID `inc_01HX...` (T1 default, hotline source)", and the new incident appears at the top of Priya's inbox with a `Phone` icon and hotline reporter-badge chip. `IncidentCreated` lands on the chain.
 7. **Outcome = "no incident"** shows a different confirmation: "Call logged. No incident created." and logs a `HotlineCallLogged{outcome: no_incident}` chain event (still on the chain, but not an incident).
 8. **Dismiss with ESC or "Cancel" button.** If any required field has content, dismissal asks "Discard this call log? You can keep editing." — confirmation dialog.
-9. **i18n.** All field labels and outcomes translated; Hindi and Bengali defaults required.
+9. **i18n.** All field labels and outcomes translated; English + Bangla defaults required (Hindi removed in lockdown reconciliation 2026-09-11). Bangla-first for hotline-text-heavy context.
 10. **No keyboard nav gotchas.** Tab order: caller name → caller phone → call time → description → location hint → outcome → Cancel → Submit. ESC = Cancel (with confirmation if dirty).
 
 ---
@@ -35,7 +36,7 @@
 
 Hotline calls are a legitimate citizen entry path for those without digital access — a phone call is the lowest-friction surface for a panicking neighbour whose water just turned bad. The operator who takes the call is the **proxy reporter**: she is the one trusted actor between the city and the caller, and the incident she creates from that call is **first-class data** — not a degraded substitute for a web-form report.
 
-The Hotline Intake Modal is the surface that converts a phone conversation into a chain-anchored incident in under 90 seconds, while the caller is still on the line. Because phone-sourced calls cannot carry any of the five verification signals (no nid, no anchor trust, no photo with EXIF, no prior report history, no cross-reporter corroboration), the resulting incident always defaults to **T3** — the lowest trust band — which means the modal is also the surface where the heaviest verification reasoning will later live (Scenario 01 Path C).
+The Hotline Intake Modal is the surface that converts a phone conversation into a chain-anchored incident in under 90 seconds, while the caller is still on the line. Because phone-sourced calls cannot carry any of the five verification signals (no nid, no anchor trust, no photo with EXIF, no prior report history, no cross-reporter corroboration), the resulting incident always defaults to **T1 (unverified, divider neutral)** and carries the `--color-reporter-hotline` (deep-teal-tint) hotline reporter-badge. The modal is also the surface where the heaviest verification reasoning will later live (Scenario 01 Path C).
 
 ---
 
@@ -58,7 +59,7 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 +---------------------------------------------------------------+
 |  Log hotline call                                              |
 |  Records will be added to the audit chain. Hotline-sourced     |
-|  incidents default to T3 (lowest trust band).                  |
+|  incidents default to T1 (unverified) + hotline reporter-badge.|
 +---------------------------------------------------------------+
 |                                                                |
 |  [Reporter info]                                               |
@@ -94,12 +95,12 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 ```
 
 - **Title:** "Log hotline call" (h2, `text-xl`, weight 600)
-- **Subtitle:** "Records will be added to the audit chain. Hotline-sourced incidents default to T3 (lowest trust band)." (`text-sm`, `text-slate-500`)
+- **Subtitle:** "Records will be added to the audit chain. Hotline-sourced incidents default to T1 (unverified) and carry a hotline reporter-badge." (`text-sm`, `text-slate-500`)
 - **Required indicator:** asterisk after label (`*`)
 - **Helper text:** below each input, `text-sm slate-500`
-- **Error text:** below each input on validation failure, `text-sm rose-600`
-- **Section dividers:** thin slate-200 horizontal rule between reporter info and incident info sections
-- **Footer:** Cancel (ghost button, left) + Submit (primary emerald, right). Submit `disabled` until required fields filled.
+- **Error text:** below each input on validation failure, `text-sm` `--color-status-warn` (amber, lockdown §1.3 carve-out — form validation errors are NOT alert-red)
+- **Section dividers:** thin `--color-divider` (`#E1DDD4`) horizontal rule between reporter info and incident info sections
+- **Footer:** Cancel (ghost button, left) + Submit (primary deep teal (`--color-primary`), right). Submit `disabled` until required fields filled.
 
 ---
 
@@ -141,7 +142,7 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 
 | Outcome enum | i18n key | Submit behaviour | Chain event | New incident? | Inbox effect |
 |---|---|---|---|---|---|
-| `reported_incident` (default) | `operator.hotlineIntake.outcomes.reportedIncident` ("Reported incident") | Submit creates incident, T3 default band, payload `{ source: hotline, reporter_kind: hotline_operator, hotline_call_id: <uuid>, call_time, caller_name?, caller_phone_hash?, description, location_hint }` | `IncidentCreated{ trust_band: T3, source: hotline, reporter_kind: hotline_operator, hotline_call_id: ... }` | ✅ Yes | New incident at **top of Priya's inbox** with `Phone` icon + amber T3 badge |
+| `reported_incident` (default) | `operator.hotlineIntake.outcomes.reportedIncident` ("Reported incident") | Submit creates incident, T1 default band + hotline reporter-badge, payload `{ source: hotline, reporter_kind: hotline_operator, hotline_call_id: <uuid>, call_time, caller_name?, caller_phone_hash?, description, location_hint }` | `IncidentCreated{ trust_band: T1, source: hotline, reporter_kind: hotline_operator, hotline_call_id: ... }` | ✅ Yes | New incident at **top of Priya's inbox** with `Phone` icon (Lucide) + `--color-reporter-hotline` (deep-teal-tint) hotline reporter-badge; T1 band pill uses `--color-trust-t1` (divider neutral, NOT amber) |
 | `no_incident` | `operator.hotlineIntake.outcomes.noIncident` ("Inquiry handled / no incident") | Submit logs call only — NO incident created | `HotlineCallLogged{ outcome: no_incident, call_time, hotline_call_id }` | ❌ No | Toast: "Call logged. No incident created." + entry appears in `AuditLog` |
 | `wrong_number` | `operator.hotlineIntake.outcomes.wrongNumber` ("Wrong number / disconnected") | Submit logs call only — NO incident created | `HotlineCallLogged{ outcome: wrong_number, call_time, hotline_call_id }` | ❌ No | Toast: "Call logged. No incident created." + entry appears in `AuditLog` |
 
@@ -156,20 +157,20 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 - **Enabled when:** description ≥ 20 chars, location hint ≥ 5 chars, outcome selected, call time valid (not in future).
 - **Disabled state:** button rendered with reduced opacity; tooltip "Fill required fields to submit."
 - **On click (enabled):**
-  1. If outcome is `reported_incident`: `POST /api/incidents` with `source: hotline, reporter_kind: hotline_operator, hotline_call_id` payload; modal closes after server-side success; toast confirms incident id and T3 default; inbox refetches via TanStack Query and surfaces new card.
+  1. If outcome is `reported_incident`: `POST /api/incidents` with `source: hotline, reporter_kind: hotline_operator, hotline_call_id` payload; modal closes after server-side success; toast confirms incident id and T1 default + hotline reporter-badge; inbox refetches via TanStack Query and surfaces new card.
   2. If outcome is `no_incident` or `wrong_number`: `POST /api/hotline-calls` with the call log payload; modal closes; toast confirms call logged; audit log refetches.
 
 ### Cancel / ESC dismiss
 
 - **ESC key** OR **Cancel button click** behaves identically.
 - **Dirty check:** modal tracks whether any field has user-entered content (caller name, caller phone, description, location hint — call time is initially set so doesn't count as dirty on its own; outcome is a select with a default so it counts only if user changed it).
-- **If dirty:** open confirmation dialog — title "Discard this call log?", body "You can keep editing." Actions: "Keep editing" (ghost, closes dialog) + "Discard" (rose destructive, closes modal without saving).
+- **If dirty:** open confirmation dialog — title "Discard this call log?", body "You can keep editing." Actions: "Keep editing" (ghost, closes dialog) + "Discard" (destructive via `--color-alert-red-reserved`, closes modal without saving).
 - **If pristine:** modal closes immediately, no confirmation.
 
 ### Form validity on submit
 
 - Live validation on blur and on submit.
-- Field-level errors render below the field in `text-sm rose-600`.
+- Field-level errors render below the field in `text-sm` `--color-status-warn` (amber; lockdown §1.3 carve-out — form validation errors are NOT alert-red-reserved).
 - Submit button **never** fires an invalid submit; it stays disabled.
 
 ---
@@ -178,13 +179,14 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 
 ### Outcome = `reported_incident`
 
-1. Toast appears top-right for **1.5 s** (sticky confirmation pattern, hover-pause), text: `"Incident created with ID inc_01HX... (T3 default)"` (with the actual ULID interpolated). i18n key: `operator.hotlineIntake.toast.incidentCreated`.
+1. Toast appears top-right for **1.5 s** (sticky confirmation pattern, hover-pause), text: `"Incident created with ID inc_01HX... (T1 default, hotline source)"` (with the actual ULID interpolated). i18n key: `operator.hotlineIntake.toast.incidentCreated`.
 2. Modal closes (focus restored to "Log hotline call" trigger button).
 3. **`HotlineIntakeReceived` secondary toast** (operator-internal, ~3 s) confirms the chain write succeeded — per Scenario 01 Screen 3.
-4. The new incident surfaces at the **top of Priya's inbox** (priority sort is priority-first / age-second — T3 hotline incidents do NOT jump higher-band work in progress; per Scenario 01 §"What fires automatically on submit"). When the inbox is empty (calm arrival), the new T3 incident is the only row.
+4. The new incident surfaces at the **top of Priya's inbox** (priority sort is priority-first / age-second — T1 hotline incidents do NOT jump higher-band work in progress; per Scenario 01 §"What fires automatically on submit"). When the inbox is empty (calm arrival), the new T1 hotline incident is the only row.
 5. **Inbox card displays:**
-   - `Phone` icon (lucide, T3 amber) in the leading position
-   - "T3" trust-band badge in amber (`--color-trust-t3` / `amber-600`) with `Phone` icon — per foundation §4.1
+   - `Phone` Lucide icon in the leading position (reporter-badge attribute)
+   - Hotline reporter-badge chip using `--color-reporter-hotline` (deep-teal-tint) with `Phone` icon — per lockdown §1.1 reporter-badge palette
+   - T1 trust-band pill: glyph `◔` + text "T1", band colour `--color-trust-t1` (divider neutral) — per lockdown §4.1 glyph + text redundancy
    - Description preview, location hint, call time
    - Missing-evidence chips: `no-photo` / `no-reputation` / `cluster-pending` (rendered by Scenario 01 Screen 4 when the operator opens the row for Path C verification — not on the inbox card itself)
 6. **`IncidentCreated` lands on the chain** with the same source attribution Surakkha applies for every report; phone is never stored in plaintext (hashed).
@@ -207,7 +209,8 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 +------------------------------------------------------+
 |  Log hotline call                                     |
 |  Records will be added to the audit chain. Hotline-   |
-|  sourced incidents default to T3 (lowest trust band). |
+|  sourced incidents default to T1 (unverified) and     |
+|  carry a hotline reporter-badge.                      |
 +------------------------------------------------------+
 |                                                       |
 |  Caller name                                          |
@@ -243,7 +246,7 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 +------------------------------------------------------+
 |                              [ Cancel ]  [ Submit ]  |
 +------------------------------------------------------+
-        (Submit greyed/disabled — required fields empty)
+        (Submit greyed/disabled — required fields empty; primary deep teal when enabled)
 ```
 
 ### Filled state (hotline-sourced incident, ready to submit)
@@ -252,7 +255,8 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 +------------------------------------------------------+
 |  Log hotline call                                     |
 |  Records will be added to the audit chain. Hotline-   |
-|  sourced incidents default to T3 (lowest trust band). |
+|  sourced incidents default to T1 (unverified) and     |
+|  carry a hotline reporter-badge.                      |
 +------------------------------------------------------+
 |                                                       |
 |  Caller name                                          |
@@ -284,7 +288,7 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 +------------------------------------------------------+
 |                              [ Cancel ]  [ Submit ]  |
 +------------------------------------------------------+
-        (Submit enabled, primary emerald)
+        (Submit enabled, primary deep teal — --color-primary)
 ```
 
 ---
@@ -315,12 +319,12 @@ If `POST /api/incidents` (or `POST /api/hotline-calls`) fails or times out:
 ### Namespaces
 
 - `operator.hotlineIntake.title` — "Log hotline call"
-- `operator.hotlineIntake.subtitle` — "Records will be added to the audit chain. Hotline-sourced incidents default to T3 (lowest trust band)."
+- `operator.hotlineIntake.subtitle` — "Records will be added to the audit chain. Hotline-sourced incidents default to T1 (unverified) and carry a hotline reporter-badge."
 - `operator.hotlineIntake.sectionNotice` — "Required fields below create the incident. Outcomes 'Inquiry handled' and 'Wrong number' only log the call."
 - `operator.hotlineIntake.fields.callerName` / `callerPhone` / `callTime` / `description` / `locationHint` / `outcome`
 - `operator.hotlineIntake.fields.callerPhoneHelper` / `descriptionHelper` / `locationHintHelper` / `outcomeHelper`
 - `operator.hotlineIntake.outcomes.reportedIncident` / `noIncident` / `wrongNumber`
-- `operator.hotlineIntake.toast.incidentCreated` — `"Incident created with ID {incidentId} (T3 default)"`
+- `operator.hotlineIntake.toast.incidentCreated` — `"Incident created with ID {incidentId} (T1 default, hotline source)"`
 - `operator.hotlineIntake.toast.callLogged` — `"Call logged. No incident created."`
 - `operator.hotlineIntake.toast.errorRetry` — `"Couldn't create incident — retrying in 5s"` / `"Couldn't log call — retrying in 5s"`
 - `operator.hotlineIntake.toast.errorFinal` — `"Still couldn't create incident — submit when ready"`
@@ -331,9 +335,9 @@ If `POST /api/incidents` (or `POST /api/hotline-calls`) fails or times out:
 - `operator.hotlineIntake.submitDisabledTooltip` — "Fill required fields to submit."
 - `operator.dashboard.actions.logHotlineCall` — "Log hotline call" (button label on the dashboard action bar)
 
-### Hindi & Bengali defaults
+### Bangla & English defaults
 
-The implementation must include Hindi and Bengali translations for all keys above at the baseline (per Phase 4 plan §6: English + Hindi + Bengali). Hindi: "फ़ोन कॉल लॉग करें", "हेल्पलाइन-स्रोत घटनाएँ डिफ़ॉल्ट रूप से T3 हैं" (placeholder copy pending i18n review per Scenario 03 / content-language rules — calm tone, no exclamations, no PHA bureaucracy speak).
+The implementation must include English + Bangla translations for all keys above at the baseline (per lockdown §11.1: English + Bangla only; Hindi removed in lockdown reconciliation 2026-09-11). Bangla: "ফোন কল লগ করুন", "হেল্পলাইন-সোর্স ঘটনাগুলি ডিফল্টরূপে T1 এবং একটি হেল্পলাইন রিপোর্টার-ব্যাজ বহন করে" (placeholder copy pending i18n review per Scenario 03 / content-language rules — calm tone, no exclamations, no PHA bureaucracy speak). Bangla body uses `--font-family-bangla` (Noto Sans Bengali) with `--line-height-body-bangla: 1.6`.
 
 ---
 
@@ -344,12 +348,13 @@ The implementation must include Hindi and Bengali translations for all keys abov
 - **Tab order (locked):** caller name → caller phone → call time → description → location hint → outcome → Cancel → Submit
 - **All labels visible** — no placeholder-only labels (foundation §9 + §3.5)
 - **Required field indicator** is asterisk after label, not separate legend
-- **Helper text for "T3 default" framing** is the subtitle AND the section notice between reporter info and incident info — operators know why hotline incidents get the lowest band by default, so the reasoning weight (Scenario 01 Path C) doesn't surprise them
-- **Trust band badge** in the inbox row carries `aria-label="T3 hotline-sourced, lowest trust band"` (foundation §9, §4.1)
+- **Helper text for "T1 default + hotline reporter-badge" framing** is the subtitle AND the section notice between reporter info and incident info — operators know why hotline incidents start unverified by default, so the reasoning weight (Scenario 01 Path C) doesn't surprise them
+- **Trust band badge** in the inbox row carries `aria-label="T1 unverified, hotline source"` (foundation §9, §4.1). Glyph `◔` + "T1" text + `--color-trust-t1` (divider neutral) per lockdown §4.1. Hotline reporter-badge chip carries `aria-label="Hotline call"` separately.
 - **Form errors** are announced via `aria-live="polite"` on a hidden status region adjacent to each field
-- **Visible focus ring** on every interactive element — 2px emerald-600 ring, 2px offset (foundation §9)
-- **Color contrast:** WCAG AA across all text (operator surfaces AA+ per foundation §9)
+- **Visible focus ring** on every interactive element — 2px primary-tint (`--color-primary-tint`) ring, 2px offset (lockdown §10.2)
+- **Color contrast:** WCAG AA across all text (operator surfaces AA+ per lockdown §10.1)
 - **`Phone` icon on inbox card** has `aria-label="Hotline-sourced incident"` so screen readers surface the hotline lineage
+- **Bangla line-heights:** Bangla surface copy uses `--line-height-body-bangla: 1.6`
 
 ---
 
@@ -362,20 +367,20 @@ The implementation must include Hindi and Bengali translations for all keys abov
 - **Emits chain event via the same write path as web-form submissions.** The chain doesn't know or care about the source — the source is a field on the event payload (`source: hotline`). The single write path per AD-1 (foundation §11 + product-brief AD-1) is preserved.
 - **Inbox refetch** is via the existing TanStack Query / fetch invalidation pattern that InboxList already uses; the new incident card re-renders at the position determined by the priority-first / age-second sort.
 - **Phone hashing** happens server-side on the gateway; the modal sends the raw phone (E.164 or local 10-digit) and the gateway replaces it with `reporter: caller_phone_hash` on the chain event. This is the same pattern as Scenario 03's `reporter: nid_hash`.
-- **Bengali locale first** for hotline-text-heavy context (operator notes, location hints); English fallback for the operator dashboard chrome. Per Scenario 01 Screen 3: "Bangla locale first; English fallback."
+- **Bengali locale first** for hotline-text-heavy context (operator notes, location hints); English fallback for the operator dashboard chrome. Per Scenario 01 Screen 3: "Bangla locale first; English fallback." Bangla body uses `--font-family-bangla` (Noto Sans Bengali) with `--line-height-body-bangla: 1.6`.
 
 ---
 
 ## Test scenarios
 
-1. **"Priya opens modal, fills all required fields, submits → incident created with T3 badge visible in inbox."**
+1. **"Priya opens modal, fills all required fields, submits → incident created with T1 band + hotline reporter-badge visible in inbox."**
    - Open OperatorDashboard, click "Log hotline call"
    - Fill caller name = "Rina Akhter", caller phone = "+880 1712 345 678", description = "Foul smell from the kitchen tap since this morning.", location hint = "Ward 14, Mohammadpur, standpipe #7"
    - Outcome stays at "Reported incident" default
    - Click Submit
-   - Modal closes, toast reads "Incident created with ID inc_01HX... (T3 default)"
-   - Inbox list now shows new incident at top with `Phone` icon + amber T3 badge
-   - Chain segment for the new incident contains `IncidentCreated{trust_band: T3, source: hotline, reporter_kind: hotline_operator, hotline_call_id: <uuid>}`
+   - Modal closes, toast reads "Incident created with ID inc_01HX... (T1 default, hotline source)"
+   - Inbox list now shows new incident at top with `Phone` icon + `--color-reporter-hotline` (deep-teal-tint) hotline reporter-badge chip + T1 band pill (`◔ T1`, `--color-trust-t1` divider neutral)
+   - Chain segment for the new incident contains `IncidentCreated{trust_band: T1, source: hotline, reporter_kind: hotline_operator, hotline_call_id: <uuid>}`
 
 2. **"Priya selects 'Inquiry handled / no incident' outcome, submits → no incident created, call logged in audit log."**
    - Open modal, fill description + location hint, select outcome "Inquiry handled / no incident"
@@ -387,7 +392,7 @@ The implementation must include Hindi and Bengali translations for all keys abov
 3. **"Priya opens modal, types in description, hits ESC → confirmation dialog appears."**
    - Open modal, type "abc" into description (now dirty)
    - Press ESC
-   - Confirmation dialog: "Discard this call log? You can keep editing." with Keep editing (ghost) + Discard (rose destructive)
+   - Confirmation dialog: "Discard this call log? You can keep editing." with Keep editing (ghost) + Discard (`--color-alert-red-reserved` destructive)
    - Click "Keep editing" → dialog closes, modal stays open with description intact
    - Press ESC again, click "Discard" → modal closes, no submit fired
 
@@ -396,20 +401,20 @@ The implementation must include Hindi and Bengali translations for all keys abov
    - Submit button is greyed/disabled
    - Hover/tab-focus → tooltip "Fill required fields to submit."
    - Cannot click; cannot submit; no error yet
-   - Type a single character into description → field error "20 characters minimum" appears (`text-sm rose-600`), button still disabled
+   - Type a single character into description → field error "20 characters minimum" appears (`text-sm --color-status-warn` amber), button still disabled
    - Type 20th character → button becomes enabled
 
-5. **"Hindi locale: Priya opens modal, all labels and outcomes are translated."**
-   - Switch language to Hindi via the TopChrome language picker
+5. **"Bangla locale: Priya opens modal, all labels and outcomes are translated."**
+   - Switch language to Bangla via the TopChrome language picker
    - Click "Log hotline call" (button label is the translated string)
-   - Modal opens; title, subtitle, all six field labels, all helper text, the three outcome options in the dropdown, and the Cancel / Submit buttons are all rendered in Hindi
-   - The T3-default framing in the subtitle is in Hindi; the operator understands the trust band default reasoning in their working language
+   - Modal opens; title, subtitle, all six field labels, all helper text, the three outcome options in the dropdown, and the Cancel / Submit buttons are all rendered in Bangla using `--font-family-bangla` (Noto Sans Bengali)
+   - The T1-default + hotline reporter-badge framing in the subtitle is in Bangla; the operator understands the trust band default reasoning in their working language
 
 6. **"Call time in the future fails validation."**
    - Open modal, advance call time field to tomorrow's date
    - Type valid description + location hint
    - Click Submit
-   - Field error renders below call time: "Call time cannot be in the future." (`rose-600`)
+   - Field error renders below call time: "Call time cannot be in the future." (`--color-status-warn` amber)
    - Submit is disabled
 
 7. **"Network failure: Priya submits, POST times out, toast + auto-retry keep modal open."**
@@ -430,14 +435,14 @@ This modal's submission flow emits the same `IncidentCreated` chain event as:
 
 **Scenario 05 — Pia's data contract** depends on the hotline-vs-web-form distinction being preserved as a first-class field through every aggregate. Specifically:
 
-- **Shape 1 (trust band distribution):** accepts `source` filter; hotline-sourced T3 incidents appear as a distinct cell in the distribution grid.
+- **Shape 1 (trust band distribution):** accepts `source` filter; hotline-sourced T1 incidents (with hotline reporter-badge) appear as a distinct cell in the distribution grid.
 - **Shape 2 (resolution rate vs. citizen-✅ divergence):** accepts `source` filter on the drill-down; hotline-sourced incidents show a different resolution-✅ correlation profile than web-form-sourced because the reporter (`caller_phone_hash`) is one-shot, not a returning reporter.
 - **Shape 3 (SLA compliance per named actor):** Priya (the operator who logged the call) carries the SLA-relevant event; the hotline call itself is captured as a `HotlineCallLogged` or `IncidentCreated` with `actor: priya`.
 - **Shape 4 (reporter cohort retention — web-form vs hotline, anchor vs non-anchor):** this is the load-bearing surface for hotline-vs-web-form distinction. Hotline callers have a fundamentally different retention profile than web-form reporters — they may report once and never return. The view must preserve `source_category` (web_form / hotline) as a cohort dimension.
 
 **The hotline_call_id carried on `IncidentCreated`** is the lineage key for the hotline path. It links the chain event back to the specific phone call session, enables de-duplication of accidental re-submits, and provides the forensic trail Scenario 05's hotline-cohort retention metric aggregates on.
 
-**T3 trust band for hotline-sourced incidents** is the structural signal that hotline reports start with the lowest verification baseline. This is preserved through every downstream event — no implicit uplift, no auto-promotion. The T3 default applies because none of the five anchor/verification signals are available: there is no nid-bound authentication, no anchor trust flag, no photo with EXIF, no prior report history (the caller is one-shot), and no cross-reporter corroboration within the cluster window.
+**T1 trust band + hotline reporter-badge for hotline-sourced incidents** is the structural signal that hotline reports start unverified, with the hotline source captured as a reporter-badge attribute. This is preserved through every downstream event — no implicit uplift, no auto-promotion. The T1 default applies because none of the five anchor/verification signals are available: there is no nid-bound authentication, no anchor trust flag, no photo with EXIF, no prior report history (the caller is one-shot), and no cross-reporter corroboration within the cluster window. The hotline reporter-badge (`--color-reporter-hotline` deep-teal-tint, `Phone` Lucide icon) distinguishes hotline lineage from web-form lineage (`--color-reporter-webform` ink) through every aggregate.
 
 ---
 
@@ -455,7 +460,7 @@ This modal's submission flow emits the same `IncidentCreated` chain event as:
 ## Remaining open questions
 
 1. **Should the modal capture the caller's preferred language?** Operators might log "Bangla" if the caller spoke Bangla; this would let the Phase 2 PHA dashboard track language-as-cohort. Currently no field captures it. Deferred — not a Phase 1 requirement.
-2. **Auto-routing of T3 hotline incidents:** per Scenario 01, T3 hotline incidents do NOT jump the priority sort above higher-band work in progress. The modal currently relies on the existing inbox sort to honor this. If the inbox sort changes, the modal needs no change — but the behavioural contract should be re-confirmed.
+2. **Auto-routing of T1 hotline incidents:** per Scenario 01, T1 hotline incidents do NOT jump the priority sort above higher-band work in progress. The modal currently relies on the existing inbox sort to honor this. If the inbox sort changes, the modal needs no change — but the behavioural contract should be re-confirmed.
 3. **Escaping accent / non-Bangla character handling** in the location hint and description (Bangla IME, Unicode normalisation). Out of scope for this spec but worth a smoke test before Phase 1 demo bar.
 4. **Hotline call id generation:** currently generated client-side at modal mount. If the modal is re-opened (after a discarded submit) within the same session, a new `hotline_call_id` is generated. This means discard + reopen starts a new lineage key. Current behaviour is acceptable but not load-bearing.
 
@@ -471,4 +476,21 @@ This modal's submission flow emits the same `IncidentCreated` chain event as:
   - [Scenario 05 — Pia's data contract, PHA deferred](../../C-UX-Scenarios/05-pia-data-contract-pha-deferred.md) — hotline-vs-web-form distinction must be preserved through every metric; Shape 4 cohort retention is the load-bearing surface
   - [Product brief](../../A-Product-Brief/product-brief.md) — AD-1 single write path; chain is the source of truth
   - [Phase 4 plan](../00-phase-4-plan.md) — Tier 1 gap screen, mounted on OperatorDashboard
-  - [Design system foundation](../01-design-system-foundation.md) — modal layer §3.4, trust band palette §1.1, Foundation §11 rule "Hotline intake is first-class," T3 amber colour and `Phone` iconography §4.1
+  - [Design system foundation](../01-design-system-foundation.md) — modal layer §3.4, trust band palette §1.1 (lockdown-bound), Foundation §11 rule "Hotline intake is first-class," T1 + `--color-reporter-hotline` chip + `Phone` Lucide iconography per lockdown §1.1 / §4.1
+
+---
+
+## Lockdown reconciliation (2026-09-11)
+
+This spec was re-edited to bind to the bmad lockdown system. Edits applied:
+- §1 Meta block + §1 locked decision #2 + Purpose + §1 locked decision #6 + §7 outcome state mapping + post-submit behaviour + cross-scenario linkage: **T1-inversion cascade.** Hotline-sourced incidents no longer get an amber T3 badge. They default to **T1 (unverified, divider neutral — `--color-trust-t1`)** and carry the `--color-reporter-hotline` (deep-teal-tint) hotline reporter-badge chip with `Phone` Lucide icon. The chain attribute `reporter_kind: hotline_operator` is preserved as the source-of-truth lineage key. T3 remains reserved for consumer-notice issuance only (lockdown `01-color-lockdown.md`).
+- §1 Meta block + §1 locked decision #9 + §13 i18n key surface + §13 Hindi & Bengali defaults renamed to Bangla & English: Hindi removed. **English + Bangla only.** Bangla-first for hotline-text-heavy context (lockdown §11.2).
+- §4 modal anatomy + §9 modal anatomy footer + §13 form validation: "primary emerald" Submit → **primary deep teal (`--color-primary`)**. "emerald-600" focus ring → **primary-tint (`--color-primary-tint`)** ring, 2px offset. "rose-600" form validation errors → **`--color-status-warn` (amber)** per lockdown §1.3 carve-out. "rose destructive" Discard button → **`--color-alert-red-reserved`** destructive.
+- §7 outcome state mapping + §10 post-submit behaviour: Toast text `Incident created with ID {incidentId} (T1 default, hotline source)`. Inbox card uses `Phone` icon + hotline reporter-badge chip + T1 band pill (glyph `◔` + text "T1" + `--color-trust-t1` divider neutral).
+- §11 accessibility: focus ring bound to `--color-primary-tint`. Bangla line-height `--line-height-body-bangla: 1.6` on Bangla surface copy.
+- §14 implementation notes: Bangla body uses `--font-family-bangla` (Noto Sans Bengali) with Bangla line-height 1.6.
+- §16 test scenarios: Test 1 + Test 5 re-keyed to T1 + hotline reporter-badge + Bangla locale.
+- Reference: `docs/D-UX-Design/01-design-system-foundation.md` (lockdown-bound).
+- Reference: `docs/D-UX-Design/decisions/00-lockdown-audit.md`.
+
+All token references in this spec now point to lockdown tokens (not Phase 4 tokens).
