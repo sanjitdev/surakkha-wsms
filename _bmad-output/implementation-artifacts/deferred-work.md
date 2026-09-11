@@ -87,6 +87,14 @@
   summary: FE-1.3c follow-up — surface `incError` in InboxDetail so a failed incidents fetch renders a fetch-failure UI instead of "Incident not found".
   evidence: FE-1.3c returns `{ incidents, loading, error }` from the hook and `InboxDetail.tsx` consumes all three, but the page treats `incidents=[]` after a 500 the same as "no incident exists" — both branches render `<IncidentNotFound />`. Spec boundary deferred error UX to a follow-up; sub-goal C (InboxList migration) is the natural home since it already reshapes the page's loading/error handling around `IncidentSummary`. Edge-Hunter finding.
 
+  **SHIPPED 2026-09-11 (commit 83c9130):**
+  - `web/src/pages/InboxDetail.tsx` — added a new `showFetchError = !loading && incError !== null` branch that renders BEFORE the `!incident` branch. Distinct EmptyState with AlertIcon + Retry CTA that calls `useIncidents().refetch()`.
+  - Added `testId="inbox-detail-fetch-error"` on the fetch-error Container and `testId="inbox-detail-not-found"` on the not-found Container so tests can lock the disjunction.
+  - Removed the dead `void incError;` line that swallowed the error silently.
+  - i18n: en/bn `inboxDetail.json` gain a sibling `fetchError` namespace (`title`, `body`, `emptyHeading`, `emptyBody`, `retryCta`). bn copy: "ঘটনা লোড করা যায়নি" / "আবার চেষ্টা করুন".
+  - Tests: new file `web/src/__checks__/fe-b6-inbox-detail-fetch-error.test.tsx` (4 cases). Locks: (a) fetch-error panel renders, notFound panel absent; (b) Retry click calls refetch spy; (c) bn locale renders Bengali copy; (d) en/bn key parity for all 5 fetchError keys.
+  - **Verification:** `pnpm test` → 340 passed across 45 files (was 336 → +4). `pnpm typecheck` → 56 errors (was 58 baseline → -2 incidental from tightened mock typing). `pnpm lint` → 0 new errors in touched files.
+
 - source_spec: `C:/ZDrive Folders/E2E_Training/Surakkha/_bmad-output/implementation-artifacts/spec-fe-b5a-dropdown.md`
   summary: FE-B5a follow-up — auto-flip the dropdown popover when it would overflow the viewport bottom; shift horizontally when it would overflow the viewport right.
   evidence: B5a ships the popover rendered as a sibling of the trigger with no viewport collision logic. When the dropdown is near the bottom of the viewport (e.g., the last row in a long table filter), the popover currently flows off-screen. The CSS already slots a mobile bottom-sheet at 767px, so the desktop auto-flip logic is a focused enhancement. Edge-Hunter finding; defer until B5b ships a real Table consumer that triggers the overflow.
