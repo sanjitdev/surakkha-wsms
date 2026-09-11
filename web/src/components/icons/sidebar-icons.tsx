@@ -208,3 +208,52 @@ export function UploadIcon(): ReactElement {
     </IconShell>
   );
 }
+
+// ──────────────────────────────────────────────── reporter-badge icons ─────
+// Per operator-dashboard.md #9 + foundation §1.1 — reporter-badge is the
+// source-attribute dimension. Four icons per §6.2:
+//   anchor  → Anchor       (lucide: anchor)
+//   hotline → Phone        (lucide: phone)
+//   webform → Edit (pencil)(lucide: pencil-line)
+//   sensor  → RadioTower   (lucide: radio-tower)
+// Text labels come from operatorDashboard.reporter.{kind}; chips colour via
+// .badge--reporter-{kind} per lockdown-bridge.css.
+export function ReporterAnchorIcon(): ReactElement {
+  // lucide: anchor
+  return (
+    <IconShell>
+      <path d="M12 22V8" />
+      <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
+      <circle cx="12" cy="5" r="3" />
+    </IconShell>
+  );
+}
+export function ReporterPhoneIcon(): ReactElement {
+  // lucide: phone
+  return (
+    <IconShell>
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
+    </IconShell>
+  );
+}
+export function ReporterWebformIcon(): ReactElement {
+  // lucide: pencil-line
+  return (
+    <IconShell>
+      <path d="M12 20h9" />
+      <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </IconShell>
+  );
+}
+export function ReporterSensorIcon(): ReactElement {
+  // lucide: radio-tower
+  return (
+    <IconShell>
+      <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+      <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />
+      <circle cx="12" cy="9" r="2" />
+      <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" />
+      <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+    </IconShell>
+  );
+}

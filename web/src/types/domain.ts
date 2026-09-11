@@ -43,6 +43,15 @@ export type IncidentStatus = (typeof IncidentStatus)[keyof typeof IncidentStatus
 // detail render. Built server-side by collapsing IncidentCreated/
 // IncidentEscalated/IncidentResolved chain blocks into one row per
 // incident_id. Mirrors `web/src/mocks/handlers.ts:443-461` verbatim.
+/**
+ * Reporter-source attribute per foundation §1.1.
+ *
+ * Source is a separate dimension from trust band (severity). Anchor
+ * citizen / hotline / webform / sensor — each incident has exactly one
+ * source. Lockdown §6.2 binds each to a Lucide icon + reporter palette
+ * token (`--color-reporter-anchor/hotline/webform/sensor`).
+ */
+export type ReporterKind = 'anchor' | 'hotline' | 'webform' | 'sensor';
 export interface IncidentSummary {
   incident_id: string;
   status: IncidentStatus;
@@ -51,4 +60,10 @@ export interface IncidentSummary {
   last_block_height: number;
   last_event_type: string;
   last_occurred_at: string;
+  /**
+   * Source attribute — operator-dashboard.md #9 + foundation §1.1.
+   * Optional; defaults to 'webform' at render time when absent so
+   * existing fixtures continue to render without breakage.
+   */
+  reporter_kind?: ReporterKind;
 }

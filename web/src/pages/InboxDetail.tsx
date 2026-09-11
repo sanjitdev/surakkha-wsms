@@ -1,10 +1,15 @@
 /**
- * InboxDetail.tsx — FE-1.5a + FE-F3.
+ * InboxDetail.tsx — FE-1.5a + FE-F3 + inbox-detail.md reconciliation.
  *
  * 2-pane incident detail at /inbox/:id. Per dim 5 §7.4:
  *   - Container width="bangla" (1080 px) for the mixed Latin/Bangla body.
- *   - Left col-span-7: timeline of chain events for this incident.
- *   - Right col-span-5: related incident list (sibling incidents by ward).
+ *   - **inbox-detail.md #6 (reconciled 2026-09-11):** chain-event timeline
+ *     moved from the LEFT pane (col-7) to a new RIGHT rail. The sibling
+ *     (related) incidents pane now occupies the LEFT col-7 slot; the
+ *     timeline lives on the RIGHT col-5. This is the Tier 2 structural
+ *     reorder that prefigures the full 3-column 240/flex/360 layout
+ *     (Batch 5 Tier 1 builds). For Phase 1 we keep Bangla width 1080 px
+ *     so the swap is a pure left↔right flip.
  *   - Drops to single pane below <bp-lg> (768 px).
  *
  * Header CTAs (FE-F3):
@@ -600,57 +605,13 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
       </div>
 
       <div className="grid-12">
-        {/* Left pane: thread timeline (col-span-7) */}
-        <div className="col-7" data-testid="inbox-detail-timeline">
-          <Card>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 'var(--space-md)',
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('timeline.title')}</h3>
-              <span
-                className="mono"
-                style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
-              >
-                {tDetail(
-                  threadEvents.length === 1 ? 'timeline.eventCount_one' : 'timeline.eventCount_other',
-                  { count: threadEvents.length },
-                )}
-              </span>
-            </div>
-            {threadEvents.length === 0 ? (
-              <EmptyState
-                icon={<AlertIcon />}
-                heading={tDetail('timeline.emptyHeading')}
-                body={tDetail('timeline.emptyBody')}
-              />
-            ) : (
-              <ul className="timeline" data-testid="inbox-detail-timeline-list">
-                {threadEvents.map((e) => (
-                  <li key={e.event_id}>
-                    <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
-                    <p className="timeline__title">{eventTitle(e, tDetail)}</p>
-                    <div
-                      className="timeline__meta"
-                      style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}
-                    >
-                      <span className="mono">{e.actor_identity?.display ?? tDetail('timeline.unknownActor')}</span>
-                      <span className="mono">{tDetail('timeline.separator')}</span>
-                      <span className="mono">{tDetail('timeline.blockRef', { height: e.height })}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </Card>
-        </div>
-
-        {/* Right pane: related incidents (col-span-5) */}
-        <div className="col-5" data-testid="inbox-detail-related">
+        {/* Left pane: related incidents (col-span-7).
+            Per inbox-detail.md #6 (reconciled 2026-09-11), the related
+            pane moves to the LEFT slot; the chain-event timeline now
+            lives on the RIGHT (EventChain rail). The full 240/flex/360
+            3-column grid is a Phase 5 Batch 5 build; this swap is the
+            Tier 2 reconciliation step. */}
+        <div className="col-7" data-testid="inbox-detail-related">
           <Card>
             <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>
               {tDetail('related.title', { ward: incident.ward_id })}
@@ -701,6 +662,60 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
                         </div>
                       </span>
                     </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+        </div>
+
+        {/* Right pane: chain-event timeline (EventChain rail, col-span-5).
+            Per inbox-detail.md #6 (reconciled 2026-09-11), the timeline
+            moves from the LEFT to a new RIGHT rail. Test-id stays
+            `inbox-detail-timeline` so existing assertions still find the
+            node; this is the Tier 2 reconciliation step that prefigures
+            the Batch 5 Tier 1 `PerIncidentChainSegment` component. */}
+        <div className="col-5" data-testid="inbox-detail-timeline">
+          <Card>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 'var(--space-md)',
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('timeline.title')}</h3>
+              <span
+                className="mono"
+                style={{ color: 'var(--fg-tertiary)', fontSize: 'var(--font-size-xs)' }}
+              >
+                {tDetail(
+                  threadEvents.length === 1 ? 'timeline.eventCount_one' : 'timeline.eventCount_other',
+                  { count: threadEvents.length },
+                )}
+              </span>
+            </div>
+            {threadEvents.length === 0 ? (
+              <EmptyState
+                icon={<AlertIcon />}
+                heading={tDetail('timeline.emptyHeading')}
+                body={tDetail('timeline.emptyBody')}
+              />
+            ) : (
+              <ul className="timeline" data-testid="inbox-detail-timeline-list">
+                {threadEvents.map((e) => (
+                  <li key={e.event_id}>
+                    <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
+                    <p className="timeline__title">{eventTitle(e, tDetail)}</p>
+                    <div
+                      className="timeline__meta"
+                      style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}
+                    >
+                      <span className="mono">{e.actor_identity?.display ?? tDetail('timeline.unknownActor')}</span>
+                      <span className="mono">{tDetail('timeline.separator')}</span>
+                      <span className="mono">{tDetail('timeline.blockRef', { height: e.height })}</span>
+                    </div>
                   </li>
                 ))}
               </ul>

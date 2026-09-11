@@ -34,7 +34,13 @@ import { useNumberFormatter } from '../hooks/useNumberFormatter';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
 import { FilterChip } from '../components/pages/FilterChip';
-import type { IncidentSummary } from '../types/domain';
+import {
+  ReporterAnchorIcon,
+  ReporterPhoneIcon,
+  ReporterSensorIcon,
+  ReporterWebformIcon,
+} from '../components/icons/sidebar-icons';
+import type { IncidentSummary, ReporterKind } from '../types/domain';
 
 type Layout = 'a' | 'b' | 'c';
 type Tab = 'overview' | 'sensors' | 'wards';
@@ -197,6 +203,49 @@ export function OperatorDashboard() {
     T0: 'threads.filters.t0',
   };
 
+  /**
+   * Reporter-badge chip — operator-dashboard.md #9.
+   *
+   * Renders one of four source-attribute chips (anchor / hotline / webform /
+   * sensor). Colour follows lockdown-bridge.css `.chip-reporter-{kind}`;
+   * text + aria-label come from operatorDashboard.reporter.{kind} so both
+   * locales render plain language. Defaults to 'webform' when an incident
+   * carries no reporter_kind (older fixtures) — keeps the chip legible
+   * without bleeding source data.
+   */
+  const renderReporterChip = (kind: ReporterKind | undefined) => {
+    const k: ReporterKind = kind ?? 'webform';
+
+    const Icon =
+      k === 'anchor'
+        ? ReporterAnchorIcon
+        : k === 'hotline'
+          ? ReporterPhoneIcon
+          : k === 'sensor'
+            ? ReporterSensorIcon
+            : ReporterWebformIcon;
+
+    return (
+      <span
+        className={`chip chip-reporter-${k} badge--reporter-${k}`}
+        data-testid={`thread-reporter-${k}`}
+        aria-label={tDash(`threads.reporter.ariaLabel.${k}`)}
+        title={tDash(`threads.reporter.ariaLabel.${k}`)}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 'var(--space-xs)',
+          padding: '2px var(--space-sm)',
+          fontSize: 'var(--font-size-xs)',
+          fontWeight: 'var(--font-weight-medium)',
+        }}
+      >
+        <Icon />
+        {tDash(`threads.reporter.${k}`)}
+      </span>
+    );
+  };
+
   // FE-B5b-migrate: column descriptors for the 3 dashboard tables. Each
   // preserves the original `<th>` class names + custom cell renderers
   // (severity dots, badges, action links) so the visual layout is identical
@@ -298,6 +347,13 @@ export function OperatorDashboard() {
         }),
       },
       {
+        // operator-dashboard.md #9 — reporter-badge chip per row.
+        // Source attribute, separate from trust band (foundation §1.1).
+        key: 'reporter_kind',
+        header: tDash('threads.table.colReporter'),
+        render: (i) => renderReporterChip(i.reporter_kind),
+      },
+      {
         key: 'status',
         header: tDash('threads.table.colStatusBlocker'),
         render: (i) => i.status,
@@ -345,6 +401,13 @@ export function OperatorDashboard() {
         render: (i) => tDash('threads.tableCompact.threadLabel', {
           ward: i.ward_id ?? tDash('common.emDash'),
         }),
+      },
+      {
+        // operator-dashboard.md #9 — reporter-badge chip per row,
+        // compact variant (single chip only, no inline sub-label).
+        key: 'reporter_kind',
+        header: tDash('threads.tableCompact.colReporter'),
+        render: (i) => renderReporterChip(i.reporter_kind),
       },
       {
         key: 'last_occurred_at',

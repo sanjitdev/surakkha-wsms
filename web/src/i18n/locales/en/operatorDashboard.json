@@ -140,9 +140,22 @@
       "t1": "T1",
       "t0": "T0"
     },
+    "reporter": {
+      "anchor": "Anchor",
+      "hotline": "Hotline",
+      "webform": "Web",
+      "sensor": "Sensor",
+      "ariaLabel": {
+        "anchor": "Reporter: anchor citizen",
+        "hotline": "Reporter: hotline call",
+        "webform": "Reporter: web report",
+        "sensor": "Reporter: sensor reading"
+      }
+    },
     "table": {
       "colThread": "Thread",
       "threadLabel": "{{ward}} incident",
+      "colReporter": "Source",
       "colStatusBlocker": "Status / blocker",
       "colOpened": "Opened",
       "colSeverity": "Severity",
@@ -151,6 +164,7 @@
     "tableCompact": {
       "colThread": "Thread",
       "threadLabel": "{{ward}} incident",
+      "colReporter": "Source",
       "colOpened": "Opened",
       "colSeverity": "Sev.",
       "openAction": "Open →"

@@ -50,6 +50,11 @@ export function useIncidents(): UseIncidentsResult {
               last_block_height: r.last_block_height,
               last_event_type: r.last_event_type,
               last_occurred_at: r.last_occurred_at,
+              // operator-dashboard.md #9 — reporter_kind projects onto
+              // the row as a source-attribute chip. Hook passes it through
+              // unchanged; the dashboard defaults to 'webform' when
+              // undefined (older fixtures without reporter_kind).
+              reporter_kind: r.reporter_kind,
             };
           }),
         );

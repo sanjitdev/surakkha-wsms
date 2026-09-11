@@ -140,9 +140,22 @@
       "t1": "T1",
       "t0": "T0"
     },
+    "reporter": {
+      "anchor": "অ্যাঙ্কর",
+      "hotline": "হটলাইন",
+      "webform": "ওয়েব",
+      "sensor": "সেন্সর",
+      "ariaLabel": {
+        "anchor": "প্রতিবেদক: অ্যাঙ্কর নাগরিক",
+        "hotline": "প্রতিবেদক: হটলাইন কল",
+        "webform": "প্রতিবেদক: ওয়েব প্রতিবেদন",
+        "sensor": "প্রতিবেদক: সেন্সর রিডিং"
+      }
+    },
     "table": {
       "colThread": "থ্রেড",
       "threadLabel": "{{ward}} ঘটনা",
+      "colReporter": "উৎস",
       "colStatusBlocker": "অবস্থা / বাধা",
       "colOpened": "খোলা হয়েছে",
       "colSeverity": "তীব্রতা",
@@ -151,6 +164,7 @@
     "tableCompact": {
       "colThread": "থ্রেড",
       "threadLabel": "{{ward}} ঘটনা",
+      "colReporter": "উৎস",
       "colOpened": "খোলা হয়েছে",
       "colSeverity": "তীব্র.",
       "openAction": "খুলুন →"

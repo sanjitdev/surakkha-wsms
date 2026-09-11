@@ -509,6 +509,28 @@ const incidentHandlers = [
       Array.from(byIncident.values()).map(({ id, latest }) => {
         const p = latest.payload as Record<string, unknown>;
 
+        // operator-dashboard.md #9 — reporter_kind projects onto the row
+        // as a source-attribute chip. Derive from the incident payload:
+        //   - explicit payload.reporter_kind wins (Tier 1 hotline spec uses
+        //     it for hotline-sourced incidents)
+        //   - else fall back to inbox.owner_kind from the FE-1.5b fixture
+        //     shape (operator → anchor, citizen → anchor, system/vendor →
+        //     sensor, technician → webform)
+        //   - else default 'webform' (foundation §6.2 — most common source)
+        const inbox = p.inbox as { owner_kind?: string } | undefined;
+        const ownerKind = inbox?.owner_kind;
+        const explicit = typeof p.reporter_kind === 'string' ? p.reporter_kind : undefined;
+        let reporterKind: 'anchor' | 'hotline' | 'webform' | 'sensor' | undefined;
+
+        if (explicit === 'anchor' || explicit === 'hotline' || explicit === 'webform' || explicit === 'sensor') {
+          reporterKind = explicit;
+        } else if (ownerKind === 'citizen' || ownerKind === 'operator') {
+          reporterKind = 'anchor';
+        } else if (ownerKind === 'system' || ownerKind === 'vendor') {
+          reporterKind = 'sensor';
+        } else if (ownerKind === 'technician') {
+          reporterKind = 'webform';
+        }
         return {
           incident_id: id,
           status:
@@ -522,6 +544,7 @@ const incidentHandlers = [
           last_block_height: latest.height,
           last_event_type: latest.event_type,
           last_occurred_at: latest.occurred_at,
+          reporter_kind: reporterKind ?? 'webform',
         };
       }),
     );
