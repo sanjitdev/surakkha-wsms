@@ -486,7 +486,19 @@ Hash anchors and chain event type names are **not translated** — they are tech
 
 ---
 
-## 16. Open questions (deferred from Scenario 06)
+## 16. Locked decisions (resolved 2026-09-11)
+
+| # | Decision | Choice | Where applied |
+|---|----------|--------|---------------|
+| 1 | Page vs tab | **Separate page** at `/incidents/:id/chain`. `InboxDetail` has a "View full chain" button that navigates to it. Operator can share URL. | §1 meta block, §3 user journeys, §10 wireframe |
+| 2 | Hash recomputation budget | **<200ms target** for chains up to 50 events. Use streaming recomputation only if exceeded. | §5 hash recomputation algorithm |
+| 3 | Cache TTL | **60s per (incident_id, last-known-seq)**. Subsequent verifications instant within the window. | §5 hash recomputation algorithm |
+| 4 | Anomaly acknowledgment | **Ack stays visible; badge persists** until Phase 2 escalation. Ack is just a chain event — forensic record preserved. | §7 anomaly handling |
+| 5 | "Escalate to Pia" button | **Disabled button + tooltip** "Available in Phase 2 PHA dashboard". Consistent with hotline modal. | §7 anomaly handling |
+| 6 | Public mode rendering | **Same component, `mode="operator" \| "public"` prop** switches rendering. Single source of truth. | §5 layout — public mode, §14 implementation notes |
+| 7 | Keyboard nav discoverability | **Help modal + `?` hotkey** lists j/k/Enter/v/a shortcuts. Discoverable without being intrusive. | §13 accessibility notes |
+
+## 17. Remaining open questions
 
 1. **Web Worker for chains >50 events.** The §5 algorithm runs synchronously in the page. For incident histories that grow beyond 50 events (e.g., multi-reopen arcs), should we move recomputation to a Web Worker to keep the main thread responsive? Phase 2 candidate.
 2. **Cross-tenant chain export.** Scenario 06 references "shares the segment with Pia via the per-incident chain export (URL with HMAC + per-tenant boundary; out of scope for UI design here but flagged for Phase 4)." — this page exposes a "Share with Pia" button that is a placeholder until the export format is locked.
@@ -494,10 +506,11 @@ Hash anchors and chain event type names are **not translated** — they are tech
 4. **Hash anchor truncation.** Right-rail shows first 8 chars + ellipsis (e.g., `01HX...9A`). Full hash is in the expanded view. Confirm 8 chars is sufficient for at-a-glance identification; may need to be 12.
 5. **Anomaly escalation queue (Phase 2 placeholder).** Phase 1 logs `ChainAnomalyEscalated` but routes to a local log file. Phase 2 owns the queue UI. Confirm the Phase 1 log-only behaviour is acceptable for the demo bar.
 6. **i18n locale for hash anchors and event type names.** Per foundation §10, these are not translated. Confirm with the team that this is acceptable for Bengali-first citizens (technical identifiers stay in English).
-7. **Cache invalidation on new event.** If a new chain event arrives while the page is open (5s chain-freshness poll), the cached verification result may be stale. Confirm: invalidate cache on new event arrival, or rely on the user re-clicking verification.
+7. **Cache invalidation on new event.** If a new chain event arrives while the page is open (5s chain-freshness poll), the cached verification result may be stale. Invalidate cache on new event arrival.
 
 ---
 
 _Spec produced by Saga/Freya — 2026-09-11_
+_Locked decisions applied 2026-09-11._
 _Source: Scenario 06 Screen 2 — Audit chain timeline (cross-cutting)_
 _Foundation reference: docs/D-UX-Design/01-design-system-foundation.md §1.1 (trust-band palette), §3.2 (three-column operator surface), §4.2 (chain event icons), §8 (motion), §9 (accessibility)_

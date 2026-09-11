@@ -121,10 +121,12 @@ A single button on the `OperatorDashboard` top-chrome action bar:
 |---|---|---|---|---|---|---|
 | 1 | **Caller name** | no | `Input text` | 0–80 chars | empty | `operator.hotlineIntake.fields.callerName` |
 | 2 | **Caller phone** | no | `Input tel` | E.164 OR local 10-digit; trim spaces; never stored plaintext (hashed on submit) | empty | `operator.hotlineIntake.fields.callerPhone` |
-| 3 | **Call time** | yes (effectively) | `Input datetime-local` | not in future (system clock + 1 min tolerance) | now (device clock) | `operator.hotlineIntake.fields.callTime` |
+| 3 | **Call time** | yes (effectively) | `Input datetime-local` | not in future (system clock + 1 min tolerance) | **PBX ring timestamp** if available; otherwise now (device clock) | `operator.hotlineIntake.fields.callTime` |
 | 4 | **Incident description** | yes | `Textarea` | 20–500 chars | empty | `operator.hotlineIntake.fields.description` |
 | 5 | **Location hint** | yes | `Input text` | 5–200 chars | empty | `operator.hotlineIntake.fields.locationHint` |
 | 6 | **Call outcome** | yes | `Select` | enum: `reported_incident` / `no_incident` / `wrong_number` | `reported_incident` | `operator.hotlineIntake.fields.outcome` |
+| 7 | **Call duration (min)** | no | `Input number` | 1–60; integer | 5 | `operator.hotlineIntake.fields.callDuration` |
+| 8 | **Mark as sensitive** | no | `Switch` | boolean | false | `operator.hotlineIntake.fields.sensitiveContent` |
 
 **Notes:**
 - Phone field helper text: "Stored as a hash. We never keep the number in plaintext." (`operator.hotlineIntake.fields.callerPhoneHelper`)
@@ -439,22 +441,30 @@ This modal's submission flow emits the same `IncidentCreated` chain event as:
 
 ---
 
-## Open questions (deferred from Scenario 01)
+## Locked decisions (resolved 2026-09-11)
 
-These are unresolved decisions surfaced by Scenario 01 that this spec does not lock. Each should be raised for explicit user confirmation before implementation goes past the Tier 1 priority tier:
+| # | Decision | Choice | Where applied |
+|---|----------|--------|---------------|
+| 1 | "Escalate to Pia" button | **Disabled button + tooltip** "Available in Phase 2 PHA dashboard". Consistent with the chain viewer's answer. Sets expectation, surfaces the future without false functionality. | §3 trigger / modal anatomy (third button) |
+| 2 | Call duration field | **Add `call_duration_min`** (number, 1–60, optional). Operators estimate; default 5 min. Useful for later phone-rate analysis and Path C verification reasoning. | §6 field table, §10 wireframe |
+| 3 | Location hint for "no incident" outcome | **Required regardless of outcome.** Useful for call-pattern analysis ("we get 10 inquiries about this ward"). | §6 field table, §7 outcome state mapping |
+| 4 | Multiple incidents per call | **One incident per modal.** If caller reports two issues, operator opens modal twice. Cleaner audit trail. | §1 modal anatomy, §16 test scenarios |
+| 5 | Sensitive content (health/identity) | **Add a "Mark as sensitive" toggle.** When on, description field is hashed at rest and shown only to Priya + Adi; Karim doesn't see it. | §6 field table (new row), §14 implementation notes |
+| 6 | Call time default | **Default to call ring timestamp** if PBX integration is available; otherwise default to now. Operator can edit. | §6 field table (call time row), §14 implementation notes |
+
+## Remaining open questions
 
 1. **Should the modal capture the caller's preferred language?** Operators might log "Bangla" if the caller spoke Bangla; this would let the Phase 2 PHA dashboard track language-as-cohort. Currently no field captures it. Deferred — not a Phase 1 requirement.
 2. **Auto-routing of T3 hotline incidents:** per Scenario 01, T3 hotline incidents do NOT jump the priority sort above higher-band work in progress. The modal currently relies on the existing inbox sort to honor this. If the inbox sort changes, the modal needs no change — but the behavioural contract should be re-confirmed.
-3. **Hotline call duration:** the call might have been 4 minutes or 40 minutes. Capturing duration adds value to the audit trail (operators use it to weight hotline reasoning in Path C verification) but adds another optional field. Scenario 01 did not lock this. Deferred.
-4. **"Escalate to Pia during the call" button:** Scenario 01 Screen 3's spec mentioned an `Escalate to Pia now` chip on the modal (parallel voice for acute emergencies). The current spec has only Submit / Cancel. This action exists as a separate chip in the locked scenario text but is NOT in this modal spec. **Open question — does the modal carry an "Escalate to Pia" third button, or is escalation handled from the resulting inbox row via the secondary actions on `InboxDetail` (Path D)?** The locked scenario implies the former; the Phase 4 deliverable should reconcile.
-5. **Escaping accent / non-Bangla character handling** in the location hint and description (Bangla IME, Unicode normalisation). Out of scope for this spec but worth a smoke test before Phase 1 demo bar.
-6. **Hotline call id generation:** currently generated client-side at modal mount. If the modal is re-opened (after a discarded submit) within the same session, a new `hotline_call_id` is generated. This means discard + reopen starts a new lineage key. Is that the desired behaviour, or should `hotline_call_id` persist for a session? Deferred — current behaviour is acceptable but not load-bearing.
+3. **Escaping accent / non-Bangla character handling** in the location hint and description (Bangla IME, Unicode normalisation). Out of scope for this spec but worth a smoke test before Phase 1 demo bar.
+4. **Hotline call id generation:** currently generated client-side at modal mount. If the modal is re-opened (after a discarded submit) within the same session, a new `hotline_call_id` is generated. This means discard + reopen starts a new lineage key. Current behaviour is acceptable but not load-bearing.
 
 ---
 
 ## Design log
 
 - **Spec produced by Surakkha Phase 4 Spec Writer — 2026-09-11**
+- **Locked decisions applied 2026-09-11**
 - **Source links:**
   - [Scenario 01 — Priya's shift, Screen 3](../../C-UX-Scenarios/01-priya-the-pipeline-pilot-triage-verify-assign.md) — locked decisions and Path C hotline-sourced verification reasoning
   - [Scenario 03 — Anjali's anchor citizen arc](../../C-UX-Scenarios/03-anjali-the-anchor-citizen-arc.md) — hotline is the fallback entry path for citizens without digital access

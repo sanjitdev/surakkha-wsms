@@ -163,15 +163,19 @@ Exhaustive state table:
 |---|---|---|
 | Just submitted, not yet verified | 1 event | "We're reviewing your report — usually within 30 min" |
 | Verified, awaiting assignment | 2 events | "Your report is verified and queued for dispatch" |
-| Assigned, on the way | 3 events | "Field crew [name] is on the way" |
-| On-site | 4 events | "Field crew is on-site now" |
-| Proof submitted, awaiting admin close | 5 events | "Field crew reports work complete — admin review in progress" |
+| Assigned, on the way | 3 events | "Field crew Karim is on the way" |
+| On-site | 4 events | "Field crew Karim is on-site now" |
+| In-flight, quiet for >24h | real events + 1 calm "Quiet for X days" row | "Quiet for 2 days — your report is still in progress. We'll update when there's news." |
+| Proof submitted, awaiting admin close | 5 events | "Field crew Karim reports work complete — admin review in progress" |
 | Resolved by admin, awaiting ack | 6 events | Closure tap UI |
 | Acked ✅ | 7 events + ack | "Thanks for confirming. All set." |
-| Ack window expired | 6 events + expired | Silent-closure reopen UI |
+| Ack window expired | 6 events + expired | Silent-closure reopen UI (within 30 days) |
+| After 30-day reopen window | 6 events + expired + final | "This report is closed. If something's still wrong, please submit a new report." |
 | Reopened | reopened event | "We've reopened this for review" |
 
 The state is derived from the chain events themselves — there is no separate mutable state. The page is a pure projection.
+
+Field crew names render as **first name + role** per locked decision #2: `Karim (field crew)`.
 
 ---
 
@@ -409,19 +413,30 @@ The projection layer (the filter from 33 closed-enum events → `CitizenVisibleE
 
 ---
 
-## 14. Open questions
+## 14. Locked decisions (resolved 2026-09-11)
 
-1. **Should `TechnicianEnRoute` be a separate event from `TechnicianArrived`?** Scenario 03's locked state list does not include `TechnicianEnRoute`; Scenario 06's `CitizenVisibleEventType` table does. This spec defers to the user — if `TechnicianEnRoute` is not in the final 33-event enum, the row simply doesn't render. The "Field crew on the way" line is best-effort.
+| # | Decision | Choice | Where applied |
+|---|----------|--------|---------------|
+| 1 | Timeline event ordering | **Newest first** — top of timeline = latest event. Frames as "what's happened lately." | §3, §5, §7, §10 wireframe |
+| 2 | Field crew name on timeline | **First name + role** — `Karim (field crew)`. Privacy + warmth balance. | §5 event row, §10 wireframe |
+| 3 | Silent-closure reopen window | **30 days from closure**, matching Scenario 03's auto-close. After 30 days the incident is final. | §6 ActionCall silent-closure state, §7 state mapping |
+| 4 | Reopen modal reason | **Optional one-line reason** (not required). Lower friction; gives Adi context. | §6 ActionCall reopen, §11 i18n key `citizen.reopen.reasonPlaceholder` |
+| 5 | "Quiet for X days" indicator | **Show after 24h of no chain activity.** Subtle timeline row: "Quiet for 2 days — your report is still in progress." | §5 timeline component, §7 state mapping |
 
-2. **Band label wording on `TrustBandAssigned` for citizens.** The foundation §1.1 mandates plain language ("verified citizen anchor" / "verified reporter" / "hotline-sourced report"), but the exact localized strings across en/hi/bn need i18n review before shipping. This spec defers wording to `citizen.statusTimeline.bandLabel` namespace; the mapping is structural, the strings are pending.
+## 15. Remaining open questions
 
-3. **Should the ActionCall show in the empty state?** Current spec: hidden (nothing to act on). Alternative: show "Submit your first report" as the ActionCall. Deferred — depends on whether the empty state lives on this page or on a separate `/citizen/new` route.
+1. **Should `TechnicianEnRoute` be a separate event from `TechnicianArrived`?** Scenario 03's locked state list does not include `TechnicianEnRoute`; Scenario 06's `CitizenVisibleEventType` table does. If `TechnicianEnRoute` is not in the final 33-event enum, the row simply doesn't render. The "Field crew on the way" line is best-effort.
 
-4. **Should the timeline auto-poll for live updates, or refresh on mount?** Scenario 06's 5s chain-freshness poll applies to operator surfaces; for citizen surfaces the spec assumes polling on focus + on the 5-min dual-channel ack cycle (when an SMS lands, the user opens the app, the timeline is fresh). This spec says: poll on focus + on visibility change. If the team wants true live polling for citizens, that's a product decision.
+2. **Band label wording on `TrustBandAssigned` for citizens.** The foundation §1.1 mandates plain language ("verified citizen anchor" / "verified reporter" / "hotline-sourced report"), but the exact localized strings across en/hi/bn need i18n review before shipping. Mapping is structural; strings are pending in the `citizen.statusTimeline.bandLabel` namespace.
 
-5. **Reopen within 30 days of closure — does this window slide?** Scenario 03 locked decision #6 says the silent-closure auto-close fires at 30 days. The reopen window per this spec is 30 days from closure. If a citizen reopens at day 29, does the reopen window reset to 30 days from the new reopen, or does the original timeline still close at day 30? Deferred to product — this spec assumes the window is from the original closure; the reopened incident has its own ack window.
+3. **Should the ActionCall show in the empty state?** Current spec: hidden (nothing to act on). Deferred — depends on whether the empty state lives on this page or on a separate `/citizen/new` route.
+
+4. **Auto-poll for live updates, or refresh on mount?** Current spec: poll on focus + on visibility change. If the team wants true live polling, that's a Phase 4.5 product decision.
+
+5. **Reopen within 30 days — does the window slide?** Spec assumes the window is from the original closure; the reopened incident has its own ack window. If a citizen reopens at day 29, the original timeline still closes at day 30.
 
 ---
 
 _Spec produced by Saga/Freya — 2026-09-11_
+_Locked decisions applied 2026-09-11._
 _See foundation §1–§11 for locked tokens, components, and rules this spec references._
