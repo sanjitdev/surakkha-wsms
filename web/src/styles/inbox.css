@@ -86,6 +86,58 @@
   color: var(--fg-on-status-dark);
 }
 
+/* ── Lockdown-bound variants (added 2026-09-11) ──────────────────────
+   Phase 4 spec layer references --color-trust-t1/2/3 (lockdown tokens).
+   These classes bind to the lockdown palette so new components can use
+   them while the legacy .badge--t1/2/3 above continue to render for
+   existing consumers. Progressive migration in Phase 1.7+.
+
+   Lockdown semantics:
+   - .badge--t1-locked  → divider neutral (unverified) — glyph ◔
+   - .badge--t2-locked  → amber (verified) — glyph ◑
+   - .badge--t3-locked  → alert-red-reserved (issuance path ONLY) — glyph ●
+   - .badge--resolved-locked → safe-green — glyph ✓
+
+   The lockdown T3 badge is reserved for the consumer-notice issuance
+   path; do not use .badge--t3-locked for operator UI badge rendering.
+   Reference: docs/D-UX-Design/01-design-system-foundation.md §1.1.
+   ──────────────────────────────────────────────────────────────────── */
+.badge--t1-locked {
+  background: var(--color-trust-t1);
+  color: var(--color-ink);
+  border: 1px solid var(--color-divider);
+}
+.badge--t2-locked {
+  background: var(--color-trust-t2);
+  color: var(--color-surface);
+}
+.badge--t3-locked {
+  background: var(--color-trust-t3-issuance);
+  color: var(--color-surface);
+}
+.badge--resolved-locked {
+  background: var(--color-trust-resolved);
+  color: var(--color-surface);
+}
+
+/* ── Reporter-badge (lockdown dimension — separate from trust band) ── */
+.badge--reporter-anchor {
+  background: var(--color-reporter-anchor);
+  color: var(--color-surface);
+}
+.badge--reporter-hotline {
+  background: var(--color-reporter-hotline);
+  color: var(--color-surface);
+}
+.badge--reporter-webform {
+  background: var(--color-reporter-webform);
+  color: var(--color-surface);
+}
+.badge--reporter-sensor {
+  background: var(--color-reporter-sensor);
+  color: var(--color-surface);
+}
+
 /* ── bulk-bar count — strong element inside .inbox-bulkbar__count uses
       the brand colour to mirror the row-urgent marker. ─────────────── */
 .inbox-bulkbar__count strong {

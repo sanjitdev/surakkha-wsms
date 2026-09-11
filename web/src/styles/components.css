@@ -387,6 +387,30 @@
   color: var(--bg-surface);
 }
 
+/* ── Lockdown-bound band pill variants (added 2026-09-11) ────────────
+   Use these for new components built against Phase 4 specs.
+   Reference: docs/D-UX-Design/01-design-system-foundation.md §1.1.
+   Progressive migration: legacy .band-pill--high/medium/low continue
+   to render for existing consumers (InboxRow, OperatorDashboard, etc.).
+   ──────────────────────────────────────────────────────────────────── */
+.band-pill--t1-locked {
+  background: var(--color-trust-t1);
+  color: var(--color-ink);
+  border: 1px solid var(--color-divider);
+}
+.band-pill--t2-locked {
+  background: var(--color-trust-t2);
+  color: var(--color-surface);
+}
+.band-pill--t3-locked {
+  background: var(--color-trust-t3-issuance);
+  color: var(--color-surface);
+}
+.band-pill--resolved-locked {
+  background: var(--color-trust-resolved);
+  color: var(--color-surface);
+}
+
 /* ── Top chrome (dim 4 §7) ──────────────────────────────────────── */
 .top-chrome {
   height: var(--height-control-xl);

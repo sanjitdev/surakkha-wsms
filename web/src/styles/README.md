@@ -72,6 +72,30 @@ other — status badges need contrast.
 | `--band-medium` | `#8A8E94` | `#6B6F76` | T2 medium-priority rows    |
 | `--band-low`    | `#5A5C60` | `#A8A9A4` | T3+ low-priority rows      |
 
+### Banding — lockdown palette (added 2026-09-11)
+
+The bmad design lockdown system binds trust-band tokens differently. These tokens are
+**additive** — existing `--band-*` tokens above continue to render for legacy consumers.
+New components built against Phase 4 specs use these lockdown tokens.
+
+| Token | Hex | Use |
+|-------|-----|-----|
+| `--color-trust-t1`           | `#E1DDD4` | T1 unverified (divider neutral — lowest verification state) |
+| `--color-trust-t2`           | `#B8801E` | T2 verified (amber) |
+| `--color-trust-t3-issuance`  | `#B23A2A` | T3 issuance (alert-red-reserved — issuance path ONLY) |
+| `--color-trust-resolved`     | `#2F6E45` | Resolved (safe-green) |
+
+Reporter-badge tokens (separate dimension from trust band — added 2026-09-11):
+
+| Token | Hex | Use |
+|-------|-----|-----|
+| `--color-reporter-anchor`   | `#2F6E45` | Anchor citizen reporter badge |
+| `--color-reporter-hotline`  | `#3F6E7C` | Hotline operator reporter badge |
+| `--color-reporter-webform`  | `#1B2026` | Web-form reporter badge |
+| `--color-reporter-sensor`   | `#B8801E` | Sensor-fired incident reporter badge |
+
+Reference: `docs/D-UX-Design/01-design-system-foundation.md` (lockdown-bound).
+
 ### Shadow
 
 | Token            | Value                                                 | Use                            |
