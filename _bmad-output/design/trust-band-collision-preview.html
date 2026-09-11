@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Trust-band token collision — visual comparison</title>
+<style>
+  :root {
+    /* Phase 4 hexes */
+    --p4-t1: #0E9F6E;   /* emerald-600 */
+    --p4-t2: #1A73E8;   /* blue-600 */
+    --p4-t3: #D97706;   /* amber-600 */
+    --p4-t-over: #4F46E5; /* indigo-600 */
+
+    /* Lockdown hexes */
+    --ld-t1: #E1DDD4;   /* divider neutral */
+    --ld-t2: #B8801E;   /* amber */
+    --ld-t3-issuance: #B23A2A; /* alert-red-reserved */
+    --ld-anchor: #2F6E45; /* safe-green for anchor reporter badge */
+    --ld-surface: #FAF7F2; /* warm off-white */
+    --ld-ink: #1B2026;
+    --ld-primary: #0F4C5C;
+    --ld-ink-on-surface: #1B2026;
+    --ld-divider: #E1DDD4;
+  }
+  body {
+    font-family: 'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+    background: var(--ld-surface);
+    color: var(--ld-ink);
+    margin: 0;
+    padding: 32px;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.75rem; font-weight: 600; margin: 0 0 8px; }
+  .lede { color: #4b5563; margin: 0 0 32px; max-width: 70ch; }
+  .cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 48px;
+  }
+  .panel {
+    border: 1px solid var(--ld-divider);
+    border-radius: 10px;
+    padding: 24px;
+    background: white;
+  }
+  .panel h2 {
+    font-size: 1.125rem;
+    margin: 0 0 4px;
+    color: var(--ld-primary);
+  }
+  .panel .sub { color: #6b7280; font-size: 0.875rem; margin: 0 0 16px; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+  }
+  .badge .glyph {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-weight: 700;
+  }
+  /* Phase 4 */
+  .p4-t1 { background: var(--p4-t1); color: white; }
+  .p4-t2 { background: var(--p4-t2); color: white; }
+  .p4-t3 { background: var(--p4-t3); color: white; }
+  .p4-over { background: var(--p4-t-over); color: white; }
+  /* Lockdown */
+  .ld-t1 { background: var(--ld-t1); color: var(--ld-ink); border-color: #c2bdb4; }
+  .ld-t2 { background: var(--ld-t2); color: white; }
+  .ld-t3-issuance {
+    background: var(--ld-t3-issuance); color: white;
+    outline: 2px dashed #999; outline-offset: 2px;
+  }
+  .ld-anchor-badge { background: var(--ld-anchor); color: white; }
+  .ld-pending { background: #F1F1EE; color: var(--ld-ink); border-color: var(--ld-divider); }
+
+  .explanation { font-size: 0.875rem; color: #4b5563; }
+  .explanation code {
+    background: #f3f4f6; padding: 2px 6px; border-radius: 4px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .fake-row {
+    border: 1px solid var(--ld-divider);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    background: var(--ld-surface);
+  }
+  .fake-row .who { font-weight: 600; }
+  .fake-row .meta { font-size: 0.8125rem; color: #6b7280; }
+
+  .legend {
+    background: #FFFBEA;
+    border: 1px solid #f6e05e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    font-size: 0.875rem;
+  }
+  .legend strong { color: #B8801E; }
+
+  .preview-banner {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 16px;
+    font-size: 0.875rem;
+  }
+</style>
+</head>
+<body>
+  <h1>Trust-band token collision</h1>
+  <p class="lede">
+    Two design systems use <code>--color-trust-t1/2/3</code> as token names but bind them to
+    different hex values. Below: each system's trust-band badges rendered with their actual colors,
+    plus a realistic operator-row preview so you can see them in context.
+  </p>
+
+  <div class="legend">
+    <strong>The structural inversion:</strong> Phase 4 says T1 is <em>anchor-priority</em>
+    (highest trust, emerald). Lockdown says T1 is the <em>lowest</em> trust band
+    (neutral divider grey) — anchors live at T2 or at a separate
+    <code>--color-reporter-anchor</code> reporter-badge dimension.
+  </div>
+
+  <div class="cols">
+
+    <!-- Phase 4 -->
+    <div class="panel">
+      <h2>Phase 4 (what I specced)</h2>
+      <p class="sub">Three-category trust band + a fourth "overridden" category.</p>
+
+      <div class="badge-row">
+        <span class="badge p4-t1"><span class="glyph">●</span> T1 anchor-priority</span>
+        <span class="badge p4-t2"><span class="glyph">◐</span> T2 verified reporter</span>
+        <span class="badge p4-t3"><span class="glyph">○</span> T3 hotline-sourced</span>
+        <span class="badge p4-over"><span class="glyph">⚑</span> T_overridden</span>
+      </div>
+
+      <p class="explanation">
+        Hexes: T1 = <code>#0E9F6E</code> emerald, T2 = <code>#1A73E8</code> sky,
+        T3 = <code>#D97706</code> amber, overridden = <code>#4F46E5</code> indigo.
+        Color is the primary signal; icons are decorative.
+      </p>
+
+      <div class="fake-row">
+        <div><span class="who">Ward 12 · standpipe 4</span>
+          <span class="badge p4-t1" style="margin-left:8px"><span class="glyph">●</span> T1</span>
+        </div>
+        <div class="meta">Reported by anchor citizen · 4 min ago · photo + nid_hash verified</div>
+      </div>
+
+      <div class="fake-row">
+        <div><span class="who">Ward 7 · block 22</span>
+          <span class="badge p4-t3" style="margin-left:8px"><span class="glyph">○</span> T3</span>
+        </div>
+        <div class="meta">Reported by hotline call · 12 min ago · no nid, no anchor</div>
+      </div>
+    </div>
+
+    <!-- Lockdown -->
+    <div class="panel">
+      <h2>bmad lockdown (what was already ratified)</h2>
+      <p class="sub">T0/T1 share the divider neutral; T2 is amber; T3 is reserved for consumer-notice issuance only. Anchors are a separate reporter badge.</p>
+
+      <div class="badge-row">
+        <span class="badge ld-t1"><span class="glyph">◔</span> T1 unverified (neutral)</span>
+        <span class="badge ld-t2"><span class="glyph">◑</span> T2 verified</span>
+        <span class="badge ld-t3-issuance" title="Reserved for T3+ consumer-notice issuance"><span class="glyph">●</span> T3 issuance-only</span>
+        <span class="badge ld-anchor-badge"><span class="glyph">⚓</span> anchor reporter</span>
+      </div>
+
+      <p class="explanation">
+        Hexes: T0/T1 = <code>#E1DDD4</code> divider (neutral), T2 = <code>#B8801E</code> amber,
+        T3 = <code>#B23A2A</code> alert-red <em>(only for issuance path, build-time lint-enforced)</em>,
+        anchor reporter badge = <code>#2F6E45</code> safe-green. Glyph characters provide
+        redundancy with text labels — never colour alone.
+      </p>
+
+      <div class="fake-row">
+        <div>
+          <span class="badge ld-t1" style="margin-left:0"><span class="glyph">◔</span> T1</span>
+          <span class="badge ld-anchor-badge" style="margin-left:6px"><span class="glyph">⚓</span> anchor</span>
+          <span class="who" style="margin-left:8px">Ward 12 · standpipe 4</span>
+        </div>
+        <div class="meta">Reported by anchor citizen · 4 min ago · reporter-badge attribute on chain</div>
+      </div>
+
+      <div class="fake-row">
+        <div>
+          <span class="badge ld-t1" style="margin-left:0"><span class="glyph">◔</span> T1</span>
+          <span class="badge ld-pending" style="margin-left:6px"><span class="glyph">☎</span> hotline</span>
+          <span class="who" style="margin-left:8px">Ward 7 · block 22</span>
+        </div>
+        <div class="meta">Reported by hotline call · reporter-badge = hotline on chain · neutral T1, not T3</div>
+      </div>
+
+      <div class="preview-banner">
+        <strong>Lockdown rule:</strong> alert-red is reserved for T3+ consumer-notice
+        confirmation only. Never for general operator UI. Enforced by token architecture + stylelint.
+      </div>
+    </div>
+  </div>
+
+  <!-- Side-by-side in-flight preview -->
+  <h2 style="margin-top: 48px">In-flight preview — same incident, two palettes</h2>
+  <p class="lede">
+    An anchor-citizen reported a contamination alert. Karim is en route. See how each
+    palette renders the same incident in an operator's queue row.
+  </p>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>Phase 4 palette</h2>
+      <div class="fake-row" style="background:white">
+        <div>
+          <span class="badge p4-t1"><span class="glyph">●</span> T1 anchor</span>
+          <strong style="margin-left:8px">Contamination · ward 12</strong>
+        </div>
+        <div class="meta">Anchor citizen · Karim en route · ETA 18 min</div>
+        <div style="margin-top:8px; font-size:0.875rem">
+          Row reads as <em>highest-priority, brand-coloured, visually loud</em>.
+          Karim's priority band feels decorated with colour.
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Lockdown palette</h2>
+      <div class="fake-row" style="background:white">
+        <div>
+          <span class="badge ld-t1"><span class="glyph">◔</span> T1</span>
+          <span class="badge ld-anchor-badge" style="margin-left:6px"><span class="glyph">⚓</span> anchor</span>
+          <strong style="margin-left:8px">Contamination · ward 12</strong>
+        </div>
+        <div class="meta">Anchor citizen · Karim en route · ETA 18 min</div>
+        <div style="margin-top:8px; font-size:0.875rem">
+          Row reads as <em>neutral band + a clear reporter-badge attribute</em>.
+          Colour carries no signal that text + glyph didn't already.
+          The anchor badge is the structural data, the trust band is the verification state.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top: 48px">Choice — which token set wins?</h2>
+  <p class="lede">
+    The choice cascades into Scenarios 03, 04, 05 (all written against Phase 4 semantics),
+    the 3 Tier 1 specs, and the data contract for Phase 2 PHA dashboard. Tell Freya which
+    one to lock and the rest of the cascade is mechanical.
+  </p>
+
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px">
+    <div class="panel" style="background: #F0FDF4; border-color: #86EFAC;">
+      <h2>Option A — Accept lockdown (recommended)</h2>
+      <p>
+        Token names <code>--color-trust-t1/2/3</code> stay. The lockdown hex values bind.
+        Scenarios 03 / 04 / 05 get re-read; the "anchor-priority" framing becomes a separate
+        reporter-badge dimension, not a trust-band tier.
+      </p>
+      <p><strong>Pros:</strong> preserves 18 lockdown files' work; the structural data model
+        matches the bmad design intent; Scenarios 04's hotline-sourced incidents render
+        as neutral T1 + hotline reporter-badge (cleaner separation).</p>
+      <p><strong>Cons:</strong> ~3–4 hours of scenario/spec editing; the data contract
+        (Scenario 05) needs Shape 4 (reporter cohort retention) updated to use the
+        reporter-badge dimension.</p>
+    </div>
+    <div class="panel" style="background: #FEF2F2; border-color: #FCA5A5;">
+      <h2>Option B — Rename Phase 4 tokens to a new namespace</h2>
+      <p>
+        Phase 4's <code>--color-trust-t1/2/3</code> get renamed to
+        <code>--color-tier-anchor-priority / verified / hotline</code> so they
+        coexist with the lockdown tokens. Both systems ship side-by-side.
+      </p>
+      <p><strong>Pros:</strong> explicit separation; no ambiguity in either spec.</p>
+      <p><strong>Cons:</strong> doubles the trust-band token surface; forces a
+        "which palette am I in?" decision on every page; the team has to learn
+        two tier systems; future contributors will be confused.</p>
+    </div>
+  </div>
+
+</body>
+</html>
