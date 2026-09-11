@@ -377,3 +377,66 @@ button {
   z-index: 100;
   box-shadow: var(--shadow-modal);
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   Lockdown tokens — added 2026-09-11 (per WDS Phase 4 reconciliation)
+
+   These tokens are ADDITIVE. Existing --brand-*, --band-*, --badge-*
+   tokens above stay untouched. The lockdown tokens describe:
+   1. Brand palette (deep teal) — eventual replacement for --brand-*
+   2. Trust band palette (T1/T2/T3/resolved) — eventual replacement
+      for --band-* (migrated in Tier 2 reconciliations)
+   3. Reporter-badge palette — NEW dimension not in --band-*
+   4. Status palette — eventual replacement for --success/warning/danger
+   5. Spacing — 7-token semantic scale (already matches existing
+      --space-* tokens; documented here for spec parity)
+   6. Radii — 4-token scale
+   7. Typography — IBM Plex Sans/Mono + Noto Sans Bengali aliases
+
+   Reference:
+   - docs/D-UX-Design/decisions/00-lockdown-audit.md
+   - docs/D-UX-Design/decisions/01-token-deconfliction-plan.md
+   - docs/D-UX-Design/01-design-system-foundation.md (lockdown-bound)
+
+   Both systems coexist until Tier 2 reconciliations migrate
+   consumers. Until then: spec layers reference lockdown tokens;
+   implementation layers may still reference --band-* / --brand-*.
+   ════════════════════════════════════════════════════════════════════ */
+
+:root,
+[data-theme="light"] {
+  /* 1. Brand palette (lockdown) */
+  --color-primary:            #0F4C5C; /* deep teal — primary CTA */
+  --color-primary-tint:       #3F6E7C; /* hover, focus ring, secondary */
+  --color-surface:            #FAF7F2; /* warm off-white */
+  --color-ink:                #1B2026; /* body text — AAA */
+  --color-amber:              #B8801E; /* calibrated warning */
+  --color-amber-bright:       #E9A23B; /* large UI only */
+  --color-safe-green:         #2F6E45; /* resolved / verified */
+  --color-alert-red:          #B23A2A; /* T3+ issuance ONLY */
+  --color-alert-red-reserved: #B23A2A; /* same hex, lint-enforced reservation */
+  --color-divider:            #E1DDD4; /* panel separator */
+
+  /* 2. Trust band palette (lockdown) */
+  --color-trust-t1:           #E1DDD4; /* divider neutral — unverified */
+  --color-trust-t2:           #B8801E; /* amber — verified */
+  --color-trust-t3-issuance:  #B23A2A; /* alert-red — issuance ONLY */
+  --color-trust-resolved:     #2F6E45; /* safe-green */
+
+  /* 3. Reporter-badge palette (NEW dimension) */
+  --color-reporter-anchor:    #2F6E45; /* safe-green chip */
+  --color-reporter-hotline:   #3F6E7C; /* deep-teal-tint chip */
+  --color-reporter-webform:   #1B2026; /* ink chip */
+  --color-reporter-sensor:    #B8801E; /* amber chip */
+
+  /* 4. Status palette (lockdown) */
+  --color-status-pending:     #F1F1EE; /* subtle bg */
+  --color-status-verified:    #2F6E45; /* safe-green */
+  --color-status-failed:      #B23A2A; /* alert-red-reserved — issuance path */
+  --color-status-warn:        #B8801E; /* form validation errors */
+
+  /* 7. Typography aliases (additive) */
+  --font-family-sans:           'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;
+  --font-family-bangla:         'Noto Sans Bengali', 'Hind Siliguri', system-ui, sans-serif;
+  --font-family-mono:           'IBM Plex Mono', 'JetBrains Mono', ui-monospace, monospace;
+}
