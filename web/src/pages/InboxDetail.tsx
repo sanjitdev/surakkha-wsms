@@ -12,13 +12,13 @@
  *     so the swap is a pure left↔right flip.
  *   - Drops to single pane below <bp-lg> (768 px).
  *
- * Header CTAs (FE-F3):
- *   - "Assign field tech" opens <AssignTechModal>: pick a tech from the
- *     team list, choose P1/P2/P3 priority, set ETA + work-order summary,
- *     submit `actions.assignTech(...)`. Closes on success.
- *   - "Request citizen ack →" opens <RequestAckModal>: choose channel
- *     (sms/whatsapp/voice) + summary copy, submit
- *     `actions.requestAck(...)`. Closes on success.
+ * Header CTAs (FE-F3 → inbox-detail.md #14 reconciled 2026-09-11):
+ *   - The two previous modal CTAs (AssignTechModal + RequestAckModal)
+ *     collapse to a single inline form below the page header. Both
+ *     write paths (actions.assignTech + actions.requestAck) fire on
+ *     submit when their respective sections have content. This is the
+ *     structural prefigure for the Batch 5 Tier 1 verifyAndAssign
+ *     single-submit surface; Phase 1 ships the two-action version.
  *
  * Data sources:
  *   - GET /api/incidents → finds the matching row by id.
@@ -27,7 +27,7 @@
  *
  * The page is intentionally lightweight — composition only. Heavy lifting
  * lives in the fixtures + handlers; this component just maps wire data
- * into the existing primitives (Container, Card, EmptyState, Modal).
+ * into the existing primitives (Container, Card, EmptyState).
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -39,7 +39,6 @@ import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
-import { Modal } from '../components/ui/Modal';
 import { AlertIcon, InboxIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
@@ -130,12 +129,43 @@ function eventTitle(
     });
   }
   return event.event_type;
-}interface AssignTechModalProps {
-  open: boolean;
-  onClose: () => void;
+}
+
+/**
+ * InlineActionForm — inbox-detail.md #14.
+ *
+ * Single inline form replacing the AssignTechModal + RequestAckModal
+ * pair. Both write paths (actions.assignTech + actions.requestAck)
+ * fire on submit when their respective sections have content; leaving
+ * either section blank skips that side. Submit is disabled until at
+ * least one side has the minimum-required fields filled.
+ *
+ * Validation mirrors the previous modals (per-side):
+ *   - assign side: workOrder ≥ 5 chars; techId valid; eta > 0
+ *   - ack side:    copy ≥ 5 chars
+ *
+ * On submit, the form fires whichever side(s) are valid (sequentially,
+ * not in parallel — preserves ordering in the toast stream) and shows
+ * the post-submit busy state until both complete. The form does NOT
+ * reset on success — that's the parent's responsibility since the
+ * page navigates back to /inbox after the chain event lands.
+ */
+interface InlineActionFormProps {
   incidentId: string;
   busy: boolean;
-  onSubmit: (input: {
+  techId: TechId;
+  onTechIdChange: (id: TechId) => void;
+  priority: 'P1' | 'P2' | 'P3';
+  onPriorityChange: (p: 'P1' | 'P2' | 'P3') => void;
+  eta: string;
+  onEtaChange: (s: string) => void;
+  workOrder: string;
+  onWorkOrderChange: (s: string) => void;
+  ackChannel: 'sms' | 'whatsapp' | 'voice';
+  onAckChannelChange: (c: 'sms' | 'whatsapp' | 'voice') => void;
+  ackCopy: string;
+  onAckCopyChange: (s: string) => void;
+  assignTech: (input: {
     incident_id: string;
     technician_id: string;
     technician_name: string;
@@ -143,262 +173,223 @@ function eventTitle(
     eta_target_minutes: number;
     work_order_summary: string;
   }) => Promise<boolean>;
-}
-
-function AssignTechModal({ open, onClose, incidentId, busy, onSubmit }: AssignTechModalProps) {
-  const { t: tDetail } = useTranslation('inboxDetail');
-  const [techId, setTechId] = useState<TechId>(TECH_ROSTER[0].id);
-  const [priority, setPriority] = useState<'P1' | 'P2' | 'P3'>('P1');
-  const [eta, setEta] = useState<string>('30');
-  const [summary, setSummary] = useState<string>('');
-
-  const tech = TECH_ROSTER.find((t) => t.id === techId);
-  const etaNum = Number(eta);
-  const summaryTrim = summary.trim();
-  const canSubmit = !busy && tech !== undefined && Number.isFinite(etaNum) && etaNum > 0 && summaryTrim.length >= 5;
-
-  const handleClose = () => {
-    if (busy) return;
-    onClose();
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!canSubmit) return;
-    const ok = await onSubmit({
-      incident_id: incidentId,
-      technician_id: tech.id,
-      technician_name: tech.name,
-      priority,
-      eta_target_minutes: etaNum,
-      work_order_summary: summaryTrim,
-    });
-
-    if (ok) {
-      // Reset on success so the next open starts fresh.
-      setSummary('');
-      setEta('30');
-      setPriority('P1');
-      setTechId(TECH_ROSTER[0].id);
-      onClose();
-    }
-  };
-
-  return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      testId="assign-tech-modal"
-      ariaLabel={tDetail('assignModal.ariaLabel')}
-    >
-      <form onSubmit={handleSubmit} data-testid="assign-tech-form">
-        <header style={{ marginBottom: 'var(--space-md)' }}>
-          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('assignModal.title')}</h2>
-          <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
-            {tDetail('assignModal.description', { id: incidentId.slice(0, 8) })}
-          </p>
-        </header>
-
-        <div className="submit-form__row">
-          <label htmlFor="assign-tech-tech" className="submit-form__label">
-            {tDetail('assignModal.technicianLabel')}
-          </label>
-          <select
-            id="assign-tech-tech"
-            data-testid="assign-tech-tech"
-            className="submit-form__input"
-            value={techId}
-            onChange={(e) => {
-              setTechId(e.target.value as TechId);
-            }}
-            disabled={busy}
-          >
-            {TECH_ROSTER.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="submit-form__row submit-form__row--split">
-          <div>
-            <label htmlFor="assign-tech-priority" className="submit-form__label">
-              {tDetail('assignModal.priorityLabel')}
-            </label>
-            <select
-              id="assign-tech-priority"
-              data-testid="assign-tech-priority"
-              className="submit-form__input"
-              value={priority}
-              onChange={(e) => {
-                setPriority(e.target.value as 'P1' | 'P2' | 'P3');
-              }}
-              disabled={busy}
-            >
-              <option value="P1">{tDetail('assignModal.priorityP1')}</option>
-              <option value="P2">{tDetail('assignModal.priorityP2')}</option>
-              <option value="P3">{tDetail('assignModal.priorityP3')}</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="assign-tech-eta" className="submit-form__label">
-              {tDetail('assignModal.etaLabel')}
-            </label>
-            <input
-              id="assign-tech-eta"
-              data-testid="assign-tech-eta"
-              type="number"
-              min={1}
-              max={1440}
-              className="submit-form__input"
-              value={eta}
-              onChange={(e) => {
-                setEta(e.target.value);
-              }}
-              disabled={busy}
-            />
-          </div>
-        </div>
-
-        <div className="submit-form__row">
-          <label htmlFor="assign-tech-summary" className="submit-form__label">
-            {tDetail('assignModal.summaryLabel')}
-          </label>
-          <textarea
-            id="assign-tech-summary"
-            data-testid="assign-tech-summary"
-            className="submit-form__textarea"
-            value={summary}
-            onChange={(e) => {
-              setSummary(e.target.value);
-            }}
-            rows={3}
-            placeholder={tDetail('assignModal.summaryPlaceholder')}
-            disabled={busy}
-            required
-          />
-          <p className="submit-form__hint">{tDetail('assignModal.summaryHint')}</p>
-        </div>
-
-        <div className="submit-form__actions">
-          <Button
-            type="submit"
-            variant="primary"
-            size="md"
-            disabled={!canSubmit}
-            testId="assign-tech-submit"
-          >
-            {busy ? tDetail('assignModal.dispatching') : tDetail('assignModal.submit')}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="md"
-            onClick={handleClose}
-            disabled={busy}
-            testId="assign-tech-cancel"
-          >
-            {tDetail('assignModal.cancel')}
-          </Button>
-        </div>
-      </form>
-    </Modal>
-  );
-}interface RequestAckModalProps {
-  open: boolean;
-  onClose: () => void;
-  incidentId: string;
-  busy: boolean;
-  onSubmit: (input: {
+  requestAck: (input: {
     incident_id: string;
     channel: 'sms' | 'whatsapp' | 'voice';
     summary: string;
   }) => Promise<boolean>;
 }
 
-function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestAckModalProps) {
+function InlineActionForm({
+  incidentId,
+  busy,
+  techId,
+  onTechIdChange,
+  priority,
+  onPriorityChange,
+  eta,
+  onEtaChange,
+  workOrder,
+  onWorkOrderChange,
+  ackChannel,
+  onAckChannelChange,
+  ackCopy,
+  onAckCopyChange,
+  assignTech,
+  requestAck,
+}: InlineActionFormProps) {
   const { t: tDetail } = useTranslation('inboxDetail');
-  const [channel, setChannel] = useState<'sms' | 'whatsapp' | 'voice'>('sms');
-  const [summary, setSummary] = useState<string>('');
 
-  const summaryTrim = summary.trim();
-  const canSubmit = !busy && summaryTrim.length >= 5;
-
-  const handleClose = () => {
-    if (busy) return;
-    onClose();
-  };
+  // Per-side validity. Each side has minimum requirements; either side
+  // can fire independently on submit.
+  const etaNum = Number(eta);
+  const assignValid =
+    techId !== undefined &&
+    Number.isFinite(etaNum) &&
+    etaNum > 0 &&
+    workOrder.trim().length >= 5;
+  const ackValid = ackCopy.trim().length >= 5;
+  const canSubmit = !busy && (assignValid || ackValid);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    const ok = await onSubmit({
-      incident_id: incidentId,
-      channel,
-      summary: summaryTrim,
-    });
-
-    if (ok) {
-      setSummary('');
-      setChannel('sms');
-      onClose();
+    // Fire assignTech first (chronologically: dispatch then notify),
+    // then requestAck. Each call is independent — if either fails, the
+    // other still attempts, matching the previous modal behaviour.
+    if (assignValid) {
+      const tech = TECH_ROSTER.find((x) => x.id === techId);
+      if (tech) {
+        await assignTech({
+          incident_id: incidentId,
+          technician_id: tech.id,
+          technician_name: tech.name,
+          priority,
+          eta_target_minutes: etaNum,
+          work_order_summary: workOrder.trim(),
+        });
+      }
+    }
+    if (ackValid) {
+      await requestAck({
+        incident_id: incidentId,
+        channel: ackChannel,
+        summary: ackCopy.trim(),
+      });
     }
   };
 
   return (
-    <Modal
-      open={open}
-      onClose={handleClose}
-      testId="request-ack-modal"
-      ariaLabel={tDetail('ackModal.ariaLabel')}
-    >
-      <form onSubmit={handleSubmit} data-testid="request-ack-form">
-        <header style={{ marginBottom: 'var(--space-md)' }}>
-          <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>{tDetail('ackModal.title')}</h2>
-          <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
-            {tDetail('ackModal.description', { id: incidentId.slice(0, 8) })}
-          </p>
-        </header>
+    <Card>
+      <form onSubmit={handleSubmit} data-testid="inbox-inline-action-form">
+        <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>
+          {tDetail('inlineForm.title')}
+        </h3>
+        <p className="page-header__sub" style={{ marginTop: 'var(--space-xs)' }}>
+          {tDetail('inlineForm.subtitle', { id: incidentId.slice(0, 8) })}
+        </p>
 
-        <div className="submit-form__row">
-          <label htmlFor="request-ack-channel" className="submit-form__label">
-            {tDetail('ackModal.channelLabel')}
-          </label>
-          <select
-            id="request-ack-channel"
-            data-testid="request-ack-channel"
-            className="submit-form__input"
-            value={channel}
-            onChange={(e) => {
-              setChannel(e.target.value as 'sms' | 'whatsapp' | 'voice');
-            }}
-            disabled={busy}
-          >
-            <option value="sms">{tDetail('ackModal.channelSms')}</option>
-            <option value="whatsapp">{tDetail('ackModal.channelWhatsapp')}</option>
-            <option value="voice">{tDetail('ackModal.channelVoice')}</option>
-          </select>
-        </div>
+        <div className="grid-12" style={{ marginTop: 'var(--space-md)' }}>
+          {/* ASSIGN-TECH HALF — col-6 */}
+          <div className="col-6" data-testid="inbox-inline-assign-section">
+            <h4
+              style={{
+                margin: 0,
+                fontSize: 'var(--font-size-md)',
+                fontWeight: 'var(--font-weight-semibold)',
+              }}
+            >
+              {tDetail('inlineForm.assignHeading')}
+            </h4>
+            <div className="submit-form__row">
+              <label htmlFor="inline-assign-tech" className="submit-form__label">
+                {tDetail('assignModal.technicianLabel')}
+              </label>
+              <select
+                id="inline-assign-tech"
+                data-testid="inline-assign-tech"
+                className="submit-form__input"
+                value={techId}
+                onChange={(e) => {
+                  onTechIdChange(e.target.value as TechId);
+                }}
+                disabled={busy}
+              >
+                {TECH_ROSTER.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="submit-form__row submit-form__row--split">
+              <div>
+                <label htmlFor="inline-assign-priority" className="submit-form__label">
+                  {tDetail('assignModal.priorityLabel')}
+                </label>
+                <select
+                  id="inline-assign-priority"
+                  data-testid="inline-assign-priority"
+                  className="submit-form__input"
+                  value={priority}
+                  onChange={(e) => {
+                    onPriorityChange(e.target.value as 'P1' | 'P2' | 'P3');
+                  }}
+                  disabled={busy}
+                >
+                  <option value="P1">{tDetail('assignModal.priorityP1')}</option>
+                  <option value="P2">{tDetail('assignModal.priorityP2')}</option>
+                  <option value="P3">{tDetail('assignModal.priorityP3')}</option>
+                </select>
+              </div>
+              <div>
+                <label htmlFor="inline-assign-eta" className="submit-form__label">
+                  {tDetail('assignModal.etaLabel')}
+                </label>
+                <input
+                  id="inline-assign-eta"
+                  data-testid="inline-assign-eta"
+                  type="number"
+                  min={1}
+                  max={1440}
+                  className="submit-form__input"
+                  value={eta}
+                  onChange={(e) => {
+                    onEtaChange(e.target.value);
+                  }}
+                  disabled={busy}
+                />
+              </div>
+            </div>
+            <div className="submit-form__row">
+              <label htmlFor="inline-assign-summary" className="submit-form__label">
+                {tDetail('assignModal.summaryLabel')}
+              </label>
+              <textarea
+                id="inline-assign-summary"
+                data-testid="inline-assign-summary"
+                className="submit-form__textarea"
+                value={workOrder}
+                onChange={(e) => {
+                  onWorkOrderChange(e.target.value);
+                }}
+                rows={3}
+                placeholder={tDetail('assignModal.summaryPlaceholder')}
+                disabled={busy}
+              />
+              <p className="submit-form__hint">{tDetail('assignModal.summaryHint')}</p>
+            </div>
+          </div>
 
-        <div className="submit-form__row">
-          <label htmlFor="request-ack-summary" className="submit-form__label">
-            {tDetail('ackModal.copyLabel')}
-          </label>
-          <textarea
-            id="request-ack-summary"
-            data-testid="request-ack-summary"
-            className="submit-form__textarea"
-            value={summary}
-            onChange={(e) => {
-              setSummary(e.target.value);
-            }}
-            rows={4}
-            placeholder={tDetail('ackModal.copyPlaceholder')}
-            disabled={busy}
-            required
-          />
-          <p className="submit-form__hint">{tDetail('ackModal.copyHint')}</p>
+          {/* ACK HALF — col-6 */}
+          <div className="col-6" data-testid="inbox-inline-ack-section">
+            <h4
+              style={{
+                margin: 0,
+                fontSize: 'var(--font-size-md)',
+                fontWeight: 'var(--font-weight-semibold)',
+              }}
+            >
+              {tDetail('inlineForm.ackHeading')}
+            </h4>
+            <div className="submit-form__row">
+              <label htmlFor="inline-ack-channel" className="submit-form__label">
+                {tDetail('ackModal.channelLabel')}
+              </label>
+              <select
+                id="inline-ack-channel"
+                data-testid="inline-ack-channel"
+                className="submit-form__input"
+                value={ackChannel}
+                onChange={(e) => {
+                  onAckChannelChange(e.target.value as 'sms' | 'whatsapp' | 'voice');
+                }}
+                disabled={busy}
+              >
+                <option value="sms">{tDetail('ackModal.channelSms')}</option>
+                <option value="whatsapp">{tDetail('ackModal.channelWhatsapp')}</option>
+                <option value="voice">{tDetail('ackModal.channelVoice')}</option>
+              </select>
+            </div>
+            <div className="submit-form__row">
+              <label htmlFor="inline-ack-copy" className="submit-form__label">
+                {tDetail('ackModal.copyLabel')}
+              </label>
+              <textarea
+                id="inline-ack-copy"
+                data-testid="inline-ack-copy"
+                className="submit-form__textarea"
+                value={ackCopy}
+                onChange={(e) => {
+                  onAckCopyChange(e.target.value);
+                }}
+                rows={4}
+                placeholder={tDetail('ackModal.copyPlaceholder')}
+                disabled={busy}
+              />
+              <p className="submit-form__hint">{tDetail('ackModal.copyHint')}</p>
+            </div>
+          </div>
         </div>
 
         <div className="submit-form__actions">
@@ -407,33 +398,46 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
             variant="primary"
             size="md"
             disabled={!canSubmit}
-            testId="request-ack-submit"
+            testId="inbox-inline-submit"
           >
-            {busy ? tDetail('ackModal.sending') : tDetail('ackModal.submit')}
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="md"
-            onClick={handleClose}
-            disabled={busy}
-            testId="request-ack-cancel"
-          >
-            {tDetail('ackModal.cancel')}
+            {busy ? tDetail('inlineForm.submitting') : tDetail('inlineForm.submit')}
           </Button>
         </div>
       </form>
-    </Modal>
+    </Card>
   );
-}export function InboxDetail() {
+}
+
+export function InboxDetail() {
   const { id = '' } = useParams<{ id: string }>();
   const { incidents, loading: incLoading, error: incError } = useIncidents();
   const { format: formatTime } = useDateFormatter();
   const actions = useIncidentActions();
   const { t: tDetail } = useTranslation('inboxDetail');
   const [events, setEvents] = useState<ChainEvent[]>([]);
-  const [assignOpen, setAssignOpen] = useState(false);
-  const [ackOpen, setAckOpen] = useState(false);
+
+  /**
+   * inbox-detail.md #14 (reconciled 2026-09-11) — single inline form
+   * replaces the AssignTechModal + RequestAckModal pair.
+   *
+   * The two CTAs (Assign field tech / Request citizen ack) collapse to
+   * one inline form under the page header. Both write paths
+   * (actions.assignTech + actions.requestAck) fire on submit when their
+   * respective sections have content — leaving either section blank
+   * skips that side. The submit button stays disabled until at least
+   * one side has the minimum-required fields filled.
+   *
+   * This is the structural prefigure for the Batch 5 Tier 1
+   * "verifyAndAssign" single-submit surface; Phase 1 ships the
+   * two-action version, the gateway-side 4-event unification lands in
+   * Phase 2 per migration plan step #11.
+   */
+  const [techId, setTechId] = useState<TechId>(TECH_ROSTER[0].id);
+  const [priority, setPriority] = useState<'P1' | 'P2' | 'P3'>('P1');
+  const [eta, setEta] = useState<string>('30');
+  const [workOrder, setWorkOrder] = useState<string>('');
+  const [ackChannel, setAckChannel] = useState<'sms' | 'whatsapp' | 'voice'>('sms');
+  const [ackCopy, setAckCopy] = useState<string>('');
 
   /**
    * Per-row verify state — inbox-detail.md #16.
@@ -604,30 +608,34 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
               })}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            <Button
-              variant="secondary"
-              size="md"
-              onClick={() => {
-                setAssignOpen(true);
-              }}
-              testId="inbox-assign-tech"
-            >
-              {tDetail('actions.assignTech')}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              onClick={() => {
-                setAckOpen(true);
-              }}
-              testId="inbox-request-ack"
-            >
-              {tDetail('actions.requestAck')}
-            </Button>
-          </div>
         </div>
       </div>
+
+      {/* inbox-detail.md #14 — single inline form replaces the two
+          previous modals (AssignTechModal + RequestAckModal). One
+          submit button fires both write paths when their respective
+          sections have content; leaving a section blank skips that
+          side. Submit is disabled until at least one side has the
+          minimum fields. The form sits in the page header band so the
+          operator doesn't lose context with the timeline below. */}
+      <InlineActionForm
+        incidentId={incident.incident_id}
+        busy={actions.busy}
+        techId={techId}
+        onTechIdChange={setTechId}
+        priority={priority}
+        onPriorityChange={setPriority}
+        eta={eta}
+        onEtaChange={setEta}
+        workOrder={workOrder}
+        onWorkOrderChange={setWorkOrder}
+        ackChannel={ackChannel}
+        onAckChannelChange={setAckChannel}
+        ackCopy={ackCopy}
+        onAckCopyChange={setAckCopy}
+        assignTech={actions.assignTech}
+        requestAck={actions.requestAck}
+      />
 
       <div className="grid-12">
         {/* Left pane: related incidents (col-span-7).
@@ -810,28 +818,6 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
           </Card>
         </div>
       </div>
-
-      {/* FE-F3 action modals — mounted at the page root so the
-          Modal portal target is consistent and Escape/click-outside
-          dismissal is shared. */}
-      <AssignTechModal
-        open={assignOpen}
-        onClose={() => {
-          setAssignOpen(false);
-        }}
-        incidentId={incident.incident_id}
-        busy={actions.busy}
-        onSubmit={actions.assignTech}
-      />
-      <RequestAckModal
-        open={ackOpen}
-        onClose={() => {
-          setAckOpen(false);
-        }}
-        incidentId={incident.incident_id}
-        busy={actions.busy}
-        onSubmit={actions.requestAck}
-      />
     </Container>
   );
 }

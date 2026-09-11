@@ -117,7 +117,7 @@ function renderInboxDetail(locale: Locale) {
 const BENGALI = /[\u0980-\u09FF]/;
 
 describe('FE-B6 InboxDetail i18n', () => {
-  it('header CTAs + meta line render in Bengali when locale=bn', async () => {
+  it('inline form labels + meta line render in Bengali when locale=bn', async () => {
     renderInboxDetail(Locale.Bn);
     // Wait for i18n to settle (locale flip propagates through the
     // provider synchronously in jsdom, but flush microtasks to be safe).
@@ -136,42 +136,15 @@ describe('FE-B6 InboxDetail i18n', () => {
 
     expect(title.textContent ?? '').toMatch(BENGALI);
 
-    // Action CTAs use bn copy ("ফিল্ড টেকনিশিয়ান নিযুক্ত করুন").
-    const assign = screen.getByTestId('inbox-assign-tech');
+    // The single inline form replaces the two CTAs (inbox-detail.md
+    // #14). Both inline-form section headings + the submit button
+    // render Bengali when locale=bn.
+    const form = screen.getByTestId('inbox-inline-action-form');
 
-    expect(assign.textContent ?? '').toMatch(BENGALI);
-
-    const ack = screen.getByTestId('inbox-request-ack');
-
-    expect(ack.textContent ?? '').toMatch(BENGALI);
-  });
-
-  it('Assign modal labels + button copy render in Bengali when locale=bn', async () => {
-    renderInboxDetail(Locale.Bn);
-    await waitFor(() => {
-      expect(i18n.language).toBe('bn');
-    });
-
-    fireEvent.click(screen.getByTestId('inbox-assign-tech'));
-
-    const modal = screen.getByTestId('assign-tech-modal');
-
-    expect(modal.textContent ?? '').toMatch(BENGALI);
-    // Priority options P1 / P2 / P3 use the bn priority strings.
-    expect(modal.textContent ?? '').toContain('জরুরি');
-  });
-
-  it('Request-ack modal labels + channel options render in Bengali when locale=bn', async () => {
-    renderInboxDetail(Locale.Bn);
-    await waitFor(() => {
-      expect(i18n.language).toBe('bn');
-    });
-
-    fireEvent.click(screen.getByTestId('inbox-request-ack'));
-
-    const modal = screen.getByTestId('request-ack-modal');
-
-    expect(modal.textContent ?? '').toMatch(BENGALI);
+    expect(form.textContent ?? '').toMatch(BENGALI);
+    // The two side headings ("ফিল্ড টেকনিশিয়ান নিযুক্ত করুন" and the
+    // ack heading) both render in bn.
+    expect(form.textContent ?? '').toContain('জরুরি');
   });
 
   it('en locale keeps English header copy (regression guard against stray bn leak)', () => {

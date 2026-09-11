@@ -16,6 +16,14 @@
     "assignTech": "Assign field tech",
     "requestAck": "Request citizen ack →"
   },
+  "inlineForm": {
+    "title": "Take action",
+    "subtitle": "Fill either side — or both — and submit. Both sides are independent.",
+    "assignHeading": "Assign field tech",
+    "ackHeading": "Request citizen ack",
+    "submit": "Submit action",
+    "submitting": "Submitting…"
+  },
   "timeline": {
     "title": "Thread timeline",
     "eventCount_one": "{{count}} event",
