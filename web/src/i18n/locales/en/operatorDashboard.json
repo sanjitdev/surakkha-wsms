@@ -132,6 +132,14 @@
   },
   "threads": {
     "cardTitle": "Open threads",
+    "filters": {
+      "ariaLabel": "Filter open threads by tier",
+      "all": "All",
+      "t3": "T3",
+      "t2": "T2",
+      "t1": "T1",
+      "t0": "T0"
+    },
     "table": {
       "colThread": "Thread",
       "threadLabel": "{{ward}} incident",

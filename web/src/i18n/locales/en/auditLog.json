@@ -44,7 +44,34 @@
     "blockPrefix": "block #",
     "actorEmDash": "—",
     "copy": "Copy",
-    "truncateHash": "{{start}}…{{end}}"
+    "truncateHash": "{{start}}…{{end}}",
+    "verifyHeader": "Verify",
+    "verify": "Verify",
+    "verifyButtonTitle": "Recompute and verify this block's hash",
+    "verifyPending": "Verifying…",
+    "verifyPendingAria": "Verifying block hash",
+    "verifyOk": "OK",
+    "verifyOkTitle": "Hash matches canonical recomputation",
+    "verifyOkAria": "Block hash verified",
+    "verifyFail": {
+      "label": "Fail",
+      "unknown_hash": {
+        "title": "Block hash not found in chain",
+        "aria": "Hash verification failed: unknown block"
+      },
+      "hash_mismatch": {
+        "title": "Recomputed hash does not match stored hash — possible tamper",
+        "aria": "Hash verification failed: mismatch"
+      },
+      "network": {
+        "title": "Verification request failed",
+        "aria": "Hash verification failed: network error"
+      },
+      "timeout": {
+        "title": "Verification request timed out",
+        "aria": "Hash verification failed: timeout"
+      }
+    }
   },
   "empty": {
     "heading": "No matching events",

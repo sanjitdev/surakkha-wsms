@@ -33,10 +33,24 @@ import { useRelativeTime } from '../hooks/useRelativeTime';
 import { useNumberFormatter } from '../hooks/useNumberFormatter';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
+import { FilterChip } from '../components/pages/FilterChip';
 import type { IncidentSummary } from '../types/domain';
 
 type Layout = 'a' | 'b' | 'c';
 type Tab = 'overview' | 'sensors' | 'wards';
+
+/**
+ * Thread filter — operator-dashboard.md #7.
+ *
+ * Filter chip group above the Open threads table. The default is 'all';
+ * picking a tier narrows the threads panel to incidents at that tier so
+ * the operator can scan by trust-band without losing the global KPI
+ * counts. Tier chips use the lockdown palette per operator-dashboard.md
+ * #9/#10.
+ */
+type ThreadFilter = 'all' | 'T3' | 'T2' | 'T1' | 'T0';
+type Severity = 'T3' | 'T2' | 'T1' | 'T0';
+const THREAD_FILTERS: readonly ThreadFilter[] = ['all', 'T3', 'T2', 'T1', 'T0'];
 
 interface SensorRow {
   sensor_id: string;
@@ -69,6 +83,7 @@ export function OperatorDashboard() {
   const { t: tDash } = useTranslation('operatorDashboard');
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
+  const [threadFilter, setThreadFilter] = useState<ThreadFilter>('all');
   const { incidents, loading: incLoading } = useIncidents();
 
   // incLoading is surfaced for future skeleton use; the page today renders
@@ -139,6 +154,48 @@ export function OperatorDashboard() {
   ).length;
   const pendingSigs = recent.filter((e) => e.event_type === 'SignatureAttestation').length; // rough proxy
   const pHAvg = computePHAvg(sensors);
+
+  // Thread filter chips — operator-dashboard.md #7.
+  // Counts per tier drive the chip badge; the filtered slice drives the
+  // table. 'all' means no filter (i.e., keep the original openIncidents
+  // list but still cap at the visible row count).
+  const threadCounts = useMemo(() => {
+    const counts: Record<ThreadFilter, number> = {
+      all: openIncidents.length,
+      T3: 0,
+      T2: 0,
+      T1: 0,
+      T0: 0,
+    };
+
+    for (const i of openIncidents) {
+      const sev = i.severity as Severity;
+
+      if (sev === 'T3' || sev === 'T2' || sev === 'T1' || sev === 'T0') {
+        counts[sev] += 1;
+      }
+    }
+    return counts;
+  }, [openIncidents]);
+  const filteredThreads = useMemo(() => {
+    if (threadFilter === 'all') return openIncidents;
+    return openIncidents.filter((i) => i.severity === threadFilter);
+  }, [openIncidents, threadFilter]);
+  // Per lockdown cascade 2026-09-11: chip dot color for T3 is amber-bright
+  // (NOT alert-red — alert-red is reserved for the issuance path).
+  const threadChipDotColor: Record<Exclude<ThreadFilter, 'all'>, string> = {
+    T3: 'var(--color-amber-bright)',
+    T2: 'var(--color-amber)',
+    T1: 'var(--color-trust-t1)',
+    T0: 'var(--color-divider)',
+  };
+  const threadChipLabelKey: Record<ThreadFilter, string> = {
+    all: 'threads.filters.all',
+    T3: 'threads.filters.t3',
+    T2: 'threads.filters.t2',
+    T1: 'threads.filters.t1',
+    T0: 'threads.filters.t0',
+  };
 
   // FE-B5b-migrate: column descriptors for the 3 dashboard tables. Each
   // preserves the original `<th>` class names + custom cell renderers
@@ -501,12 +558,42 @@ export function OperatorDashboard() {
 
             <div className="dense-foot">
               <div className="card data-card">
-                <div className="data-card__head">
+                <div
+                  className="data-card__head"
+                  style={{
+                    padding: 'var(--space-md) var(--space-lg)',
+                    borderBottom: '1px solid var(--border-subtle)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--space-sm)',
+                  }}
+                >
                   <h3 className="data-card__title">{tDash('threads.cardTitle')}</h3>
+                  {/* Thread filter chips — operator-dashboard.md #7 */}
+                  <div
+                    className="filter-chips"
+                    role="tablist"
+                    aria-label={tDash('threads.filters.ariaLabel')}
+                    data-testid="dashboard-thread-filters"
+                    style={{ marginTop: 'var(--space-xs)' }}
+                  >
+                    {THREAD_FILTERS.map((f) => (
+                      <FilterChip
+                        key={f}
+                        label={`${tDash(threadChipLabelKey[f])} ${threadCounts[f]}`}
+                        active={threadFilter === f}
+                        dotColor={f === 'all' ? undefined : threadChipDotColor[f]}
+                        onClick={() => {
+                          setThreadFilter(f);
+                        }}
+                        testId={`dashboard-thread-chip-${f.toLowerCase()}`}
+                      />
+                    ))}
+                  </div>
                 </div>
                 <Table<IncidentSummary>
                   columns={threadColumns}
-                  rows={openIncidents.slice(0, 3)}
+                  rows={filteredThreads.slice(0, 3)}
                   rowKey="incident_id"
                   testId="table-threads"
                   className="data-table"
@@ -638,12 +725,41 @@ export function OperatorDashboard() {
               </div>
               <div className="right-rail">
                 <div className="card data-card">
-                  <div className="data-card__head">
+                  <div
+                    className="data-card__head"
+                    style={{
+                      padding: 'var(--space-md) var(--space-lg)',
+                      borderBottom: '1px solid var(--border-subtle)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 'var(--space-sm)',
+                    }}
+                  >
                     <h3 className="data-card__title">{tDash('threads.cardTitle')}</h3>
+                    <div
+                      className="filter-chips"
+                      role="tablist"
+                      aria-label={tDash('threads.filters.ariaLabel')}
+                      data-testid="dashboard-thread-filters-b"
+                      style={{ marginTop: 'var(--space-xs)' }}
+                    >
+                      {THREAD_FILTERS.map((f) => (
+                        <FilterChip
+                          key={f}
+                          label={`${tDash(threadChipLabelKey[f])} ${threadCounts[f]}`}
+                          active={threadFilter === f}
+                          dotColor={f === 'all' ? undefined : threadChipDotColor[f]}
+                          onClick={() => {
+                            setThreadFilter(f);
+                          }}
+                          testId={`dashboard-thread-chip-b-${f.toLowerCase()}`}
+                        />
+                      ))}
+                    </div>
                   </div>
                   <Table<IncidentSummary>
                     columns={threadColumnsCompact}
-                    rows={openIncidents.slice(0, 3)}
+                    rows={filteredThreads.slice(0, 3)}
                     rowKey="incident_id"
                     testId="table-threads"
                     className="data-table"

@@ -119,6 +119,70 @@ const chainHandlers = [
   }),
 
   /**
+   * Independent hash verification — per audit-log.md #13.
+   *
+   * POST /api/chain/verify  body: { block_hash: "0x…" }
+   *
+   * Recomputes the canonical hash from the block's stored fields and
+   * compares it to the supplied block_hash. This is the same canonical
+   * form dim 7 §6 uses for chain linking, so a passing result proves
+   * the block was not tampered with after append. Designed to complete
+   * within 200 ms (foundation §12 #10) — IndexedDB lookup + one
+   * SHA-256 call.
+   *
+   * Response:
+   *   { ok: true,  block_hash, height, recomputed: block_hash }
+   *   { ok: false, block_hash, reason: 'unknown_hash' | 'hash_mismatch' }
+   *
+   * This is the operator-side equivalent of a full chain-scan; we keep
+   * it single-block so a UI row can verify one event without blocking
+   * the table.
+   */
+  http.post('/api/chain/verify', async ({ request }) => {
+    await delay(LATENCY_MS() / 4); // faster than data fetch — pure compute
+    const body = (await request.json()) as { block_hash?: string };
+    const target = body.block_hash;
+
+    if (!target || typeof target !== 'string') {
+      return HttpResponse.json({ ok: false, reason: 'missing_block_hash' }, { status: 400 });
+    }
+    const all = await getAllBlocks();
+    const block = all.find((b) => b.block_hash === target);
+
+    if (!block) {
+      return HttpResponse.json({ ok: false, block_hash: target, reason: 'unknown_hash' }, { status: 404 });
+    }
+
+    const recomputed = await blockHash({
+      prev_block_hash: block.prev_block_hash,
+      tenant_id: block.tenant_id,
+      schema_version: block.schema_version,
+      event_type: block.event_type,
+      event_id: block.event_id,
+      occurred_at: block.occurred_at,
+      ingested_at: block.ingested_at,
+      actor_identity: block.actor_identity,
+      payload: block.payload,
+    });
+
+    if (recomputed !== block.block_hash) {
+      return HttpResponse.json({
+        ok: false,
+        block_hash: block.block_hash,
+        recomputed,
+        reason: 'hash_mismatch',
+      });
+    }
+
+    return HttpResponse.json({
+      ok: true,
+      block_hash: block.block_hash,
+      height: block.height,
+      recomputed,
+    });
+  }),
+
+  /**
    * Append a new envelope. The mock:
    *   1. validates envelope shape (event_type in closed set; required fields)
    *   2. computes block_hash via canonical.ts

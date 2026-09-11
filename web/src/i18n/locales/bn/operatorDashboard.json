@@ -132,6 +132,14 @@
   },
   "threads": {
     "cardTitle": "খোলা থ্রেড",
+    "filters": {
+      "ariaLabel": "স্তর অনুসারে খোলা থ্রেড ফিল্টার করুন",
+      "all": "সব",
+      "t3": "T3",
+      "t2": "T2",
+      "t1": "T1",
+      "t0": "T0"
+    },
     "table": {
       "colThread": "থ্রেড",
       "threadLabel": "{{ward}} ঘটনা",

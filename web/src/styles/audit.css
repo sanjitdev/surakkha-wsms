@@ -125,3 +125,76 @@
 .audit-range button {
   margin-left: auto;
 }
+
+/* ── Per-row Verify button + outcome badge (audit-log.md #13) ──────
+   Single-click independent hash verification. The button is the idle
+   state; on click it flips to a pending state, then to ok or fail
+   based on the /api/chain/verify response.
+
+   The ok state uses --color-safe-green (operator-readable positive).
+   The fail state uses --color-status-warn (NOT alert-red-reserved —
+   the verification is operator-readable and does not escalate into
+   the issuance path on its own; a single failed row is data for the
+   operator, not a chain failure surface).
+   ─────────────────────────────────────────────────────────────────── */
+.audit-verify-btn {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition:
+    border-color var(--motion-press-120) var(--ease-out),
+    color var(--motion-press-120) var(--ease-out);
+}
+.audit-verify-btn:hover {
+  border-color: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+.audit-verify-btn:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.audit-verify {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  border: 1px solid transparent;
+}
+.audit-verify--ok {
+  background: color-mix(in srgb, var(--color-safe-green) 12%, transparent);
+  color: var(--color-safe-green);
+  border-color: color-mix(in srgb, var(--color-safe-green) 40%, transparent);
+}
+.audit-verify--fail {
+  background: color-mix(in srgb, var(--color-status-warn) 12%, transparent);
+  color: var(--color-status-warn);
+  border-color: color-mix(in srgb, var(--color-status-warn) 40%, transparent);
+}
+.audit-verify--pending {
+  background: var(--bg-subtle);
+  color: var(--fg-tertiary);
+  border-color: var(--border-subtle);
+}
+.audit-verify--pending::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--fg-tertiary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: audit-verify-spin 0.7s linear infinite;
+}
+@keyframes audit-verify-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
