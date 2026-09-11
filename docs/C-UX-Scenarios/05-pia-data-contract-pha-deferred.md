@@ -17,7 +17,7 @@ This scenario is the **emission contract** that Phase 1 must satisfy so the Phas
 
 1. **Chain anchoring for every aggregate.** Every number on the Phase 2 dashboard must trace back to underlying chain events. Pia drills from a monthly chart into the incident-level chain segment that produced the number. This satisfies Goal 2 (defensible) at per-incident scale and at city scale simultaneously.
 2. **Named-actor attribution at every level.** Every metric is attributable to a named operator, named admin, named technician, named reporter (anchor flag visible). No anonymous role labels. This satisfies Goal 2 (defensible) at city scale — when Pia asks "which operator is missing SLA?", she gets a name, not a role.
-3. **Hotline-vs-web-form distinction preserved.** Hotline-intake incidents (from Scenario 1's `+ New hotline report` button) are first-class data. The reporter-cohort retention metric distinguishes web-form vs hotline-sourced reports because they have different trust baselines (a hotline caller reports once and may never return; an anchor reporter reports weekly by design).
+3. **Reporter-badge dimension preserved as a SEPARATE axis from the trust-band tier.** Hotline-intake incidents (from Scenario 1's `+ New hotline report` button) are first-class data. The reporter-cohort retention metric distinguishes reporter kinds (anchor / hotline_operator / webform / sensor) because they have different reporting baselines — but reporter-kind is a SEPARATE dimension from trust-band. A hotline caller reports once and may never return; an anchor reporter reports weekly by design; the *trust-band* (verification state) is independent of the reporter-kind (source attribute). Hotline-sourced incidents default to T1 (unverified) because they have no verification signals; the hotline reporter-badge is the source, not the band colour.
 
 Without this contract, the Phase 2 dashboard team has to either retro-engineer aggregates from raw chain events (expensive, error-prone, fragile to chain schema changes) or ask Phase 1 to add emission queries after the fact (rework, blast radius). The contract makes Phase 1's emissions Phase 2-ready on day one.
 
@@ -31,9 +31,9 @@ Two timing subsets. **Phase 1 ready (4 shapes)** — Phase 1 emits these correct
 
 #### Shape 1 — Trust band distribution (incidents per band per ward per period)
 
-**(a) Pia's question.** *"For each ward, over the last month, how many incidents landed in high / medium / low trust band — and what was the override rate per band? Are the right incidents landing in the right buckets?"*
+**(a) Pia's question.** *"For each ward, over the last month, how many incidents landed in T1 unverified / T2 verified / T3 issuance / Resolved trust band — and what was the override rate per band? Are the right incidents landing in the right buckets?"*
 
-**(b) SQL/API surface.** Read-only view `v_trust_band_distribution` joining `IncidentCreated` (band field) with `TrustBandOverridden` events (reviewer, from_band, to_band, reason_category). Aggregation grain: `(ward, band, period)`. Period is `month` (Phase 1 default) or `week` (drill-down). Returns counts of `IncidentCreated`, counts of overrides, and override-rate per cell.
+**(b) SQL/API surface.** Read-only view `v_trust_band_distribution` joining `IncidentCreated` (band field) with `TrustBandOverridden` events (reviewer, from_band, to_band, reason_category). Aggregation grain: `(ward, band, period)`. Bands are now `T1` (unverified, divider neutral) / `T2` (verified, amber) / `T3` (issuance, alert-red-reserved — only counts if a consumer-notice was issued; build-time lint-enforced, not used in operator UI) / `Resolved` (safe-green). Period is `month` (Phase 1 default) or `week` (drill-down). Returns counts of `IncidentCreated`, counts of overrides, and override-rate per cell. Override events are chain events with `from_band` and `to_band` fields; there is no T_overridden category.
 
 **(c) Chain anchor.** Every cell in the view aggregates from the per-incident chain. Pia drills from `(ward, band, month)` → `IncidentCreated` rows for that cell → per-incident audit timeline. Each incident has a chain block hash; the drill returns the list of incident ids.
 
@@ -41,7 +41,7 @@ Two timing subsets. **Phase 1 ready (4 shapes)** — Phase 1 emits these correct
 
 **(e) Timing marker.** **Phase 1 ready.** The trust band is computed at `IncidentCreated` and overrides happen at `Verified` / `TrustBandOverridden`. Both chain events are first-class Phase 1 emissions.
 
-**Phase 1 scenario link:** [Scenario 01 — Priya](01-priya-the-pipeline-pilot-triage-verify-assign.md) emits `IncidentCreated{band, ward, source}`; [Scenario 02 — Adi](02-adi-the-auditor-mark-resolved-handoff.md) emits `TrustBandOverridden{reviewer, from_band, to_band, reason_category}`.
+**Phase 1 scenario link:** [Scenario 01 — Priya](01-priya-the-pipeline-pilot-triage-verify-assign.md) emits `IncidentCreated{band, ward, source, reporter_kind}`; [Scenario 02 — Adi](02-adi-the-auditor-mark-resolved-handoff.md) emits `TrustBandOverridden{reviewer, from_band, to_band, reason_category}` (an override event, NOT a band).
 
 ---
 
@@ -79,9 +79,9 @@ Two timing subsets. **Phase 1 ready (4 shapes)** — Phase 1 emits these correct
 
 #### Shape 4 — Reporter cohort retention (anchor-vs-non-anchor, web-form-vs-hotline, repeat-vs-once)
 
-**(a) Pia's question.** *"Per ward over the last 90 days — how many distinct reporters submitted? Of those, how many are still reporting at the 30-day / 60-day / 90-day mark? Are anchor reporters retained differently from citizen-tier reporters? Are hotline-sourced reporters retained differently from web-form reporters? If retention drops, the social infrastructure that makes the sensor graph trustworthy is collapsing."*
+**(a) Pia's question.** *"Per ward over the last 90 days — how many distinct reporters submitted? Of those, how many are still reporting at the 30-day / 60-day / 90-day mark? Are anchor reporters retained differently from citizen-tier reporters? Are hotline-sourced reporters retained differently from web-form reporters? Does the retention curve differ for anchor reporters at T1 baseline vs T2 verified? If retention drops, the social infrastructure that makes the sensor graph trustworthy is collapsing."*
 
-**(b) SQL/API surface.** Read-only view `v_reporter_cohort_retention` joining `IncidentCreated{reporter, source, anchor}` events with the reporter's full submission history. Aggregation grain: `(ward, cohort_month, anchor_flag, source_category)`. `source_category` is one of `web_form` / `hotline`. Returns: `cohort_size`, `retained_at_30d`, `retained_at_60d`, `retained_at_90d`, `retention_pct`. Per-`reporter` drill-down for cohort members.
+**(b) SQL/API surface.** Read-only view `v_reporter_cohort_retention` joining `IncidentCreated{reporter, source, anchor, reporter_kind, trust_band}` events with the reporter's full submission history. Aggregation grain: `(ward, cohort_month, anchor_flag, source_category, trust_band)`. `source_category` is one of `web_form` / `hotline` / `sensor`; `reporter_kind` is `anchor` / `hotline_operator` / `webform` / `sensor` (a SEPARATE dimension from `trust_band`). Returns: `cohort_size`, `retained_at_30d`, `retained_at_60d`, `retained_at_90d`, `retention_pct`. The metric must distinguish: (a) anchor reporter at T1 baseline vs (b) anchor reporter at T2 verified — the retention curve is different at different trust bands. Per-`reporter` drill-down for cohort members.
 
 **(c) Chain anchor.** Every cell aggregates from the per-incident chain. Pia drills from `(ward, cohort_month)` → list of reporters in that cohort → list of incidents per reporter → per-incident audit timeline. The drill-down answers "who reported, when, and what happened to each report."
 
@@ -89,7 +89,22 @@ Two timing subsets. **Phase 1 ready (4 shapes)** — Phase 1 emits these correct
 
 **(e) Timing marker.** **Phase 1 ready.** `IncidentCreated` carries `reporter`, `source`, `anchor`, `created_at` — every field needed for cohort construction. The view is computed by the gateway, not authored.
 
-**Phase 1 scenario link:** Scenario 1 emits `IncidentCreated{reporter, source, band, anchor}` from both the Anjali submit path (Scenario 3 → Scenario 1 entry) and the hotline-intake path (Scenario 1, Screen 3). Scenario 3's `LoginSucceeded{reporter, anchor}` is the source of the `anchor: bool` flag.
+**Phase 1 scenario link:** Scenario 1 emits `IncidentCreated{reporter, source, band, reporter_kind, anchor}` from both the Anjali submit path (Scenario 3 → Scenario 1 entry) and the hotline-intake path (Scenario 1, Screen 3). Scenario 3's `LoginSucceeded{reporter, anchor}` is the source of the `anchor: bool` flag. The `IncidentCreated` chain event carries `reporter_kind` as a separate column from `trust_band`; aggregates can drill on either dimension independently.
+
+---
+
+## Reporter-badge as separate dimension (lockdown reconciliation 2026-09-11)
+
+Phase 1 emits two parallel data dimensions on every incident:
+
+- `trust_band` (verification state): T1 unverified / T2 verified / T3 issuance / resolved
+- `reporter_kind` (source attribute): anchor / hotline_operator / webform / sensor
+
+A reporter can be an anchor at any trust band. A hotline-sourced
+incident always defaults to T1 because it has no verification
+signals. The two dimensions must be preserved through every
+aggregate in Shapes 1–6 so Pia can drill on either dimension
+independently.
 
 ---
 
@@ -135,7 +150,7 @@ These requirements apply to **every** data shape above, every aggregation, every
 |---|---|---|---|
 | **1** | **Chain anchoring for every aggregate.** Every number on the Phase 2 dashboard must trace back to underlying chain events. Pia drills from a monthly chart into the incident-level chain segment that produced the number. | Goal 2 (defensible) at per-incident AND city scale. Without drill-down, the chart is assertion; with drill-down, the chart is evidence. | Every read-only view in this contract returns an `incident_ids[]` array alongside the aggregated metric. The Phase 2 dashboard renders drill-down links to the per-incident chain segment. |
 | **2** | **Named-actor attribution at every level.** Every metric attributable to a named operator, named admin, named technician, named reporter (anchor flag visible). No anonymous role labels. | Goal 2 (defensible) at city scale. "The system worked as designed" is not a defence; "Karim missed SLA 8 times in T2" is. | Every chain event that captures a human decision or action carries the actor's identity. Views never collapse to role-level aggregates when the underlying events carry names. |
-| **3** | **Hotline-vs-web-form distinction preserved through all metrics.** `source: hotline` is preserved through every aggregation. Hotline-intake incidents (from Scenario 1, Screen 3) appear as a distinct cohort. | Hotline-sourced reports have different trust baselines than web-form reports (hotline caller reports once and may never return; web-form reporter returns on the timeline). Merging them hides the retention signal. | `IncidentCreated{source}` is one of `web_form` / `hotline` / `sensor`. Every view accepts a `source` filter; no view defaults to "all sources" in the absence of a filter. |
+| **3** | **Reporter-badge dimension preserved through all metrics — SEPARATE from trust-band tier.** `reporter_kind: anchor | hotline_operator | webform | sensor` is preserved through every aggregation as a SEPARATE column from `trust_band`. Hotline-intake incidents (from Scenario 1, Screen 3) appear as a distinct cohort and default to T1 (unverified) because they have no verification signals — but the hotline reporter-badge is the source, not the band colour. | Hotline-sourced reports have different reporting baselines than web-form reports (hotline caller reports once and may never return; web-form reporter returns on the timeline; anchor reporter reports weekly by design). Merging reporter-kind dimensions hides the retention signal; merging trust-band tiers hides the verification signal. Both dimensions must remain independently drillable. | `IncidentCreated{reporter_kind}` is one of `anchor` / `hotline_operator` / `webform` / `sensor`. `IncidentCreated{trust_band}` is one of `T1` (unverified) / `T2` (verified) / `T3` (issuance) / `resolved`. Every view accepts both a `reporter_kind` filter and a `trust_band` filter; no view defaults to "all sources" or "all bands" in the absence of a filter. |
 | **4** | **Anchor-trust flag preserved through all reporter-cohort metrics.** `anchor: bool` is preserved through every aggregation. Anchor-flagged reporters' reports are visible to Pia as a distinct cohort. | The anchor system is not opaque to Pia. If anchor reporters retain at 95% and citizen-tier reporters at 40%, that is the load-bearing signal for the "citizens keep reporting" force — and Pia needs to see it to defend it. | `IncidentCreated{anchor: bool}` is preserved through every cohort construction. The reporter-cohort retention view (Shape 4) is the primary surface; trust-band distribution (Shape 1) and resolution-✅ divergence (Shape 2) accept `anchor` as an optional drill-down filter. |
 | **5** | **Citizen-ack silence (`CitizenAckWindowExpired`) is data, not absence.** `CitizenAckWindowExpired` events feed into reporter cohort retention and resolution-rate-vs-divergence metrics. Pia sees the silence structurally. | "Citizens stop reporting because no one came" (Pia, FIA 13, negative) is detected via the silence pattern, not the absence of data. Silent-ack + non-return is the structural signature of the force. | `CitizenAckWindowExpired` is emitted by the system monitor on the 1h / 24h / 7d / 30d schedule (Scenario 3, Silent-ack path). The event is first-class; the cohort retention view counts silent reporters as a distinct retention bucket. |
 | **6** | **Override-rate metric from Adi's surface feeds into trust band correctness check.** `TrustBandOverridden{reviewer: adi, from_band, to_band, reason_category}` is the override-rate numerator; the trust band correctness view (Shape 6) consumes it. | Adi's override rate trends toward expert-level is one of her load-bearing forces (FIA 11). The override-rate trend is also the load-bearing input to the trust band correctness exhibit — Pia needs to see overrides-where-outcome-was-bad as the anomaly marker. | Scenario 2 emits `TrustBandOverridden` at the moment of override; the view consumes it directly. |
@@ -213,3 +228,24 @@ Pia has 12 forces (5 negative + 7 positive per `02-persona-pia-the-public-health
 - [Scenario 02 — Adi](02-adi-the-auditor-mark-resolved-handoff.md) — emits `TrustBandOverridden{reviewer}`, `ProofAccepted{reviewer}`, `CitizenAckRequested`, `IncidentResolvedByAdmin{reviewer}`, `EscalationTriggered{path_template}`, `ProofInsufficient{reviewer}`
 - [Scenario 03 — Anjali](03-anjali-the-anchor-citizen-arc.md) — emits `IncidentCreated` (web-form path), `CitizenAckAccepted{anjali}`, `CitizenAckRejected{anjali}`, `CitizenAckWindowExpired`, `IncidentClosed{closer: priya, ack: yes | silent}`
 - [Scenario 04 — Karim](04-karim-the-technician-field-lane.md) — emits `Acknowledged{by: karim}`, `TechnicianArrived{by: karim}`, `DiagnosisSubmitted`, `FixSubmitted{parts}`, `ProofSubmitted`
+
+---
+
+## Lockdown reconciliation (2026-09-11)
+
+This scenario was re-read after the lockdown audit (00-lockdown-audit.md)
+bound the design system. Edits applied:
+- §"Why this scenario exists" property #3 (Hotline-vs-web-form distinction): reframed as the reporter-badge dimension PRESERVED AS A SEPARATE AXIS from the trust-band tier; explicitly states hotline incidents default to T1 (unverified), and the hotline reporter-badge is the source, not the band colour.
+- Shape 1 (Trust band distribution): band set re-bound to lockdown values (T1 unverified divider / T2 verified amber / T3 issuance alert-red-reserved / Resolved safe-green); T3 only counts if a consumer-notice was issued; override events are chain events with `from_band` and `to_band` (not a band category).
+- Shape 1 scenario link: `IncidentCreated` payload now lists `reporter_kind` as a separate field from `band`; `TrustBandOverridden` is annotated "(an override event, NOT a band)".
+- Shape 4 (Reporter cohort retention): title kept; SQL surface now joins `IncidentCreated{reporter, source, anchor, reporter_kind, trust_band}` — aggregation grain expanded to `(ward, cohort_month, anchor_flag, source_category, trust_band)`; explicitly notes that (a) anchor reporter at T1 baseline vs (b) anchor reporter at T2 verified are distinct retention curves.
+- Shape 4 scenario link: `IncidentCreated` chain event payload now names `reporter_kind` as a separate column from `trust_band` with independent drill-down.
+- Cross-cutting requirement #3: rewritten to name both dimensions separately (`reporter_kind: anchor | hotline_operator | webform | sensor` AND `trust_band: T1 | T2 | T3 | resolved`); every view accepts both filters independently.
+- New subsection added: "Reporter-badge as separate dimension (lockdown reconciliation 2026-09-11)" — defines the two parallel data dimensions and the rule that aggregates must preserve both.
+- This scenario's structural shape did not change (six data shapes intact), but the schema and aggregation contracts re-bind so that `reporter_kind` and `trust_band` are independent drill axes.
+- Trust band now = verification state only (T1/T2/T3/Resolved)
+- Reporter-badge now = separate source attribute (anchor/hotline/webform/sensor)
+- Hotline-sourced no longer T3; hotline = reporter-badge hotline + T1 default
+- Anchor no longer T1; anchor = reporter-badge anchor attribute at any tier
+- Reference: docs/D-UX-Design/01-design-system-foundation.md (lockdown-bound)
+- Reference: docs/D-UX-Design/decisions/00-lockdown-audit.md

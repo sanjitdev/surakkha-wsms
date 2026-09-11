@@ -19,7 +19,7 @@
 > **Confirmed by user before scenario writeup. Locking these so Freya reconciles against them, not against an interpretation:**
 >
 > 1. **Karim's queue is assignments-only, distinct from Adi's closed-loop queue.** Sorted by `due_at` first, then priority within `due_at`. Top row = what he needs to act on *now*. He does NOT see the action lane queue (Priya's inbox) or the decision lane queues (Adi's overrides / proofs / escalations buckets). His surface is field lane, full stop.
-> 2. **Priority band colour visible to Karim.** T1/T2/T3 colour-coded on each queue row (high / medium / low per visual-direction.md trust-band palette). He's an action lane (not a decision lane), but the colour cue helps him triage under load. He does NOT override or reason about bands; he just sees the colour.
+> 2. **Priority band colour visible to Karim.** T1/T2/T3 colour-coded on each queue row by trust-band tier (verification state) — T1 unverified (divider neutral), T2 verified (amber), T3 issuance (alert-red-reserved — only visible if a consumer-notice has been issued, which is rare in operator UI). He's an action lane (not a decision lane), but the colour cue helps him triage under load. The colour is the trust-band tier, NOT the reporter-badge source. He does NOT override or reason about bands; he just sees the colour.
 > 3. **Full offline mode for Karim's surface.** Queue cached locally, photos queued locally, form submissions deferred, sync on reconnect with conflict resolution by timestamp + chain hash. Diagnosis form is offline-tolerant at minimum; the whole surface works offline. The system defends against network failure mid-shift.
 > 4. **Each row in the queue exposes the assignment context inline:** incident id + ward + address, priority band, time since assignment + `due_at` countdown, reporter context (Anjali name + anchor flag, OR hotline caller info + phone + language preference), original report (text + photo + voice), Priya's verification reasoning (full text), and pre-arrival sensor prep (nearest sensors + current readings + 24h trend chart).
 > 5. **Two pre-arrival actions per row:** `Acknowledged{by: karim}` (fires immediately on tap) and `TechnicianArrived` (fires when GPS confirms within 50m of incident pin, OR manual "I'm here" tap if GPS is unreliable in a pump-house / indoor location).
@@ -65,8 +65,8 @@ At the moment Priya clicks **Submit verify + assign** on her `InboxDetail` right
 - **Priority band** (T1/T2/T3 colour — locked decision #2)
 - **Time since assignment + `due_at` countdown** (small clock chip — changes colour as `due_at` approaches and after it passes)
 - **Reporter context:**
-  - If the report came from Anjali: her display name + civic-anchor flag ("Anchor reporter ✓"). He does not see her reputation score or any tier math — just the badge, same as she sees.
-  - If the report came from the hotline (Priya's `HotlineIntakeModal` from Scenario 1, Screen 3): the caller's hashed phone reference + caller's described symptom + caller's ward + proximity-to-sensor answer + caller's language preference (for his on-site courtesy).
+  - If the report came from Anjali: her display name + anchor reporter-badge chip (`Anchor` Lucide icon, `--color-reporter-anchor` chip). The chip is the `reporter_kind: anchor` source attribute, NOT a trust-band tier — Anjali's incident can be at T1 unverified or T2 verified regardless of the anchor chip. He does not see her reputation score or any tier math.
+  - If the report came from the hotline (Priya's `HotlineIntakeModal` from Scenario 1, Screen 3): the caller's hashed phone reference + caller's described symptom + caller's ward + proximity-to-sensor answer + caller's language preference (for his on-site courtesy). The hotline reporter-badge chip (`Phone` Lucide icon, `--color-reporter-hotline`) surfaces next to the caller info — this is the source attribute. Hotline-sourced incidents default to T1 (unverified) because they have no verification signals; the hotline reporter-badge is the source, not the band.
 - **Original report** (text + photo + voice note — verbatim, EXIF preserved, no re-encode per visual-direction.md "real evidence only"). Photo viewer with EXIF strip; voice note plays back.
 - **Priya's verification reasoning** (the full text she captured at the moment of dispatch — from her right column's reasoning field per Scenario 1, Screen 4). This is load-bearing for Karim's on-site context; she tells him what she saw, what was missing, and why she assigned him anyway (the audit-defensible "why" is his briefing).
 - **Pre-arrival sensor prep:** nearest sensors + current readings + a 24h trend chart (mini, inline). See the Pre-arrival sensor prep sub-section below.
@@ -86,9 +86,9 @@ A pre-ranked list of his open assignments, sorted by `due_at` first, then priori
 
 - **Incident id** (mono, copy-to-clipboard)
 - **Ward + address** (one line)
-- **Priority band** (T1 / T2 / T3 colour-coded chip — locked decision #2)
+- **Priority band** (T1 / T2 / T3 colour-coded chip by trust-band tier — T1 unverified divider, T2 verified amber, T3 reserved alert-red — locked decision #2; NOT a source-attribute colour)
 - **Time since assignment + `due_at` countdown** (small clock chip, colour-shifts toward warning at `due_at − 10 min`, past `due_at` shows as "OVERDUE")
-- **Reporter name + anchor flag** (or hotline caller info compactly)
+- **Reporter name + reporter-badge chip** (anchor chip with `Anchor` Lucide icon, OR hotline chip with `Phone` Lucide icon, OR no chip for plain webform; the chip is the `reporter_kind` source attribute, NOT the trust band)
 - **Status chip:** one of `NEW` / `ACKNOWLEDGED` / `EN_ROUTE` / `ON_SITE` / `DIAGNOSED` / `FIXED` / `AWAITING_PROOF` / `REOPENED` — Karim's surface state, distinct from the chain event types
 
 **TopChrome (48 px, persona-adapted):** brand + chain-status pulse-dot on the left; persona chip + locale-globe + theme toggle on the right. Same shared TopChrome as Priya's and Adi's surfaces per visual-direction.md.
@@ -136,9 +136,9 @@ A pre-ranked list of his open assignments, sorted by `due_at` first, then priori
 |---|---|
 | **Incident id** | Mono, copy-to-clipboard |
 | **Ward + address** | One line; mini-map preview; tap to expand full map |
-| **Priority band** | T1/T2/T3 chip (coloured) |
+| **Priority band** | T1/T2/T3 chip (coloured by trust-band tier: T1 unverified divider, T2 verified amber, T3 reserved alert-red) |
 | **Time since assignment + `due_at` countdown** | Live chip |
-| **Reporter context** | Anjali: name + anchor flag. Hotline: hashed phone ref + described symptom + language preference. |
+| **Reporter context** | Anjali: name + anchor reporter-badge chip (`Anchor` Lucide icon). Hotline: hashed phone ref + described symptom + language preference + hotline reporter-badge chip (`Phone` Lucide icon). The chip is the `reporter_kind` source attribute, not the trust band. |
 | **Original report** | Verbatim text (Anjali's "what" field, or caller's description) + photo (with EXIF strip viewer) + voice note (play button). |
 | **Priya's verification reasoning** | Full text from her right column at dispatch. Verbatim. The "why anyway" reasoning (per Scenario 1 Path B or Path C) is here if it was a B/C-path assignment. |
 | **Path badge** | Path A / B / C / D from Scenario 1's verification — Karim knows what shape the call was. |
@@ -407,7 +407,27 @@ This is the edge case the chain has to support but Karim's surface does not act 
 - [Anjali persona](../B-Trigger-Map/04-persona-anjali-the-anchor.md) — referenced for Karim's `TechnicianArrived` impact on Anjali's status timeline (Scenario 3)
 - [Feature impact](../B-Trigger-Map/feature-impact.md) — **#5 resolution-proof bundle viewer** is the load-bearing feature Karim is producing data for; #3 post-resolution sensor readback verification supplies the readback reference
 - [Content & language](../A-Product-Brief/content-language.md) — Karim is action lane, terse copy, English-first in Phase 1
-- [Visual direction](../A-Product-Brief/visual-direction.md) — TopChrome + Sidebar component patterns; trust-band palette referenced (T1/T2/T3); token system locked 2026-09-07; EXIF preserved verbatim
+- [Visual direction](../A-Product-Brief/visual-direction.md) — TopChrome + Sidebar component patterns; trust-band palette referenced (T1 unverified divider / T2 verified amber / T3 reserved alert-red; Resolved safe-green); token system locked 2026-09-07; EXIF preserved verbatim
 - [Scenario 01 — Priya's shift](01-priya-the-pipeline-pilot-triage-verify-assign.md) — Karim's entry event is Priya's `Verified` + `Assigned` from InboxDetail Screen 4 (assignment handoff in)
 - [Scenario 02 — Adi's shift](02-adi-the-auditor-mark-resolved-handoff.md) — Karim's exit event is his `ProofSubmitted`, which routes to Adi's proofs bucket (`ProofAwaitingVerification`); Adi's `ProofInsufficient` is the reopen path back to Karim (reopen handoff)
 - [Scenario 03 — Anjali's shift](03-anjali-the-anchor-citizen-arc.md) — Anjali's status timeline threads Karim's `TechnicianArrived`, `DiagnosisSubmitted`, `FixSubmitted`, `ProofSubmitted` as in-progress beats
+
+---
+
+## Lockdown reconciliation (2026-09-11)
+
+This scenario was re-read after the lockdown audit (00-lockdown-audit.md)
+bound the design system. Edits applied:
+- Locked decision #2: priority-band colour re-bound to trust-band tier (T1 unverified divider / T2 verified amber / T3 reserved alert-red); the colour is the verification-state tier, NOT the reporter-badge source.
+- §"Threading the handoff" reporter context: anchor "flag" reframed as a reporter-badge chip (`Anchor` Lucide icon, `--color-reporter-anchor`); hotline caller info gains a hotline reporter-badge chip (`Phone` Lucide icon, `--color-reporter-hotline`). Hotline-sourced incidents default to T1 (unverified); the hotline reporter-badge is the source attribute, not the band colour.
+- Screen 1 FieldQueuePage: queue-row priority chip notes "NOT a source-attribute colour" — priority chip = trust-band tier; reporter-badge chip = source attribute.
+- Screen 1 FieldQueuePage: "Reporter name + anchor flag" reframed as "Reporter name + reporter-badge chip (anchor / hotline / webform)".
+- Screen 2 FieldIncidentDetailPage Section 1 row: "Reporter context" table cell now names the specific reporter-badge chip per source (anchor = Anchor icon; hotline = Phone icon + caller info).
+- Visual direction source link: trust-band palette references re-bound to lockdown values.
+- Karim's arc does not structurally change (he still gets assigned, acknowledges, arrives, diagnoses, fixes, submits proof); only the visual treatment of priority colour and reporter-badge chips re-binds.
+- Trust band now = verification state only (T1/T2/T3/Resolved)
+- Reporter-badge now = separate source attribute (anchor/hotline/webform/sensor)
+- Hotline-sourced no longer T3; hotline = reporter-badge hotline + T1 default
+- Anchor no longer T1; anchor = reporter-badge anchor attribute at any tier
+- Reference: docs/D-UX-Design/01-design-system-foundation.md (lockdown-bound)
+- Reference: docs/D-UX-Design/decisions/00-lockdown-audit.md

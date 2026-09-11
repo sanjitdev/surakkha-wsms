@@ -18,14 +18,14 @@
 
 > **Confirmed by user before scenario writeup. Locking these so Freya reconciles against them, not against an interpretation:**
 >
-> 1. **Submit form is under 60 seconds.** Five fields in order: where (map pin, GPS-defaulted, draggable) / what (short text, Bangla or English, with auto-suggestions: "foul smell," "discoloration," "sickness in family," "leak/pipe damage") / when (auto-now with calendar fallback) / photo (optional but encouraged; EXIF preserved, NOT stripped) / voice note (optional, 30s max, speech-to-text on). Single primary CTA: "Submit report" in green (trust-band T1 color). No secondary CTAs.
+> 1. **Submit form is under 60 seconds.** Five fields in order: where (map pin, GPS-defaulted, draggable) / what (short text, Bangla or English, with auto-suggestions: "foul smell," "discoloration," "sickness in family," "leak/pipe damage") / when (auto-now with calendar fallback) / photo (optional but encouraged; EXIF preserved, NOT stripped) / voice note (optional, 30s max, speech-to-text on). Single primary CTA: "Submit report" in primary (deep teal). No secondary CTAs.
 > 2. **Anchor-trust badge visible to Anjali.** "Anchor reporter ✓" shown near the submit button on her own form. Tells her: "Your reports get priority because you're verified as authentic." Chain captures anchor flag on every report. No trust-band math visible, just the badge.
 > 3. **Got-heard ack within 5 minutes, dual channel.** On-screen: form transitions to confirmation view "Got heard ✅. Your report id: `inc_01HX...`. We'll keep you posted as it moves." SMS: same message + deep link to portal status timeline. Bangla-first, calm tone per `content-language.md`. No resolution timeline promised — only motion promised.
 > 4. **Status timeline is the gap screen — #2 priority feature from feature-impact.md.** Vertical list of state transitions with timestamps + one-line Bangla descriptions. Captures every state: `IncidentCreated` → `VerificationSubmitted` (Priya) → `AssignedToTechnician` → `TechnicianArrived` → `DiagnosisSubmitted` → `FixSubmitted` → `ProofAccepted` (Adi) → `IncidentResolvedByAdmin` → `IncidentClosed` (Priya close) OR `IncidentReopened{parent}` (re-enter with branch visible). Reopen lineage preserved as a connected thread — never confuse her about what happened to her report.
 > 5. **Closure ✅/❌ tap is INSIDE the authenticated web portal.** SMS notifies ("tap to confirm") but tapping opens the browser → portal login → once authenticated, taken to the closure screen for that specific incident. One screen, one decision. Large ✅ / ❌ buttons. Incident summary visible above (where, what, when, who worked on it). ❌ tap opens a free-text + optional voice "tell us why" field.
 > 6. **Silent-ack path: held open with periodic reminders.** 60 min first nudge SMS → 24h second nudge → 7d third nudge (escalated tone, "incident will remain open until you respond or until 30 days from now") → 30d auto-close with `CitizenAckWindowExpired + IncidentClosed{closer: priya, ack: silent, age: 30d}`. Final SMS: "Your report was closed without your confirmation. If the problem persists, please resubmit." **Priya monitors the held-open state** (not Adi, who has already walked away after marking resolved). Priya can close earlier with sensor-confirmed silence if her post-resolution readback confirms clearance.
 > 7. **My reports tab + (Phase 2 candidate) ward-at-a-glance for anchors.** Phase 1 only ships the My Reports tab (full history with status). Phase 2 candidates: ward-at-a-glance view for anchor reporters (12 active reports · 3 resolved this week · 1 escalated — without revealing other reporters' identities). Flag the Phase 2 candidate in the scenario writeup without designing it.
-> 8. **Submit fires `IncidentCreated{source: web_form, reporter: nid_hash, band: T1 or T2, anchor: bool}`.** Anchors default to T1; non-anchors default to T2; priority can be uplifted by sensor proximity at creation time.
+> 8. **Submit fires `IncidentCreated{source: web_form, reporter: nid_hash, band: T1 or T2, reporter_kind: webform | anchor, anchor: bool}`.** Anchors default to T2 verified (when their anchor reporter-badge is present); non-anchors default to T1 unverified; `reporter_kind` is the source attribute on the chain (separate dimension from `trust_band`). Citizens never see T1/T2/T3 labels — they see plain-language verification state ("verified" / "not yet verified") and the anchor reporter-badge chip if applicable.
 > 9. **All Bangla copy.** Noto Sans Bengali per `visual-direction.md`. Tone is calm, protective, not alarming. Slot discipline per `content-language.md` — no marketing language, no PHA bureaucracy speak.
 > 10. **Three-beat Goal 3 visibility.** The scenario must explicitly thread all three beats: got-heard ack (Screen 2), in-progress signals (Screen 3), closure tap (Screen 4). These are not separate scenarios; they are the spine of Anjali's arc.
 
@@ -77,9 +77,9 @@ Five fields in fixed order, each one obvious:
 | 4 | **Photo** (optional but encouraged) | Empty | Tap "Add photo" → camera or gallery. EXIF preserved verbatim (no re-encode, no filter, no strip — per visual-direction.md "real evidence only"). A small caption underneath reads "Photo helps the city act faster." |
 | 5 | **Voice note** (optional) | Empty | Tap the mic icon → 30-second recording with a waveform visual. Speech-to-text on (server side); the resulting text lands in field #2 as an editable draft. |
 
-**Single primary CTA:** **"Submit report"** in green (trust-band T1 color; the anchor default). No secondary CTAs. No "Save draft." No "Cancel." The form is so fast that "draft" is friction.
+**Single primary CTA:** **"Submit report"** in primary (deep teal `#0F4C5C`). No secondary CTAs. No "Save draft." No "Cancel." The form is so fast that "draft" is friction.
 
-**Anchor-trust badge:** Near the submit button, a small badge reads **"Anchor reporter ✓"** with a one-line caption: *"Your reports get priority because you're verified as authentic."* This is the only tier signal visible to her. The badge is conditional on `anchor: true` in the chain record; non-anchors don't see it, and anchors don't see anything else different — the priority promise is what the badge means.
+**Anchor-trust badge:** Near the submit button, a small reporter-badge chip reads **"Anchor ✓"** with an `Anchor` Lucide icon and a one-line caption: *"Your reports get priority because you're verified as authentic."* This is the **reporter-badge** chip (the `reporter_kind: anchor` attribute on the chain), NOT a trust-band tier. An anchor reporter can be at any trust band (T1 unverified or T2 verified) — the reporter-badge attribute is separate from the verification state. The badge is conditional on `anchor: true` in the chain record; non-anchors don't see it, and anchors don't see anything else different — the priority promise is what the badge means. Per lockdown §1.1, citizens never see T1/T2/T3 trust-band labels; the chip carries the Anchor icon only.
 
 **Bangla copy on the form** (placeholder copy pending i18n review per `content-language.md`):
 
@@ -102,12 +102,12 @@ Tone is **calm, protective, not alarming.** No exclamation marks. No "URGENT!" N
 
 **What fires automatically on submit:**
 
-1. **`IncidentCreated{source: web_form, reporter: nid_hash, band: T1 or T2, anchor: bool, location, observed_at, text, photo_ref, voice_ref, created_at}`** lands on the chain.
+1. **`IncidentCreated{source: web_form, reporter: nid_hash, band: T1 or T2, reporter_kind: anchor | webform, anchor: bool, location, observed_at, text, photo_ref, voice_ref, created_at}`** lands on the chain. (Per lockdown §1.1: `trust_band` = verification state; `reporter_kind` = source attribute. Both dimensions are independent.)
 2. The form transitions to the **confirmation view** (no page navigation — same screen, new state): big ✅ icon, Bangla message *"আপনার রিপোর্ট পাওয়া গেছে / Got heard ✅"*, report id displayed in mono font (`inc_01HX...`, copy-to-clipboard), and a one-line *"We'll keep you posted as it moves / আমরা আপনাকে জানিয়ে যাব"* in Bangla.
 3. **SMS dispatch:** within 5 minutes (Goal 3.1 timing), the same message lands on her phone via SMS, with a deep link to the authenticated portal status timeline for this incident. Bangla-first, GSM-7 / UCS-2 hard caps per C-11.
 4. The offline-queue indicator (feature #32) clears if she had anything queued.
 
-**The form-to-confirmation transition is the got-heard ack.** It is the load-bearing UX promise of the entire citizen surface: sub-60-sec submit + 5-min ack. It is the structural response to the "report that disappears" negative force (FIA 15) — she knows the city saw her within five minutes.
+**The form-to-confirmation transition is the got-heard ack.** It is the load-bearing UX promise of the entire citizen surface: sub-60-sec submit + 5-min ack. It is the structural response to the "report that disappears" negative force (FIA 15) — she knows the city saw her within five minutes. **Per lockdown §1.1, the confirmation copy uses plain-language verification state ("verified" / "not yet verified" / "resolved") — never T1/T2/T3 labels.**
 
 **Note on the offline path:** If her phone was offline at submit, the report is queued on the device with a "queued, will send when online" indicator (feature #32). The chain write happens when connectivity returns; the SMS ack fires from the gateway after the chain write, so the 5-min window is from the source-side timestamp, not from when the SMS landed. The offline indicator keeps her from re-submitting.
 
@@ -128,9 +128,10 @@ This is the #2 priority feature (`feature-impact.md`) and the structural respons
 **Layout:** A vertical list of state transitions for the incident, top-to-bottom (newest at top), each row carrying:
 
 - **Timestamp** in Bangla numerals (`Intl.NumberFormat('bn-BD')`, `useNumberFormatter` per FE-B5g)
-- **One-line Bangla description** of what happened
+- **One-line Bangla description** of what happened (plain-language verification state — never T1/T2/T3 labels per lockdown §1.1)
 - **Actor chip** (small, mono, copy-to-clipboard for the chain ref) — *who* triggered the state: "Operator: Priya" / "Tech: Karim" / "Reviewer: Adi" / "System"
 - **Chain anchor chip** (forensic, mono, copy-to-clipboard) — the per-incident audit timeline's block hash
+- **Reporter-badge chip** (if applicable): an anchor reporter sees the Anchor chip; a hotline-sourced incident would surface the Phone chip; webform reports carry no extra chip. This is the `reporter_kind` attribute on the chain, separate from the trust band.
 
 **The timeline shows every state in the loop.** Per the locked state list:
 
@@ -191,8 +192,8 @@ The SMS closure notification arrives on her phone with the deep link: "আপন
 
 Two large buttons (mobile touch floor ≥48×48 px per visual-direction.md). Bangla-first labels, English fallback underneath:
 
-- ✅ **"হ্যাঁ, সমস্যা সমাধান হয়েছে / Yes — fixed"** (primary, green / trust-band-success-500)
-- ❌ **"না, সমস্যা এখনো আছে / No — still a problem"** (secondary, danger-tinted — danger-500)
+- ✅ **"হ্যাঁ, সমস্যা সমাধান হয়েছে / Yes — fixed"** (primary, safe-green `#2F6E45` — Resolved trust-band colour per lockdown §1.1; the citizen-facing "closure is real" cue)
+- ❌ **"না, সমস্যা এখনো আছে / No — still a problem"** (secondary, amber `#B8801E` — `--color-status-warn`, NOT alert-red; form-error style per lockdown §12 rule 13)
 
 **The ✅ path:**
 
@@ -232,7 +233,7 @@ The row in My Reports now carries the **"Closed"** status pill (or "Reopened" wi
 
 **The history is preserved.** Every report she's ever submitted is in My Reports, with its full timeline. She can scroll back weeks or months. The reporting history is the reputation ledger from the citizen's side — but she doesn't see any "score" or "tier" math. She sees her history; the system sees her credibility.
 
-**Anchor tier note:** Anchors see the same My Reports as non-anchors. The anchor badge is on the submit form, not on My Reports. There is no per-row indicator that says "this report was priority-fast-tracked because you're an anchor" — that would surface the tier signal, which is internal-only per feature #14 (tier-signal internal handling — citizen vs anchor response parity).
+**Anchor tier note:** Anchors see the same My Reports as non-anchors. The anchor reporter-badge chip is on the submit form, not on My Reports. There is no per-row indicator that says "this report was priority-fast-tracked because you're an anchor" — that would surface the tier signal, which is internal-only per feature #14 (tier-signal internal handling — citizen vs anchor response parity). The anchor reporter-badge attribute is preserved on the chain (`reporter_kind: anchor`) but does not elevate the trust-band tier — anchors can be at T1 unverified or T2 verified depending on verification signals, just like non-anchor reporters.
 
 ---
 
@@ -407,9 +408,33 @@ This view is **explicitly deferred to Phase 2** for these reasons: (a) per-write
 - [Adi persona](../B-Trigger-Map/05-persona-adi-the-auditor.md) (handoff thread — Adi's `IncidentResolvedByAdmin` is Anjali's closure ack trigger)
 - [Feature impact](../B-Trigger-Map/feature-impact.md) — **#2 In-flight citizen motion signals** is the load-bearing gap screen
 - [Content & language](../A-Product-Brief/content-language.md) — Bangla-first tone, slot discipline, calm tone per surface; placeholder copy pending i18n review
-- [Visual direction](../A-Product-Brief/visual-direction.md) — Noto Sans Bengali, trust-band palette references (T1 green / T2 amber / T3 grey); token system locked 2026-09-07; shoulder-surfing redaction binding for FR-4 ✅ / ❌ tap
+- [Visual direction](../A-Product-Brief/visual-direction.md) — Noto Sans Bengali, trust-band palette references (T1 unverified divider / T2 verified amber / T3 reserved alert-red / Resolved safe-green); token system locked 2026-09-07; shoulder-surfing redaction binding for FR-4 ✅ / ❌ tap
 - [Scenario 01 — Priya's shift](01-priya-the-pipeline-pilot-triage-verify-assign.md) — Anjali's submit is the entry event; `Verified` + `Assigned` from Screen 4 is the in-progress signal she sees on her phone
 - [Scenario 02 — Adi's shift](02-adi-the-auditor-mark-resolved-handoff.md) — Adi's `IncidentResolvedByAdmin` from Screen 2 is the trigger for Anjali's `CitizenAckRequested` closure ack
+
+---
+
+## Lockdown reconciliation (2026-09-11)
+
+This scenario was re-read after the lockdown audit (00-lockdown-audit.md)
+bound the design system. Edits applied:
+- Locked decision #1: CTA "Submit report" colour changed from green (trust-band T1) to primary deep teal — T1 is no longer a brand colour.
+- Locked decision #2: anchor badge reframed as a `reporter_kind: anchor` reporter-badge chip with `Anchor` Lucide icon; citizens never see T1/T2/T3 labels; the badge is the source attribute, not a tier elevation.
+- Locked decision #8: `IncidentCreated` payload now carries both `trust_band` (T1 unverified / T2 verified) AND `reporter_kind` (anchor | webform) as separate dimensions.
+- SubmitForm §"Single primary CTA" + anchor-trust badge: re-bound to lockdown §1.1 token references (primary deep teal; Anchor chip not a tier).
+- SubmitForm §"What fires automatically on submit": chain event payload now lists `reporter_kind` as a separate column.
+- SubmitForm §"The form-to-confirmation transition": added lockdown §1.1 plain-language verification state rule ("verified" / "not yet verified" / "resolved").
+- Screen 3 status timeline: added reporter-badge chip rule — anchor reporter sees Anchor chip; hotline-sourced would surface Phone chip; webform reports carry no extra chip.
+- Screen 4 ✅/❌ tap: ✅ uses safe-green (Resolved band colour); ❌ uses amber (`--color-status-warn`, NOT alert-red per lockdown §12 rule 13).
+- Screen 5 anchor tier note: anchor reporter-badge does not elevate trust-band tier — anchors can be at T1 or T2 like any reporter.
+- Visual direction source link: trust-band palette references re-bound to lockdown values (T1 divider / T2 amber / T3 alert-red-reserved / Resolved safe-green).
+- Anjali's arc does not structurally change (she still reports, gets ack, sees progress, gets closure); only the visual treatment and chain event schema re-bind.
+- Trust band now = verification state only (T1/T2/T3/Resolved)
+- Reporter-badge now = separate source attribute (anchor/hotline/webform/sensor)
+- Hotline-sourced no longer T3; hotline = reporter-badge hotline + T1 default
+- Anchor no longer T1; anchor = reporter-badge anchor attribute at any tier
+- Reference: docs/D-UX-Design/01-design-system-foundation.md (lockdown-bound)
+- Reference: docs/D-UX-Design/decisions/00-lockdown-audit.md
 
 ---
 
