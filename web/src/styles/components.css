@@ -527,8 +527,15 @@
 }
 
 /* ── Container (dim 5 §3) ───────────────────────────────────────── */
+/* Container fills the parent edge-to-edge so the chrome's outer padding
+ * handles the gutter. The --wide / --bangla / --narrow modifiers cap the
+ * *content* line at the typography max-width (kept for readability on
+ * ultra-wide viewports), but the container itself stays full-width.
+ * `margin: 0` replaces the previous `margin: 0 auto` so the container
+ * doesn't shrink to the cap and float in the middle of the viewport on
+ * desktop monitors wider than 1280 px. */
 .container {
-  margin: 0 auto;
+  margin: 0;
   padding-inline: var(--space-xl);
   width: 100%;
 }
