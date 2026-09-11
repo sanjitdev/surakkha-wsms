@@ -6,6 +6,11 @@
     "subtitleUnit_other": "wards",
     "sensorsOnline": "{{count}} sensors online"
   },
+  "actions": {
+    "logHotlineCall": "Log hotline call",
+    "hotlineSubmitted": "Incident {{incidentId}} added to your inbox",
+    "hotlineCallLogged": "Call logged. No incident created."
+  },
   "layoutToggle": {
     "ariaLabel": "Dashboard layout",
     "optionA": "grid",

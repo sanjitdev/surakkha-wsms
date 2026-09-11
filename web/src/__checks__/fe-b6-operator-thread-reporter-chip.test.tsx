@@ -19,6 +19,7 @@ import { MemoryRouter } from 'react-router-dom';
 import i18n from '../i18n';
 import { LocaleProvider } from '../hooks/useLocale';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
+import { ToastProvider } from '../components/ui/ToastProvider';
 import { OperatorDashboard } from '../pages/OperatorDashboard';
 import { handlers } from '../mocks/handlers';
 import enJson from '../i18n/locales/en/operatorDashboard.json';
@@ -110,23 +111,25 @@ function renderDash() {
   return render(
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
-        <MemoryRouter
-          future={{
-            v7_startTransition: true,
-            v7_relativeSplatPath: true,
-          }}
-        >
-          <AppLayoutContext.Provider
-            value={{
-              session: SESSION_FIXTURE,
-              chainHead: CHAIN_HEAD_FIXTURE,
-              chainFreshSeconds: 0,
-              logout: () => Promise.resolve(),
+        <ToastProvider durationMs={100}>
+          <MemoryRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
             }}
           >
-            <OperatorDashboard />
-          </AppLayoutContext.Provider>
-        </MemoryRouter>
+            <AppLayoutContext.Provider
+              value={{
+                session: SESSION_FIXTURE,
+                chainHead: CHAIN_HEAD_FIXTURE,
+                chainFreshSeconds: 0,
+                logout: () => Promise.resolve(),
+              }}
+            >
+              <OperatorDashboard />
+            </AppLayoutContext.Provider>
+          </MemoryRouter>
+        </ToastProvider>
       </LocaleProvider>
     </I18nextProvider>,
   );

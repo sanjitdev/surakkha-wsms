@@ -6,6 +6,11 @@
     "subtitleUnit_other": "ওয়ার্ড",
     "sensorsOnline": "{{count}}টি সেন্সর অনলাইন"
   },
+  "actions": {
+    "logHotlineCall": "ফোন কল লগ করুন",
+    "hotlineSubmitted": "ঘটনা {{incidentId}} আপনার ইনবক্সে যোগ হয়েছে",
+    "hotlineCallLogged": "কল লগ হয়েছে। কোনো ঘটনা তৈরি হয়নি।"
+  },
   "layoutToggle": {
     "ariaLabel": "ড্যাশবোর্ড লেআউট",
     "optionA": "গ্রিড",

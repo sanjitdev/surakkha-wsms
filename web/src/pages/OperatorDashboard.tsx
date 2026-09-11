@@ -34,6 +34,9 @@ import { useNumberFormatter } from '../hooks/useNumberFormatter';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
 import { FilterChip } from '../components/pages/FilterChip';
+import { Button } from '../components/ui/Button';
+import { HotlineIntakeModal } from '../components/operator/HotlineIntakeModal';
+import { useToast } from '../components/ui/ToastProvider';
 import {
   ReporterAnchorIcon,
   ReporterPhoneIcon,
@@ -90,7 +93,13 @@ export function OperatorDashboard() {
   const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
   const [threadFilter, setThreadFilter] = useState<ThreadFilter>('all');
-  const { incidents, loading: incLoading } = useIncidents();
+  // operator-dashboard.md #6 — top-chrome `Log hotline call` button.
+  // Mounts HotlineIntakeModal. The modal owns its own form state, dirty-
+  // check, and submit path; this state only toggles open/close and
+  // surfaces the post-submit incident id in the inbox refresh.
+  const [hotlineOpen, setHotlineOpen] = useState<boolean>(false);
+  const toast = useToast();
+  const { incidents, loading: incLoading, refetch: refetchIncidents } = useIncidents();
 
   // incLoading is surfaced for future skeleton use; the page today renders
   // an empty `openIncidents` slice instead of a loading spinner so the
@@ -473,6 +482,25 @@ export function OperatorDashboard() {
               })}{' '}
               {tDash('pageHeader.sensorsOnline', { count: sensors.length })}
             </div>
+          </div>
+          {/* operator-dashboard.md #6 — top-chrome action bar.
+              "Log hotline call" sits leftmost, before the layout toggle,
+              so the alt-path for incoming reports is the most prominent
+              secondary action per spec §"Trigger". */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => {
+                setHotlineOpen(true);
+              }}
+              testId="dashboard-log-hotline-call"
+            >
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--space-xs)', marginRight: 'var(--space-xs)' }} aria-hidden="true">
+                <ReporterPhoneIcon />
+              </span>
+              {tDash('actions.logHotlineCall')}
+            </Button>
           </div>
           <div className="layout-toggle" role="radiogroup" aria-label={tDash('layoutToggle.ariaLabel')}>
             {(['a', 'b', 'c'] as Layout[]).map((opt) => (
@@ -1043,6 +1071,28 @@ export function OperatorDashboard() {
           </div>
         </section>
       </main>
+
+      {/* operator-dashboard.md #6 — hotline intake modal mount.
+          Sits at the page root so the focus trap and Escape handling
+          from <Modal> apply uniformly. onSubmitted refetches the
+          incidents list so the new row (with hotline reporter-badge)
+          appears in the threads table without a page refresh. */}
+      <HotlineIntakeModal
+        open={hotlineOpen}
+        onClose={() => {
+          setHotlineOpen(false);
+        }}
+        onSubmitted={({ outcome, incidentId }) => {
+          if (outcome === 'reported_incident') {
+            void refetchIncidents();
+            if (incidentId) {
+              toast.success(tDash('actions.hotlineSubmitted', { incidentId: incidentId.slice(0, 8) }));
+            }
+          } else {
+            toast.info(tDash('actions.hotlineCallLogged'));
+          }
+        }}
+      />
     </>
   );
 }
