@@ -59,10 +59,15 @@ const INCIDENT: IncidentRow = {
   last_occurred_at: '2024-01-01T12:00:00.000Z',
 };
 
+// Lockdown cascade 2026-09-11: ack window computed from
+// CitizenAckRequested.occurred_at is 5 minutes; fixture must be
+// within the window so the decision buttons render (happy path).
+const ACK_REQUEST_FRESH = new Date(Date.now() - 60 * 1000).toISOString(); // 1 min ago
+
 const ACK_REQUEST_EVENT = {
   event_id: 'evt_ackreq_001',
   event_type: 'CitizenAckRequested',
-  occurred_at: '2024-01-01T12:05:00.000Z',
+  occurred_at: ACK_REQUEST_FRESH,
   actor_identity: { kind: 'operator', ref: 'priya-001', display: 'Priya' },
   payload: {
     incident_id: 'inc_ack_001',
@@ -280,5 +285,26 @@ describe('FE-F6 /ack/:incident_id submitted state', () => {
     });
     expect(screen.getByText('DISPUTED')).toBeTruthy();
     expect(screen.getByText('You disputed the fix')).toBeTruthy();
+  });
+
+  // (8) Lockdown cascade 2026-09-11: when the ack window has elapsed
+  // (CitizenAckRequested older than 5 min), the page renders a calm
+  // "we marked this closed" message with no decision buttons.
+  it('ack_window_expired_renders_closed_state_without_buttons', async () => {
+    const expiredAt = new Date(Date.now() - 10 * 60 * 1000).toISOString(); // 10 min ago
+    fixtureAckEvents = {
+      events: [
+        { ...ACK_REQUEST_EVENT, occurred_at: expiredAt },
+      ],
+    };
+
+    renderAck('anjali', 'inc_ack_001');
+    await waitFor(() => {
+      expect(screen.getByTestId('ack-expired-card')).toBeTruthy();
+    });
+    expect(screen.queryByTestId('ack-decision-card')).toBeNull();
+    expect(screen.queryByTestId('ack-approve')).toBeNull();
+    expect(screen.queryByTestId('ack-dispute')).toBeNull();
+    expect(screen.getByText('We marked this closed')).toBeTruthy();
   });
 });

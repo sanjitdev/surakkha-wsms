@@ -31,6 +31,11 @@
     "title": "Reset demo",
     "subtitle": "Clears the local chain, session, and theme/locale prefs, then reloads the page. Use this when you want to start fresh from the seeded fixtures.",
     "buttonIdle": "Reset everything",
-    "buttonBusy": "Resetting…"
+    "buttonBusy": "Resetting…",
+    "confirmAria": "Confirm reset",
+    "confirmHeading": "Reset demo data?",
+    "confirmBody": "This clears the local chain, your session, and your theme/locale preferences, then reloads the page. You will be returned to the sign-in screen with seeded fixtures. This cannot be undone.",
+    "confirmCancel": "Cancel",
+    "confirmConfirm": "Yes, reset everything"
   }
 }

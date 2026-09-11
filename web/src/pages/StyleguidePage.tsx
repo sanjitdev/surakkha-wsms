@@ -324,15 +324,31 @@ export function StyleguidePage() {
             Snooze
           </Button>
         </Row>
-        <Row label="danger (outline)">
+        <Row label="danger (issuance path only)">
+          {/* Lockdown cascade 2026-09-11: variant="danger" is reserved
+              for the T3+ issuance path. Destructive operator actions
+              (reject / override / force resolve) use secondary + warning
+              icon, NOT danger. The danger showcase here documents the
+              single sanctioned use site. */}
           <Button variant="danger" size="sm">
-            Reject
+            Confirm consumer notice
           </Button>
           <Button variant="danger" size="md">
-            Override
+            Confirm consumer notice
           </Button>
           <Button variant="danger" size="lg">
-            Force Resolve
+            Confirm consumer notice
+          </Button>
+        </Row>
+        <Row label="destructive operator action (secondary + warn)">
+          <Button variant="secondary" size="sm">
+            <span aria-hidden="true">⚠︎</span> Reject
+          </Button>
+          <Button variant="secondary" size="md">
+            <span aria-hidden="true">⚠︎</span> Override
+          </Button>
+          <Button variant="secondary" size="lg">
+            <span aria-hidden="true">⚠︎</span> Force resolve
           </Button>
         </Row>
         <Row label="disabled">
@@ -340,7 +356,7 @@ export function StyleguidePage() {
             Save
           </Button>
           <Button variant="danger" size="md" disabled>
-            Reject
+            Confirm consumer notice
           </Button>
         </Row>
       </Section>
@@ -511,13 +527,44 @@ export function StyleguidePage() {
       </Section>
 
       <Section
-        title="BandPill"
-        blurb="3 bands per dim 4 §12. 88 px min-width, uppercase label, dim-3 §6.1 icons."
+        title="BandPill — lockdown palette"
+        blurb="5-band lockdown palette per docs/D-UX-Design/01-design-system-foundation.md §1.1 / §4.1. Glyph + text redundancy (TextStyle VS15). The legacy BandPill with the High/Medium/Low trio is preserved for existing consumers (InboxRow, OperatorDashboard) but is no longer the canonical showcase."
       >
-        <Row label="all bands">
+        <Row label="locked: all 5 bands">
+          <BandPill band={Band.High} locked />
+          <BandPill band={Band.Medium} locked />
+          <BandPill band={Band.Low} locked />
+          <span className="badge badge--resolved-locked" data-testid="styleguide-band-resolved-locked">
+            <span className="badge__glyph" aria-hidden="true">✓︎</span>
+            <span>RESOLVED</span>
+          </span>
+          <span className="badge badge--t0-locked" data-testid="styleguide-band-t0-locked">
+            <span className="badge__glyph" aria-hidden="true">○</span>
+            <span>T0 INTAKE</span>
+          </span>
+        </Row>
+        <Row label="legacy: BandPill (deprecated)">
           <BandPill band={Band.High} />
           <BandPill band={Band.Medium} />
           <BandPill band={Band.Low} />
+        </Row>
+      </Section>
+
+      <Section
+        title="Reporter-badge — lockdown dimension"
+        blurb="Per foundation §1.1 the reporter badge is a separate dimension from trust band. 4 reporter kinds, each paired with its own --color-reporter-* token. Use these on incident-card bylines, audit-log actor columns, and inbox 'filed by' metadata."
+      >
+        <Row label="anchor (verified citizen)">
+          <span className="badge badge--reporter-anchor">Anchor</span>
+        </Row>
+        <Row label="hotline (operator on phone)">
+          <span className="badge badge--reporter-hotline">Hotline</span>
+        </Row>
+        <Row label="webform (anon / unverified citizen)">
+          <span className="badge badge--reporter-webform">Web form</span>
+        </Row>
+        <Row label="sensor (machine-fired)">
+          <span className="badge badge--reporter-sensor">Sensor</span>
         </Row>
       </Section>
 

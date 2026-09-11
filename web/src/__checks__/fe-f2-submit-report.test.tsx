@@ -110,7 +110,7 @@ function SubmitReportPageWithActions({ actions: _actions }: { actions: UseIncide
 let currentActions: UseIncidentActionsResult = makeActionsStub({
   busy: false,
   lastError: null,
-  submitReport: vi.fn(async () => true),
+  submitReport: vi.fn(async () => {return { chain_ref: '01STUBCHAINREF' }}),
 });
 
 vi.mock('../hooks/useIncidentActions', () => {return {
@@ -121,7 +121,7 @@ beforeEach(() => {
   currentActions = makeActionsStub({
     busy: false,
     lastError: null,
-    submitReport: vi.fn(async () => true),
+    submitReport: vi.fn(async () => {return { chain_ref: '01STUBCHAINREF' }}),
   });
 });
 
@@ -140,15 +140,15 @@ describe('FE-F2 /submit Anjali role gating', () => {
     expect(screen.queryByTestId('submit-form-card')).toBeNull();
   });
 
-  // (2) Anjali gets the form with the default T2 / W01 selections.
-  it('anjali_renders_form_with_default_values: form is visible, defaults are T2 / W01', () => {
+  // (2) Anjali gets the form with the default urgency / W01 selections.
+  it('anjali_renders_form_with_default_values: form is visible, defaults are needs_attention / W01', () => {
     renderSubmitPage({ role: 'anjali', actions: currentActions });
 
     expect(screen.getByTestId('submit-form')).toBeTruthy();
     expect(screen.getByTestId('submit-form-card')).toBeTruthy();
-    const severity = screen.getByTestId('submit-severity');
+    const urgency = screen.getByTestId('submit-urgency');
 
-    expect(severity.value).toBe('T2');
+    expect(urgency.value).toBe('needs_attention');
     const ward = screen.getByTestId('submit-ward');
 
     expect(ward.value).toBe('W01');
@@ -186,7 +186,7 @@ describe('FE-F2 /submit form validation', () => {
 
   // (4) Submitting calls actions.submitReport with the trimmed payload.
   it('submit_calls_actions_submitReport_with_payload: payload shape pinned', async () => {
-    const submitReport = vi.fn(async () => true);
+    const submitReport = vi.fn(async () => {return { chain_ref: '01STUBCHAINREF' }});
 
     currentActions = makeActionsStub({ busy: false, lastError: null, submitReport });
     renderSubmitPage({ role: 'anjali', actions: currentActions });
@@ -194,8 +194,8 @@ describe('FE-F2 /submit form validation', () => {
     fireEvent.input(screen.getByTestId('submit-title'), {
       target: { value: '  Brown water in ward 4  ' },
     });
-    fireEvent.change(screen.getByTestId('submit-severity'), {
-      target: { value: 'T3' },
+    fireEvent.change(screen.getByTestId('submit-urgency'), {
+      target: { value: 'urgent' },
     });
     fireEvent.change(screen.getByTestId('submit-ward'), {
       target: { value: 'W04' },
@@ -213,7 +213,7 @@ describe('FE-F2 /submit form validation', () => {
 
     expect(arg).toEqual({
       title: 'Brown water in ward 4',
-      severity: 'T3',
+      urgency: 'urgent',
       ward_id: 'W04',
       description: 'Reported by 3 households since 6am',
       photo_url: undefined,
@@ -223,11 +223,12 @@ describe('FE-F2 /submit form validation', () => {
 });
 
 describe('FE-F2 /submit success state', () => {
-  // (6) After successful submit, the receipt UI is shown with event_id.
-  it('success_state_renders_receipt_with_event_id: receipt renders, form is hidden', async () => {
-    // submitReport mock is the default true-returning stub. The page
-    // mints its own synthetic event_id inside the success handler; the
-    // assertion just checks the rendered receipt markup.
+  // (6) After successful submit, the receipt UI is shown with the real chain ref.
+  it('success_state_renders_receipt_with_event_id: receipt renders the chain ref from the hook', async () => {
+    // Lockdown cascade 2026-09-11: the receipt pulls the chain_ref that
+    // the hook returns (i.e. the IncidentCreated event_id from the
+    // server), not a synthetic client-minted ULID. The default stub
+    // returns '01STUBCHAINREF'.
     renderSubmitPage({ role: 'anjali', actions: currentActions });
     fireEvent.input(screen.getByTestId('submit-title'), {
       target: { value: 'Brown water in ward 4' },
@@ -243,7 +244,7 @@ describe('FE-F2 /submit success state', () => {
       expect(screen.getByTestId('submit-receipt-card')).toBeTruthy();
     });
     expect(screen.queryByTestId('submit-form')).toBeNull();
-    expect(screen.getByTestId('submit-receipt-event-id').textContent).toMatch(/^01[A-Z0-9]+$/);
+    expect(screen.getByTestId('submit-receipt-event-id').textContent).toBe('01STUBCHAINREF');
     expect(screen.getByText('Submit another report')).toBeTruthy();
   });
 
@@ -272,12 +273,12 @@ describe('FE-F2 /submit success state', () => {
 });
 
 describe('FE-F2 /submit error path', () => {
-  // (8) submitReport returning false keeps the form visible (no receipt).
-  it('submit_failure_keeps_form_visible: submitReport=false → form stays', async () => {
+  // (8) submitReport returning null keeps the form visible (no receipt).
+  it('submit_failure_keeps_form_visible: submitReport=null → form stays', async () => {
     currentActions = makeActionsStub({
       busy: false,
       lastError: new Error('TestFailure'),
-      submitReport: vi.fn(async () => false),
+      submitReport: vi.fn(async () => null),
     });
     renderSubmitPage({ role: 'anjali', actions: currentActions });
     fireEvent.input(screen.getByTestId('submit-title'), {

@@ -50,16 +50,16 @@ export interface UseIncidentActionsResult {
     channel: 'sms' | 'whatsapp' | 'voice';
     summary: string;
   }) => Promise<boolean>;
-  /** Anjali submits a citizen report. */
+  /** Anjali submits a citizen report. Returns the chain ref on success. */
   submitReport: (input: {
     title: string;
-    severity: 'T1' | 'T2' | 'T3';
+    urgency: 'not_urgent' | 'needs_attention' | 'urgent';
     ward_id: string;
     description: string;
     photo_url?: string;
     voice_url?: string;
     gps?: { lat: number; lng: number };
-  }) => Promise<boolean>;
+  }) => Promise<{ chain_ref: string } | null>;
   /** Field tech records arrival at the incident site. */
   techArrived: (input: { incident_id: string; technician_id: string }) => Promise<boolean>;
   /** Field tech submits a diagnosis note (still on site, not yet fixed). */
@@ -213,6 +213,20 @@ export function useIncidentActions(): UseIncidentActionsResult {
 
   const submitReport = useCallback<UseIncidentActionsResult['submitReport']>(
     async (input) => {
+      // Lockdown cascade (2026-09-11): urgency is the citizen-asserted
+      // severity hint; it stays on the chain payload mapped to a T-code
+      // so operator surfaces keep their existing taxonomy (T1/T2/T3).
+      // The trust_band itself is computed server-side from verification
+      // signals on later chain events (AnjaliNidVerified, etc.) — not
+      // from this urgency field. Reporter-badge dimension (anchor vs
+      // webform) is set server-side from the session.
+      const urgencyToTCode = (u: typeof input.urgency): 'T1' | 'T2' | 'T3' => {
+        if (u === 'not_urgent') return 'T1';
+        if (u === 'needs_attention') return 'T2';
+        return 'T3';
+      };
+      const tcode = urgencyToTCode(input.urgency);
+
       // Mint the incident_id client-side so the AnjaliReportSubmitted +
       // IncidentCreated pair share the same anchor. Both land on chain
       // and the operator inbox (IncidentCreated) + the citizen ack flow
@@ -223,7 +237,8 @@ export function useIncidentActions(): UseIncidentActionsResult {
         payload: {
           incident_id,
           title: input.title,
-          severity: input.severity,
+          urgency: input.urgency,
+          severity: tcode,
           ward_id: input.ward_id,
           description: input.description,
           photo_url: input.photo_url ?? null,
@@ -232,12 +247,12 @@ export function useIncidentActions(): UseIncidentActionsResult {
         },
       });
 
-      if (!report) return false;
+      if (!report) return null;
       const created = await post({
         event_type: 'IncidentCreated',
         payload: {
           incident_id,
-          severity: input.severity,
+          severity: tcode,
           ward_id: input.ward_id,
           title: input.title,
           summary: input.description,
@@ -250,7 +265,7 @@ export function useIncidentActions(): UseIncidentActionsResult {
             status: 'awaiting_ack',
             title: input.title,
             summary: input.description.slice(0, 140),
-            isUrgent: input.severity === 'T3',
+            isUrgent: input.urgency === 'urgent',
             isAwaitingSig: false,
           },
           source: 'citizen_report',
@@ -260,9 +275,9 @@ export function useIncidentActions(): UseIncidentActionsResult {
 
       if (created) {
         toast.success(tCommon('toast.reportSubmitted'));
-        return true;
+        return { chain_ref: created.event_id };
       }
-      return false;
+      return null;
     },
     [post, toast],
   );

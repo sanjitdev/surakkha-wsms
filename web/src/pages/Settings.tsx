@@ -11,14 +11,22 @@
  *     (useTheme, useLocale) — single source of truth, no prop drilling.
  *   - Role config is read-only — the persona is selected on the login
  *     picker, not editable here.
- *   - Reset is a DangerButton that calls resetEverything() and reloads
- *     the page. Plain English copy explains the consequence.
+ *   - Reset is a destructive action; lockdown §7.1 reserves the Danger
+ *     button variant for the T3+ issuance path only. Settings uses
+ *     `variant="ghost"` plus a confirmation <Modal> (lockdown §3.4
+ *     modal pattern) before calling resetEverything() and reloading.
  *
  * Why composition only:
  *   - All real persistence already happens in localStorage (theme,
  *     locale) and IndexedDB (session, chain). Reset just wipes those.
  *   - There is no backend "update profile" endpoint — the persona is
  *     login-time only.
+ *
+ * Lockdown cascade (2026-09-11):
+ *   - Reset: variant="danger" → variant="ghost"; confirmation <Modal>
+ *     before destructive action.
+ *   - Persona readout: badge--t1 → badge--t1-locked (divider neutral
+ *     --color-trust-t1, not legacy sky-blue).
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +35,7 @@ import '../styles/settings.css';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { Modal } from '../components/ui/Modal';
 import { useTheme } from '../hooks/useTheme';
 import { useLocale } from '../hooks/useLocale';
 import { useAnjaliFilter } from '../hooks/useAnjaliFilter';
@@ -42,6 +51,7 @@ export function Settings() {
   const { from: anjaliFrom, setFrom: setAnjaliFrom, clear: clearAnjaliFrom } = useAnjaliFilter();
   const { session } = useAppLayout();
   const [resetting, setResetting] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const handleReset = async () => {
     if (resetting) return;
@@ -53,6 +63,7 @@ export function Settings() {
     } catch (err) {
       console.error('[surakkha] settings reset failed', err);
       setResetting(false);
+      setConfirmOpen(false);
     }
   };
 
@@ -179,7 +190,7 @@ export function Settings() {
             className="settings-row__control settings-row__readout"
             data-testid="settings-role-readout"
           >
-            <span className="badge badge--t1" data-testid="settings-role-role">
+            <span className="badge badge--t1-locked" data-testid="settings-role-role">
               {session.role}
             </span>
             <span className="settings-row__display-name">{session.display_name}</span>
@@ -195,11 +206,14 @@ export function Settings() {
             <p className="settings-row__sub">{tSettings('reset.subtitle')}</p>
           </div>
           <div className="settings-row__control">
+            {/* Lockdown cascade 2026-09-11: variant="danger" is reserved
+                for the issuance path. Reset is destructive but not T3+
+                issuance, so it uses variant="ghost" + a confirm-modal. */}
             <Button
-              variant="danger"
+              variant="ghost"
               size="md"
               onClick={() => {
-                void handleReset();
+                setConfirmOpen(true);
               }}
               disabled={resetting}
               testId="settings-reset-button"
@@ -209,6 +223,56 @@ export function Settings() {
           </div>
         </div>
       </Card>
+
+      <Modal
+        open={confirmOpen}
+        onClose={() => {
+          if (!resetting) setConfirmOpen(false);
+        }}
+        ariaLabel={tSettings('reset.confirmAria')}
+        testId="settings-reset-confirm-modal"
+      >
+        <h2
+          id="settings-reset-confirm-title"
+          style={{ margin: 0, fontSize: 'var(--font-size-lg)', color: 'var(--fg-default)' }}
+        >
+          {tSettings('reset.confirmHeading')}
+        </h2>
+        <p
+          style={{
+            margin: 'var(--space-md) 0 var(--space-lg)',
+            color: 'var(--fg-secondary)',
+            fontSize: 'var(--font-size-sm)',
+            lineHeight: 'var(--line-height-body)',
+          }}
+        >
+          {tSettings('reset.confirmBody')}
+        </p>
+        <div style={{ display: 'flex', gap: 'var(--space-sm)', justifyContent: 'flex-end' }}>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => {
+              setConfirmOpen(false);
+            }}
+            disabled={resetting}
+            testId="settings-reset-confirm-cancel"
+          >
+            {tSettings('reset.confirmCancel')}
+          </Button>
+          <Button
+            variant="ghost"
+            size="md"
+            onClick={() => {
+              void handleReset();
+            }}
+            disabled={resetting}
+            testId="settings-reset-confirm-confirm"
+          >
+            {resetting ? tSettings('reset.buttonBusy') : tSettings('reset.confirmConfirm')}
+          </Button>
+        </div>
+      </Modal>
     </Container>
   );
 }

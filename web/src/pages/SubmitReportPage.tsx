@@ -22,6 +22,15 @@
  *   - The form has 5 fields. react-hook-form / formik would add
  *     ~30KB for a feature the built-in useState already handles.
  *   - Phase 1 lockdown: zero new deps.
+ *
+ * Lockdown cascade (2026-09-11):
+ *   - Severity dropdown replaced with plain-language urgency options
+ *     ("not urgent", "needs attention", "urgent"). T-codes stay on the
+ *     chain payload for operator reference but citizens never see raw
+ *     T1/T2/T3 labels (foundation §1.1: T1 = unverified, T2 = verified,
+ *     T3 = issuance-path-only — operator concepts, not citizen ones).
+ *   - Receipt pulls the real IncidentCreated event_id from the chain
+ *     projection, not a synthetic ULID.
  */
 
 import { useState } from 'react';
@@ -39,15 +48,19 @@ import { useIncidentActions } from '../hooks/useIncidentActions';
 import { useDateFormatter } from '../hooks/useDateFormatter';
 
 const WARDS = ['W01', 'W02', 'W03', 'W04', 'W05', 'W06', 'W07', 'W08', 'W09', 'W10'] as const;
-const SEVERITIES = ['T1', 'T2', 'T3'] as const;
 
-type Severity = (typeof SEVERITIES)[number];
+// Plain-language urgency scale (lockdown 2026-09-11). T-codes stay on
+// the chain payload for the inbox / audit layers but never surface
+// to citizens. The Urgency keys map to trust-band T-codes internally
+// so the existing IncidentCreated payload contract is preserved.
+type Urgency = 'not_urgent' | 'needs_attention' | 'urgent';
+const URGENCIES: readonly Urgency[] = ['not_urgent', 'needs_attention', 'urgent'];
 
 interface SubmissionReceipt {
   event_id: string;
   title: string;
   ward_id: string;
-  severity: Severity;
+  urgency: Urgency;
   submitted_at: string;
 }
 
@@ -59,7 +72,7 @@ export function SubmitReportPage() {
   const isAnjali = session.role === 'anjali';
 
   const [title, setTitle] = useState('');
-  const [severity, setSeverity] = useState<Severity>('T2');
+  const [urgency, setUrgency] = useState<Urgency>('needs_attention');
   const [wardId, setWardId] = useState<string>(WARDS[0]);
   const [description, setDescription] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
@@ -77,25 +90,25 @@ export function SubmitReportPage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
-    const ok = await actions.submitReport({
+    const result = await actions.submitReport({
       title: titleTrimmed,
-      severity,
+      urgency,
       ward_id: wardId,
       description: descTrimmed,
       photo_url: photoUrl.trim() || undefined,
       voice_url: voiceUrl.trim() || undefined,
     });
 
-    if (ok) {
-      // Capture a synthetic receipt so the success state has data even
-      // though the hook doesn't return the block_hash. The chain
-      // projection rebuilds /api/incidents on next mount; the receipt
-      // is a one-shot UX anchor, not a system-of-record.
+    if (result) {
+      // Lockdown cascade (2026-09-11): receipt pulls the real chain
+      // event_id from the IncidentCreated post (the "block_hash" in the
+      // citizen's mental model), not a synthetic ULID. Trust band is
+      // server-assigned and surfaced only on the operator's inbox.
       setReceipt({
-        event_id: `01${  Math.random().toString(36).slice(2, 24).toUpperCase()}`,
+        event_id: result.chain_ref,
         title: titleTrimmed,
         ward_id: wardId,
-        severity,
+        urgency,
         submitted_at: new Date().toISOString(),
       });
       setTitle('');
@@ -138,8 +151,12 @@ export function SubmitReportPage() {
         </div>
         <Card testId="submit-receipt-card">
           <div className="submit-receipt">
-            <span className={`badge badge--${receipt.severity.toLowerCase()}`}>
-              {receipt.severity}
+            {/* Lockdown 2026-09-11: citizens see plain-language urgency on
+                receipt, NOT a trust-band T-code chip — trust band is the
+                operator's mental model, surfaced on the inbox row after
+                verification signals land. */}
+            <span className="submit-receipt__urgency">
+              {tSubmit(`receipt.urgencyLabels.${receipt.urgency}`)}
             </span>
             <h2 className="submit-receipt__title">{receipt.title}</h2>
             <dl className="submit-receipt__meta">
@@ -209,24 +226,25 @@ export function SubmitReportPage() {
 
           <div className="submit-form__row submit-form__row--split">
             <div>
-              <label htmlFor="submit-severity" className="submit-form__label">
-                {tSubmit('form.severityLabel')}
+              <label htmlFor="submit-urgency" className="submit-form__label">
+                {tSubmit('form.urgencyLabel')}
               </label>
               <select
-                id="submit-severity"
-                data-testid="submit-severity"
+                id="submit-urgency"
+                data-testid="submit-urgency"
                 className="submit-form__input"
-                value={severity}
+                value={urgency}
                 onChange={(e) => {
-                  setSeverity(e.target.value as Severity);
+                  setUrgency(e.target.value as Urgency);
                 }}
               >
-                {SEVERITIES.map((s) => (
-                  <option key={s} value={s}>
-                    {tSubmit(`form.severityOptions.${s}`)}
+                {URGENCIES.map((u) => (
+                  <option key={u} value={u}>
+                    {tSubmit(`form.urgencyOptions.${u}`)}
                   </option>
                 ))}
               </select>
+              <p className="submit-form__hint">{tSubmit('form.urgencyHint')}</p>
             </div>
             <div>
               <label htmlFor="submit-ward" className="submit-form__label">

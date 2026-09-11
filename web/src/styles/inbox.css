@@ -60,6 +60,14 @@
   border-radius: var(--radius-xs);
   letter-spacing: var(--letter-spacing-wide, 0.04em);
 }
+.badge__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-xs);
+  font-size: var(--font-size-sm);
+  line-height: 1;
+}
 .badge--t3 {
   background: var(--danger);
   color: var(--fg-on-status-light);
@@ -93,6 +101,7 @@
    existing consumers. Progressive migration in Phase 1.7+.
 
    Lockdown semantics:
+   - .badge--t0-locked  → neutral T0 / intake band (no verification yet)
    - .badge--t1-locked  → divider neutral (unverified) — glyph ◔
    - .badge--t2-locked  → amber (verified) — glyph ◑
    - .badge--t3-locked  → alert-red-reserved (issuance path ONLY) — glyph ●
@@ -102,6 +111,11 @@
    path; do not use .badge--t3-locked for operator UI badge rendering.
    Reference: docs/D-UX-Design/01-design-system-foundation.md §1.1.
    ──────────────────────────────────────────────────────────────────── */
+.badge--t0-locked {
+  background: var(--bg-subtle);
+  color: var(--fg-default);
+  border: 1px solid var(--border-default);
+}
 .badge--t1-locked {
   background: var(--color-trust-t1);
   color: var(--color-ink);

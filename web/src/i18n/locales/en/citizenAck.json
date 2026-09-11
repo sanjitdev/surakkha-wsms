@@ -23,6 +23,11 @@
     "channelLabel": "Channel",
     "decidedLabel": "Decided"
   },
+  "expired": {
+    "heading": "We marked this closed",
+    "body": "The 5-minute acknowledgement window passed without a response at {{time}}. The operator's fix is now sealed on the chain.",
+    "reopenHint": "If the issue is still present, contact the hotline within 30 days to reopen the incident."
+  },
   "form": {
     "subtitle": "{{name}} · incident {{id}} · ward {{ward}} · see inbox detail",
     "noticeHeading": "Operator notice",
@@ -31,8 +36,8 @@
     "noticeFallback": "The operator confirmed the fix for incident {{id}}.",
     "decisionHeading": "Did the fix resolve the issue?",
     "decisionBody": "Approve to close the incident. Dispute to reopen it for review.",
-    "approve": "✅ Approve & close",
-    "dispute": "❌ Dispute & reopen",
+    "approve": "Approve & close",
+    "dispute": "Dispute & reopen",
     "sealing": "Sealing…"
   }
 }

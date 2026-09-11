@@ -14,18 +14,24 @@
     "submittedAt": "Submitted",
     "chainRef": "Chain ref",
     "hint": "The operator will see this on their inbox shortly. You can submit another report or close the browser — your report is already sealed.",
-    "submitAnother": "Submit another report"
+    "submitAnother": "Submit another report",
+    "urgencyLabels": {
+      "not_urgent": "Not urgent",
+      "needs_attention": "Needs attention",
+      "urgent": "Urgent"
+    }
   },
   "form": {
     "titleLabel": "Title",
     "titlePlaceholder": "Brown water in tap since morning",
     "titleHint": "A short summary; the operator reads this first.",
-    "severityLabel": "Severity",
-    "severityOptions": {
-      "T1": "T1 · low concern",
-      "T2": "T2 · concerning",
-      "T3": "T3 · urgent"
+    "urgencyLabel": "How serious is this?",
+    "urgencyOptions": {
+      "not_urgent": "Not urgent — no immediate risk",
+      "needs_attention": "Needs attention — should be looked at soon",
+      "urgent": "Urgent — health risk today or tonight"
     },
+    "urgencyHint": "Pick the plain-language level. Verification signals (NID, photos, hotline) decide the actual band on the operator side.",
     "wardLabel": "Ward",
     "descriptionLabel": "Description",
     "descriptionPlaceholder": "What did you see, when did it start, how many households are affected?",

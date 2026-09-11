@@ -200,12 +200,13 @@ describe('FE-F1 useIncidentActions', () => {
     await act(async () => {
       const ok = await result.current.submitReport({
         title: 'Brown water in ward 4',
-        severity: 'T2',
+        urgency: 'needs_attention',
         ward_id: 'W04',
         description: 'Reported by 3 households since 6am',
       });
 
-      expect(ok).toBe(true);
+      // Lockdown cascade 2026-09-11: hook returns { chain_ref } on success.
+      expect(ok).toEqual({ chain_ref: '01ABC' });
     });
 
     // (1) AnjaliReportSubmitted event with the citizen's input.
@@ -213,6 +214,8 @@ describe('FE-F1 useIncidentActions', () => {
 
     expect(report).toBeDefined();
     expect(report?.payload.title).toBe('Brown water in ward 4');
+    expect(report?.payload.urgency).toBe('needs_attention');
+    // severity on chain = mapped T-code (urgency 'needs_attention' → T2).
     expect(report?.payload.severity).toBe('T2');
     expect(report?.payload.ward_id).toBe('W04');
     // (2) IncidentCreated event with the same incident_id so the

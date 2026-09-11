@@ -36,7 +36,7 @@ vi.mock('../hooks/useIncidentActions', () => {
     useIncidentActions: () => ({
       busy: false,
       lastError: null,
-      submitReport: vi.fn(async () => true),
+      submitReport: vi.fn(async () => {return { chain_ref: '01STUBCHAINREF' }}),
       post: vi.fn(async () => ({ event_id: '01STUB' })),
       assignTech: vi.fn(async () => true),
       requestAck: vi.fn(async () => true),
@@ -97,10 +97,10 @@ describe('FE-B6 SubmitReport i18n', () => {
     expect(screen.getByTestId('submit-form')).toBeTruthy();
     // Bengali strings should appear somewhere in the form document.
     expect(document.body.textContent ?? '').toMatch(BENGALI);
-    // Severity select options use bn copy: "T3 · জরুরি".
-    const severity = screen.getByTestId('submit-severity');
+    // Urgency select options use bn copy: "জরুরি" ("urgent").
+    const urgency = screen.getByTestId('submit-urgency');
 
-    expect(severity.textContent ?? '').toContain('জরুরি');
+    expect(urgency.textContent ?? '').toContain('জরুরি');
   });
 
   it('role-gate empty state renders Bengali heading when locale=bn', async () => {
@@ -114,10 +114,10 @@ describe('FE-B6 SubmitReport i18n', () => {
 
   it('en locale keeps English labels (regression guard)', () => {
     renderPage(Locale.En);
-    // Severity T1/T2/T3 options use en copy: "T1 · low concern".
-    const severity = screen.getByTestId('submit-severity');
+    // Urgency options use en copy: "Not urgent — no immediate risk".
+    const urgency = screen.getByTestId('submit-urgency');
 
-    expect(severity.textContent ?? '').toContain('low concern');
+    expect(urgency.textContent ?? '').toContain('Not urgent');
     expect(document.body.textContent ?? '').not.toMatch(BENGALI);
   });
 });
