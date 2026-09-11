@@ -30,6 +30,7 @@ import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useDateFormatter } from '../hooks/useDateFormatter';
 import { useLocale } from '../hooks/useLocale';
 import { isInRange } from '../hooks/auditDateRange';
+import { verifyBlockHash, type VerifyState } from '../lib/chain-verify';
 
 interface ChainEvent {
   event_id: string;
@@ -40,13 +41,6 @@ interface ChainEvent {
   block_hash: string;
   height: number;
 }
-
-/** Per-row verification result. null = not yet verified for this row. */
-type VerifyState =
-  | { status: 'idle' }
-  | { status: 'pending' }
-  | { status: 'ok' }
-  | { status: 'fail'; reason: 'unknown_hash' | 'hash_mismatch' | 'network' | 'timeout' };
 type FilterId = 'all' | 'errors' | 'signatures' | 'sensor' | 'citizen' | 'notices' | 'auth';
 interface ChipDef {
   id: FilterId;
@@ -103,46 +97,6 @@ async function copyToClipboard(value: string): Promise<void> {
     await navigator.clipboard.writeText(value);
   } catch {
     /* Clipboard API unavailable in some test contexts. */
-  }
-}
-/**
- * Independent single-block hash verification per audit-log.md #13.
- *
- * Posts the stored block_hash to /api/chain/verify, which recomputes
- * the canonical SHA-256 over the block's stored fields and compares.
- * A passing result proves the block was not tampered with after append.
- *
- * Completes within ~200ms (foundation §12 #10). Resolves to a typed
- * VerifyState — never throws; failures degrade gracefully so the row
- * UI always renders a stable shape.
- */
-async function verifyBlockHash(blockHash: string): Promise<VerifyState> {
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 1500);
-
-    try {
-      const r = await fetch('/api/chain/verify', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ block_hash: blockHash }),
-        signal: controller.signal,
-      });
-
-      if (!r.ok) {
-        // 404 unknown_hash is the expected "tamper demo" outcome — surface
-        // it as a typed failure rather than a network error.
-        if (r.status === 404) return { status: 'fail', reason: 'unknown_hash' };
-        return { status: 'fail', reason: 'network' };
-      }
-      const data = (await r.json()) as { ok: boolean };
-
-      return data.ok ? { status: 'ok' } : { status: 'fail', reason: 'hash_mismatch' };
-    } finally {
-      clearTimeout(timer);
-    }
-  } catch {
-    return { status: 'fail', reason: 'network' };
   }
 }
 export function AuditLog() {

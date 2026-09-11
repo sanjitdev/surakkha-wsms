@@ -29,11 +29,12 @@
  * lives in the fixtures + handlers; this component just maps wire data
  * into the existing primitives (Container, Card, EmptyState, Modal).
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
+import '../styles/audit.css';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
@@ -44,6 +45,7 @@ import { ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
 import { useIncidentActions } from '../hooks/useIncidentActions';
+import { verifyBlockHash, type VerifyState } from '../lib/chain-verify';
 
 interface ChainEvent {
   event_id: string;
@@ -433,6 +435,29 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
   const [assignOpen, setAssignOpen] = useState(false);
   const [ackOpen, setAckOpen] = useState(false);
 
+  /**
+   * Per-row verify state — inbox-detail.md #16.
+   *
+   * Keyed by event_id so a verification badge persists across re-renders
+   * for the same row. Mirrors the AuditLog pattern (audit-log.md #13) so
+   * the operator's spot-check workflow is consistent across surfaces:
+   * click → POST /api/chain/verify → typed badge in <200ms.
+   */
+  const [verifyStates, setVerifyStates] = useState<Map<string, VerifyState>>(new Map());
+  const onVerifyRow = useCallback(async (eventId: string, blockHash: string) => {
+    setVerifyStates((prev) => {
+      const next = new Map(prev);
+      next.set(eventId, { status: 'pending' });
+      return next;
+    });
+    const result = await verifyBlockHash(blockHash);
+    setVerifyStates((prev) => {
+      const next = new Map(prev);
+      next.set(eventId, result);
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     // Chain poll is owned by AppLayout; this page only fetches the
     // chain-event feed it needs to render the incident thread timeline.
@@ -704,20 +729,82 @@ function RequestAckModal({ open, onClose, incidentId, busy, onSubmit }: RequestA
               />
             ) : (
               <ul className="timeline" data-testid="inbox-detail-timeline-list">
-                {threadEvents.map((e) => (
-                  <li key={e.event_id}>
-                    <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
-                    <p className="timeline__title">{eventTitle(e, tDetail)}</p>
-                    <div
-                      className="timeline__meta"
-                      style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}
-                    >
-                      <span className="mono">{e.actor_identity?.display ?? tDetail('timeline.unknownActor')}</span>
-                      <span className="mono">{tDetail('timeline.separator')}</span>
-                      <span className="mono">{tDetail('timeline.blockRef', { height: e.height })}</span>
-                    </div>
-                  </li>
-                ))}
+                {threadEvents.map((e) => {
+                  const vs = verifyStates.get(e.event_id) ?? { status: 'idle' };
+                  // Per-row verify badge — inbox-detail.md #16. Mirrors
+                  // audit-log.md #13 / AuditLog.tsx render contract: idle
+                  // shows a Verify button, pending shows busy text, ok
+                  // shows ✓\uFE0E, fail shows ⚠\uFE0E with the typed reason.
+                  let verifyControl: React.ReactNode;
+
+                  if (vs.status === 'ok') {
+                    verifyControl = (
+                      <span
+                        className="audit-verify audit-verify--ok"
+                        data-testid={`inbox-verify-${e.event_id}`}
+                        aria-label={tDetail('timeline.verifyOkAria')}
+                        style={{ marginLeft: 'var(--space-sm)' }}
+                      >
+                        <span aria-hidden="true">{'\u2713\uFE0E'}</span>
+                        {tDetail('timeline.verifyOk')}
+                      </span>
+                    );
+                  } else if (vs.status === 'fail') {
+                    verifyControl = (
+                      <span
+                        className="audit-verify audit-verify--fail"
+                        data-testid={`inbox-verify-${e.event_id}`}
+                        aria-label={tDetail(`timeline.verifyFail.${vs.reason}.aria`)}
+                        title={tDetail(`timeline.verifyFail.${vs.reason}.title`)}
+                        style={{ marginLeft: 'var(--space-sm)' }}
+                      >
+                        <span aria-hidden="true">{'\u26A0\uFE0E'}</span>
+                        {tDetail('timeline.verifyFail.label')}
+                      </span>
+                    );
+                  } else if (vs.status === 'pending') {
+                    verifyControl = (
+                      <span
+                        className="audit-verify audit-verify--pending"
+                        data-testid={`inbox-verify-${e.event_id}`}
+                        aria-label={tDetail('timeline.verifyPendingAria')}
+                        style={{ marginLeft: 'var(--space-sm)' }}
+                      >
+                        {tDetail('timeline.verifyPending')}
+                      </span>
+                    );
+                  } else {
+                    verifyControl = (
+                      <button
+                        type="button"
+                        className="audit-verify-btn"
+                        data-testid={`inbox-verify-btn-${e.event_id}`}
+                        onClick={() => {
+                          void onVerifyRow(e.event_id, e.block_hash);
+                        }}
+                        style={{ marginLeft: 'var(--space-sm)' }}
+                      >
+                        {tDetail('timeline.verify')}
+                      </button>
+                    );
+                  }
+
+                  return (
+                    <li key={e.event_id} data-testid={`inbox-event-row-${e.event_id}`}>
+                      <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
+                      <p className="timeline__title">{eventTitle(e, tDetail)}</p>
+                      <div
+                        className="timeline__meta"
+                        style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap', alignItems: 'center' }}
+                      >
+                        <span className="mono">{e.actor_identity?.display ?? tDetail('timeline.unknownActor')}</span>
+                        <span className="mono">{tDetail('timeline.separator')}</span>
+                        <span className="mono">{tDetail('timeline.blockRef', { height: e.height })}</span>
+                        {verifyControl}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </Card>

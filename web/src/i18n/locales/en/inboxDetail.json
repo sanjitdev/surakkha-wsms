@@ -24,7 +24,31 @@
     "emptyBody": "Once actions land on the chain for this incident, they show here.",
     "unknownActor": "—",
     "separator": "·",
-    "blockRef": "block #{{height}}"
+    "blockRef": "block #{{height}}",
+    "verify": "Verify",
+    "verifyPending": "Verifying…",
+    "verifyPendingAria": "Verifying block hash",
+    "verifyOk": "Verified",
+    "verifyOkAria": "Block hash verified",
+    "verifyFail": {
+      "label": "Failed",
+      "unknown_hash": {
+        "title": "Block not found on chain",
+        "aria": "Block hash not found on chain"
+      },
+      "hash_mismatch": {
+        "title": "Block hash mismatch — possible tamper",
+        "aria": "Block hash mismatch — possible tamper"
+      },
+      "network": {
+        "title": "Couldn't reach verify endpoint",
+        "aria": "Network error during verify"
+      },
+      "timeout": {
+        "title": "Verify timed out",
+        "aria": "Verify timed out"
+      }
+    }
   },
   "events": {
     "incidentOpened": "Incident opened ({{ward}})",
