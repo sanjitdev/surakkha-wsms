@@ -40,6 +40,7 @@ import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
 import { AlertIcon, InboxIcon } from '../components/icons/sidebar-icons';
+
 import { ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
@@ -410,7 +411,7 @@ function InlineActionForm({
 
 export function InboxDetail() {
   const { id = '' } = useParams<{ id: string }>();
-  const { incidents, loading: incLoading, error: incError } = useIncidents();
+  const { incidents, loading: incLoading, error: incError, refetch: refetchIncidents } = useIncidents();
   const { format: formatTime } = useDateFormatter();
   const actions = useIncidentActions();
   const { t: tDetail } = useTranslation('inboxDetail');
@@ -488,10 +489,13 @@ export function InboxDetail() {
 
   const loading = incLoading;
 
-  // Surface the hook's error in dev — no toast, per spec §HAPPY_PATH_memo
-  // contract. The page still renders "Incident not found" if the
-  // incidents projection never resolves the requested id.
-  void incError;
+  // Surface the hook's error: render a distinct fetch-failure panel so a
+  // 500 on /api/incidents does NOT collapse into the "Incident not found"
+  // branch below (which only fires when incidents=[] AND no error was
+  // raised). The retry button calls useIncidents().refetch() to round-trip
+  // again without a full page reload.
+  // Refs: deferred-work.md FE-1.3c follow-up (Edge-Hunter finding).
+  const showFetchError = !loading && incError !== null;
 
   const incident = useMemo(
     () => incidents.find((i) => i.incident_id === id) ?? null,
@@ -538,9 +542,57 @@ export function InboxDetail() {
     );
   }
 
+  if (showFetchError) {
+    return (
+      <Container width={ContainerWidth.Bangla} testId="inbox-detail-fetch-error">
+        <div className="page-header">
+          <div className="page-header__row">
+            <div>
+              <Link
+                to="/inbox"
+                className="mono"
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--fg-tertiary)',
+                  textDecoration: 'none',
+                }}
+                data-testid="back-to-inbox"
+              >
+                {tDetail('header.backToInbox')}
+              </Link>
+              <h1 style={{ marginTop: 'var(--space-md)' }}>{tDetail('fetchError.title')}</h1>
+              <p className="page-header__sub">
+                {tDetail('fetchError.body')}
+              </p>
+            </div>
+          </div>
+        </div>
+        <Card>
+          <EmptyState
+            icon={<AlertIcon />}
+            heading={tDetail('fetchError.emptyHeading')}
+            body={tDetail('fetchError.emptyBody')}
+            primaryCta={
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => {
+                  void refetchIncidents();
+                }}
+                testId="inbox-detail-retry"
+              >
+                {tDetail('fetchError.retryCta')}
+              </Button>
+            }
+          />
+        </Card>
+      </Container>
+    );
+  }
+
   if (!incident) {
     return (
-      <Container width={ContainerWidth.Bangla}>
+      <Container width={ContainerWidth.Bangla} testId="inbox-detail-not-found">
         <div className="page-header">
           <div className="page-header__row">
             <div>

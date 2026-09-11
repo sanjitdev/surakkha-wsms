@@ -12,6 +12,13 @@
     "emptyHeading": "No matching incident",
     "emptyBody": "This thread may have been pruned from the read-model or never existed."
   },
+  "fetchError": {
+    "title": "Couldn't load incident",
+    "body": "The incident feed returned an error and the page may be stale.",
+    "emptyHeading": "Feed unavailable",
+    "emptyBody": "Try again — the cache may warm up on retry.",
+    "retryCta": "Retry"
+  },
   "actions": {
     "assignTech": "Assign field tech",
     "requestAck": "Request citizen ack →"
