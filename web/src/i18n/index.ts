@@ -54,6 +54,10 @@ import enComingSoon from './locales/en/comingSoon.json';
 import bnComingSoon from './locales/bn/comingSoon.json';
 import enStyleguide from './locales/en/styleguide.json';
 import bnStyleguide from './locales/bn/styleguide.json';
+import enChainSegment from './locales/en/chainSegment.json';
+import bnChainSegment from './locales/bn/chainSegment.json';
+import enCitizenStatusTimeline from './locales/en/citizenStatusTimeline.json';
+import bnCitizenStatusTimeline from './locales/bn/citizenStatusTimeline.json';
 
 export const SUPPORTED_LOCALES: readonly Locale[] = [Locale.En, Locale.Bn];
 export const STORAGE_KEY = 'surakkha.locale';
@@ -88,6 +92,8 @@ void i18n.use(initReactI18next).init({
       settings: enSettings,
       comingSoon: enComingSoon,
       styleguide: enStyleguide,
+      chainSegment: enChainSegment,
+      citizenStatusTimeline: enCitizenStatusTimeline,
     },
     [Locale.Bn]: {
       common: bnCommon,
@@ -107,6 +113,8 @@ void i18n.use(initReactI18next).init({
       settings: bnSettings,
       comingSoon: bnComingSoon,
       styleguide: bnStyleguide,
+      chainSegment: bnChainSegment,
+      citizenStatusTimeline: bnCitizenStatusTimeline,
     },
   },
   lng: readInitialLocale(),
@@ -114,7 +122,7 @@ void i18n.use(initReactI18next).init({
   defaultNS: 'common',
   // Hand-maintained namespace list. Add a new entry when shipping a new
   // page or shared chrome file (see plan: gentle-singing-torvalds).
-  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow', 'settings', 'comingSoon', 'styleguide'],
+  ns: ['common', 'layout', 'datepicker', 'login', 'operatorDashboard', 'inboxCommon', 'inboxList', 'inboxDetail', 'fieldIncidentDetail', 'submitReport', 'citizenAck', 'fieldQueue', 'auditLog', 'verifyFlow', 'settings', 'comingSoon', 'styleguide', 'chainSegment', 'citizenStatusTimeline'],
   // Stop i18next from trying to fetch /locales/{{lng}}/{{ns}}.json —
   // resources are bundled at build time via Vite's JSON import.
   partialBundledLanguages: true,

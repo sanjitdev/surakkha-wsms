@@ -1,0 +1,34 @@
+{
+  "header": {
+    "backToInbox": "← Back to inbox"
+  },
+  "loading": {
+    "title": "Loading chain segment…"
+  },
+  "title": "Full chain segment — {{count}} events",
+  "meta": {
+    "unknownActor": "—"
+  },
+  "empty": {
+    "heading": "No events yet",
+    "body": "This incident was created but no chain events have been emitted."
+  },
+  "verify": {
+    "button": "Verify",
+    "pending": "Verifying…",
+    "ok": "Verified",
+    "fail": "Failed"
+  },
+  "fullSegment": {
+    "button": "Independent verification",
+    "verifying": "Verifying… ({{current}}/{{total}})",
+    "verified": "Full chain verified {{timestamp}}",
+    "failed": "Chain anomaly — see banner"
+  },
+  "anomaly": {
+    "banner": "Chain anomaly detected on {{incident_id}} — escalate to Pia.",
+    "acknowledge": "Acknowledge",
+    "escalate": "Escalate to Pia",
+    "escalateDisabledTooltip": "Available in Phase 2 PHA dashboard"
+  }
+}

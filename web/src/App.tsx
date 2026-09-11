@@ -20,6 +20,10 @@
  *     /dashboard     → <OperatorDashboard />    (utility_operator)
  *     /inbox         → <InboxList />            (utility_operator)
  *     /inbox/:id     → <InboxDetail />          (utility_operator)
+ *     /incidents/:incident_id/chain
+ *                   → <IncidentChainSegmentPage /> (utility_operator, Batch 5)
+ *     /my-reports/:incident_id/timeline
+ *                   → <CitizenStatusTimeline />  (citizen, Batch 5)
  *     /verify-flow   → <VerifyFlow />           (utility_operator)
  *     /audit-log     → <AuditLog />             (utility_operator)
  *     /settings      → <Settings />             (utility_operator)
@@ -40,6 +44,8 @@ import { OperatorDashboard } from './pages/OperatorDashboard';
 import { StyleguidePage } from './pages/StyleguidePage';
 import { InboxList } from './pages/InboxList';
 import { InboxDetail } from './pages/InboxDetail';
+import { IncidentChainSegmentPage } from './pages/IncidentChainSegmentPage';
+import { CitizenStatusTimeline } from './pages/CitizenStatusTimeline';
 import { VerifyFlow } from './pages/VerifyFlow';
 import { AuditLog } from './pages/AuditLog';
 import { Settings } from './pages/Settings';
@@ -149,6 +155,8 @@ function RoutedSurface() {
         <Route path="/dashboard" element={<OperatorDashboard />} />
         <Route path="/inbox" element={<InboxList />} />
         <Route path="/inbox/:id" element={<InboxDetail />} />
+        <Route path="/incidents/:incident_id/chain" element={<IncidentChainSegmentPage />} />
+        <Route path="/my-reports/:incident_id/timeline" element={<CitizenStatusTimeline />} />
         <Route path="/verify-flow" element={<VerifyFlow />} />
         <Route path="/audit-log" element={<AuditLog />} />
         <Route path="/settings" element={<Settings />} />

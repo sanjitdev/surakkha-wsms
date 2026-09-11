@@ -1,0 +1,61 @@
+{
+  "header": {
+    "back": "← আমার রিপোর্ট"
+  },
+  "loading": {
+    "title": "অবস্থা লোড হচ্ছে…",
+    "ariaLabel": "আপনার রিপোর্টের অবস্থা লোড হচ্ছে"
+  },
+  "title": "অবস্থার টাইমলাইন",
+  "empty": {
+    "heading": "এখনও কোনো ইভেন্ট নেই",
+    "body": "হোম পেজ থেকে আপনার প্রথম রিপোর্ট জমা দিন।"
+  },
+  "time": {
+    "justNow": "এইমাত্র",
+    "minutesAgo_one": "{{count}} মিনিট আগে",
+    "minutesAgo_other": "{{count}} মিনিট আগে",
+    "hoursAgo_one": "{{count}} ঘণ্টা আগে",
+    "hoursAgo_other": "{{count}} ঘণ্টা আগে",
+    "daysAgo_one": "{{count}} দিন আগে",
+    "daysAgo_other": "{{count}} দিন আগে"
+  },
+  "event": {
+    "IncidentCreated": "রিপোর্ট গ্রহণ করা হয়েছে",
+    "TrustBandAssigned": "যাচাই সম্পন্ন",
+    "AssignedToTechnician": "ফিল্ড ক্রু নিযুক্ত",
+    "TechnicianEnRoute": "ফিল্ড ক্রু আসছে",
+    "TechnicianArrived": "ফিল্ড ক্রু পৌঁছেছে",
+    "DiagnosisSubmitted": "সমস্যা নির্ণয় করা হয়েছে",
+    "FixSubmitted": "মেরামত সম্পন্ন",
+    "ProofSubmitted": "ফিল্ড ক্রু কাজ সম্পন্ন রিপোর্ট করেছে",
+    "ProofAccepted": "মেরামত যাচাই সম্পন্ন",
+    "IncidentResolvedByAdmin": "সমাধান হিসেবে চিহ্নিত — অনুগ্রহ করে নিশ্চিত করুন",
+    "CitizenAckAccepted": "আপনি নিশ্চিত করেছেন: সমস্যা সমাধান ✓\uFE0E",
+    "CitizenAckRejected": "পুনরায় খোলা হচ্ছে",
+    "CitizenReopened": "পর্যালোচনার জন্য পুনরায় খোলা হয়েছে",
+    "CitizenAckWindowExpired": "বন্ধ হিসেবে চিহ্নিত (আমরা উত্তর পাইনি)",
+    "IncidentClosed": "রিপোর্ট বন্ধ"
+  },
+  "actionCall": {
+    "in-progress": {
+      "title": "আমরা আপনার রিপোর্ট পর্যালোচনা করছি",
+      "body": "সাধারণত ৩০ মিনিটের মধ্যে।"
+    },
+    "closure-ack": {
+      "title": "এটি কি সমাধান হয়েছে?",
+      "body": "ফিল্ড ক্রু সমস্যা সমাধান করলে ✓ চাপুন। কিছু ভুল থাকলে ✗ চাপুন।",
+      "confirm": "✓ হ্যাঁ, সমাধান হয়েছে",
+      "reopen": "✗ এখনও নয়"
+    },
+    "silent-closure": {
+      "title": "আমরা এটি বন্ধ হিসেবে চিহ্নিত করেছি",
+      "body": "আমরা উত্তর পাইনি। কিছু ভুল থাকলে ৩০ দিনের মধ্যে পুনরায় খুলতে পারেন।",
+      "reopen": "পুনরায় খুলুন"
+    },
+    "all-caught-up": {
+      "title": "সব আপ টু ডেট",
+      "body": "কিছু পরিবর্তন হলে আমরা আপনাকে জানাব।"
+    }
+  }
+}

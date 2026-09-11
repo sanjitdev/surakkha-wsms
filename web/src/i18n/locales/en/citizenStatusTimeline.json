@@ -1,0 +1,61 @@
+{
+  "header": {
+    "back": "← My reports"
+  },
+  "loading": {
+    "title": "Loading status…",
+    "ariaLabel": "Loading your report status"
+  },
+  "title": "Status timeline",
+  "empty": {
+    "heading": "No events yet",
+    "body": "Submit your first report from the home page."
+  },
+  "time": {
+    "justNow": "just now",
+    "minutesAgo_one": "{{count}} min ago",
+    "minutesAgo_other": "{{count}} min ago",
+    "hoursAgo_one": "{{count}} hr ago",
+    "hoursAgo_other": "{{count}} hr ago",
+    "daysAgo_one": "{{count}} day ago",
+    "daysAgo_other": "{{count}} days ago"
+  },
+  "event": {
+    "IncidentCreated": "Report received",
+    "TrustBandAssigned": "Verified",
+    "AssignedToTechnician": "Assigned to field crew",
+    "TechnicianEnRoute": "Field crew on the way",
+    "TechnicianArrived": "Field crew arrived",
+    "DiagnosisSubmitted": "Problem diagnosed",
+    "FixSubmitted": "Repair completed",
+    "ProofSubmitted": "Field crew reports work complete",
+    "ProofAccepted": "Repair verified",
+    "IncidentResolvedByAdmin": "Marked resolved — please confirm",
+    "CitizenAckAccepted": "You confirmed: issue resolved ✓\uFE0E",
+    "CitizenAckRejected": "Reopening",
+    "CitizenReopened": "Reopened for review",
+    "CitizenAckWindowExpired": "Marked closed (we haven't heard back)",
+    "IncidentClosed": "Report closed"
+  },
+  "actionCall": {
+    "in-progress": {
+      "title": "We're reviewing your report",
+      "body": "Usually within 30 min."
+    },
+    "closure-ack": {
+      "title": "Is this resolved?",
+      "body": "Tap ✓ if the field crew fixed the issue. Tap ✗ if something's still wrong.",
+      "confirm": "✓ Yes, fixed",
+      "reopen": "✗ Not yet"
+    },
+    "silent-closure": {
+      "title": "We marked this closed",
+      "body": "We hadn't heard back. If something's still wrong, you can reopen within 30 days.",
+      "reopen": "Reopen"
+    },
+    "all-caught-up": {
+      "title": "All caught up",
+      "body": "We'll message you when something changes."
+    }
+  }
+}
