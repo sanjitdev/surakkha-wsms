@@ -18,7 +18,29 @@ phases:
       - citizen-status-timeline
       - hotline-intake-modal
       - per-incident-chain-segment-viewer
-  ux-design: not-started
+  ux-design: complete
+    lockdown-reconciliation:
+      signed-off: 2026-09-11
+      audit: docs/D-UX-Design/decisions/00-lockdown-audit.md
+      foundation: docs/D-UX-Design/01-design-system-foundation.md (lockdown-bound)
+      token-bridge: web/mockups/theme.css (additive lockdown tokens)
+      decisions:
+        - t1-trust-band-inversion-accepted
+        - closure-confetti-removed
+        - hindi-locale-removed
+        - shadcn-ui-adopted
+        - token-names-kept-lockdown-hexes
+    specs:
+      tier-1: 3 # gap screens
+      tier-2: 5 # load-bearing existing pages
+      tier-3: 9 # light infrastructure pages
+      total: 17
+      lines: 3428
+    migration-plan:
+      tier-1: 3 new builds + chain-verify utility
+      tier-2: 95-step plan across 5 PRs (114 reconciliation items: 24 OK / 57 MINOR / 26 MEDIUM / 7 MAJOR)
+      tier-3: 5 MAJOR items flagged for fix
+    open-questions: 37
   development: not-started
 
 output-folder: docs
