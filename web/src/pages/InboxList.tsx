@@ -149,22 +149,27 @@ export function InboxList() {
       {
         key: 'severity-dot',
         header: tInbox('columns.severityDot'),
-        render: (r) => (
-          <span
-            className="row-severity-dot"
-            style={{
-              background:
-                r.severity === 'T3'
-                  ? 'var(--danger)'
-                  : r.severity === 'T2'
-                    ? 'var(--warning)'
-                    : r.severity === 'T1'
-                      ? 'var(--info)'
-                      : 'var(--band-medium)',
-            }}
-            aria-hidden="true"
-          />
-        ),
+        render: (r) => {
+          // Lockdown cascade 2026-09-11: severity dot uses the lockdown
+          // palette per inbox-list.md #1 / inbox-rail.md. T3 in operator
+          // chrome is amber-bright (NOT alert-red-reserved); alert-red is
+          // reserved for the consumer-notice issuance path.
+          const sevClass =
+            r.severity === 'T3'
+              ? 'is-t3'
+              : r.severity === 'T2'
+                ? 'is-t2'
+                : r.severity === 'T1'
+                  ? 'is-t1'
+                  : 'is-t0';
+
+          return (
+            <span
+              className={`row-severity-dot ${sevClass}`}
+              aria-hidden="true"
+            />
+          );
+        },
         className: 'col-warn',
       },
       {
@@ -281,7 +286,7 @@ export function InboxList() {
           <FilterChip
             label={tInbox('filters.t3Urgent')}
             count={chipCounts.T3}
-            dotColor="var(--danger)"
+            dotColor="var(--color-amber-bright)"
             active={filter === 'T3'}
             onClick={() => {
               setFilter('T3');
@@ -413,7 +418,7 @@ export function InboxList() {
                 >
                   {tInbox('bulkBar.markReviewed')}
                 </Button>
-                <Button variant="danger" size="sm" disabled>
+                <Button variant="secondary" size="sm" disabled>
                   {tInbox('bulkBar.archive')}
                 </Button>
               </div>

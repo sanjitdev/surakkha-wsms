@@ -1,0 +1,355 @@
+/* ════════════════════════════════════════════════════════════════════
+   lockdown-bridge.css — Phase 5 Batch 3 (lockdown cascade 2026-09-11)
+
+   This file is the token-bridge layer between the legacy Surakkha
+   tokens and the bmad design lockdown tokens per
+   `docs/D-UX-Design/decisions/01-token-deconfliction-plan.md`.
+
+   Strategy: existing component CSS continues to reference legacy
+   tokens (--brand-*, --danger, --warning, --info, --band-*). This
+   file overrides those legacy values INSIDE the legacy classes so the
+   visual contract changes for new tokens without requiring a wholesale
+   rewrite of every component file.
+
+   Lockdown rule reminders (foundation §1.1 / §1.2 / §7.1):
+     - --color-alert-red-reserved is reserved for the T3+ consumer-notice
+       issuance path only. Operator-readable T3 surfaces use
+       --color-amber-bright (large UI dot) or --color-amber (badge).
+     - T1 = divider neutral --color-trust-t1 (NOT sky-blue).
+     - --color-primary (#0F4C5C deep teal) is the canonical primary CTA
+       colour; --brand-500 is the legacy alias.
+
+   Loaded once from web/src/main.tsx after theme.css.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Severity-dot T3 in operator surfaces ─────────────────────────
+   Replaces legacy --danger (which mapped to alert-red-reserved) on
+   large UI dots. Alert-red stays reserved for the issuance modal.
+
+   scope: .severity-dot--t3 (used in OperatorDashboard + InboxRow).
+   Reference: inbox-rail.md #1, operator-dashboard.md #4. */
+.severity-dot--t3 {
+  background: var(--color-amber-bright);
+  color: var(--fg-on-status-dark, #0E1013);
+}
+/* Legacy alias — operators using `className="severity-dot t3"` keep
+   working. The legacy T3 dot literal was `var(--danger)`. */
+.severity-dot.t3,
+.row-severity-dot.t3,
+.severity-dot[data-severity='t3'] {
+  background: var(--color-amber-bright);
+}
+
+/* ── 2. Severity-dot T1 — sky-blue inversion to divider neutral ───────
+   Legacy --info mapped to sky-blue. Lockdown §4.1 / audit §B.1
+   invert this: T1 = divider neutral --color-trust-t1.
+
+   Reference: inbox-rail.md #3. */
+.severity-dot--t1,
+.severity-dot.t1,
+.row-severity-dot.t1,
+.severity-dot[data-severity='t1'] {
+  background: var(--color-trust-t1);
+}
+
+/* ── 3. Severity-dot T2 / T0 — amber / divider neutral ────────────── */
+.severity-dot--t2,
+.severity-dot.t2,
+.row-severity-dot.t2,
+.severity-dot[data-severity='t2'] {
+  background: var(--color-amber);
+}
+.severity-dot--t0,
+.severity-dot.t0,
+.row-severity-dot.t0,
+.severity-dot[data-severity='t0'] {
+  background: var(--color-divider);
+}
+
+/* ── 4. Trust band badge — additive variant classes ──────────────────
+   Add these to .band-pill--high / --medium / --low and lock them to
+   the lockdown palette via custom-property overrides so existing
+   consumers (InboxRow, OperatorDashboard) render with the lockdown
+   hexes when paired with the LOCKED modifier.
+
+   Reference: operator-dashboard.md #10, audit-log.md #5. */
+.band-pill--high.is-locked {
+  background: var(--color-trust-t1);
+  color: var(--color-ink);
+  border: 1px solid var(--color-divider);
+}
+.band-pill--medium.is-locked {
+  background: var(--color-trust-t2);
+  color: var(--color-surface);
+}
+.band-pill--low.is-locked {
+  background: var(--color-trust-t3-issuance);
+  color: var(--color-surface);
+}
+
+/* ── 5. Chart colour aliases — addon for KPI / donut / 24h trend ────
+   Operators using --band-high/--band-medium/--band-low on the
+   operator-dashboard charts get auto-aliased to --color-trust-t*
+   without touching the underlying chart component.
+
+   Reference: operator-dashboard.md #13/#20. */
+.chart-swatch--high { background: var(--color-trust-t2); }
+.chart-swatch--medium { background: var(--color-trust-t1); }
+.chart-swatch--low { background: var(--color-divider); }
+.chart-line--verified { stroke: var(--color-safe-green); }
+.chart-line--primary { stroke: var(--color-primary); }
+.chart-line--warn { stroke: var(--color-amber); }
+
+/* ── 6. Input focus ring — swap to --color-primary-tint ─────────────
+   override every form-control focus rule used by the Tier 2 surfaces.
+
+   Reference: operator-dashboard.md #14. */
+.input:focus,
+.search-input:focus,
+textarea:focus,
+.input--search:focus,
+.input--with-icon:focus {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+
+/* ── 7. Audit-log row anomaly dot ───────────────────────────────────
+   Audit-log.md #6: ChainAnomalyDetected → alert-red-reserved (issuance
+   path). Operator error events use --color-status-warn (amber).
+
+   Reference: audit-log.md #6. */
+.audit-row--anomaly {
+  border-left: 3px solid var(--color-alert-red-reserved);
+}
+.audit-row--error {
+  border-left: 3px solid var(--color-status-warn);
+}
+
+/* ── 8. FieldQueue priority chip — re-bind P1 to alert-red IS reserved
+   for the issuance path but P1 in this surface means "high-priority
+   dispatch", not issuance. Per field-queue.md #3, P1/P2/P3 are a
+   separate dimension from trust-band tier. The dispatch P1 colour
+   should be a non-reserved "high urgency" indicator (amber-bright),
+   NOT alert-red.
+
+   Reference: field-queue.md #3. */
+.tech-job__priority--p1 {
+  background: var(--color-amber-bright);
+  color: var(--fg-on-status-dark, #0E1013);
+}
+.tech-job__priority--p2 {
+  background: var(--color-amber);
+  color: var(--color-surface);
+}
+
+/* ── 9. Reporter-badge inline chips (anchor/hotline/webform/sensor) ──
+   These mirrors the .badge--reporter-* classes already defined in
+   inbox.css; this section gives them an additional inline variant for
+   use in row-byline contexts.
+
+   Reference: inbox-list.md #3, operator-dashboard.md #9. */
+.chip-reporter-anchor { color: var(--color-reporter-anchor); }
+.chip-reporter-hotline { color: var(--color-reporter-hotline); }
+.chip-reporter-webform { color: var(--color-reporter-webform); }
+.chip-reporter-sensor { color: var(--color-reporter-sensor); }
+
+/* ── 10. Glyph + text redundancy for existing band badge ─────────────
+   If a component renders an existing .band-pill--high/medium/low but
+   also wants the lockdown §4.1 glyph next to the text, the
+   .with-glyph modifier adds it inline.
+
+   Reference: operator-dashboard.md #10, audit-log.md #5. */
+.band-pill.with-glyph {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.band-pill.with-glyph::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  font-size: var(--font-size-md);
+  line-height: 1;
+}
+.band-pill--high.with-glyph::before { content: '\u25D4'; } /* ◔ */
+.band-pill--medium.with-glyph::before { content: '\u25D1'; } /* ◑ */
+.band-pill--low.with-glyph::before { content: '\u25CF'; } /* ● */
+
+/* ── 11. FieldQueue active-state indicator ─────────────────────────
+   field-queue.md #20: --brand-500 active state → --color-primary.
+
+   Reference: field-queue.md #20. */
+.tech-chip.is-on,
+.tech-job.is-active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-surface);
+}
+
+/* ── 12. Operator-dashboard chart line + status colour mapping ────── */
+.chart-line--ok { stroke: var(--color-safe-green); }
+.chart-line--alert { stroke: var(--color-alert-red-reserved); }
+.chart-line--primary { stroke: var(--color-primary); }
+.chart-bar--t3 { background: var(--color-amber-bright); }
+.chart-bar--t2 { background: var(--color-amber); }
+.chart-bar--t1 { background: var(--color-trust-t1); }
+.chart-bar--t0 { background: var(--color-divider); }
+
+/* ── 13. Bangla-aware row block-padding for Tier 2 surfaces ─────────
+   Already declared in inbox.css §Bangla row block-padding for the
+   inbox data-table--inbox; this mirrors the same amendment for
+   `data-table--audit` + `data-table--audit` rows so audit-log row
+   block-padding matches in bn locale.
+   ──────────────────────────────────────────────────────────────────── */
+[data-locale='bn'] .data-table--audit tr td {
+  padding-block: calc(var(--space-md) + var(--space-xs));
+}
+
+/* ── 14. Audit-log copy-button hover/focus → --color-primary-tint ──
+   Reference: audit-log.md #20 / #22 (chain ref presentation).
+   ──────────────────────────────────────────────────────────────────── */
+.audit-copy:hover {
+  border-color: var(--color-primary-tint);
+  color: var(--color-primary-tint);
+}
+.audit-copy:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+
+/* ── 15. Sidebar unread-count badge ────────────────────────────────
+   The sidebar uses `var(--danger)` for unread count chips. These are
+   notification counts, NOT the issuance path. The bridge re-aliases
+   to --color-amber-bright (operator-readable alert) so alert-red
+   stays reserved for issuance path surfaces.
+   ──────────────────────────────────────────────────────────────────── */
+.sidebar__badge {
+  background: var(--color-amber-bright);
+  color: var(--fg-on-status-dark, #0E1013);
+}
+
+/* ── 16. Sidebar active link colour → --color-primary ─────────────
+   Per foundation §3.2 the sidebar's active-state indicator uses
+   --color-primary (deep teal) per the lockdown palette.
+   ──────────────────────────────────────────────────────────────────── */
+.sidebar__link.active,
+.sidebar__link.active .sidebar__icon {
+  color: var(--color-primary);
+}
+.sidebar__link.active {
+  box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+/* ── 17. Row urgent (T3) border-bottom on inbox rows ──────────────
+   audit-log.md / inbox-list.md: T3 row's bottom-border used
+   --danger which mapped to alert-red. Re-alias to amber-bright so
+   the operator-readable row-urgent marker doesn't burn alert-red.
+   ──────────────────────────────────────────────────────────────────── */
+.data-table--inbox tr.row-urgent td {
+  border-bottom-color: var(--color-amber-bright);
+}
+
+/* ── 18. KPI delta indicators → lockdown status palette ───────────
+   Reference: operator-dashboard.md #3.
+   .kpi__delta--up → --color-safe-green
+   .kpi__delta--down → --color-status-warn (amber; only operator
+   error patterns; alert-red is reserved for issuance path)
+   ──────────────────────────────────────────────────────────────────── */
+.kpi__delta--up { color: var(--color-safe-green); }
+.kpi__delta--down { color: var(--color-status-warn); }
+.kpi__delta--alert { color: var(--color-alert-red-reserved); }
+
+/* ── 19. Handover brief / signature-step active ───────────────────
+   .handover-brief strong.is-t3 → amber-bright (operator-readable).
+   .handover-brief strong.is-t2 → amber (lockdown T2).
+   .handover-brief strong.is-t1 → divider neutral.
+   ──────────────────────────────────────────────────────────────────── */
+.handover-brief strong.is-t3 { color: var(--color-amber-bright); }
+.handover-brief strong.is-t2 { color: var(--color-amber); }
+.handover-brief strong.is-t1 { color: var(--color-trust-t1); }
+.signature-step--active .signature-step__status { color: var(--color-amber); }
+.signature-step--active .signature-step__dot { background: var(--color-amber); }
+
+/* ── 20. Row-severity-dot in inbox row ────────────────────────────
+   Inbox row's severity dot binds to --danger / --warning / --info.
+   Re-alias per lockdown: T3 → amber-bright, T2 → amber, T1 →
+   divider neutral, T0 → divider neutral.
+   ──────────────────────────────────────────────────────────────────── */
+.row-severity-dot.is-t3 { background: var(--color-amber-bright); }
+.row-severity-dot.is-t2 { background: var(--color-amber); }
+.row-severity-dot.is-t1 { background: var(--color-trust-t1); }
+.row-severity-dot.is-t0 { background: var(--color-divider); }
+.row-severity-dot.is-error { background: var(--color-status-warn); }
+.row-severity-dot.is-ok { background: var(--color-safe-green); }
+.row-severity-dot.is-anomaly { background: var(--color-alert-red-reserved); }
+
+/* ── 21. Verify-flow active step + bullet colour ───────────────────
+   --brand-500 (operator verify step accents) → --color-primary.
+   Reference: verify-flow spec (Tier 3, dim 5 §verify-lockdown).
+   ──────────────────────────────────────────────────────────────────── */
+.verify-step--active {
+  border-color: var(--color-primary-tint);
+  background: color-mix(in srgb, var(--color-primary) 6%, var(--bg-surface));
+}
+.verify-step--active .verify-step__num,
+.verify-step--active .verify-step__icon,
+.verify-step__bullets li::before {
+  color: var(--color-primary);
+  background-color: var(--color-primary);
+}
+.verify-step__icon {
+  color: var(--color-primary);
+}
+
+/* ── 22. Owner-avatar dot (reporter / tech / system / vendor) ────────
+   Aliases the inline-style background values used in InboxList.tsx
+   .avatar-dot — keeps owner Kind distinguishable with the lockdown
+   palette without forcing a className refactor.
+
+     reporter  → --color-safe-green (verified citizen)
+     tech      → --color-primary    (deep teal)
+     system    → --fg-tertiary      (neutral)
+     vendor    → --color-amber      (third-party)
+     (default) → --color-primary
+   ──────────────────────────────────────────────────────────────────── */
+.avatar-dot.owner-kind-reporter { background: var(--color-safe-green); }
+.avatar-dot.owner-kind-tech { background: var(--color-primary); }
+.avatar-dot.owner-kind-system { background: var(--fg-tertiary); }
+.avatar-dot.owner-kind-vendor { background: var(--color-amber); }
+.avatar-dot.owner-kind-default { background: var(--color-primary); }
+
+/* ── 23. SeverityRail Hbar widths ───────────────────────────────────
+   Hbar bars in InboxRail are colored via inline style
+   `var(--danger)` / `var(--warning)` / `var(--info)` / `var(--band-medium)`.
+   The bridge file applies same lockdown palette via .severity-bar-t*
+   modifier classes (recommended for new code).
+   ──────────────────────────────────────────────────────────────────── */
+.severity-bar-t3 { background: var(--color-amber-bright); }
+.severity-bar-t2 { background: var(--color-amber); }
+.severity-bar-t1 { background: var(--color-trust-t1); }
+.severity-bar-t0 { background: var(--color-divider); }
+
+/* ── 24. Two-tap armed button + toggle-switch slider ────────────────
+   Re-aliases legacy --brand-500 primary CTA surfaces to --color-primary
+   per operator-dashboard.md #20.
+   ──────────────────────────────────────────────────────────────────── */
+.two-tap__btn.is-armed {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.toggle-switch input:checked + .toggle-switch__slider {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ── 25. Verify-step done → safe-green (resolved) ──────────────────
+   .verify-step--done (border-color) maps to --color-safe-green.
+   ──────────────────────────────────────────────────────────────────── */
+.verify-step--done {
+  border-color: var(--color-safe-green);
+}
+.verify-step--done .verify-step__num {
+  color: var(--color-safe-green);
+}

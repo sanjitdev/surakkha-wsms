@@ -46,12 +46,16 @@ interface SevProps {
 }
 export function SeverityRail({ T3, T2, T1, T0, total }: SevProps) {
   const { t } = useTranslation('inboxCommon');
+  // Lockdown cascade 2026-09-11: Hbar colours map to lockdown palette.
+  // T3 in operator chrome is amber-bright (NOT alert-red-reserved);
+  // alert-red is reserved for the consumer-notice issuance path.
+  // T1 = divider neutral (not legacy sky-blue --info).
   return (
     <Card heading={t('severityRail.heading')}>
-      <Hbar label={t('severityRail.t3')} value={T3} total={total} colour="var(--danger)" />
-      <Hbar label={t('severityRail.t2')} value={T2} total={total} colour="var(--warning)" />
-      <Hbar label={t('severityRail.t1')} value={T1} total={total} colour="var(--info)" />
-      <Hbar label={t('severityRail.t0')} value={T0} total={total} colour="var(--band-medium)" last />
+      <Hbar label={t('severityRail.t3')} value={T3} total={total} colour="var(--color-amber-bright)" />
+      <Hbar label={t('severityRail.t2')} value={T2} total={total} colour="var(--color-amber)" />
+      <Hbar label={t('severityRail.t1')} value={T1} total={total} colour="var(--color-trust-t1)" />
+      <Hbar label={t('severityRail.t0')} value={T0} total={total} colour="var(--color-divider)" last />
     </Card>
   );
 }
@@ -67,8 +71,7 @@ export function AwaitingActionRail({ rows }: { rows: InboxRow[] }) {
             <tr key={r.id}>
               <td className="col-warn">
                 <span
-                  className="row-severity-dot"
-                  style={{ background: r.severity === 'T3' ? 'var(--danger)' : 'var(--warning)' }}
+                  className={`row-severity-dot ${r.severity === 'T3' ? 'is-t3' : 'is-t2'}`}
                 />
               </td>
               <td>

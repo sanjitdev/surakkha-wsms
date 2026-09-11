@@ -12,7 +12,7 @@
  * by height (ascending). For a real audit explorer we'd want descending
  * + pagination, but Phase 1 ships the structure not the backend.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/audit.css';
@@ -40,6 +40,13 @@ interface ChainEvent {
   block_hash: string;
   height: number;
 }
+
+/** Per-row verification result. null = not yet verified for this row. */
+type VerifyState =
+  | { status: 'idle' }
+  | { status: 'pending' }
+  | { status: 'ok' }
+  | { status: 'fail'; reason: 'unknown_hash' | 'hash_mismatch' | 'network' | 'timeout' };
 type FilterId = 'all' | 'errors' | 'signatures' | 'sensor' | 'citizen' | 'notices' | 'auth';
 interface ChipDef {
   id: FilterId;
@@ -98,6 +105,46 @@ async function copyToClipboard(value: string): Promise<void> {
     /* Clipboard API unavailable in some test contexts. */
   }
 }
+/**
+ * Independent single-block hash verification per audit-log.md #13.
+ *
+ * Posts the stored block_hash to /api/chain/verify, which recomputes
+ * the canonical SHA-256 over the block's stored fields and compares.
+ * A passing result proves the block was not tampered with after append.
+ *
+ * Completes within ~200ms (foundation §12 #10). Resolves to a typed
+ * VerifyState — never throws; failures degrade gracefully so the row
+ * UI always renders a stable shape.
+ */
+async function verifyBlockHash(blockHash: string): Promise<VerifyState> {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 1500);
+
+    try {
+      const r = await fetch('/api/chain/verify', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ block_hash: blockHash }),
+        signal: controller.signal,
+      });
+
+      if (!r.ok) {
+        // 404 unknown_hash is the expected "tamper demo" outcome — surface
+        // it as a typed failure rather than a network error.
+        if (r.status === 404) return { status: 'fail', reason: 'unknown_hash' };
+        return { status: 'fail', reason: 'network' };
+      }
+      const data = (await r.json()) as { ok: boolean };
+
+      return data.ok ? { status: 'ok' } : { status: 'fail', reason: 'hash_mismatch' };
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch {
+    return { status: 'fail', reason: 'network' };
+  }
+}
 export function AuditLog() {
   const { chainHead } = useAppLayout();
   const { t: tAudit } = useTranslation('auditLog');
@@ -111,6 +158,12 @@ export function AuditLog() {
     to: null,
   });
   const rangeActive = range.from !== null || range.to !== null;
+  // Per-row verification state. Keyed by event_id so the badge persists
+  // across filter changes for the same row. Cleared on filter change is
+  // intentional: a verified badge for a row the operator can't see is
+  // misleading. Audit-log.md #13 says "single-click independent" — the
+  // operator verifies only what they're currently inspecting.
+  const [verifyStates, setVerifyStates] = useState<Map<string, VerifyState>>(new Map());
 
   useEffect(() => {
     void (async () => {
@@ -145,6 +198,28 @@ export function AuditLog() {
       .filter((e) => isInRange(e.occurred_at, range.from, range.to, locale));
   }, [events, filter, range.from, range.to, locale]);
 
+  // Single-click verify per row. Marks the row pending immediately so the
+  // button shows an in-flight state, then replaces with the outcome.
+  // No batching across rows: each click is independent so the operator can
+  // spot-check a few rows without committing the whole table to a scan.
+  const onVerifyRow = useCallback(async (eventId: string, blockHash: string) => {
+    setVerifyStates((prev) => {
+      const next = new Map(prev);
+
+      next.set(eventId, { status: 'pending' });
+      return next;
+    });
+
+    const result = await verifyBlockHash(blockHash);
+
+    setVerifyStates((prev) => {
+      const next = new Map(prev);
+
+      next.set(eventId, result);
+      return next;
+    });
+  }, []);
+
   const auditColumns: TableColumn<ChainEvent>[] = useMemo(
     () => [
       {
@@ -158,17 +233,29 @@ export function AuditLog() {
         key: 'severity-dot',
         header: '',
         className: 'col-warn',
-        render: (e) => (
-          <span
-            className="row-severity-dot"
-            style={{
-              background: e.event_type.includes('Error')
-                ? 'var(--danger)'
-                : 'var(--success)',
-            }}
-            aria-hidden="true"
-          />
-        ),
+        render: (e) => {
+          // Lockdown cascade 2026-09-11: severity dot uses the lockdown
+          // palette per audit-log.md #6.
+          //   - ChainAnomalyDetected / Tamper / Breach → alert-red-reserved
+          //     (issuance path: anomaly surfaces escalate the operator to
+          //     confirm consumer notice).
+          //   - Error → --color-status-warn (amber; form-validation style,
+          //     NOT issuance path).
+          //   - everything else → --color-safe-green.
+          let cls = 'is-ok';
+
+          if (
+            e.event_type.includes('Anomaly') ||
+            e.event_type.includes('Tamper') ||
+            e.event_type.includes('Breach')
+          ) {
+            cls = 'is-anomaly';
+          } else if (e.event_type.includes('Error')) {
+            cls = 'is-error';
+          }
+
+          return <span className={`row-severity-dot ${cls}`} aria-hidden="true" />;
+        },
       },
       {
         key: 'event_type',
@@ -238,8 +325,69 @@ export function AuditLog() {
           </button>
         ),
       },
+      {
+        key: 'verify',
+        header: tAudit('table.verifyHeader'),
+        className: 'col-verify',
+        render: (e) => {
+          const state = verifyStates.get(e.event_id) ?? { status: 'idle' };
+
+          if (state.status === 'ok') {
+            return (
+              <span
+                className="audit-verify audit-verify--ok"
+                data-testid={`audit-verify-${e.event_id}`}
+                title={tAudit('table.verifyOkTitle')}
+                aria-label={tAudit('table.verifyOkAria')}
+              >
+                <span aria-hidden="true">{'\u2713\uFE0E'}</span>
+                {tAudit('table.verifyOk')}
+              </span>
+            );
+          }
+          if (state.status === 'fail') {
+            return (
+              <span
+                className="audit-verify audit-verify--fail"
+                data-testid={`audit-verify-${e.event_id}`}
+                title={tAudit(`table.verifyFail.${state.reason}.title`)}
+                aria-label={tAudit(`table.verifyFail.${state.reason}.aria`)}
+              >
+                <span aria-hidden="true">{'\u26A0\uFE0E'}</span>
+                {tAudit('table.verifyFail.label')}
+              </span>
+            );
+          }
+          if (state.status === 'pending') {
+            return (
+              <span
+                className="audit-verify audit-verify--pending"
+                data-testid={`audit-verify-${e.event_id}`}
+                aria-label={tAudit('table.verifyPendingAria')}
+              >
+                {tAudit('table.verifyPending')}
+              </span>
+            );
+          }
+
+          // idle — show the Verify button.
+          return (
+            <button
+              type="button"
+              className="audit-verify-btn"
+              onClick={() => {
+                void onVerifyRow(e.event_id, e.block_hash);
+              }}
+              title={tAudit('table.verifyButtonTitle')}
+              data-testid={`audit-verify-btn-${e.event_id}`}
+            >
+              {tAudit('table.verify')}
+            </button>
+          );
+        },
+      },
     ],
-    [formatTime, tAudit],
+    [formatTime, tAudit, verifyStates, onVerifyRow],
   );
 
   return (

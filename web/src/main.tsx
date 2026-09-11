@@ -16,7 +16,12 @@ import { I18nextProvider } from 'react-i18next';
 // Global styles — the lockdown tokens live here. Importing theme.css
 // from `mockups/` means the React app and the static mockups share
 // one source of truth for color, typography, spacing.
+//
+// lockdown-bridge.css (Phase 5 Batch 3, 2026-09-11) overlays the
+// legacy token system onto the lockdown palette per
+// `docs/D-UX-Design/decisions/01-token-deconfliction-plan.md`.
 import '../mockups/theme.css';
+import './styles/lockdown-bridge.css';
 import './styles/app.css';
 import i18n from './i18n';
 import { App } from './App';

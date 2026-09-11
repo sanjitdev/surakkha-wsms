@@ -226,7 +226,9 @@ export function FieldQueuePage() {
           <span
             className="tech-today__val"
             style={{
-              color: rows.some((r) => r.timeIsOverdue && !r.isDone) ? 'var(--danger)' : undefined,
+              // Lockdown cascade 2026-09-11: overdue is operator-readable
+              // (amber-bright), NOT alert-red-reserved.
+              color: rows.some((r) => r.timeIsOverdue && !r.isDone) ? 'var(--color-amber-bright)' : undefined,
             }}
           >
             {rows.filter((r) => r.timeIsOverdue && !r.isDone).length}
@@ -311,7 +313,7 @@ export function FieldQueuePage() {
             <span
               style={{
                 fontFamily: 'var(--font-family-mono)',
-                color: r.isActive ? 'var(--brand-500)' : 'var(--fg-tertiary)',
+                color: r.isActive ? 'var(--color-primary)' : 'var(--fg-tertiary)',
               }}
             >
               {r.isDone ? '↗' : '→'}
