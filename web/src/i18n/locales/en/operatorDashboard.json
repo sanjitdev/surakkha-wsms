@@ -37,9 +37,9 @@
       "unit": "min"
     },
     "pendingSignatures": {
-      "label": "Pending signatures",
-      "shortLabel": "Pending sigs",
-      "unit": "awaiting"
+      "label": "Attestations logged",
+      "shortLabel": "Attestations",
+      "unit": "today"
     },
     "noticesIssued": {
       "label": "Notices issued",
@@ -173,7 +173,20 @@
       "colOpened": "Opened",
       "colSeverity": "Sev.",
       "openAction": "Open →"
-    }
+    },
+    "openAll": "Open {{count}} ranked in inbox",
+    "emptyTitle": "Nothing waiting on you",
+    "emptyBody": "Auto-routed work is collapsed to the right of the page header. Pull on it when you want a closer look."
+  },
+  "bandAriaLabel": {
+    "t1": "Trust band T1, not yet verified",
+    "t2": "Trust band T2, verified",
+    "t3": "Trust band T3, high priority",
+    "resolved": "Trust band, resolved"
+  },
+  "errorBanner": {
+    "message": "Couldn't reach the chain ({{detail}}). Showing the last-known data if any.",
+    "retry": "Retry"
   },
   "wards": {
     "chart": {

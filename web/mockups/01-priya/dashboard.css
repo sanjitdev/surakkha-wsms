@@ -361,29 +361,47 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 }
 .handover-list__action:hover { color: var(--brand-600); }
 
-/* ── Data table (multi-column rows with header) ───────────────── */
+/* ── Data table (multi-column rows with header) ─────────────────
+   The <Table> B5b primitive renders <th class="table__header-cell">;
+   the consumer wraps it with className="data-table". Without this
+   override, the more-specific .data-table th rule below was clobbering
+   table.css's polished header treatment (10 px mono uppercase tracked
+   tertiary-color) — that's the "awful headers" complaint. The values
+   here align with .table__header-cell so both selectors render the
+   same chunky, easy-to-scan header band. */
 .data-table {
+  /* Wrapper <div> around <Table>. The .table set in src/styles/table.css
+     owns table-level layout (width, table-layout); this just lets the
+     wrapper inherit the body font-size so any <th>/<td> that fall through
+     to defaults still match the page scale. */
   width: 100%;
-  border-collapse: collapse;
   font-size: var(--font-size-sm);
-  table-layout: fixed;
 }
 .data-table th {
+  /* Match .table__header-cell from src/styles/table.css. The cascade
+     still wins on .col-* cells (those target <td>) so dashboard
+     column widths keep working untouched. */
+  height: var(--height-control-md);
+  padding: 0 var(--space-md);
   text-align: left;
-  font-family: var(--font-family-mono);
-  font-size: 10px;
+  font-family: var(--font-family-sans);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--fg-tertiary);
-  padding: var(--space-xs) var(--space-sm);
-  border-bottom: 1px solid var(--border-subtle);
+  letter-spacing: 0.04em;
+  color: var(--fg-secondary);
+  background: var(--bg-elevated);
+  border-bottom: 1px solid var(--border-default);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  user-select: none;
 }
 .data-table td {
-  padding: var(--space-sm) var(--space-sm);
+  /* Borderless table (per ui-ux-pro-max Minimalism pass): the
+     surrounding Card owns the framing; rows inside are separated by
+     hairline --border-subtle only. The visual heaviness came from
+     stacking: card border + table outer border + per-row divider —
+     stripping both restores Swiss-grid breathing room. */
+  padding: var(--space-md) var(--space-md);
   border-bottom: 1px solid var(--border-subtle);
   vertical-align: middle;
   font-size: var(--font-size-sm);
@@ -392,6 +410,20 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   text-overflow: ellipsis;
 }
 .data-table tr:last-child td { border-bottom: none; }
+/* Subtle zebra — alternating --bg-inset tint on even rows keeps long
+   scan lines legible without screaming. Header band still wins because
+   it sits on --bg-elevated, which is one step darker than --bg-inset. */
+.data-table tbody tr:nth-child(even) td { background: var(--bg-inset); }
+/* Hover tint only — no rail. Earlier revisions added a 2 px inset
+   brand rail, but in a borderless design the rail read as a bordering
+   edge and broke the "clean row" feel. The --bg-elevated tint alone is
+   enough affordance for "this row" without drawing a new line. */
+.data-table tbody tr {
+  transition: background-color var(--motion-press-120) var(--ease-out);
+}
+.data-table tbody tr:hover td {
+  background: var(--bg-elevated);
+}
 .data-table .col-time    { width: 56px; font-family: var(--font-family-mono); color: var(--fg-tertiary); font-size: var(--font-size-xs); white-space: nowrap; }
 .data-table .col-status  { width: 64px; white-space: nowrap; }
 .data-table .col-action  { width: 96px; text-align: right; }
@@ -418,6 +450,13 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   align-items: baseline;
   margin-bottom: var(--space-md);
 }
+.data-card__head--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
 .data-card__title {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
@@ -428,6 +467,24 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   color: var(--fg-tertiary);
   font-family: var(--font-family-mono);
 }
+/* Issue #11: discoverable inbox link inside the threads card */
+.data-card__foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--space-sm) var(--space-lg);
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+.data-card__foot-link {
+  font-size: var(--font-size-sm);
+  color: var(--brand-500);
+  text-decoration: none;
+  font-weight: var(--font-weight-medium);
+}
+.data-card__foot-link:hover { color: var(--brand-600); }
+[data-theme="dark"] .data-card__foot-link { color: var(--brand-400); }
+[data-theme="dark"] .data-card__foot-link:hover { color: var(--brand-300, var(--brand-400)); }
 
 /* ── KPI unit (inline unit on the value) ─────────────────────── */
 .kpi__unit {
@@ -838,6 +895,103 @@ main[data-layout="c"] [data-layout-only="c"] {
 }
 [data-theme="dark"] .inbox-bulkbar__count { color: var(--fg-default); }
 .inbox-bulkbar__actions { display: flex; gap: var(--space-sm); }
+
+/* ── Error banner (Issue #1) ───────────────────────────────────── */
+.dashboard-error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  background: var(--warning-bg, rgba(233, 162, 59, 0.12));
+  border-bottom: 1px solid var(--color-amber, var(--warning));
+  color: var(--fg-default);
+  font-size: var(--font-size-sm);
+}
+.dashboard-error__retry {
+  margin-left: auto;
+  height: var(--height-control-md);
+  padding: 0 var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  font-family: inherit;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+.dashboard-error__retry:hover { background: var(--bg-subtle); }
+/* ── Empty state (Issue #12) ───────────────────────────────────── */
+.dashboard-empty {
+  text-align: center;
+  padding: var(--space-3xl) var(--space-xl);
+  color: var(--fg-secondary);
+}
+.dashboard-empty__title {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  margin: 0 0 var(--space-xs);
+  color: var(--fg-default);
+}
+.dashboard-empty__body {
+  font-size: var(--font-size-sm);
+  color: var(--fg-tertiary);
+  margin: 0;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* ── Focus rings (Issue #14) ───────────────────────────────────── */
+.tab:focus-visible,
+.layout-toggle__btn:focus-visible,
+.filter-chip:focus-visible,
+.data-card__foot-link:focus-visible {
+  outline: 2px solid var(--color-primary-tint, var(--brand-500));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+/* ── Utility: nowrap (Issue #23) ─────────────────────────────────── */
+.nowrap { white-space: nowrap; }
+
+/* ── Button icon (Issue #18) ──────────────────────────────────── */
+.button-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-right: var(--space-xs);
+}
+
+/* ── Chain event row (Issue #22) ───────────────────────────────── */
+.chain-event {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+.chain-event__icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+
+/* ── Reporter chip layout (Issue #28) ──────────────────────────── */
+.chip-reporter-anchor,
+.chip-reporter-hotline,
+.chip-reporter-webform,
+.chip-reporter-sensor {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 2px var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+.chip-reporter-anchor svg,
+.chip-reporter-hotline svg,
+.chip-reporter-webform svg,
+.chip-reporter-sensor svg {
+  flex-shrink: 0;
+}
 
 /* ── Pager (page footer) ───────────────────────────────────────── */
 .inbox-pager {

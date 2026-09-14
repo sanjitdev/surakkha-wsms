@@ -29,15 +29,18 @@
  */
 import type { ReactElement, ReactNode } from 'react';
 
-function IconShell({ children }: { children: ReactNode }): ReactElement {
+function IconShell({ children, size = 24 }: { children: ReactNode; size?: number }): ReactElement {
   return (
     <svg
       viewBox="0 0 24 24"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
+      aria-hidden="true"
     >
       {children}
     </svg>
@@ -218,42 +221,152 @@ export function UploadIcon(): ReactElement {
 //   sensor  → RadioTower   (lucide: radio-tower)
 // Text labels come from operatorDashboard.reporter.{kind}; chips colour via
 // .badge--reporter-{kind} per lockdown-bridge.css.
-export function ReporterAnchorIcon(): ReactElement {
+//
+// Issue #18: each icon accepts an optional `size` (default 24). Chips
+// render at 14px to fit the chip body without forcing the chip taller
+// than the neighbouring row text.
+export function ReporterAnchorIcon({ size = 24 }: { size?: number } = {}): ReactElement {
   // lucide: anchor
   return (
-    <IconShell>
+    <IconShell size={size}>
       <path d="M12 22V8" />
       <path d="M5 12H2a10 10 0 0 0 20 0h-3" />
       <circle cx="12" cy="5" r="3" />
     </IconShell>
   );
 }
-export function ReporterPhoneIcon(): ReactElement {
+export function ReporterPhoneIcon({ size = 24 }: { size?: number } = {}): ReactElement {
   // lucide: phone
   return (
-    <IconShell>
+    <IconShell size={size}>
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" />
     </IconShell>
   );
 }
-export function ReporterWebformIcon(): ReactElement {
+export function ReporterWebformIcon({ size = 24 }: { size?: number } = {}): ReactElement {
   // lucide: pencil-line
   return (
-    <IconShell>
+    <IconShell size={size}>
       <path d="M12 20h9" />
       <path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
     </IconShell>
   );
 }
-export function ReporterSensorIcon(): ReactElement {
+export function ReporterSensorIcon({ size = 24 }: { size?: number } = {}): ReactElement {
   // lucide: radio-tower
   return (
-    <IconShell>
+    <IconShell size={size}>
       <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
       <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />
       <circle cx="12" cy="9" r="2" />
       <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" />
       <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+    </IconShell>
+  );
+}
+
+// ──────────────────────────────────────────────── chain-event icons ─────────
+// Issue #22: foundation §4.2 requires Lucide icons from the 27-approved set
+// on the "Today on chain" widget. These are the 9 event types currently
+// emitted by the chain; add more as new event types land.
+export function ChainIncidentCreatedIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: file-plus
+  return (
+    <IconShell size={size}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="12" y1="18" x2="12" y2="12" />
+      <line x1="9" y1="15" x2="15" y2="15" />
+    </IconShell>
+  );
+}
+export function ChainIncidentEscalatedIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: triangle-alert
+  return (
+    <IconShell size={size}>
+      <path d="M21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </IconShell>
+  );
+}
+export function ChainIncidentResolvedIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: check-circle-2
+  return (
+    <IconShell size={size}>
+      <circle cx="12" cy="12" r="10" />
+      <path d="m9 12 2 2 4-4" />
+    </IconShell>
+  );
+}
+export function ChainNoticeIssuedIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: megaphone
+  return (
+    <IconShell size={size}>
+      <path d="m3 11 18-5v12L3 14v-3z" />
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+    </IconShell>
+  );
+}
+export function ChainSignatureIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: pen-tool
+  return (
+    <IconShell size={size}>
+      <path d="M15.707 21.293a1 1 0 0 1-1.414 0l-1.586-1.586a1 1 0 0 1 0-1.414l5.586-5.586a1 1 0 0 1 1.414 0l1.586 1.586a1 1 0 0 1 0 1.414z" />
+      <path d="m18 13-1.375-6.5a2 2 0 0 0-3.864-.013L11.5 13" />
+      <path d="M4 21h10" />
+      <path d="M4 17h7" />
+      <path d="M4 13h4" />
+      <path d="M4 9h3" />
+    </IconShell>
+  );
+}
+export function ChainReadingIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: activity
+  return (
+    <IconShell size={size}>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </IconShell>
+  );
+}
+export function ChainReportIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: file-text
+  return (
+    <IconShell size={size}>
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="10" y1="9" x2="8" y2="9" />
+    </IconShell>
+  );
+}
+export function ChainOperatorIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: user-check
+  return (
+    <IconShell size={size}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <polyline points="16 11 18 13 22 9" />
+    </IconShell>
+  );
+}
+export function ChainWrenchIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: wrench — used for PlaybookStepExecuted, TechnicianAssigned,
+  // DiagnosisSubmitted, FixSubmitted, DeviationCaptured.
+  return (
+    <IconShell size={size}>
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </IconShell>
+  );
+}
+export function ChainPinIcon({ size = 14 }: { size?: number } = {}): ReactElement {
+  // lucide: map-pin — used for SensorSilenceObserved (an event tied to a
+  // specific site).
+  return (
+    <IconShell size={size}>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
     </IconShell>
   );
 }

@@ -1,13 +1,23 @@
 /* table.css — FE-B5b Table primitive (redesign pass).
    Token-only composition on components.css + dim 4 tokens.
-   No hex literals. No new tokens. ≤200 LoC (AD-FE-5). */
+   No hex literals. No new tokens. ≤200 LoC (AD-FE-5).
+
+   Visual contract (post ui-ux-pro-max Minimalism pass):
+   - The .table wrapper has NO outer border / radius — the surrounding
+     Card owns the framing. Without this the table sat inside two
+     boxes (card border + table border + card padding) which read as
+     "double-framed" and heavy.
+   - Rows are separated by hairline --border-subtle (~1px) — barely
+     visible, but enough to keep scan lines for >10 row tables.
+   - Hover lifts the row with --bg-elevated tint and a tiny inset
+     brand rail so the operator gets a clear "this row" affordance
+     without the row jumping around. Layout-bounds-stable.
+   - The header band keeps --bg-elevated so the eye lands on it first
+     (it's the only tinted region in the table). */
 
 .table {
   width: 100%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  overflow: hidden;
+  background: transparent;
   font-family: var(--font-family-sans);
 }
 .table__inner {
@@ -20,7 +30,7 @@
   background: var(--bg-elevated);
 }
 .table__head tr {
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--border-subtle);
 }
 /* Headers — uppercase tracked labels, secondary text color (was default).
    The compact --font-size-xs + letter-spacing gives the "DATA TABLE" look. */
@@ -109,24 +119,37 @@
   accent-color: var(--brand-500);
   cursor: pointer;
 }
-/* Rows — dense (40 px) + visible zebra (--bg-inset, not the washed-out --zebra
-   fallback that the original spec used) + selected row rail. */
+/* Rows — borderless table: hairline --border-subtle divider keeps the
+   scan line visible without an outer frame. Hover is a tinted
+   --bg-elevated shift only; no inset rail (an earlier revision added
+   a brand rail here, but in a borderless design it read as a hard
+   edge and broke the clean-row feel). Selection keeps its rail —
+   selection is a persistent state and needs the visual commit. */
 .table__row {
   min-height: var(--height-row-default);
   border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
+  background: transparent;
   transition: background-color var(--motion-press-120) var(--ease-out);
 }
+.table__row:last-child { border-bottom: none; }
 .table__row:nth-child(even) { background: var(--bg-inset); }
 .table__row:hover { background: var(--bg-elevated); }
 .table__row--selected {
   background: var(--brand-100);
   box-shadow: inset 3px 0 0 var(--brand-500);
 }
-.table__row--selected:hover { background: var(--brand-200); }
-/* Cells — tight 4/12 padding so 40 px rows read as dense data. */
+.table__row--selected:hover {
+  background: var(--brand-200);
+  /* Keep the 3px rail (selection marker) on hover so the selected row
+     is still clearly distinguishable from a plain hovered row. */
+  box-shadow: inset 3px 0 0 var(--brand-500);
+}
+/* Cells — generous vertical padding (12px) for a more spacious, modern
+   read; the previous 4/12 felt cramped next to the new header band.
+   Horizontal padding matches the header (--space-md) so column edges
+   line up. */
 .table__cell {
-  padding: var(--space-xs) var(--space-md);
+  padding: var(--space-md) var(--space-md);
   vertical-align: middle;
   color: var(--fg-default);
   font-size: var(--font-size-sm);
@@ -157,8 +180,9 @@
   font-size: var(--font-size-sm);
   color: var(--fg-secondary);
 }
-/* Skeleton rows — tighter shimmer to match the dense row height. */
-.table__row--skeleton .table__cell { padding-block: var(--space-sm); }
+/* Skeleton rows — match the new cell padding so the shimmer doesn't
+   collapse to the dense pre-refresh height. */
+.table__row--skeleton .table__cell { padding-block: var(--space-md); }
 .table__skeleton {
   display: block;
   width: 100%;
