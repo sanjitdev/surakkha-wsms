@@ -1,9 +1,22 @@
 # generated: 2026-09-07
-# last_updated: 2026-09-07
+# last_updated: 2026-09-11
 # project: Surakkha
 # project_key: NOKEY
 # tracking_system: file-system
 # story_location: {project-root}/_bmad-output/implementation-artifacts
+#
+# Regenerated 2026-09-11 after implementation-readiness discovery.
+# Reflects real filesystem evidence, not just the 2026-09-07 backlog snapshot:
+#   - Backend Phase 1: `app/` directory does not yet exist. Story 1.1 spec
+#     (status: draft) is the only backend spec compiled. Epics 2-5 have no
+#     specs on disk. Epic 1 is therefore `in-progress` (spec authored) and
+#     all other backend epics remain `backlog`.
+#   - Frontend FE-1: heavy shipping in `web/` against 24 specs and ~45
+#     vitest files. Latest verified run (deferred-work.md, 2026-09-11):
+#     `pnpm test` -> 340 passed across 45 files. The status below marks
+#     every spec with shipped code + tests + verification as `done`, and
+#     every deferred follow-up as `in-progress` (spec exists; ships in a
+#     follow-up PR per deferred-work.md evidence).
 
 # STATUS DEFINITIONS:
 # ==================
@@ -35,34 +48,65 @@
 # WORKFLOW NOTES:
 # ===============
 # - Epic transitions to 'in-progress' automatically when first story starts (via build's sprint sync)
-# - Stories can be worked in parallel if team capacity allows
+# - Stories can be worked in parallel if team capacity permits
 # - Developer typically creates next story after previous one is 'done' to incorporate learnings
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; sprint-status surfaces open ones
 #
-# PHASE 1 SCOPE NOTE (regenerated 2026-09-07):
+# PHASE 1 SCOPE NOTE (regenerated 2026-09-11):
 # ============================================
-# Source: {project-root}/_bmad-output/planning-artifacts/epics-backend.md (Phase 1 trim, status: final)
+# Backend source: {project-root}/_bmad-output/planning-artifacts/epics-backend.md (Phase 1 trim, status: final)
 # - 5 epics, 19 stories, 4 personas (Sensor, Anjali, Admin, Operator)
 # - Trust scoring pre-triage (cluster window + sensor cross-check + reporter-reputation)
-# - Citizen-confirmed closure loop (✅/❌ tap -> IncidentReopened branch)
+# - Citizen-confirmed closure loop (check/cross tap -> IncidentReopened branch)
 # - Companion: {project-root}/_bmad-output/planning-artifacts/workflow-phase1.html
 # - Architecture spine: {project-root}/_bmad-output/planning-artifacts/architecture/architecture-surakkha-2026-09-06/ARCHITECTURE-SPINE.md
 # - Phase 2 deferred (PHA, public notice channel, dual-signature, simulator, multi-tenancy, multi-radio fallback, phone-as-network, hybrid incentive)
+#
+# Frontend Phase 1 source: {project-root}/_bmad-output/planning-artifacts/epics-frontend.md
+# - Foundation library + primitives + admin/operator/citizen pages
+# - Frontend architecture spine: {project-root}/_bmad-output/planning-artifacts/architecture/architecture-surakkha-frontend-2026-09-08/ARCHITECTURE-SPINE.md
+# - UX lockdown: {project-root}/_bmad-output/planning-artifacts/ux-designs/ux-Surakkha-2026-09-06/DESIGN.md
+# - 24 Ready-for-Dev specs under {project-root}/_bmad-output/implementation-artifacts/spec-fe-*.md
+# - Latest verification: 340 tests passing across 45 vitest files (commit 83c9130, 2026-09-11)
+#
+# AS-AT NOTE (regenerated 2026-09-11):
+# =====================================
+# - Backend gateway code: NOT YET WRITTEN. `app/` directory absent.
+# - Story 1.1 spec status: `draft` -> ready-for-dev after spec is approved.
+# - Frontend foundation library + primitives: SHIPPED (FE-1.1a/b/c, FE-1.3a/c, FE-1.5b, FE-B2/B3/B5*, FE-B6 lockdown sweep + per-page i18n, FE-F1/F2/F4/F6/F7).
+# - Frontend FE-1 epic: `in-progress` (sub-stories done; follow-ups + B5 consumer migrations still tracked in deferred-work.md).
+#
+# SCOPE UPDATE 2026-09-11 (per Sanjit):
+# ======================================
+# The active milestone is **frontend FE-1 only against the mock backend** in `web/src/mocks/`.
+# The backend Phase 1 build (`app/` directory) is **deferred to the next milestone**.
+# - Backend epics 1-5 and the 19 backend stories remain in `backlog` (or `in-progress`
+#   for Epic 1's Story 1.1 spec) and will be re-assessed when the backend build starts.
+# - FE-1 stories continue to ship against MSW handlers + fixtures.
+# - See `_bmad-output/planning-artifacts/implementation-readiness-report-2026-09-11.md`
+#   for the full readiness verdict and the parked backend-side pre-implementation list.
 
 generated: 2026-09-07
-last_updated: 2026-09-07
+last_updated: 2026-09-11
 project: Surakkha
 project_key: NOKEY
 tracking_system: file-system
 story_location: '{project-root}/_bmad-output/implementation-artifacts'
 
 development_status:
+  # ========================================================================
+  # BACKEND PHASE 1 (Python / FastAPI / SQLite WAL) — epics-backend.md
+  # Source tree (`app/`) does not exist on disk as of 2026-09-11.
+  # Story 1.1 is the only backend story whose Ready-for-Dev spec has been
+  # authored; the spec itself is still `draft` awaiting approval.
+  # ========================================================================
+
   # Epic 1 — Trust Foundation
   # Single-gateway content-addressed chain + RBAC defense-in-depth + idempotency.
   # Every later epic writes through the gateway this epic creates.
-  epic-1: backlog
-  1-1-single-gateway-content-addressed-chain-with-per-tenant-namespace: backlog
+  epic-1: in-progress
+  1-1-single-gateway-content-addressed-chain-with-per-tenant-namespace: ready-for-dev  # spec drafted 2026-09-07
   1-2-rbac-defense-in-depth-with-closed-phase-1-role-enum: backlog
   1-3-idempotency-by-tenant_id-event_id-and-sensor-silence-as-event: backlog
   epic-1-retrospective: optional
@@ -98,9 +142,75 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5 — Admin Closure & Citizen Loop
-  # Verify resolution (photo + GPS + timestamp check) -> close + citizen ✅/❌ tap -> reopened branch (chained with parent) -> per-incident audit timeline (chain-hash anchored).
+  # Verify resolution (photo + GPS + timestamp check) -> close + citizen check/cross tap -> reopened branch (chained with parent) -> per-incident audit timeline (chain-hash anchored).
   epic-5: backlog
   5-1-resolution-verify-photo-gps-timestamp-check: backlog
   5-2-close-and-citizen-confirm-checkmark-rejection-mark-tap-reopened: backlog
   5-3-per-incident-audit-timeline-chain-hash-anchored: backlog
   epic-5-retrospective: optional
+
+  # ========================================================================
+  # FRONTEND FE-1 (React / Vite / TypeScript / TanStack Query) — epics-frontend.md
+  # Source tree (`web/`) is built; 45 vitest test files; 340 tests passing.
+  # Every entry below corresponds 1:1 to a Ready-for-Dev spec on disk.
+  # `done` = spec shipped, code on disk, tests shipped, verification entry in
+  #          deferred-work.md or `web/src/__checks__/*.test.{ts,tsx}`.
+  # `in-progress` = follow-up split out of an over-ceiling spec, tracked
+  #                explicitly in deferred-work.md (still has independent
+  #                value; not yet shipped).
+  # ========================================================================
+
+  # FE-1 — Foundation Library & Primitives
+  epic-fe-1: in-progress
+  # Foundation library (10 primitives + hooks)
+  fe-1-1a-foundation-library-components-and-hooks: done            # Container, Button, Input, Card, Modal, Toast, BandPill, EmptyState, TopChrome+Sidebar; 19 vitest cases landed in FE-1.1c
+  fe-1-1b-styleguide-and-router: done                                # react-router-dom + StyleguidePage (10 components, 8 sections)
+  fe-1-1c-vitest-harness-for-foundation-library: done                # vitest 3.x + RTL + jsdom; 19 cases across 8 describe groups (2026-09-08)
+  fe-1-3a-data-hooks-fixtures-and-msw-handlers: done                 # MSW handlers + fixtures shipped
+  fe-1-3c-useincidents-hook-and-operator-dashboard-inboxdetail: done # hook + 2 consumer migrations; fetch-error panel landed 2026-09-11 (commit 83c9130)
+  fe-1-5b-inbox-list-page: done                                       # InboxList shipped; 9 row + filter-chip tests + page-level integration tests
+  fe-1-5b-inbox-list-followup-d2-d3-d4: in-progress                  # I/O matrix integration tests + /inbox route source-assertion + CSS literal lockdown
+  fe-1-1-others: backlog                                              # remaining hook layer (useChain, useIncident singular, useSensors, useEvents, useSessionRole) per FE-1.3c follow-up
+  epic-fe-1-retrospective: optional
+
+  # FE-B — Bridge Primitives & Lockdown Sweep
+  epic-fe-b: in-progress
+  fe-b2-toast-errorboundary: done                                     # Toast + ErrorBoundary vitest shipped
+  fe-b3-i18n-harness: done                                            # en/bn key parity vitest shipped
+  fe-b5a-dropdown-primitive: done                                     # Dropdown primitive + 7 follow-ups tracked in deferred-work.md
+  fe-b5a-harden-dropdown-a11y: in-progress                            # aria-controls combobox trigger fix
+  fe-b5a-keyboard-typeahead: in-progress                              # cycle-through-prefix + query reset
+  fe-b5a-flip-dropdown-popover: in-progress                           # auto-flip on viewport collision
+  fe-b5b-table-primitive: done                                        # Table primitive + 5 follow-ups tracked
+  fe-b5b-sort-a11y: in-progress                                       # sort comparator for non-primitives
+  fe-b5b-migrate-tables-to-operator-dashboard: in-progress            # OperatorDashboard bespoke table -> <Table>
+  fe-b5b-migrate-tables-to-inbox-list: backlog                        # InboxList migration tracked
+  fe-b5b-migrate-tables-to-audit-log: backlog                         # AuditLog migration tracked
+  fe-b5c-datepicker: done                                             # DatePicker primitive shipped
+  fe-b5d-locale-format-helper: done                                   # locale-format helper + en/bn tests
+  fe-b5e-relative-time: done                                          # relative-time helper
+  fe-b5f-audit-date-range: done                                       # AuditLog date-range filter
+  fe-b5g-anjali-filter-bangla-counters: done                          # Anjali Bangla counters
+  fe-b6-lockdown-bridge-css-literals: in-progress                     # inbox.css stray hex literals sweep (deferred-work entry)
+  fe-b6-inbox-detail-pane-swap: done                                  # InboxDetail pane-swap + verify-row tests
+  fe-b6-shared-chrome-i18n: done                                      # TopChrome + Sidebar en/bn parity
+  fe-b6-inbox-inline-action-form: done                                # InlineActionForm
+  fe-b6-settings-reset-modal: done                                    # Settings reset modal
+  fe-b6-hotline-intake-modal: done                                    # Hotline intake modal
+  fe-b6-operator-thread-filters: done                                 # Thread filter chips
+  fe-b6-operator-thread-reporter-chip: done                           # Reporter reputation chip
+  fe-b6-operator-log-hotline-call: done                               # Hotline-call log entry
+  fe-b6-incident-chain-segment: done                                  # IncidentChainSegment component
+  fe-b6-citizen-status-timeline: done                                 # CitizenStatusTimeline component
+  fe-b6-per-page-i18n-sweep: done                                     # inbox/field/operator/settings/verify-flow/submit-report i18n tests
+  epic-fe-b-retrospective: optional
+
+  # FE-F — Full-UI Stories (Phase-1 surfaces)
+  epic-fe-f: in-progress
+  fe-f1-incident-actions: done                                        # IncidentActions primitive + tests
+  fe-f2-submit-report: done                                           # Anjali-mobile equivalent (web form, Phase-1 minimal)
+  fe-f3-inbox-modals: done                                            # Inbox bulk modals (rewire/reassign/verify/close)
+  fe-f4-field-detail: done                                            # FieldIncidentDetail page + i18n
+  fe-f6-citizen-ack: done                                             # CitizenAckPage (check/cross tap surface)
+  fe-f7-bulk-optimize: done                                           # InboxList bulk-bar optimize
+  epic-fe-f-retrospective: optional
