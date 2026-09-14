@@ -1290,7 +1290,6 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .data-table th.hash {
   font-size: 10px;
 }
-/* (col-where width rule consolidated above — see line 1273 area) */
 
 .verify-result {
   display: grid;

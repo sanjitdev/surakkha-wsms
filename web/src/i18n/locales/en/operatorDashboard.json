@@ -11,12 +11,6 @@
     "hotlineSubmitted": "Incident {{incidentId}} added to your inbox",
     "hotlineCallLogged": "Call logged. No incident created."
   },
-  "layoutToggle": {
-    "ariaLabel": "Dashboard layout",
-    "optionA": "grid",
-    "optionB": "editorial",
-    "optionC": "status"
-  },
   "tabs": {
     "ariaLabel": "Dashboard sections",
     "overview": "Overview",
@@ -83,17 +77,11 @@
       "colDetected": "Detected",
       "colSeverity": "Severity",
       "severityBadgeT2": "T2",
-      "inspectAction": "Inspect →"
+      "inspectAction": "Inspect"
     }
   },
   "chain": {
     "cardTitle": "Today on chain",
-    "table": {
-      "colTime": "Time",
-      "colWhat": "What happened",
-      "colWhere": "Where",
-      "colStatus": "Status"
-    },
     "tableCompact": {
       "colTime": "Time",
       "colWhat": "What",
@@ -157,22 +145,13 @@
         "sensor": "Reporter: sensor reading"
       }
     },
-    "table": {
-      "colThread": "Thread",
-      "threadLabel": "{{ward}} incident",
-      "colReporter": "Source",
-      "colStatusBlocker": "Status / blocker",
-      "colOpened": "Opened",
-      "colSeverity": "Severity",
-      "openAction": "Open →"
-    },
     "tableCompact": {
       "colThread": "Thread",
       "threadLabel": "{{ward}} incident",
       "colReporter": "Source",
       "colOpened": "Opened",
       "colSeverity": "Sev.",
-      "openAction": "Open →"
+      "openAction": "Open"
     },
     "openAll": "Open {{count}} ranked in inbox",
     "emptyTitle": "Nothing waiting on you",
@@ -212,10 +191,6 @@
       "gulshan": "Gulshan",
       "gulshanValue": "1.1 min"
     }
-  },
-  "editorial": {
-    "triageAll": "Triage all →",
-    "sectionLabel": "Today at a glance"
   },
   "hotlineIntake": {
     "title": "Log hotline call",

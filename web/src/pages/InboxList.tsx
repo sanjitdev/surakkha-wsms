@@ -249,7 +249,7 @@ export function InboxList() {
         // work surface. Empty literal avoids the i18n-key-leak when t()
         // resolves a missing/empty value to the key string itself.
         header: '',
-        render: (r) => <a href={r.action.href}>{r.action.label} →</a>,
+        render: (r) => <a href={r.action.href}>{r.action.label}</a>,
         className: 'col-action',
       },
     ],

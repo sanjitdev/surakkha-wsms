@@ -21,7 +21,7 @@
   },
   "actions": {
     "assignTech": "Assign field tech",
-    "requestAck": "Request citizen ack →"
+    "requestAck": "Request citizen ack"
   },
   "inlineForm": {
     "title": "Take action",

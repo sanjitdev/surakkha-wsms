@@ -11,12 +11,6 @@
     "hotlineSubmitted": "ঘটনা {{incidentId}} আপনার ইনবক্সে যোগ হয়েছে",
     "hotlineCallLogged": "কল লগ হয়েছে। কোনো ঘটনা তৈরি হয়নি।"
   },
-  "layoutToggle": {
-    "ariaLabel": "ড্যাশবোর্ড লেআউট",
-    "optionA": "গ্রিড",
-    "optionB": "এডিটোরিয়াল",
-    "optionC": "স্ট্যাটাস"
-  },
   "tabs": {
     "ariaLabel": "ড্যাশবোর্ড বিভাগ",
     "overview": "সারসংক্ষেপ",
@@ -83,17 +77,11 @@
       "colDetected": "সনাক্ত হয়েছে",
       "colSeverity": "তীব্রতা",
       "severityBadgeT2": "T2",
-      "inspectAction": "পরীক্ষা করুন →"
+      "inspectAction": "পরীক্ষা করুন"
     }
   },
   "chain": {
     "cardTitle": "আজ চেইনে",
-    "table": {
-      "colTime": "সময়",
-      "colWhat": "কী ঘটেছে",
-      "colWhere": "কোথায়",
-      "colStatus": "অবস্থা"
-    },
     "tableCompact": {
       "colTime": "সময়",
       "colWhat": "কী",
@@ -157,22 +145,13 @@
         "sensor": "প্রতিবেদক: সেন্সর রিডিং"
       }
     },
-    "table": {
-      "colThread": "থ্রেড",
-      "threadLabel": "{{ward}} ঘটনা",
-      "colReporter": "উৎস",
-      "colStatusBlocker": "অবস্থা / বাধা",
-      "colOpened": "খোলা হয়েছে",
-      "colSeverity": "তীব্রতা",
-      "openAction": "খুলুন →"
-    },
     "tableCompact": {
       "colThread": "থ্রেড",
       "threadLabel": "{{ward}} ঘটনা",
       "colReporter": "উৎস",
       "colOpened": "খোলা হয়েছে",
       "colSeverity": "তীব্র.",
-      "openAction": "খুলুন →"
+      "openAction": "খুলুন"
     },
     "openAll": "ইনবক্সে {{count}}টি র‍্যাঙ্কড থ্রেড দেখুন",
     "emptyTitle": "আপনার জন্য অপেক্ষমাণ কিছু নেই",
@@ -212,10 +191,6 @@
       "gulshan": "গুলশান",
       "gulshanValue": "১.১ মিনিট"
     }
-  },
-  "editorial": {
-    "triageAll": "সব ট্রায়াজ →",
-    "sectionLabel": "আজ এক নজরে"
   },
   "hotlineIntake": {
     "title": "ফোন কল লগ করুন",

@@ -100,7 +100,7 @@ export function InboxRow({ row, selected, onToggle, testId }: InboxRowProps) {
         <span className={`badge badge--${sev}`}>{row.severity}</span>
       </td>
       <td className="col-action">
-        <Link to={row.action.href}>{row.action.label} →</Link>
+        <Link to={row.action.href}>{row.action.label}</Link>
       </td>
     </tr>
   );

@@ -324,14 +324,6 @@ export function FieldQueuePage() {
                 {r.timeVal}
               </div>
             </div>
-            <span
-              style={{
-                fontFamily: 'var(--font-family-mono)',
-                color: r.isActive ? 'var(--color-primary)' : 'var(--fg-tertiary)',
-              }}
-            >
-              {r.isDone ? '↗' : '→'}
-            </span>
           </a>
         ))}
       </div>

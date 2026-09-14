@@ -16,7 +16,7 @@
     "statusError": "mock backend · error",
     "heading": "Sign in",
     "radiogroupLabel": "Persona picker",
-    "continue": "Continue →",
+    "continue": "Continue",
     "signingIn": "Signing in…"
   }
 }

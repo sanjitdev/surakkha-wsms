@@ -48,7 +48,7 @@
     "aria": "Pagination",
     "summary": "Showing {{from}}–{{to}} of {{total}}",
     "prev": "← Prev",
-    "next": "Next →",
+    "next": "Next",
     "pageSize": "Page size",
     "pageSizeItem": "{{n}} / page"
   },
