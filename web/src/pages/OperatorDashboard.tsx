@@ -273,7 +273,7 @@ export function OperatorDashboard() {
         className: 'col-title',
         render: (s: SensorRow) => (
           <>
-            {s.ward_id} · <span className="mono">{s.sensor_id}</span>
+            {s.ward_id} · <span className="mono">{shortSensorId(s.sensor_id)}</span>
           </>
         ),
       },
@@ -1095,6 +1095,15 @@ export function OperatorDashboard() {
       />
     </>
   );
+}
+/**
+ * Truncate ULID-style sensor ids (e.g. "01JOSENSORWARD00000000000A")
+ * so the WARD/SENSOR column doesn't overflow on narrow rows. Real
+ * sensor ids like "SN-2208" pass through untouched. Mirrors the
+ * inboxListModel sensorIdShort helper.
+ */
+function shortSensorId(id: string): string {
+  return id.length > 12 && !id.startsWith('SN-') ? `${id.slice(0, 8)}…` : id;
 }
 function computePHAvg(sensors: SensorRow[]): number | null {
   const ph = sensors.filter(

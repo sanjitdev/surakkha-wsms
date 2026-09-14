@@ -149,6 +149,11 @@
   gap: var(--space-sm);
   font-size: var(--font-size-sm);
   color: var(--fg-secondary);
+  /* Allow the left cluster to shrink (chain seconds chip is the widest
+     element here). Without min-width: 0 the left cluster claims its
+     intrinsic width and pushes the right cluster past the viewport. */
+  min-width: 0;
+  flex-shrink: 1;
 }
 .top-chrome__persona {
   font-size: var(--font-size-sm);
@@ -160,7 +165,15 @@
      constraint, so the persona chip is the natural fallback target. */
   white-space: nowrap;
 }
-.top-chrome__right { display: flex; align-items: center; flex-shrink: 0; }
+.top-chrome__right {
+  display: flex;
+  align-items: center;
+  /* flex-shrink: 0 keeps the persona name untruncated; the left
+     cluster's min-width: 0 (above) is what lets the layout actually
+     fit — without it both sides tried to claim intrinsic width and
+     the right cluster overflowed the viewport. */
+  flex-shrink: 0;
+}
 
 /* ── Page header ─────────────────────────────────────────────── */
 .page-header {
