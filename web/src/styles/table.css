@@ -30,13 +30,17 @@
   background: var(--bg-elevated);
 }
 .table__head tr {
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-default);
 }
 /* Headers — uppercase tracked labels, secondary text color (was default).
-   The compact --font-size-xs + letter-spacing gives the "DATA TABLE" look. */
+   The compact --font-size-xs + letter-spacing gives the "DATA TABLE" look.
+   Vertical rhythm (padding + line-height + vertical-align) matches
+   .table__cell so the header band sits on the same baseline as the data
+   rows; without it the THREAD / WHERE labels drift above the row badges
+   and links. */
 .table__header-cell {
   height: var(--height-control-md);
-  padding: 0 var(--space-md);
+  padding: var(--space-md) var(--space-md);
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-xs);
   letter-spacing: 0.04em;
@@ -46,6 +50,8 @@
   user-select: none;
   background: var(--bg-elevated);
   position: relative;
+  vertical-align: middle;
+  line-height: var(--line-height-body, 1.5);
 }
 .table__sort-button {
   display: inline-flex;
@@ -155,6 +161,67 @@
   font-size: var(--font-size-sm);
   line-height: var(--line-height-body);
 }
+/* Inbox column widths apply symmetrically to <th> + <td> so headers
+   and rows share the same column tracks. Without this, header cells
+   fall back to auto-width while body cells get fixed widths from the
+   inbox CSS (dashboard.css .col-warn/.col-owner/.col-action), and the
+   header text drifts out of line with the data underneath. */
+.table .col-warn,
+.table .table__header-cell.col-warn,
+.table .table__cell.col-warn,
+.table__header-cell.col-warn    { width: 16px; padding-inline: 0; }
+.table .col-title,
+.table .table__header-cell.col-title,
+.table .table__cell.col-title,
+.table__header-cell.col-title   { text-align: left; }
+.table .col-where,
+.table .table__header-cell.col-where,
+.table .table__cell.col-where,
+.table__header-cell.col-where   { width: 22%; min-width: 120px; }
+.table .col-owner,
+.table .table__header-cell.col-owner,
+.table .table__cell.col-owner,
+.table__header-cell.col-owner   { width: 110px; }
+.table .col-status,
+.table .table__header-cell.col-status,
+.table .table__cell.col-status,
+.table__header-cell.col-status  { width: 64px; }
+.table .col-action,
+.table .table__header-cell.col-action,
+.table .table__cell.col-action,
+.table__header-cell.col-action  { width: 96px; text-align: right; }
+/* Shared column widths for the table primitive — mirror the same
+   widths used by hand-rolled .data-table consumers in dashboard.css
+   so <Table> dashboards (sensor fleet, threads, chain) share the same
+   tracks. The <th> rule guarantees header cells are not auto-width. */
+.table .col-time,
+.table .table__header-cell.col-time,
+.table .table__cell.col-time,
+.table__header-cell.col-time    { width: 56px; font-family: var(--font-family-mono); color: var(--fg-tertiary); font-size: var(--font-size-xs); white-space: nowrap; }
+.table .col-value,
+.table .table__header-cell.col-value,
+.table .table__cell.col-value,
+.table__header-cell.col-value   { width: 88px; font-family: var(--font-family-mono); text-align: right; white-space: nowrap; }
+.table .col-sensor,
+.table .table__header-cell.col-sensor,
+.table .table__cell.col-sensor,
+.table__header-cell.col-sensor  { width: 92px; font-family: var(--font-family-mono); color: var(--fg-secondary); font-size: var(--font-size-xs); white-space: nowrap; }
+.table .col-check,
+.table .table__header-cell.col-check,
+.table .table__cell.col-check,
+.table__header-cell.col-check   { width: 28px; padding-left: var(--space-md); }
+.table .col-hash,
+.table .table__header-cell.col-hash,
+.table .table__cell.col-hash,
+.table__header-cell.col-hash    { font-size: 10px; font-family: var(--font-family-mono); }
+.table .col-verify,
+.table .table__header-cell.col-verify,
+.table .table__cell.col-verify,
+.table__header-cell.col-verify  { width: 96px; text-align: right; }
+/* Safety net: when a column passes an empty / whitespace header the
+   inner label is still rendered as a <span> by the primitive; hide the
+   visible glyph so it doesn't read as a phantom header. */
+.table__header-cell .table__header-label:empty { visibility: hidden; }
 .table__cell--mono {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);

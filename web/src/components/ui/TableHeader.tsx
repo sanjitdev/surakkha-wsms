@@ -145,9 +145,9 @@ export function TableHeader<T>(props: TableHeaderProps<T>): ReactNode {
                     {sortIndicator}
                   </span>
                 </button>
-              ) : (
+              ) : col.header !== '' ? (
                 <span className="table__header-label">{col.header}</span>
-              )}
+              ) : null}
               {isResizable ? (
                 <span
                   className="table__resize-handle"
