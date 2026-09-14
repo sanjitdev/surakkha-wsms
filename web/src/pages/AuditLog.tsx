@@ -409,12 +409,44 @@ export function AuditLog() {
                   marginTop: 'var(--space-xs)',
                 }}
               >
-                {tAudit('chainHead.prevLabel')}{' '}
-                {chainHead.prev_hash ? truncateHash(chainHead.prev_hash) : tAudit('table.actorEmDash')}
-                {chainHead.sealed_at
-                  ? `${tAudit('chainHead.sealedLabel')}${formatTime('time-full', chainHead.sealed_at)}`
-                  : ''}
-                {tAudit('chainHead.rootOk')}
+                {/*
+                  Build the subtitle as a segmented array — each segment
+                  is either included or omitted depending on the data,
+                  with a leading · between segments. Previously the
+                  i18n strings baked the " · " into sealedLabel/rootOk,
+                  which produced "prev — · sealed 15:30 · root ok" with
+                  a doubled · when prev_hash was empty (root block).
+                  Pulling the separator into JSX means missing segments
+                  drop the dot too — so a root block reads
+                  "— · root ok", not "—  ·  · root ok".
+                */}
+                {/*
+                  chainHead subtitle — join parts with a single · separator.
+                  Previously the i18n strings baked " · " into
+                  sealedLabel/rootOk, so when prev_hash was empty (root
+                  block) the result was "prev — · sealed … · root ok" with
+                  double dots. Now we render each segment only when its
+                  data is present, and put the separator in JSX so dropped
+                  segments drop their · too.
+                */}
+                {[
+                  chainHead.prev_hash
+                    ? `${tAudit('chainHead.prevLabel')} ${truncateHash(chainHead.prev_hash)}`
+                    : // Root block: show em-dash so the chainHead still reads
+                      // as a complete sentence rather than a fragment.
+                      `${tAudit('chainHead.prevLabel')} ${tAudit('table.actorEmDash')}`,
+                  chainHead.sealed_at
+                    ? `${tAudit('chainHead.sealedLabel')} ${formatTime('time-full', chainHead.sealed_at)}`
+                    : null,
+                  tAudit('chainHead.rootOk'),
+                ]
+                  .filter((seg): s is string => seg !== null)
+                  .map((seg, i, arr) => (
+                    <span key={i}>
+                      {i > 0 && <span aria-hidden="true"> · </span>}
+                      {seg}
+                    </span>
+                  ))}
               </div>
             </div>
             <div

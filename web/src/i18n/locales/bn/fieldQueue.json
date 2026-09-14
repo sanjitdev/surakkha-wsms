@@ -15,7 +15,7 @@
     "inProgressEmDash": "—",
     "overdueLabel": "বিলম্বিত",
     "closedLabel": "এই সপ্তাহে বন্ধ",
-    "closedAvgClose": "গড় বন্ধ —"
+    "closedAvgClose": "গড় বন্ধ · {{avg}}"
   },
   "filters": {
     "all": "সব",

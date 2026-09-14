@@ -240,7 +240,15 @@ export function FieldQueuePage() {
         <div className="tech-today__cell">
           <span className="tech-today__label">{tField('today.closedLabel')}</span>
           <span className="tech-today__val">{rows.filter((r) => r.isDone).length}</span>
-          <span className="tech-today__sub">{tField('today.closedAvgClose')}</span>
+          <span className="tech-today__sub">
+            {/*
+              avgClose isn't modelled yet — when it lands, swap this
+              fallback for a real number (e.g. "avg close · 38 min").
+              The metric stays em-dash + "no data" so the slot never
+              reads as an empty cell.
+            */}
+            {tField('today.closedAvgClose', { avg: tField('today.inProgressEmDash') })}
+          </span>
         </div>
       </div>
 

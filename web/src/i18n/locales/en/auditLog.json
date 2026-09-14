@@ -12,8 +12,8 @@
   "chainHead": {
     "headLabel": "Chain head · block #",
     "prevLabel": "prev",
-    "sealedLabel": " · sealed ",
-    "rootOk": " · root ok",
+    "sealedLabel": "sealed",
+    "rootOk": "root ok",
     "eventsTotal": "events total",
     "blocks": "blocks"
   },

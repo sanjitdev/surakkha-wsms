@@ -60,14 +60,14 @@ export const PERSONAS: Persona[] = [
   },
   {
     id: 'pha_approver',
-    display_name: 'PHA Approver (Dr. Karim)',
+    display_name: 'PHA Approver — Dr. Karim',
     role: 'pha_approver',
     landing: '/approve',
     hint: 'Dual-signs PublicNoticeIssued + PlaybookAmendmentApproved.',
   },
   {
     id: 'pha_viewer',
-    display_name: 'PHA Viewer (audit only)',
+    display_name: 'PHA Viewer — audit only',
     role: 'pha_viewer',
     landing: '/audit',
     hint: 'Read-only audit chain access; no write perm.',

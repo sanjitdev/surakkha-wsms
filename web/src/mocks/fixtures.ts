@@ -532,7 +532,7 @@ export async function seedIfEmpty(): Promise<boolean> {
     },
     {
       severity: 'low',
-      ward: 'block-12',
+      ward: 'ward-12',
       sensor_id: 'system',
       owner_kind: 'system',
       owner_ref: ACTORS.sensor.ref,

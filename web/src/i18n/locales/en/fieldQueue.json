@@ -15,7 +15,7 @@
     "inProgressEmDash": "—",
     "overdueLabel": "Overdue",
     "closedLabel": "Closed this week",
-    "closedAvgClose": "avg close —"
+    "closedAvgClose": "avg close · {{avg}}"
   },
   "filters": {
     "all": "All",

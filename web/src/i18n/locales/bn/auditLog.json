@@ -12,8 +12,8 @@
   "chainHead": {
     "headLabel": "চেইন হেড · ব্লক #",
     "prevLabel": "পূর্ববর্তী",
-    "sealedLabel": " · সিল ",
-    "rootOk": " · রুট ঠিক আছে",
+    "sealedLabel": "সিল",
+    "rootOk": "রুট ঠিক আছে",
     "eventsTotal": "মোট ইভেন্ট",
     "blocks": "ব্লক"
   },

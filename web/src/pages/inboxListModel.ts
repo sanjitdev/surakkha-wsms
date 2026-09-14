@@ -87,7 +87,14 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       severity,
       title: toStr(inbox.title, 'Untitled incident'),
       meta: toStr(inbox.summary, ''),
-      where: ward.startsWith('ward') ? `ward ${ward.slice(5)}` : ward,
+      // Use a non-breaking space (\u00A0) between "ward" and the suffix so
+      // the prefix never splits onto its own line in the WHERE column.
+      // A regular space let the mono span wrap into
+      //   "ward"
+      //   "dhanmondi"
+      // when the column was narrower than the full id. The nbsp keeps
+      // the pair atomic while still reading as a normal space.
+      where: ward.startsWith('ward') ? `ward\u00A0${ward.slice(5)}` : ward,
       whereSub: sensorIdShort,
       ownerName: toStr(inbox.owner_display, 'System'),
       ownerKind,
