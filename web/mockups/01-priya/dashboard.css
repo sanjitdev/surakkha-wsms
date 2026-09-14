@@ -153,8 +153,14 @@
 .top-chrome__persona {
   font-size: var(--font-size-sm);
   color: var(--fg-secondary);
+  /* Hold the full "Name — Role" string even when the brand + chain
+     labels on the left are wide — without flex-shrink: 0 the right
+     cluster compresses and the persona name is clipped ("Utility Op…")
+     at 1440 px. The chain metric chip already has its own width
+     constraint, so the persona chip is the natural fallback target. */
+  white-space: nowrap;
 }
-.top-chrome__right { display: flex; align-items: center; }
+.top-chrome__right { display: flex; align-items: center; flex-shrink: 0; }
 
 /* ── Page header ─────────────────────────────────────────────── */
 .page-header {
@@ -370,7 +376,11 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .data-table .col-action a { font-size: var(--font-size-sm); color: var(--brand-500); text-decoration: none; font-weight: var(--font-weight-medium); white-space: nowrap; }
 .data-table .col-action a:hover { color: var(--brand-600); }
 .data-table .row-severity-dot {
-  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  /* Slightly larger than the 8 px the mockup used — the T1 info-blue
+     dot was getting lost in row whitespace at 1440 px viewport. The
+     10 px circle is still smaller than the row badge pill so it reads
+     as a status marker, not a primary control. */
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
 }
 .data-table .col-warn .row-severity-dot { display: inline-block; }
 

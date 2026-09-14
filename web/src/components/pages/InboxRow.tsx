@@ -34,7 +34,10 @@ function severityDotColor(severity: InboxRow['severity']): string {
   if (severity === 'T3') return 'var(--danger)';
   if (severity === 'T2') return 'var(--warning)';
   if (severity === 'T1') return 'var(--info)';
-  return 'var(--band-medium)';
+  // T0 fallback: --fg-tertiary is theme-aware (deeper grey in light,
+  // lighter grey in dark) — gives enough contrast against the row
+  // background without competing with the T1–T3 alert colors.
+  return 'var(--fg-tertiary)';
 }
 function ownerColor(kind: InboxRow['ownerKind']): string {
   if (kind === 'reporter') return 'var(--success)';

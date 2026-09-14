@@ -74,7 +74,7 @@
     "sensorReading": "Sensor {{sensorId}} reading: {{value}} {{parameter}}"
   },
   "related": {
-    "title": "Related incidents · ward {{ward}}",
+    "title": "Related incidents in {{ward}}",
     "subtitle_one": "{{count}} sibling incident in this ward",
     "subtitle_other": "{{count}} sibling incidents in this ward",
     "emptyHeading": "No siblings",

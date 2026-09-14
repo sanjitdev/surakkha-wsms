@@ -74,7 +74,7 @@
     "sensorReading": "সেন্সর {{sensorId}} রিডিং: {{value}} {{parameter}}"
   },
   "related": {
-    "title": "সম্পর্কিত ঘটনা · ওয়ার্ড {{ward}}",
+    "title": "{{ward}}-এর সম্পর্কিত ঘটনা",
     "subtitle_one": "এই ওয়ার্ডে {{count}}টি সহোদর ঘটনা",
     "subtitle_other": "এই ওয়ার্ডে {{count}}টি সহোদর ঘটনা",
     "emptyHeading": "কোনো সহোদর নেই",
