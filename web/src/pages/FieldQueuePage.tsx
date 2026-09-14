@@ -169,7 +169,7 @@ export function FieldQueuePage() {
   // button. Post FE-1.6a AppLayout owns the chrome; the page returns
   // only the page header + jobs.
   return (
-    <main className="container--wide">
+    <main className="container container--wide">
       <div className="page-header">
         <div className="page-header__row">
           <div>

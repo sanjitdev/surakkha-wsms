@@ -19,7 +19,7 @@
  *     no longer fetches session or chain freshness — both come from
  *     useAppLayout().
  *   - The page renders ONLY the tab body (page-header + tabs +
- *     <main className="container--wide">). No .app-shell wrapper, no
+ *     <main className="container container--wide">). No .app-shell wrapper, no
  *     inline aside/top-chrome.
  */
 
@@ -785,7 +785,7 @@ export function OperatorDashboard() {
         </button>
       </div>
 
-      <main className="container--wide" data-layout={layout}>
+      <main className="container container--wide" data-layout={layout}>
         {/* ── TAB: OVERVIEW ── */}
         <section
           id="tabpanel-overview"
