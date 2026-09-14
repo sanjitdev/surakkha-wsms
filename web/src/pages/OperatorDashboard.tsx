@@ -504,7 +504,7 @@ export function OperatorDashboard() {
               "Log hotline call" sits leftmost, before the layout toggle,
               so the alt-path for incoming reports is the most prominent
               secondary action per spec §"Trigger". */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
+          <div className="page-header__actions">
             <Button
               variant="secondary"
               size="md"
@@ -518,27 +518,27 @@ export function OperatorDashboard() {
               </span>
               {tDash('actions.logHotlineCall')}
             </Button>
-          </div>
-          <div className="layout-toggle" role="radiogroup" aria-label={tDash('layoutToggle.ariaLabel')}>
-            {(['a', 'b', 'c'] as Layout[]).map((opt) => (
-              <button
-                key={opt}
-                type="button"
-                role="radio"
-                aria-checked={layout === opt}
-                className={`layout-toggle__btn${layout === opt ? ' is-active' : ''}`}
-                onClick={() => {
-                  setLayout(opt);
-                }}
-              >
-                {opt.toUpperCase()} ·{' '}
-                {opt === 'a'
-                  ? tDash('layoutToggle.optionA')
-                  : opt === 'b'
-                    ? tDash('layoutToggle.optionB')
-                    : tDash('layoutToggle.optionC')}
-              </button>
-            ))}
+            <div className="layout-toggle" role="radiogroup" aria-label={tDash('layoutToggle.ariaLabel')}>
+              {(['a', 'b', 'c'] as Layout[]).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  role="radio"
+                  aria-checked={layout === opt}
+                  className={`layout-toggle__btn${layout === opt ? ' is-active' : ''}`}
+                  onClick={() => {
+                    setLayout(opt);
+                  }}
+                >
+                  {opt.toUpperCase()} ·{' '}
+                  {opt === 'a'
+                    ? tDash('layoutToggle.optionA')
+                    : opt === 'b'
+                      ? tDash('layoutToggle.optionB')
+                      : tDash('layoutToggle.optionC')}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -569,6 +569,19 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   flex-wrap: wrap;
 }
 .page-header__row > div:first-child { flex: 1; min-width: 240px; }
+.page-header__actions {
+  /* Bundle the right-side action cluster (Log hotline call + layout
+     toggle) into a single flex group so they share one wrap budget.
+     Without this, "Log hotline call" and the toggle are siblings of
+     the row itself, so .page-header__row sees them as independent
+     items — when the row is wide enough for the H1 + the hotline
+     button alone, the toggle still tries to share the remaining
+     space and gets clipped past the right padding. */
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
 
 /* ── Default: hide all variants ───────────────────────────────── */
 [data-layout-only] { display: none; }
@@ -852,6 +865,12 @@ main[data-layout="c"] [data-layout-only="c"] {
   align-items: baseline;
 }
 .recent-decisions li:first-child { border-top: none; }
+.recent-decisions__empty {
+  /* Span the full width — the time column is dropped in the empty
+     state so we don't render the orphaned em-dash in column 1. */
+  grid-template-columns: 1fr;
+  color: var(--fg-tertiary);
+}
 .recent-decisions__time {
   font-size: var(--font-size-xs);
   color: var(--fg-tertiary);

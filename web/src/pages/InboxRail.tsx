@@ -97,8 +97,14 @@ export function RecentDecisionsRail({ recent }: { recent: RecentDecision[] }) {
     <Card heading={t('recentDecisionsRail.heading')} modifier="with-heading">
       <ul className="recent-decisions">
         {recent.length === 0 ? (
-          <li>
-            <span className="recent-decisions__time mono">{t('recentDecisionsRail.emptyTime')}</span>
+          /*
+           * Empty state: when no recent decisions exist, drop the time
+           * slot entirely. Previously the empty row showed "—" in the
+           * time column + "No decisions yet" in the text column, which
+           * read as an orphaned em-dash floating next to the message.
+           * Collapsing to a single muted line keeps the rail tidy.
+           */
+          <li className="recent-decisions__empty">
             <span className="recent-decisions__text">{t('recentDecisionsRail.emptyText')}</span>
           </li>
         ) : (
