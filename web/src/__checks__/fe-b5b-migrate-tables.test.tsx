@@ -179,7 +179,7 @@ describe('FE-B5b-migrate OperatorDashboard', () => {
     // Wait for the default Layout A to mount.
     await screen.findAllByTestId('table-sensors');
     // Click the 'c' layout toggle.
-    const cBtn = screen.getByRole('radio', { name: /status-board/i });
+    const cBtn = screen.getByRole('radio', { name: /status/i });
 
     act(() => {
       fireEvent.click(cBtn);

@@ -9,7 +9,7 @@
     "stepLabel": "ধাপ {{num}}: {{title}}",
     "stepCardHeading": "ধাপ {{num}}: {{title}}",
     "backLabel": "← পিছনে",
-    "continueLabel": "ধাপ {{num}}-এ এগিয়ে যান: {{title}} →",
+    "continueLabel": "ধাপ {{num}}-এ এগিয়ে যান: {{title}}",
     "sealLabel": "যাচাইকরণ সিল করুন"
   },
   "sensorCluster": {

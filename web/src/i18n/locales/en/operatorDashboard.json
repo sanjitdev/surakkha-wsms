@@ -15,7 +15,7 @@
     "ariaLabel": "Dashboard layout",
     "optionA": "grid",
     "optionB": "editorial",
-    "optionC": "status-board"
+    "optionC": "status"
   },
   "tabs": {
     "ariaLabel": "Dashboard sections",

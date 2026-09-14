@@ -9,7 +9,7 @@
     "stepLabel": "Step {{num}}: {{title}}",
     "stepCardHeading": "Step {{num}}: {{title}}",
     "backLabel": "← Back",
-    "continueLabel": "Continue to Step {{num}}: {{title}} →",
+    "continueLabel": "Continue to Step {{num}}: {{title}}",
     "sealLabel": "Seal verification"
   },
   "sensorCluster": {

@@ -490,6 +490,11 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 2px;
+  /* Keep each pill at its natural width even when the page-header
+     row gets crowded — without this the longest label (originally
+     "status-board") would clip. Pair with the shortened optionC
+     label in operatorDashboard.json. */
+  flex-shrink: 0;
 }
 .layout-toggle__btn {
   font-family: var(--font-family-mono);
@@ -505,6 +510,7 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   cursor: pointer;
   height: 28px;
   line-height: 1;
+  white-space: nowrap;
   transition: background-color 120ms ease-out, color 120ms ease-out;
 }
 .layout-toggle__btn:hover { color: var(--fg-default); }

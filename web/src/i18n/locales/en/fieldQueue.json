@@ -26,7 +26,7 @@
     "onsite": "On site"
   },
   "loading": "loading queue from chain…",
-  "empty": "no jobs in this filter",
+  "empty": "No jobs in this filter — try resetting filters, or pull-to-refresh from the queue.",
   "optimizeRoute": "Optimize route",
   "pill": {
     "assigned": "Assigned",

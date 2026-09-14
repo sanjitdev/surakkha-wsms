@@ -191,9 +191,20 @@ export function VerifyFlow() {
               onClick={advance}
               testId={`verify-advance-${next?.id ?? ''}`}
             >
-              {next
-                ? t('steps.continueLabel', { num: current.num + 1, title: next.title })
-                : ''}
+              {next ? (
+                <>
+                  {t('steps.continueLabel', {
+                    num: current.num + 1,
+                    title: next.title,
+                  })}
+                  {/* Arrow sits outside the i18n string so we control the
+                     gap precisely. Without it the arrow renders flush
+                     against the title text (screenshot review 2026-09-14). */}
+                  <span aria-hidden="true" style={{ marginLeft: 'var(--space-xs)' }}>
+                    {'\u2192'}
+                  </span>
+                </>
+              ) : null}
             </Button>
           )}
         </div>
