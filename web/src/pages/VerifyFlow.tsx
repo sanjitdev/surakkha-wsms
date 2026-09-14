@@ -113,7 +113,12 @@ export function VerifyFlow() {
       <div className="page-header" data-testid="verify-flow-header">
         <h1>{t('header.title')}</h1>
         <p className="page-header__sub">
-          {t('header.subtotalLabel')} · {steps.length} steps ·{' '}
+          {/* subtotalLabel already includes the step count ("3-step chain
+              verification") — appending "{{steps.length}} steps" right
+              after produces "3-step chain verification · 3 steps · …".
+              Drop the dynamic count; the step header below already shows
+              it via the active step number. */}
+          {t('header.subtotalLabel')} ·{' '}
           {t('header.currentLabel', { num: current.num })}
         </p>
       </div>

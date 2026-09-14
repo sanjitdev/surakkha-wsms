@@ -63,7 +63,7 @@ export const PERSONAS: Persona[] = [
     display_name: 'PHA Approver — Dr. Karim',
     role: 'pha_approver',
     landing: '/approve',
-    hint: 'Dual-signs PublicNoticeIssued + PlaybookAmendmentApproved.',
+    hint: 'Dual-signs public notices and playbook amendments on the chain.',
   },
   {
     id: 'pha_viewer',

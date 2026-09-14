@@ -82,7 +82,7 @@ const PLACEHOLDERS: Placeholder[] = [
   {
     path: '/approve',
     landing: '/approve',
-    description: 'PHA Approver dual-signs PublicNoticeIssued + PlaybookAmendmentApproved.',
+    description: 'PHA Approver dual-signs public notices and playbook amendments on the chain.',
   },
   {
     path: '/audit',

@@ -273,7 +273,14 @@ export function OperatorDashboard() {
         className: 'col-title',
         render: (s: SensorRow) => (
           <>
-            {s.ward_id} · <span className="mono">{shortSensorId(s.sensor_id)}</span>
+            {/* white-space: nowrap keeps 'ward-dhanmondi' on one line —
+                CSS wraps at the hyphen by default and the WARD/SENSOR
+                column is narrow enough that the id falls to two lines.
+                Same root cause as inbox #40 (which used a non-breaking
+                space); here a nowrap span is the lighter fix since we
+                don't want to swap the glyph. */}
+            <span style={{ whiteSpace: 'nowrap' }}>{s.ward_id}</span>{' · '}
+            <span className="mono">{shortSensorId(s.sensor_id)}</span>
           </>
         ),
       },

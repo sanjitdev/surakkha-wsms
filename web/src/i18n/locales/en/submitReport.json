@@ -1,7 +1,7 @@
 {
   "header": {
     "title": "Submit report",
-    "subtitle": "{{name}} · Anjali citizen report · lands on the operator's inbox"
+    "subtitle": "{{name}} · lands on the operator's inbox"
   },
   "roleGate": {
     "subtitle": "Citizen-report intake is reserved for the Anjali persona.",
