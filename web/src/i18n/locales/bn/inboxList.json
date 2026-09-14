@@ -21,13 +21,11 @@
     "resolvedToday": "আজ সমাধান"
   },
   "columns": {
-    "severityDot": "",
     "thread": "থ্রেড",
     "where": "কোথায়",
     "owner": "মালিক",
     "ownerUnknown": "?",
-    "severity": "তীব্রতা",
-    "action": ""
+    "severity": "তীব্রতা"
   },
   "card": {
     "title": "পদক্ষেপ সারি",

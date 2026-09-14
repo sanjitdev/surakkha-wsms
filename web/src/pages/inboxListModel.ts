@@ -64,6 +64,13 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       (p.sensor_snapshot as { sensor_id?: string }[] | undefined)?.[0]?.sensor_id ?? '—',
       '—',
     );
+    // Truncate ULID-style sensor ids (e.g. "01JOSENSORWARD00000000000A")
+    // so the where-column sub line doesn't overflow on narrow rows.
+    // Real sensor ids like "SN-2208" pass through untouched.
+    const sensorIdShort =
+      sensorId.length > 12 && !sensorId.startsWith('SN-')
+        ? `${sensorId.slice(0, 8)}…`
+        : sensorId;
     const ownerKind = inbox.owner_kind as InboxRowType['ownerKind'];
     // The InboxDetail route at /inbox/:id expects an incident_id (it
     // looks the row up in the /api/incidents list, which keys by
@@ -81,7 +88,7 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       title: toStr(inbox.title, 'Untitled incident'),
       meta: toStr(inbox.summary, ''),
       where: ward.startsWith('ward') ? `ward ${ward.slice(5)}` : ward,
-      whereSub: sensorId,
+      whereSub: sensorIdShort,
       ownerName: toStr(inbox.owner_display, 'System'),
       ownerKind,
       status,

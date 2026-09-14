@@ -152,6 +152,7 @@ export async function seedIfEmpty(): Promise<boolean> {
   height++;
 
   // ── incident created from the anjali report ───────────────────────────
+  const dhanmondiIncidentId = ulid(t0 + 3001);
   const incident: ChainBlock = await buildBlock({
     prev_block_hash: prevHash,
     event_type: 'IncidentCreated',
@@ -159,12 +160,28 @@ export async function seedIfEmpty(): Promise<boolean> {
     occurred_at: NOW(),
     actor_identity: ACTORS.priya,
     payload: {
-      incident_id: ulid(t0 + 3001),
+      incident_id: dhanmondiIncidentId,
       correlation_id: anjaliReport.event_id,
       ward_id: 'ward-dhanmondi',
       severity: 'medium',
       source: 'AnjaliReport',
       sensor_snapshot: [{ sensor_id: sensorId, parameter: 'pH', value: 7.6, band: 'medium' }],
+      // inbox-row extensions so the seed incident shows up on the operator
+      // dashboard with a real title + summary instead of falling back to
+      // "Untitled incident" in inboxListModel.toStr.
+      inbox: {
+        owner_kind: 'operator',
+        owner_display: 'System',
+        status: 'info',
+        title: 'Ward dhanmondi pH drift — citizen report',
+        summary: 'Anjali SMS · SN-cluster above 7.6 pH · needs verification',
+        href: `/inbox/${dhanmondiIncidentId}`,
+        isUrgent: false,
+        isDraft: false,
+        isCitizen: true,
+        isAwaitingSig: false,
+        read: false,
+      },
     },
   });
 

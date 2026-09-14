@@ -527,6 +527,24 @@ const incidentHandlers = [
         const inbox = p.inbox as { owner_kind?: string } | undefined;
         const ownerKind = inbox?.owner_kind;
         const explicit = typeof p.reporter_kind === 'string' ? p.reporter_kind : undefined;
+        // Walk back through this incident's events to find the most recent
+        // severity-bearing payload. IncidentResolved / TechnicianAssigned /
+        // FixSubmitted don't carry severity, so the latest-event lookup
+        // would otherwise yield 'unknown' and the InboxDetail chip would
+        // render the literal word "unknown". Scan ascending so the first
+        // hit wins (events are sorted ascending by height in `all`).
+        const incidentChain = all
+          .filter((b) => (b.payload as { incident_id?: string }).incident_id === id)
+          .sort((a, b) => a.height - b.height);
+        const lastSeverity = [...incidentChain]
+          .reverse()
+          .map((b) => {
+            const bp = b.payload as { severity?: unknown; to_severity?: unknown };
+            const s = typeof bp.severity === 'string' ? bp.severity : undefined;
+            const t = typeof bp.to_severity === 'string' ? bp.to_severity : undefined;
+            return s ?? t;
+          })
+          .find((v) => typeof v === 'string');
         let reporterKind: 'anchor' | 'hotline' | 'webform' | 'sensor' | undefined;
 
         if (explicit === 'anchor' || explicit === 'hotline' || explicit === 'webform' || explicit === 'sensor') {
@@ -546,7 +564,7 @@ const incidentHandlers = [
               : latest.event_type === 'IncidentEscalated'
                 ? 'escalated'
                 : 'open',
-          severity: p.severity ?? p.to_severity ?? 'unknown',
+          severity: lastSeverity ?? 'unknown',
           ward_id: p.ward_id,
           last_block_height: latest.height,
           last_event_type: latest.event_type,

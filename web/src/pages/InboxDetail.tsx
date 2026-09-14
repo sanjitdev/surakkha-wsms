@@ -74,6 +74,31 @@ function severityBadgeClass(sev: string): string {
   if (sev === 'T1' || sev === 't1') return 'badge badge--t1';
   return 'badge badge--t0';
 }
+/**
+ * Map a chain event_type to the timeline marker modifier class.
+ * Mirrors the mockup contract (mockups/01-priya/dashboard.css
+ * .timeline li::before variants): done = success green, active =
+ * warning amber, danger = red, info = brand blue. Everything else
+ * falls through to the default neutral ring so the marker still reads
+ * as "an event happened here".
+ */
+function timelineMarkerClass(eventType: string): string {
+  if (eventType === 'IncidentResolved') return 'tl-done';
+  if (eventType === 'IncidentEscalated') return 'tl-danger';
+  if (eventType === 'IncidentCreated') return 'tl-active';
+  if (
+    eventType === 'TechnicianAssigned' ||
+    eventType === 'TechnicianArrived' ||
+    eventType === 'DiagnosisSubmitted' ||
+    eventType === 'FixSubmitted' ||
+    eventType === 'PublicNoticeIssued' ||
+    eventType === 'PlaybookStepExecuted' ||
+    eventType === 'SignatureAttestation'
+  ) {
+    return 'tl-info';
+  }
+  return '';
+}
 function eventTitle(
   event: ChainEvent,
   t: (k: string, opts?: Record<string, unknown>) => string,
@@ -850,7 +875,11 @@ export function InboxDetail() {
                   }
 
                   return (
-                    <li key={e.event_id} data-testid={`inbox-event-row-${e.event_id}`}>
+                    <li
+                      key={e.event_id}
+                      data-testid={`inbox-event-row-${e.event_id}`}
+                      className={timelineMarkerClass(e.event_type)}
+                    >
                       <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
                       <p className="timeline__title">{eventTitle(e, tDetail)}</p>
                       <div

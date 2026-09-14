@@ -148,7 +148,11 @@ export function InboxList() {
     () => [
       {
         key: 'severity-dot',
-        header: tInbox('columns.severityDot'),
+        // No visible header for the dot column — it's a visual rail,
+        // not a labelled field. Passing an empty literal avoids the
+        // i18n-key-leak that happens when t() resolves a missing/empty
+        // value to the key string itself.
+        header: '',
         render: (r) => {
           // Lockdown cascade 2026-09-11: severity dot uses the lockdown
           // palette per inbox-list.md #1 / inbox-rail.md. T3 in operator
@@ -241,7 +245,10 @@ export function InboxList() {
       },
       {
         key: 'action',
-        header: tInbox('columns.action'),
+        // Action column has no visible header — rows link directly to the
+        // work surface. Empty literal avoids the i18n-key-leak when t()
+        // resolves a missing/empty value to the key string itself.
+        header: '',
         render: (r) => <a href={r.action.href}>{r.action.label} →</a>,
         className: 'col-action',
       },

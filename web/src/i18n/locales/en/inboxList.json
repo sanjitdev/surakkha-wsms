@@ -21,13 +21,11 @@
     "resolvedToday": "Resolved · today"
   },
   "columns": {
-    "severityDot": "",
     "thread": "Thread",
     "where": "Where",
     "owner": "Owner",
     "ownerUnknown": "?",
-    "severity": "Severity",
-    "action": ""
+    "severity": "Severity"
   },
   "card": {
     "title": "Action queue",

@@ -933,6 +933,16 @@ main[data-layout="c"] [data-layout-only="c"] {
 }
 .timeline li.tl-done::before { border-color: var(--success); background: var(--success); }
 .timeline li.tl-active::before { border-color: var(--warning); background: var(--warning); }
+/* timeline li.tl-info — neutral brand-blue dot for routine actions
+   (TechnicianAssigned, DiagnosisSubmitted, FixSubmitted, PlaybookStep,
+   PublicNoticeIssued, SignatureAttestation). Bridges the gap between
+   "done" (success) and "active" (warning). */
+.timeline li.tl-info::before { border-color: var(--brand-500); background: var(--brand-500); }
+/* timeline li.tl-danger — alert-red dot for IncidentEscalated only.
+   Uses the locked --danger token (NOT the alert-red-reserved
+   --color-trust-t3-issuance token, which is reserved for the
+   consumer-notice issuance path). */
+.timeline li.tl-danger::before { border-color: var(--danger); background: var(--danger); }
 .timeline__time {
   font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);

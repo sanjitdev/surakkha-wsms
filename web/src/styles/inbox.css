@@ -26,6 +26,22 @@
 .inbox-row__title-link:hover strong {
   color: var(--brand-600);
 }
+/* ── row rhythm — clamp title to 2 lines + give every row a comfortable
+      min-height so wrapping titles + long summaries still align vertically.
+      Without this the rows ripple (one short, two tall, one short) and
+      the table reads as jittery. ───────────────────────────────────── */
+.data-table--inbox__tr {
+  min-height: 88px;
+}
+.data-table--inbox__tr td.col-title strong {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* keep rows with 1-line titles vertically aligned with rows that wrap */
+  line-height: var(--line-height-snug, 1.35);
+}
 
 /* ── selection state — strip row background per dim 1 (no colour tokens
       transition; row bg switches instantly via attribute). ──────────── */
