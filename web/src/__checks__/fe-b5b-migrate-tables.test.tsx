@@ -8,13 +8,13 @@
  *
  * Cases (8 total):
  *   1) OperatorDashboard_sensors_table_renders_5_rows_with_severity_dots
- *   2) OperatorDashboard_chain_table_has_4_columns_with_status_badge
+ *   2) OperatorDashboard_chain_table_has_3_columns_with_status_badge
  *   3) InboxList_action_queue_table_has_selectable_checkbox_with_tri_state
  *   4) AuditLog_events_table_sortable_on_event_type_column
  *   5) AuditLog_loading_state_uses_table_skeleton
  *   6) AuditLog_empty_state_renders_when_no_events
  *   7) InboxList_row_checkbox_toggles_selection_and_updates_tri_state
- *   8) OperatorDashboard_layout_C_chain_table_renders_3_rows
+ *   8) OperatorDashboard_chain_table_renders_rows
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -152,12 +152,11 @@ describe('FE-B5b-migrate OperatorDashboard', () => {
     expect(dots.length).toBe(4);
   });
 
-  // (2) Today-on-chain card — 4 columns + status badge.
-  it('OperatorDashboard_chain_table_has_4_columns_with_status_badge', async () => {
+  // (2) Today-on-chain card — 3 columns (time / what / status) + status
+  // badge. Single grid layout (post removal of the layout chooser).
+  it('OperatorDashboard_chain_table_has_3_columns_with_status_badge', async () => {
     installDashboardHandlers();
     renderInRouter(<OperatorDashboard />, true);
-    // Layout A renders table-chain at the top-right; Layouts B+C also
-    // render one. Pick the first.
     const chainTable = (await screen.findAllByTestId('table-chain')).at(0)!;
 
     await waitFor(() => {
@@ -165,30 +164,22 @@ describe('FE-B5b-migrate OperatorDashboard', () => {
     });
     const headerCells = within(chainTable).getAllByRole('columnheader');
 
-    expect(headerCells.length).toBe(4); // 4 columns for Layout A chain
+    expect(headerCells.length).toBe(3); // chainColumnsCompact: time / what / status
     const badges = chainTable.querySelectorAll('.badge');
 
     expect(badges.length).toBeGreaterThan(0);
   });
 
-  // (8) Layout C — switch layout to 'c' then assert the chain table in
-  // the right-rail renders 3 fixture events.
-  it('OperatorDashboard_layout_C_chain_table_renders_3_rows', async () => {
+  // (8) Single grid layout — assert the chain table renders rows from the
+  // mocked chain events. There is no layout toggle anymore; the dashboard
+  // always renders the status-board grid.
+  it('OperatorDashboard_chain_table_renders_rows', async () => {
     installDashboardHandlers();
     renderInRouter(<OperatorDashboard />, true);
-    // Wait for the default Layout A to mount.
     await screen.findAllByTestId('table-sensors');
-    // Click the 'c' layout toggle.
-    const cBtn = screen.getByRole('radio', { name: /status/i });
-
-    act(() => {
-      fireEvent.click(cBtn);
-    });
-    // Layouts A, B, C all render table-chain — at least one is present.
     const chainTables = await screen.findAllByTestId('table-chain');
 
     expect(chainTables.length).toBeGreaterThan(0);
-    // At least one table-chain should have rows.
     const totalRows = chainTables.reduce(
       (sum, t) => sum + within(t).queryAllByRole('row').length,
       0,

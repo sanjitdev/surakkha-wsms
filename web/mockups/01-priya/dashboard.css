@@ -312,10 +312,6 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .kpi__delta--down { color: var(--danger); }
 .kpi__delta--neutral { color: var(--fg-tertiary); }
 
-/* ── Handover card ───────────────────────────────────────────── */
-.handover-card { padding: var(--space-md) var(--space-lg); }
-.handover-brief strong.is-t3 { color: var(--danger); }
-.handover-brief strong.is-t2 { color: var(--warning); }
 .card-heading {
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
@@ -324,42 +320,6 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.handover-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-.handover-list li {
-  display: grid;
-  grid-template-columns: 12px 1fr auto auto;
-  align-items: center;
-  gap: var(--space-md);
-  padding: var(--space-sm) 0;
-  border-top: 1px solid var(--border-subtle);
-}
-.handover-list li:first-child { border-top: none; padding-top: var(--space-xs); }
-.handover-list__dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-}
-.handover-list__title {
-  font-size: var(--font-size-sm);
-  color: var(--fg-default);
-}
-.handover-list__meta {
-  font-size: var(--font-size-xs);
-  color: var(--fg-tertiary);
-  font-family: var(--font-family-mono);
-}
-.handover-list__action {
-  font-size: var(--font-size-sm);
-  color: var(--brand-500);
-  text-decoration: none;
-  font-weight: var(--font-weight-medium);
-}
-.handover-list__action:hover { color: var(--brand-600); }
 
 /* ── Data table (multi-column rows with header) ─────────────────
    The <Table> B5b primitive renders <th class="table__header-cell">;
@@ -424,12 +384,18 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .data-table tbody tr:hover td {
   background: var(--bg-elevated);
 }
-.data-table .col-time    { width: 56px; font-family: var(--font-family-mono); color: var(--fg-tertiary); font-size: var(--font-size-xs); white-space: nowrap; }
-.data-table .col-status  { width: 64px; white-space: nowrap; }
-.data-table .col-action  { width: 96px; text-align: right; }
-.data-table .col-value   { width: 88px; font-family: var(--font-family-mono); text-align: right; white-space: nowrap; }
-.data-table .col-sensor  { width: 92px; font-family: var(--font-family-mono); color: var(--fg-secondary); font-size: var(--font-size-xs); white-space: nowrap; }
-.data-table .col-warn    { width: 16px; padding-right: 0; }
+.data-table .col-time,
+.data-table th.col-time    { width: 56px; font-family: var(--font-family-mono); color: var(--fg-tertiary); font-size: var(--font-size-xs); white-space: nowrap; }
+.data-table .col-status,
+.data-table th.col-status  { width: 64px; white-space: nowrap; }
+.data-table .col-action,
+.data-table th.col-action  { width: 96px; text-align: right; }
+.data-table .col-value,
+.data-table th.col-value   { width: 88px; font-family: var(--font-family-mono); text-align: right; white-space: nowrap; }
+.data-table .col-sensor,
+.data-table th.col-sensor  { width: 92px; font-family: var(--font-family-mono); color: var(--fg-secondary); font-size: var(--font-size-xs); white-space: nowrap; }
+.data-table .col-warn,
+.data-table th.col-warn    { width: 16px; padding-right: 0; }
 .data-table td.col-title strong { font-weight: var(--font-weight-semibold); }
 .data-table .col-action a { font-size: var(--font-size-sm); color: var(--brand-500); text-decoration: none; font-weight: var(--font-weight-medium); white-space: nowrap; }
 .data-table .col-action a:hover { color: var(--brand-600); }
@@ -571,52 +537,9 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   LAYOUT TOGGLER + 3 DASHBOARD VARIANTS (A / B / C)
+   PAGE HEADER + STATUS-BOARD DASHBOARD
    No new design tokens — references locked dim-1 + dim-4 only.
    ════════════════════════════════════════════════════════════════════ */
-
-/* ── Layout toggle (page header pills) ─────────────────────────── */
-.layout-toggle {
-  display: inline-flex;
-  gap: 2px;
-  background: var(--bg-subtle);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 2px;
-  /* Keep each pill at its natural width even when the page-header
-     row gets crowded — without this the longest label (originally
-     "status-board") would clip. Pair with the shortened optionC
-     label in operatorDashboard.json. */
-  flex-shrink: 0;
-}
-.layout-toggle__btn {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: var(--space-xs) var(--space-md);
-  color: var(--fg-secondary);
-  cursor: pointer;
-  height: 28px;
-  line-height: 1;
-  white-space: nowrap;
-  transition: background-color 120ms ease-out, color 120ms ease-out;
-}
-.layout-toggle__btn:hover { color: var(--fg-default); }
-.layout-toggle__btn.is-active {
-  background: var(--bg-surface);
-  color: var(--brand-600);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
-[data-theme="dark"] .layout-toggle__btn.is-active {
-  background: var(--bg-surface);
-  color: var(--brand-400);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.32);
-}
 
 .page-header__row {
   display: flex;
@@ -627,74 +550,15 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 }
 .page-header__row > div:first-child { flex: 1; min-width: 240px; }
 .page-header__actions {
-  /* Bundle the right-side action cluster (Log hotline call + layout
-     toggle) into a single flex group so they share one wrap budget.
-     Without this, "Log hotline call" and the toggle are siblings of
-     the row itself, so .page-header__row sees them as independent
-     items — when the row is wide enough for the H1 + the hotline
-     button alone, the toggle still tries to share the remaining
-     space and gets clipped past the right padding. */
+  /* Bundle the right-side action cluster (Log hotline call) into a single
+     flex group so it shares one wrap budget with the H1 row. */
   display: flex;
   align-items: center;
   gap: var(--space-sm);
   flex-shrink: 0;
 }
 
-/* ── Default: hide all variants ───────────────────────────────── */
-[data-layout-only] { display: none; }
-main[data-layout="a"] [data-layout-only="a"],
-main[data-layout="b"] [data-layout-only="b"],
-main[data-layout="c"] [data-layout-only="c"] {
-  display: block;
-}
-
-/* ── Variant A — Dense grid (operator command center) ──────────── */
-.kpi-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-.kpi-row .kpi { min-height: 108px; }
-.dense-row {
-  display: grid;
-  grid-template-columns: 8fr 4fr;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-.dense-row .card { min-height: 260px; }
-.dense-row .handover-list { margin-top: var(--space-xs); }
-.dense-foot .card { min-height: 200px; }
-
-/* ── Variant B — Editorial (magazine-style section-led) ────────── */
-.editorial-hero {
-  display: grid;
-  grid-template-columns: 4fr 8fr;
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-.editorial-hero .card { min-height: 240px; }
-.kpi--hero .kpi__value {
-  font-size: 3.5rem;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  margin: var(--space-sm) 0;
-}
-.kpi--hero .kpi__delta { font-size: var(--font-size-sm); }
-.editorial-second {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--space-md);
-  margin-bottom: var(--space-md);
-}
-.editorial-second .kpi { min-height: 96px; }
-.editorial-second .kpi .kpi__value { font-size: var(--font-size-xl); }
-.editorial-row {
-  margin-bottom: var(--space-md);
-}
-.editorial-row .card { min-height: 200px; }
-
-/* ── Variant C — Status-board (workspace split) ────────────────── */
+/* ── Status-board layout (KPI strip + split-pane body) ──────────── */
 .kpi-strip {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -722,25 +586,47 @@ main[data-layout="c"] [data-layout-only="c"] {
 
 .status-board .split-pane {
   display: grid;
+  /* Two columns on the desktop layout. The chain card is a sibling of
+     .right-rail here so it can be re-positioned responsively — see
+     .data-card--today-chain / @media (max-width: 1100px) below. */
   grid-template-columns: 6fr 4fr;
+  /* Desktop positioning via named areas: sensor fleet occupies the full
+     left column (spans both rows), the threads card sits in the top
+     right, and Today on chain sits in the bottom right. */
+  grid-template-areas:
+    "sensor threads"
+    "sensor chain";
   gap: var(--space-md);
 }
 .status-board .split-pane .card { min-height: 240px; }
+.status-board .data-card--sensor-fleet { grid-area: sensor; }
 .status-board .right-rail {
+  grid-area: threads;
   display: grid;
-  grid-template-rows: 1fr 1fr;
+  grid-template-rows: 1fr;
   gap: var(--space-md);
 }
+.status-board .data-card--today-chain { grid-area: chain; }
 
-/* ── Section divider (subtle, used in variant B) ───────────────── */
-.section-label {
-  font-family: var(--font-family-mono);
-  font-size: var(--font-size-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--fg-tertiary);
-  margin: 0 0 var(--space-sm);
-  font-weight: var(--font-weight-semibold);
+/* Narrow screens (≤1100px — matches the work-queue / history / fleet
+   collapse points used elsewhere in the project): collapse the split-pane
+   to a single column. The sensor fleet fills the viewport on the first
+   row; threads on the second; Today on chain on the third. This puts
+   the chain card directly below the sensor fleet per FE-1.6a §2.4
+   "small-screen contract". */
+@media (max-width: 1100px) {
+  .status-board .split-pane {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "sensor"
+      "threads"
+      "chain";
+  }
+  .status-board .data-card--sensor-fleet,
+  .status-board .right-rail,
+  .status-board .data-card--today-chain {
+    grid-area: auto;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -841,10 +727,13 @@ main[data-layout="c"] [data-layout-only="c"] {
 .inbox-search__input::placeholder { color: var(--fg-tertiary); }
 
 /* ── Inbox data-table extended columns ─────────────────────────── */
-.data-table--inbox td.col-title { padding: var(--space-md) var(--space-sm); }
-.data-table--inbox .col-check { width: 28px; padding-left: var(--space-md); }
+.data-table--inbox td.col-title,
+.data-table--inbox th.col-title { padding: var(--space-md) var(--space-sm); }
+.data-table--inbox .col-check,
+.data-table--inbox th.col-check { width: 28px; padding-left: var(--space-md); }
 .data-table--inbox .col-check input { cursor: pointer; }
-.data-table--inbox .col-owner { width: 110px; font-size: var(--font-size-sm); }
+.data-table--inbox .col-owner,
+.data-table--inbox th.col-owner { width: 110px; font-size: var(--font-size-sm); }
 .data-table--inbox .row-sub {
   font-size: var(--font-size-xs);
   color: var(--fg-tertiary);
@@ -943,7 +832,6 @@ main[data-layout="c"] [data-layout-only="c"] {
 }
 /* ── Focus rings (Issue #14) ───────────────────────────────────── */
 .tab:focus-visible,
-.layout-toggle__btn:focus-visible,
 .filter-chip:focus-visible,
 .data-card__foot-link:focus-visible {
   outline: 2px solid var(--color-primary-tint, var(--brand-500));
@@ -1385,7 +1273,8 @@ main[data-layout="c"] [data-layout-only="c"] {
 /* ════════════════════════════════════════════════════════════════════
    Data-table default for .col-where (used by verify, audit, sensors)
    ════════════════════════════════════════════════════════════════════ */
-.data-table .col-where {
+.data-table .col-where,
+.data-table th.col-where {
   width: 140px;
   font-size: var(--font-size-xs);
   color: var(--fg-secondary);
@@ -1401,6 +1290,7 @@ main[data-layout="c"] [data-layout-only="c"] {
 .data-table th.hash {
   font-size: 10px;
 }
+/* (col-where width rule consolidated above — see line 1273 area) */
 
 .verify-result {
   display: grid;

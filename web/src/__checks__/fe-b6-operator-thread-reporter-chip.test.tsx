@@ -184,8 +184,8 @@ describe('FE-B6 OperatorDashboard reporter-badge chips (operator-dashboard.md #9
   });
 
   // (4) Default kind fallback (inc-default has no reporter_kind → webform).
-  // Top 3 of 3 incidents render per layout; 1 of those 3 is webform
-  // (inc-default fallback). 2 layouts × 1 = 2 webform chips minimum.
+  // Single grid layout (post removal of the layout chooser): exactly 1
+  // webform chip is rendered (the inc-default fallback).
   it('defaults missing reporter_kind to webform chip', async () => {
     renderDash();
     await waitFor(() => {
@@ -194,8 +194,8 @@ describe('FE-B6 OperatorDashboard reporter-badge chips (operator-dashboard.md #9
 
     const webformChips = document.querySelectorAll('[data-testid="thread-reporter-webform"]');
 
-    // 2 layouts × 1 webform chip per layout (inc-default fallback) = 2.
-    expect(webformChips.length).toBeGreaterThanOrEqual(2);
+    // Single layout × 1 webform chip per layout (inc-default fallback) = 1.
+    expect(webformChips.length).toBeGreaterThanOrEqual(1);
   });
 
   // (5) Key parity (still includes sensor — even though fixture doesn't

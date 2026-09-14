@@ -4,8 +4,7 @@
  * Surakkha Phase 1 — Priya's dashboard. React port of
  * web/mockups/01-priya/dashboard.html.
  *
- * - 3 layouts (A · grid / B · editorial / C · status-board) with the same
- *   localStorage-backed toggler the static mockup ships. Default = 'a'.
+ * - Single layout (status-board grid) with KPI strip + split-pane body.
  * - 3 tabs (Overview / Sensors / Wards); arrow-key nav between tabs.
  * - Reads /api/incidents for KPI counts + thread rows, /api/sensors for the
  *   sensor fleet, /api/events for "Today on chain" timeline.
@@ -56,7 +55,6 @@ import {
 import type { ReactElement } from 'react';
 import type { IncidentSummary, ReporterKind } from '../types/domain';
 
-type Layout = 'a' | 'b' | 'c';
 type Tab = 'overview' | 'sensors' | 'wards';
 
 /**
@@ -90,11 +88,7 @@ interface ChainEventLite {
 // shape contract is preserved in the next iteration of this page.
 // type ThreadRow { incident_id: string; ward_id?: string; severity: string; status: string; last_occurred_at: string; }
 
-const LAYOUT_STORAGE_KEY = 'surakkha.layout';
 const TABS: Tab[] = ['overview', 'sensors', 'wards'];
-// Module-scope constant so `layoutToggleKeyDown` (also at module scope)
-// and the JSX in OperatorDashboard share the same source of truth.
-const LAYOUT_OPTIONS: Layout[] = ['a', 'b', 'c'];
 
 /**
  * Issue #10: spec §10.3 mandates Tab order matches visual order, and the
@@ -142,54 +136,6 @@ function tablistKeyDown(
   });
 }
 
-/**
- * Issue #4 (Critical — a11y): `role="radiogroup"` requires arrow-key
- * movement between options. Without this, a keyboard-only operator has
- * to Tab out of the group, Tab back, and Tab past 2 more radios to
- * reach "C", which is wrong for a 3-option cluster.
- *
- * Per WAI-ARIA radiogroup pattern: ArrowLeft/Up moves to the previous
- * option (wrapping), ArrowRight/Down moves to the next, Home/End jump
- * to the ends. The radio receiving focus becomes both focused AND
- * checked (single-selection radiogroup convention).
- */
-function layoutToggleKeyDown(
-  layout: Layout,
-  setLayout: (l: Layout) => void,
-  e: React.KeyboardEvent<HTMLDivElement>,
-): void {
-  const i = LAYOUT_OPTIONS.indexOf(layout);
-  if (i === -1) return;
-  let next: number | null = null;
-  switch (e.key) {
-    case 'ArrowRight':
-    case 'ArrowDown':
-      next = (i + 1) % LAYOUT_OPTIONS.length;
-      break;
-    case 'ArrowLeft':
-    case 'ArrowUp':
-      next = (i - 1 + LAYOUT_OPTIONS.length) % LAYOUT_OPTIONS.length;
-      break;
-    case 'Home':
-      next = 0;
-      break;
-    case 'End':
-      next = LAYOUT_OPTIONS.length - 1;
-      break;
-    default:
-      return;
-  }
-  e.preventDefault();
-  const target = LAYOUT_OPTIONS[next]!;
-  setLayout(target);
-  requestAnimationFrame(() => {
-    const el = document.querySelector<HTMLButtonElement>(
-      `[data-layout-btn="${target}"]`,
-    );
-    el?.focus();
-  });
-}
-
 export function OperatorDashboard() {
   // Session + chain freshness come from the AppLayout context. AppLayout
   // already gates on `role === 'utility_operator'` so by the time this
@@ -199,7 +145,6 @@ export function OperatorDashboard() {
   const { formatRelative } = useRelativeTime();
   const { format: formatNum } = useNumberFormatter();
   const { t: tDash } = useTranslation('operatorDashboard');
-  const [layout, setLayout] = useState<Layout>('a');
   const [tab, setTab] = useState<Tab>('overview');
   const [threadFilter, setThreadFilter] = useState<ThreadFilter>('all');
   // operator-dashboard.md #6 — top-chrome `Log hotline call` button.
@@ -235,26 +180,7 @@ export function OperatorDashboard() {
   const combinedError =
     fetchError ?? (incidentsError ? incidentsError.message : null);
 
-  // 1. layout persistence — localStorage.surakkha.layout, default 'a'
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(LAYOUT_STORAGE_KEY);
-
-      if (saved === 'a' || saved === 'b' || saved === 'c') setLayout(saved);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(LAYOUT_STORAGE_KEY, layout);
-    } catch {
-      /* ignore */
-    }
-  }, [layout]);
-
-  // 2. data fetch — sensors + recent chain events only. Incidents come
+  // 1. data fetch — sensors + recent chain events only. Incidents come
   // from `useIncidents()` (Layer C) so the dashboard, inbox detail, and
   // any future incident consumer share a single fetch path.
   useEffect(() => {
@@ -459,105 +385,11 @@ export function OperatorDashboard() {
     [formatTime, tDash],
   );
 
-  const chainColumns: TableColumn<ChainEventLite>[] = useMemo(
-    () => [
-      {
-        key: 'occurred_at',
-        header: tDash('chain.table.colTime'),
-        className: 'col-time',
-        render: (e) => formatTime('time', e.occurred_at),
-      },
-      {
-        key: 'event_type',
-        header: tDash('chain.table.colWhat'),
-        render: (e) => (
-          <span className="chain-event">
-            <span className="chain-event__icon" aria-hidden="true">
-              {chainEventIcon(e.event_type)}
-            </span>
-            <span>{summarizeEvent(e, tDash)}</span>
-          </span>
-        ),
-      },
-      {
-        key: 'where',
-        header: tDash('chain.table.colWhere'),
-        render: (e) => {
-          const wardId = (e.payload as { ward_id?: string }).ward_id;
-          if (wardId === undefined) {
-            return tDash('common.emDash');
-          }
-          return <span className="nowrap">{wardId}</span>;
-        },
-      },
-      {
-        key: 'status',
-        header: tDash('chain.table.colStatus'),
-        className: 'col-status',
-        render: (e) => (
-          <span className={`badge badge--${statusBadgeClass(e.event_type)}`}>
-            {statusBadgeLabel(e.event_type, tDash)}
-          </span>
-        ),
-      },
-    ],
-    [formatTime, tDash],
-  );
+  // chainColumns + threadColumns (non-compact variants) were removed
+  // alongside the layout chooser — only the compact column sets render
+  // in the status-board grid. See chainColumnsCompact + threadColumnsCompact.
 
   // Issue #6: drops the col-warn severity dot. The trust-band badge below
-  // already encodes severity with glyph + text + colour; the dot was
-  // double-encoding the same information. The badge uses the lockdown
-  // T3→amber-bright mapping via severityBadgeGlyphClass().
-  const threadColumns: TableColumn<IncidentSummary>[] = useMemo(
-    () => [
-      {
-        key: 'severity-badge',
-        header: tDash('threads.table.colSeverity'),
-        className: 'col-status',
-        render: (i) => (
-          <span
-            className={`badge badge--${severityBadgeClass(i.severity)}`}
-            aria-label={severityAriaLabel(i.severity, tDash)}
-            title={severityAriaLabel(i.severity, tDash)}
-          >
-            {severityGlyph(i.severity)} {i.severity}
-          </span>
-        ),
-      },
-      {
-        key: 'incident_id',
-        header: tDash('threads.table.colThread'),
-        render: (i) => tDash('threads.table.threadLabel', {
-          ward: i.ward_id ?? tDash('common.emDash'),
-        }),
-      },
-      {
-        // operator-dashboard.md #9 — reporter-badge chip per row.
-        // Source attribute, separate from trust band (foundation §1.1).
-        key: 'reporter_kind',
-        header: tDash('threads.table.colReporter'),
-        render: (i) => renderReporterChip(i.reporter_kind),
-      },
-      {
-        key: 'status',
-        header: tDash('threads.table.colStatusBlocker'),
-        render: (i) => i.status,
-      },
-      {
-        key: 'last_occurred_at',
-        header: tDash('threads.table.colOpened'),
-        className: 'col-time',
-        render: (i) => formatRelative(i.last_occurred_at),
-      },
-      {
-        key: 'action',
-        header: '',
-        className: 'col-action',
-        render: () => <a href="/inbox">{tDash('threads.table.openAction')}</a>,
-      },
-    ],
-    [formatRelative, tDash],
-  );
 
   const threadColumnsCompact: TableColumn<IncidentSummary>[] = useMemo(
     () => [
@@ -655,42 +487,8 @@ export function OperatorDashboard() {
               {tDash('pageHeader.sensorsOnline', { count: sensors.length })}
             </div>
           </div>
-          {/* operator-dashboard.md #6 — top-chrome action bar.
-              Issue #19: layout toggle comes BEFORE the hotline button in
-              DOM order so keyboard tab order matches the spec §10.3
-              contract (layout toggle → tabs → KPI cards → table rows →
-              action button). Visual left/right is governed by CSS
-              `justify-content` so this swap is keyboard-order only. */}
+          {/* operator-dashboard.md #6 — top-chrome action bar. */}
           <div className="page-header__actions">
-            <div
-              className="layout-toggle"
-              role="radiogroup"
-              aria-label={tDash('layoutToggle.ariaLabel')}
-              onKeyDown={(e) => {
-                layoutToggleKeyDown(layout, setLayout, e);
-              }}
-            >
-              {LAYOUT_OPTIONS.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  role="radio"
-                  aria-checked={layout === opt}
-                  data-layout-btn={opt}
-                  className={`layout-toggle__btn${layout === opt ? ' is-active' : ''}`}
-                  onClick={() => {
-                    setLayout(opt);
-                  }}
-                >
-                  {opt.toUpperCase()} ·{' '}
-                  {opt === 'a'
-                    ? tDash('layoutToggle.optionA')
-                    : opt === 'b'
-                      ? tDash('layoutToggle.optionB')
-                      : tDash('layoutToggle.optionC')}
-                </button>
-              ))}
-            </div>
             <Button
               variant="secondary"
               size="md"
@@ -785,7 +583,7 @@ export function OperatorDashboard() {
         </button>
       </div>
 
-      <main className="container container--wide" data-layout={layout}>
+      <main className="container container--wide">
         {/* ── TAB: OVERVIEW ── */}
         <section
           id="tabpanel-overview"
@@ -795,244 +593,8 @@ export function OperatorDashboard() {
           role="tabpanel"
           hidden={tab !== 'overview'}
         >
-          {/* Variant A — Dense grid */}
-          <div data-layout-only="a" hidden={layout !== 'a'}>
-            <div className="kpi-row">
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.activeIncidents.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {showLoadingPlaceholders
-                    ? tDash('common.emDash')
-                    : formatNum(openIncidents.length)}
-                  <span className="kpi__unit">{tDash('kpi.activeIncidents.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.phAvg.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {pHAvg !== null ? pHAvg.toFixed(1) : tDash('common.emDash')}
-                  <span className="kpi__unit">{tDash('kpi.phAvg.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.responseTime.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {responseMin !== null ? responseMin.toFixed(1) : tDash('common.emDash')}
-                  <span className="kpi__unit">{tDash('kpi.responseTime.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.pendingSignatures.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {showLoadingPlaceholders
-                    ? tDash('common.emDash')
-                    : formatNum(pendingSigs)}
-                  <span className="kpi__unit">{tDash('kpi.pendingSignatures.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.noticesIssued.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {showLoadingPlaceholders
-                    ? tDash('common.emDash')
-                    : formatNum(noticesToday)}
-                  <span className="kpi__unit">{tDash('kpi.noticesIssued.unit')}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="dense-row">
-              <div className="card data-card">
-                <div className="data-card__head">
-                  <h3 className="data-card__title">{tDash('sensors.cardTitle')}</h3>
-                </div>
-                <Table<SensorRow>
-                  columns={sensorColumns}
-                  rows={sensors.slice(0, 4)}
-                  rowKey="sensor_id"
-                  testId="table-sensors"
-                  className="data-table"
-                />
-              </div>
-
-              <div className="card data-card">
-                <div className="data-card__head">
-                  <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
-                </div>
-                {/* Issue #2: aria-live=polite so screen readers announce new
-                    chain events as polling refreshes the table. aria-relevant
-                    keeps deletions quiet. */}
-                <div aria-live="polite" aria-relevant="additions text">
-                  <Table<ChainEventLite>
-                    columns={chainColumns}
-                    rows={recent.slice(0, 6)}
-                    rowKey="event_id"
-                    testId="table-chain"
-                    className="data-table"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="dense-foot">
-              <div className="card data-card">
-                <div
-                  className="data-card__head data-card__head--stacked"
-                >
-                  <h3 className="data-card__title">{tDash('threads.cardTitle')}</h3>
-                  {/* Thread filter chips — operator-dashboard.md #7 */}
-                  <div
-                    className="filter-chips"
-                    role="group"
-                    aria-label={tDash('threads.filters.ariaLabel')}
-                    data-testid="dashboard-thread-filters"
-                  >
-                    {THREAD_FILTERS.map((f) => (
-                      <FilterChip
-                        key={f}
-                        label={`${tDash(threadChipLabelKey[f])} ${threadCounts[f]}`}
-                        active={threadFilter === f}
-                        dotColor={f === 'all' ? undefined : threadChipDotColor[f]}
-                        onClick={() => {
-                          setThreadFilter(f);
-                        }}
-                        testId={`dashboard-thread-chip-${f.toLowerCase()}`}
-                      />
-                    ))}
-                  </div>
-                </div>
-                {filteredThreads.length === 0 ? (
-                  /* Issue #12: empty state when no open incidents match the
-                     current filter — gives the operator an explicit
-                     "nothing waiting on you" confirmation rather than a
-                     blank table. */
-                  <div
-                    className="dashboard-empty"
-                    data-testid="dashboard-threads-empty"
-                  >
-                    <p className="dashboard-empty__title">
-                      {tDash('threads.emptyTitle')}
-                    </p>
-                    <p className="dashboard-empty__body">
-                      {tDash('threads.emptyBody')}
-                    </p>
-                  </div>
-                ) : (
-                  <Table<IncidentSummary>
-                    columns={threadColumns}
-                    rows={filteredThreads}
-                    rowKey="incident_id"
-                    testId="table-threads"
-                    className="data-table"
-                  />
-                )}
-              </div>
-              {/* Issue #11: discoverable inbox link inside the threads card.
-                  Replaces the previous 3-row cap with the full filtered set
-                  plus an explicit "Open all →" affordance. */}
-              <div
-                className="data-card__foot"
-                data-testid="dashboard-threads-foot"
-              >
-                <a className="data-card__foot-link" href="/inbox">
-                  {tDash('threads.openAll', {
-                    count: filteredThreads.length,
-                  })}{' '}
-                  →
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Variant B — Editorial */}
-          <div data-layout-only="b" hidden={layout !== 'b'}>
-            <div className="editorial-hero">
-              <div className="card handover-card kpi--hero">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.activeIncidents.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {formatNum(openIncidents.length)}
-                  <span className="kpi__unit">{tDash('kpi.activeIncidents.unit')}</span>
-                </div>
-                <div style={{ marginTop: 'var(--space-md)' }}>
-                  <a className="handover-list__action" href="/inbox">
-                    {tDash('editorial.triageAll')}
-                  </a>
-                </div>
-              </div>
-              <div className="card data-card">
-                <div className="data-card__head">
-                  <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
-                </div>
-                <div aria-live="polite" aria-relevant="additions text">
-                  <Table<ChainEventLite>
-                    columns={chainColumns}
-                    rows={recent.slice(0, 6)}
-                    rowKey="event_id"
-                    testId="table-chain"
-                    className="data-table"
-                  />
-                </div>
-              </div>
-            </div>
-            <p className="section-label">{tDash('editorial.sectionLabel')}</p>
-            <div className="editorial-second">
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.phAvg.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {pHAvg !== null ? pHAvg.toFixed(1) : tDash('common.emDash')}
-                  <span className="kpi__unit">{tDash('kpi.phAvg.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.responseTime.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {responseMin !== null ? responseMin.toFixed(1) : tDash('common.emDash')}
-                  <span className="kpi__unit">{tDash('kpi.responseTime.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.pendingSignatures.shortLabel')}</span>
-                </div>
-                <div className="kpi__value">
-                  {showLoadingPlaceholders
-                    ? tDash('common.emDash')
-                    : formatNum(pendingSigs)}
-                  <span className="kpi__unit">{tDash('kpi.pendingSignatures.unit')}</span>
-                </div>
-              </div>
-              <div className="kpi">
-                <div className="kpi__head">
-                  <span className="kpi__label">{tDash('kpi.noticesIssued.label')}</span>
-                </div>
-                <div className="kpi__value">
-                  {showLoadingPlaceholders
-                    ? tDash('common.emDash')
-                    : formatNum(noticesToday)}
-                  <span className="kpi__unit">{tDash('kpi.noticesIssued.unit')}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Variant C — Status-board */}
-          <div data-layout-only="c" className="status-board" hidden={layout !== 'c'}>
+          {/* Status-board layout (single grid: kpi-strip + split-pane) */}
+          <div className="status-board">
             <div className="kpi-strip">
               <div className="kpi-strip__cell kpi">
                 <div className="kpi__label">{tDash('kpi.activeIncidents.label')}</div>
@@ -1077,7 +639,7 @@ export function OperatorDashboard() {
               </div>
             </div>
             <div className="split-pane">
-              <div className="card data-card">
+              <div className="card data-card data-card--sensor-fleet">
                 <div className="data-card__head">
                   <h3 className="data-card__title">{tDash('sensors.cardTitle')}</h3>
                 </div>
@@ -1099,7 +661,7 @@ export function OperatorDashboard() {
                       className="filter-chips"
                       role="group"
                       aria-label={tDash('threads.filters.ariaLabel')}
-                      data-testid="dashboard-thread-filters-b"
+                      data-testid="dashboard-thread-filters"
                     >
                       {THREAD_FILTERS.map((f) => (
                         <FilterChip
@@ -1110,7 +672,7 @@ export function OperatorDashboard() {
                           onClick={() => {
                             setThreadFilter(f);
                           }}
-                          testId={`dashboard-thread-chip-b-${f.toLowerCase()}`}
+                          testId={`dashboard-thread-chip-${f.toLowerCase()}`}
                         />
                       ))}
                     </div>
@@ -1144,23 +706,29 @@ export function OperatorDashboard() {
                   <a className="data-card__foot-link" href="/inbox">
                     {tDash('threads.openAll', {
                       count: filteredThreads.length,
-                    })}{' '}
-                    →
+                    })}
                   </a>
                 </div>
-                <div className="card data-card">
-                  <div className="data-card__head">
-                    <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
-                  </div>
-                  <div aria-live="polite" aria-relevant="additions text">
-                    <Table<ChainEventLite>
-                      columns={chainColumnsCompact}
-                      rows={recent.slice(0, 6)}
-                      rowKey="event_id"
-                      testId="table-chain"
-                      className="data-table"
-                    />
-                  </div>
+              </div>
+              {/* Today on chain — extracted from .right-rail so it can be
+                  repositioned responsively. On large screens (≥1100px) it
+                  visually sits below the threads card on the right via
+                  grid-template-areas. On narrow screens the split-pane
+                  collapses to a single column and the chain card naturally
+                  falls below the sensor fleet, matching the "small screen"
+                  contract in FE-1.6a §layout §2.4. */}
+              <div className="card data-card data-card--today-chain">
+                <div className="data-card__head">
+                  <h3 className="data-card__title">{tDash('chain.cardTitle')}</h3>
+                </div>
+                <div aria-live="polite" aria-relevant="additions text">
+                  <Table<ChainEventLite>
+                    columns={chainColumnsCompact}
+                    rows={recent.slice(0, 6)}
+                    rowKey="event_id"
+                    testId="table-chain"
+                    className="data-table"
+                  />
                 </div>
               </div>
             </div>
