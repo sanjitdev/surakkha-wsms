@@ -116,7 +116,7 @@ docs/D-UX-Design/
 ├── 00-phase-4-plan.md                     (this file's predecessor; preserved)
 ├── 01-design-system-foundation.md         (lockdown-bound; rewritten 2026-09-11)
 ├── 02-phase-4-closeout.md                 (this file)
-├── specs/
+├── specs/                                 (17 canonical page specs; source of truth)
 │   ├── Tier 1 (3):
 │   │   ├── citizen-status-timeline.md
 │   │   ├── hotline-intake-modal.md
@@ -137,12 +137,24 @@ docs/D-UX-Design/
 │       ├── styleguide-page.md
 │       ├── coming-soon-page.md
 │       └── verify-flow.md
+├── wireframes/                            (mirror of specs/ — added 2026-09-14 for navigation)
+├── tokens/                                (mirror of foundation doc — added 2026-09-14)
+│   ├── README.md
+│   ├── 01-colors.md
+│   ├── 02-typography.md
+│   ├── 03-spacing.md
+│   ├── 04-radii-and-elevation.md
+│   ├── 05-motion.md
+│   ├── 06-trust-bands.md
+│   └── 07-reporter-badges.md
 └── decisions/
     ├── 00-lockdown-audit.md               (587 lines, 29 high-severity conflicts)
     └── 01-token-deconfliction-plan.md     (additive bridge strategy)
 ```
 
 Plus CSS update at `web/mockups/theme.css` (442 lines; lockdown tokens added additively).
+
+> **Note (2026-09-14):** `tokens/` and `wireframes/` are navigation-only mirrors. The canonical source of truth remains `01-design-system-foundation.md` (tokens) and `specs/` (wireframes). Edit those files; the mirrors are regenerated when needed.
 
 ---
 

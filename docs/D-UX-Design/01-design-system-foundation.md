@@ -2,6 +2,7 @@
 
 > Phase 4 — UX Design
 > **Lockdown-bound:** every rule below is bound to `_bmad-output/design/` (18 dimension files) + `_bmad-output/planning-artifacts/ux-designs/ux-Surakkha-2026-09-06/{DESIGN,EXPERIENCE}.md`.
+> **Token mirror (2026-09-14):** per-group token navigability in [`tokens/`](tokens/) — README, 01-colors, 02-typography, 03-spacing, 04-radii-and-elevation, 05-motion, 06-trust-bands, 07-reporter-badges. The mirror is navigation-only; this doc is the source of truth.
 > Per `DESIGN.md`: "Spine wins on conflict." Both DESIGN.md and EXPERIENCE.md win against any mock, wireframe, or import.
 > Page specs in `docs/D-UX-Design/specs/` reference this document and don't re-spec its rules.
 > Produced by Saga/Freya — 2026-09-11 (rewritten after lockdown reconciliation; superseded foundation at git history).

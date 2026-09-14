@@ -92,22 +92,27 @@ These are the only colour-coded categorical badges in Phase 1. Use neutrals for 
 docs/D-UX-Design/
 ├── 00-phase-4-plan.md             (this file)
 ├── 01-design-system-foundation.md (locked tokens + components + rules)
-├── specs/
-│   ├── citizen-status-timeline.md
-│   ├── hotline-intake-modal.md
-│   ├── per-incident-chain-segment.md
-│   ├── operator-dashboard.md
-│   ├── inbox-detail.md
-│   ├── field-queue.md
-│   ├── field-incident-detail.md
-│   └── audit-log.md
-├── wireframes/
-│   └── (ascii wireframes per page)
-├── decisions/
-│   └── (per-page reconciliation log)
-└── tokens/
-    └── (extracted per phase)
+├── specs/                         (17 canonical page specs; source of truth)
+│   ├── Tier 1 (3): citizen-status-timeline, hotline-intake-modal, per-incident-chain-segment
+│   ├── Tier 2 (5): operator-dashboard, inbox-detail, field-queue, field-incident-detail, audit-log
+│   └── Tier 3 (9): inbox-list, inbox-rail, submit-report-page, citizen-ack-page,
+│                    login-page, settings-page, styleguide-page, coming-soon-page, verify-flow
+├── wireframes/                    (mirror of specs/ — navigable navigation copy, 2026-09-14)
+├── decisions/                     (per-page reconciliation log)
+│   ├── 00-lockdown-audit.md
+│   └── 01-token-deconfliction-plan.md
+└── tokens/                        (mirror of foundation doc — navigable token groups, 2026-09-14)
+    ├── README.md (index)
+    ├── 01-colors.md
+    ├── 02-typography.md
+    ├── 03-spacing.md
+    ├── 04-radii-and-elevation.md
+    ├── 05-motion.md
+    ├── 06-trust-bands.md
+    └── 07-reporter-badges.md
 ```
+
+> **Mirror folders added 2026-09-14.** `tokens/` and `wireframes/` are navigation-only mirrors; the canonical source of truth remains `01-design-system-foundation.md` and `specs/` respectively. Do not edit token values in `tokens/` — edit the foundation doc instead.
 
 ## 6. Constraints honoured throughout
 
