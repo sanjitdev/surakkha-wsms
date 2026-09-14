@@ -241,13 +241,19 @@ export function FieldQueuePage() {
           <span className="tech-today__label">{tField('today.closedLabel')}</span>
           <span className="tech-today__val">{rows.filter((r) => r.isDone).length}</span>
           <span className="tech-today__sub">
-            {/*
-              avgClose isn't modelled yet — when it lands, swap this
-              fallback for a real number (e.g. "avg close · 38 min").
-              The metric stays em-dash + "no data" so the slot never
-              reads as an empty cell.
-            */}
-            {tField('today.closedAvgClose', { avg: tField('today.inProgressEmDash') })}
+            {(() => {
+              // avgClose isn't modelled yet — when it lands the subtitle
+              // reads "avg close · 38 min". Until then the slot stays as
+              // a bare em-dash so the rendered label never shows a
+              // dangling "·" separator pointing at nothing.
+              const emDash = tField('today.inProgressEmDash');
+              // Mock a future value: replace this conditional with the
+              // real metric when the data shape lands.
+              const avg: string | null = null;
+
+              if (avg === null) return emDash;
+              return tField('today.closedAvgClose', { avg });
+            })()}
           </span>
         </div>
       </div>

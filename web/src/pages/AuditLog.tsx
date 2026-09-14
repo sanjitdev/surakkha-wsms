@@ -440,8 +440,8 @@ export function AuditLog() {
                     : null,
                   tAudit('chainHead.rootOk'),
                 ]
-                  .filter((seg): s is string => seg !== null)
-                  .map((seg, i, arr) => (
+                  .filter((seg): seg is string => seg !== null)
+                  .map((seg, i) => (
                     <span key={i}>
                       {i > 0 && <span aria-hidden="true"> · </span>}
                       {seg}

@@ -128,6 +128,13 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* Cap main at its grid-allocated width. Without min-width: 0 a
+     grid item claims its min-content width — KPI cards, chain tables,
+     and chart panels can be wider than (viewport - sidebar) at 1280px,
+     which pushes .main past the viewport and clips the right side of
+     the top-chrome (persona chip, action bar tabs). */
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 /* ── Top chrome (simplified — brand lives in sidebar now) ────── */
@@ -164,6 +171,12 @@
      at 1440 px. The chain metric chip already has its own width
      constraint, so the persona chip is the natural fallback target. */
   white-space: nowrap;
+  /* Lock the span itself from shrinking inside the right cluster —
+     white-space: nowrap alone is not enough because flex children
+     shrink to their min-content and overflow the chrome's right
+     padding, clipping the tail end of the persona name against the
+     viewport edge at 1440px. */
+  flex-shrink: 0;
 }
 .top-chrome__right {
   display: flex;

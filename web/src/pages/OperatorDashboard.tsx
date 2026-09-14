@@ -326,7 +326,17 @@ export function OperatorDashboard() {
       {
         key: 'where',
         header: tDash('chain.table.colWhere'),
-        render: (e) => (e.payload as { ward_id?: string }).ward_id ?? tDash('common.emDash'),
+        render: (e) => {
+          const wardId = (e.payload as { ward_id?: string }).ward_id;
+          if (wardId === undefined) {
+            return tDash('common.emDash');
+          }
+          // white-space: nowrap keeps 'ward-dhanmondi' from wrapping at
+          // the hyphen in the narrow WHERE column. Same root cause as
+          // #58 (sensor fleet render); the compact chain table had it
+          // too but Tier-7 only fixed the wide variant.
+          return <span style={{ whiteSpace: 'nowrap' }}>{wardId}</span>;
+        },
       },
       {
         key: 'status',
