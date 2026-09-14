@@ -528,26 +528,29 @@
 
 /* ── Container (dim 5 §3) ───────────────────────────────────────── */
 /* Container fills the parent edge-to-edge so the chrome's outer padding
- * handles the gutter. The --wide / --bangla / --narrow modifiers cap the
- * *content* line at the typography max-width (kept for readability on
- * ultra-wide viewports), but the container itself stays full-width.
- * `margin: 0` replaces the previous `margin: 0 auto` so the container
- * doesn't shrink to the cap and float in the middle of the viewport on
- * desktop monitors wider than 1280 px. */
+ * handles the gutter. The --narrow / --bangla / --wide modifiers used
+ * to cap content at 720 / 1080 / 1280 px for readability on ultra-wide
+ * viewports — but that floated the content in the middle of the screen
+ * on monitors wider than the cap, leaving white margins on either side.
+ *
+ * The current contract is full-width: every modifier is now a
+ * no-op cap (the class is still emitted so page-level markup keeps
+ * its semantic intent — "this is the wide container" — but the rule
+ * does not constrain width). The mobile floor still pins padding. */
 .container {
   margin: 0;
   padding-inline: var(--space-xl);
   width: 100%;
+  max-width: none;
 }
-.container--narrow {
-  max-width: 720px;
-}
-.container--bangla {
-  max-width: 1080px;
-}
-.container--wide {
-  max-width: 1280px;
-}
+/* Modifiers intentionally inherit .container's width: 100% (no cap).
+   They are kept as semantic hooks — pages still mark "this is the
+   bangla / wide / narrow container" — but they no longer constrain
+   the box. Add a max-width here only if a future page needs a
+   readability cap. */
+.container--narrow { /* full-width */ }
+.container--bangla { /* full-width */ }
+.container--wide   { /* full-width */ }
 
 /* Mobile floor (< 768 px): container fills viewport with --space-md */
 @media (max-width: 767px) {
