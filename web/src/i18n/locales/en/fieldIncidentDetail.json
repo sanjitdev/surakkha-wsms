@@ -6,7 +6,7 @@
     "loading": "Loading work order…",
     "notFound": "Work order not found",
     "notFoundEvent": "Event {{id}} is not in the current chain.",
-    "notFoundNoId": "No work_order id supplied in the URL.",
+    "notFoundNoId": "No work order id supplied in the URL.",
     "notFoundEmptyHeading": "No matching work order",
     "fieldTechOnly": {
       "heading": "Field-tech only",

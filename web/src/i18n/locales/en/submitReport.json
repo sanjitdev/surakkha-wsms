@@ -41,7 +41,7 @@
     "photoPlaceholder": "https://example.com/photo.jpg",
     "voiceLabel": "Voice note URL",
     "voicePlaceholder": "https://example.com/voice.mp3",
-    "submit": "Submit report →",
+    "submit": "Submit report",
     "submitBusy": "Sealing on the chain…",
     "submitIdle": "Sealed in one chain write"
   }

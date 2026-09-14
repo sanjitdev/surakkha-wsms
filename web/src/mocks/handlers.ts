@@ -556,6 +556,17 @@ const incidentHandlers = [
         } else if (ownerKind === 'technician') {
           reporterKind = 'webform';
         }
+        // Same walk-back pattern as severity: resolve/assign/fix events
+        // don't carry ward_id, so the latest-only lookup would yield
+        // undefined and the InboxDetail subtitle renders 'Ward —'.
+        const lastWardId = [...incidentChain]
+          .reverse()
+          .map((b) => {
+            const bp = b.payload as { ward_id?: unknown };
+            return typeof bp.ward_id === 'string' ? bp.ward_id : undefined;
+          })
+          .find((v) => typeof v === 'string');
+
         return {
           incident_id: id,
           status:
@@ -565,7 +576,7 @@ const incidentHandlers = [
                 ? 'escalated'
                 : 'open',
           severity: lastSeverity ?? 'unknown',
-          ward_id: p.ward_id,
+          ward_id: lastWardId ?? null,
           last_block_height: latest.height,
           last_event_type: latest.event_type,
           last_occurred_at: latest.occurred_at,

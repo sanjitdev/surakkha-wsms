@@ -6,7 +6,7 @@
     "loading": "কাজের আদেশ লোড হচ্ছে…",
     "notFound": "কাজের আদেশ পাওয়া যায়নি",
     "notFoundEvent": "ইভেন্ট {{id}} বর্তমান চেইনে নেই।",
-    "notFoundNoId": "URL-এ কোনো work_order আইডি দেওয়া হয়নি।",
+    "notFoundNoId": "URL-এ কোনো কাজের আদেশ আইডি দেওয়া হয়নি।",
     "notFoundEmptyHeading": "কোনো মিলে যাওয়া কাজের আদেশ নেই",
     "fieldTechOnly": {
       "heading": "শুধুমাত্র ফিল্ড-টেক",

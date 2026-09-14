@@ -41,7 +41,7 @@
     "photoPlaceholder": "https://example.com/photo.jpg",
     "voiceLabel": "ভয়েস নোট URL",
     "voicePlaceholder": "https://example.com/voice.mp3",
-    "submit": "রিপোর্ট জমা দিন →",
+    "submit": "রিপোর্ট জমা দিন",
     "submitBusy": "চেইনে সিল হচ্ছে…",
     "submitIdle": "একটি চেইন রাইটে সিল"
   }

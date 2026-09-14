@@ -335,6 +335,9 @@ export function SubmitReportPage() {
               testId="submit-submit"
             >
               {tSubmit('form.submit')}
+              <span aria-hidden="true" style={{ marginLeft: 'var(--space-xs)' }}>
+                {'\u2192'}
+              </span>
             </Button>
             <span className="submit-form__action-hint">
               {actions.busy ? tSubmit('form.submitBusy') : tSubmit('form.submitIdle')}
