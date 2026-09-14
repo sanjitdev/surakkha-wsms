@@ -195,11 +195,6 @@
   "hotlineIntake": {
     "title": "Log hotline call",
     "subtitle": "Records will be added to the audit chain. Hotline-sourced incidents default to T1 (unverified) and carry a hotline reporter-badge.",
-    "sectionNotice": "Required fields below create the incident. Outcomes 'Inquiry handled' and 'Wrong number' only log the call.",
-    "sections": {
-      "reporterInfo": "Reporter info",
-      "incidentInfo": "Incident info"
-    },
     "fields": {
       "callerName": "Caller name",
       "callerPhone": "Caller phone",
@@ -234,6 +229,9 @@
     "submitting": "Submitting…",
     "cancel": "Cancel",
     "submitDisabledTooltip": "Fill required fields to submit.",
+    "errorSummary": {
+      "title": "Please fix the following before submitting:"
+    },
     "toast": {
       "incidentCreated": "Incident created with ID {{incidentId}} (T1 default, hotline source)",
       "incidentIdFallback": "inc_pending",

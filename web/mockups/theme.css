@@ -13,6 +13,14 @@
   --bg-surface:     #16191D;
   --bg-subtle:      #1C2025;
   --bg-inset:       #22272D;
+  /* --bg-elevated: one step brighter than --bg-inset. Used as the
+     surface for "lifted callouts" (tooltip panels, table header bands,
+     row hover, skeleton shimmer midstop) that should read as raised
+     above the surrounding --bg-surface without jumping to a status
+     color. Kept subtle on purpose — strong enough to be visibly opaque
+     against the modal background, soft enough to not compete with
+     badges or status pills. */
+  --bg-elevated:    #2A2F35;
 
   --fg-default:     #ECEDEE;
   --fg-secondary:   #B5B9BF;
@@ -65,6 +73,20 @@
   --brand-gradient-dark-to:   #0F2236;
 
   --shadow-modal:   0 4px 12px rgba(0,0,0,0.32);
+
+  /* Z-index layers — kept as tokens so every consumer (modals,
+     toasts, sticky chrome, table-header sticky bands, dropdowns)
+     shares a single ordered scale and no element has to guess.
+     Layer order, low → high:
+       sticky  (top-chrome, sticky table headers, sticky card heads)
+       chrome  (theme toggle + sidebar brand-mark, was magic 100)
+       dropdown (datepicker / dropdown menus)
+       modal   (modal stage + scrim, error-screen, toast-region)
+       modal-content (modal panel itself, one above the scrim) */
+  --z-sticky:        50;
+  --z-chrome:        60;
+  --z-dropdown:      70;
+  --z-modal:         1000;
   color-scheme: dark;
 }
 
@@ -73,6 +95,11 @@
   --bg-surface:     #FFFFFF;
   --bg-subtle:      #F1F1EE;
   --bg-inset:       #ECEBE7;
+  /* Light-theme counterpart to the dark --bg-elevated token. Sits one
+     step darker than --bg-inset so lifted callouts (tooltip panels,
+     table header bands, row hover, skeleton shimmer midstop) read as
+     raised above --bg-surface without jumping to a status color. */
+  --bg-elevated:    #E3E1DC;
 
   --fg-default:     #111418;
   --fg-secondary:   #4A5159;

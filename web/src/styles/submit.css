@@ -28,6 +28,27 @@
   gap: var(--space-lg);
 }
 
+/* Two-column grid for forms wider than 480px (FE-B6
+   HotlineIntakeModal). The grid holds 2 fields side-by-side; the
+   last row (callDuration + sensitiveContent) is its own
+   row with the same 1fr 1fr template so the bottom of the form
+   stays aligned. A `submit-form__grid` parent groups the two
+   fieldsets; the fieldset <legend> spans both columns so it
+   reads as a true section header. */
+.submit-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: var(--space-lg);
+  row-gap: var(--space-md);
+}
+.submit-form__grid > .submit-form__row--full { grid-column: 1 / -1; }
+/* When the screen is too narrow for a side-by-side pair, fall back
+   to a single column so fields keep a comfortable reading width. */
+@media (max-width: 640px) {
+  .submit-form__grid { grid-template-columns: 1fr; }
+  .submit-form__grid > .submit-form__row--full { grid-column: 1; }
+}
+
 @media (max-width: 768px) {
   .submit-form__row--split {
     grid-template-columns: 1fr;
@@ -65,7 +86,11 @@
 
 .submit-form__textarea {
   resize: vertical;
-  min-height: calc(var(--height-control-lg) * 3);
+  /* Trimmed from 3 control-heights to 2.5 so the modal fits in the
+     viewport on a 768px-tall laptop without a scrollbar. The textarea
+     still grows with `resize: vertical` if the operator wants more
+     vertical space. */
+  min-height: calc(var(--height-control-lg) * 2.5);
   font-family: inherit;
 }
 
@@ -74,6 +99,131 @@
   font-size: var(--font-size-xs);
   color: var(--fg-tertiary);
   line-height: var(--line-height-body);
+}
+/* Section legend (groups the fieldset, e.g. "Reporter info" /
+   "Incident info"). Without a distinct style the <legend> renders
+   identical to a field label and reads as just another input, not a
+   section header. Larger size + semibold + small-caps tracking + a
+   tinted underline gives a clear "group header" affordance. */
+fieldset > legend.submit-form__label {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--fg-secondary);
+  margin-bottom: var(--space-md);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
+}
+/* Tighter vertical rhythm so the fieldset doesn't add extra top
+   whitespace (default <fieldset> has block-start margin in some
+   browsers). */
+.submit-form fieldset { margin: 0; padding: 0; border: 0; }
+.submit-form fieldset + fieldset,
+.submit-form fieldset + hr + fieldset,
+.submit-form fieldset + p + fieldset {
+  margin-top: var(--space-md);
+}
+/* ── Form row spacing — modest gap so the form doesn't feel gappy.
+   The original var(--space-lg) margin-bottom plus the per-row
+   var(--space-xs) gap stacked up to ~28px between fields; we trim to
+   var(--space-md) so the form reads as compact and the section
+   dividers (hr + sectionNotice) do the structural work instead.
+   Inside a 2-column grid the margin-bottom is even tighter — the
+   row-gap on the grid already provides vertical separation. */
+.submit-form__row { margin-bottom: var(--space-md); }
+.submit-form__grid > .submit-form__row { margin-bottom: 0; }
+/* Inline field error — ui-ux-pro-max (Forms / Error Placement):
+   show a specific error below the input, wire it via aria-describedby.
+   Use --warning (amber-bright) instead of plain red so the form stays
+   aligned with our calm, low-alarm palette; the role="alert" / live
+   region handles the urgency announcement. */
+.submit-form__error {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--warning);
+  line-height: var(--line-height-body);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-xs);
+}
+/* Tiny "!" prefix to give the inline error a visible anchor without
+   changing line height; --warning color + a slight dot glyph makes
+   the error scannable at a glance even if the screen reader is off. */
+.submit-form__error::before {
+  content: "•";
+  font-weight: var(--font-weight-bold);
+  flex: none;
+  line-height: 1;
+  position: relative;
+  top: 0.05em;
+}
+/* Required-field marker — colored to flag the required asterisk so
+   the operator can spot mandatory fields at a glance (vs. body text).
+   ui-ux-pro-max (Forms / Required Indicators): mark required clearly.
+   We use the brand-500 token (the same one used for focus rings and
+   the active step indicator) so the required marker matches the
+   product's primary attention color in both light and dark themes —
+   a stable signal regardless of the warning amber. The asterisk is
+   rendered as a larger glyph with a small horizontal padding so it
+   doesn't crowd the label text. */
+.submit-form__required {
+  color: var(--brand-500);
+  margin-inline-start: 0.35em;
+  font-weight: var(--font-weight-bold);
+  font-size: 1.1em;
+  vertical-align: middle;
+  line-height: 1;
+  display: inline-block;
+}
+/* Focused error state for the input — red-tinted border when
+   aria-invalid=true is present so the visual signal matches the
+   announced state. Falls back gracefully when aria-invalid is absent. */
+.submit-form__input[aria-invalid="true"],
+.submit-form__textarea[aria-invalid="true"] {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 20%, transparent);
+}
+.submit-form__input[aria-invalid="true"]:focus,
+.submit-form__textarea[aria-invalid="true"]:focus {
+  border-color: var(--warning);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 30%, transparent);
+}
+/* Error summary — focusable region at the top of the form for failed
+   submits (ui-ux-pro-max Forms / Focusable Error Summary).
+   role=alert + tabindex=-1 lets the submit handler move focus here
+   after a failed attempt so screen-reader and keyboard users both
+   land in the right place. */
+.submit-form__error-summary {
+  border: 1px solid var(--warning);
+  background: color-mix(in srgb, var(--warning) 10%, var(--bg-surface));
+  border-radius: var(--radius-sm);
+  padding: var(--space-md) var(--space-lg);
+  margin-bottom: var(--space-md);
+  color: var(--fg-default);
+}
+.submit-form__error-summary-title {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--warning);
+}
+.submit-form__error-summary-list {
+  margin: 0;
+  padding-inline-start: var(--space-lg);
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+  line-height: var(--line-height-body);
+}
+.submit-form__error-summary-list li { margin-bottom: var(--space-xs); }
+.submit-form__error-summary-list a {
+  color: var(--fg-default);
+  text-decoration: underline;
+}
+.submit-form__error-summary-list a:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
 }
 
 /* Collapsible optional-attachments section. Mirrors the operator

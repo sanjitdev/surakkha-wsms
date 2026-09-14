@@ -37,6 +37,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
+import { HelpTooltip } from '../ui/Tooltip';
 import { useToast } from '../ui/ToastProvider';
 import { ReporterPhoneIcon } from '../icons/sidebar-icons';
 
@@ -133,6 +134,15 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
   const [busy, setBusy] = useState<boolean>(false);
   const [confirmDiscard, setConfirmDiscard] = useState<boolean>(false);
   const [errors, setErrors] = useState<FieldErrors>({});
+  // ui-ux-pro-max (Forms / Focusable Error Summary): when submit
+  // fails on a validation block, render a focusable error summary at
+  // the top of the form and move focus to it. Submitted (not
+  // server-error) failures only — a 5xx keeps the toast path.
+  const [submitErrorSummary, setSubmitErrorSummary] = useState<FieldErrors>({});
+  const errorSummaryRef = useRef<HTMLDivElement | null>(null);
+  // Map field-key → input id so the error summary can link straight to
+  // the offending field. Stable per-render — id is constant.
+  const fieldId = (k: keyof FieldErrors): string => `hotline-field-${k}`;
 
   // Stable per-open hotline_call_id — generated fresh on each mount.
   const hotlineCallIdRef = useRef<string>('');
@@ -154,6 +164,7 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
       setBusy(false);
       setConfirmDiscard(false);
       setErrors({});
+      setSubmitErrorSummary({});
       hotlineCallIdRef.current = '';
     }
   }, [open]);
@@ -205,8 +216,6 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
     return next;
   }, [callerName, callerPhone, callTime, description, locationHint, outcome, callDuration, tHot]);
 
-  const fieldErrors = useMemo(() => validate(), [validate]);
-
   const canSubmit =
     !busy &&
     description.trim().length >= 20 &&
@@ -239,9 +248,19 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
 
       if (Object.keys(ve).length > 0) {
         setErrors(ve);
+        // ui-ux-pro-max (Forms / Focusable Error Summary): surface
+        // every blocked field at the top of the form and move focus
+        // there so keyboard / AT users land in the right place.
+        setSubmitErrorSummary(ve);
+        // Move focus to the summary after the next paint so the
+        // summary is in the DOM.
+        queueMicrotask(() => {
+          errorSummaryRef.current?.focus();
+        });
         return;
       }
       setErrors({});
+      setSubmitErrorSummary({});
       setBusy(true);
 
       const payload = {
@@ -338,11 +357,12 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
         onClose={handleClose}
         testId="hotline-intake-modal"
         ariaLabel={tHot('hotlineIntake.title')}
+        panelClassName="modal--wide"
       >
         <form onSubmit={handleSubmit} data-testid="hotline-intake-form" className="submit-form">
           <header style={{ marginBottom: 'var(--space-md)' }}>
             <h2 style={{ margin: 0, fontSize: 'var(--font-size-lg)', display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
-              <span style={{ color: 'var(--color-reporter-hotline, var(--fg-default))' }} aria-hidden="true">
+              <span style={{ color: 'var(--warning)' }} aria-hidden="true">
                 <ReporterPhoneIcon />
               </span>
               {tHot('hotlineIntake.title')}
@@ -356,197 +376,270 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
             </p>
           </header>
 
-          {/* Reporter info section */}
-          <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-            <legend className="submit-form__label" style={{ fontWeight: 'var(--font-weight-semibold)' }}>
-              {tHot('hotlineIntake.sections.reporterInfo')}
-            </legend>
-
-            <div className="submit-form__row">
-              <label htmlFor="hotline-caller-name" className="submit-form__label">
-                {tHot('hotlineIntake.fields.callerName')}
-              </label>
-              <input
-                id="hotline-caller-name"
-                data-testid="hotline-caller-name"
-                type="text"
-                className="submit-form__input"
-                value={callerName}
-                onChange={(e) => {
-                  setCallerName(e.target.value);
-                }}
-                maxLength={80}
-                disabled={busy}
-              />
-              {errors.callerName && (
-                <p className="submit-form__error" role="status">
-                  {errors.callerName}
-                </p>
-              )}
-            </div>
-
-            <div className="submit-form__row">
-              <label htmlFor="hotline-caller-phone" className="submit-form__label">
-                {tHot('hotlineIntake.fields.callerPhone')}
-              </label>
-              <input
-                id="hotline-caller-phone"
-                data-testid="hotline-caller-phone"
-                type="tel"
-                className="submit-form__input"
-                value={callerPhone}
-                onChange={(e) => {
-                  setCallerPhone(e.target.value);
-                }}
-                placeholder="+8801712345678"
-                disabled={busy}
-              />
-              <p className="submit-form__hint">{tHot('hotlineIntake.fields.callerPhoneHelper')}</p>
-              {errors.callerPhone && (
-                <p className="submit-form__error" role="status">
-                  {errors.callerPhone}
-                </p>
-              )}
-            </div>
-
-            <div className="submit-form__row">
-              <label htmlFor="hotline-call-time" className="submit-form__label">
-                {tHot('hotlineIntake.fields.callTime')}
-              </label>
-              <input
-                id="hotline-call-time"
-                data-testid="hotline-call-time"
-                type="datetime-local"
-                className="submit-form__input"
-                value={callTime}
-                onChange={(e) => {
-                  setCallTime(e.target.value);
-                }}
-                disabled={busy}
-              />
-              {errors.callTime && (
-                <p className="submit-form__error" role="status">
-                  {errors.callTime}
-                </p>
-              )}
-            </div>
-          </fieldset>
-
-          <hr style={{ border: 'none', borderTop: '1px solid var(--color-divider, var(--border-subtle))', margin: 'var(--space-md) 0' }} />
-
-          <p
-            className="submit-form__hint bangla-body"
-            style={{ marginBottom: 'var(--space-md)' }}
-            data-testid="hotline-intake-section-notice"
-          >
-            {tHot('hotlineIntake.sectionNotice')}
-          </p>
-
-          {/* Incident info section */}
-          <fieldset style={{ border: 'none', padding: 0, margin: 0 }}>
-            <legend className="submit-form__label" style={{ fontWeight: 'var(--font-weight-semibold)' }}>
-              {tHot('hotlineIntake.sections.incidentInfo')}
-            </legend>
-
-            <div className="submit-form__row">
-              <label htmlFor="hotline-description" className="submit-form__label">
-                {tHot('hotlineIntake.fields.description')}
-                <span aria-hidden="true" style={{ color: 'var(--color-status-warn)' }}>
-                  {' *'}
-                </span>
-              </label>
-              <textarea
-                id="hotline-description"
-                data-testid="hotline-description"
-                className="submit-form__textarea"
-                value={description}
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                }}
-                rows={3}
-                maxLength={500}
-                placeholder={tHot('hotlineIntake.fields.descriptionPlaceholder')}
-                disabled={busy}
-                required
-              />
-              <p className="submit-form__hint">
-                {tHot('hotlineIntake.fields.descriptionHelper')}
-                {' · '}
-                <span data-testid="hotline-description-count">{description.trim().length}</span>
-                {' / 500'}
-              </p>
-              {errors.description && (
-                <p className="submit-form__error" role="status">
-                  {errors.description}
-                </p>
-              )}
-            </div>
-
-            <div className="submit-form__row">
-              <label htmlFor="hotline-location-hint" className="submit-form__label">
-                {tHot('hotlineIntake.fields.locationHint')}
-                <span aria-hidden="true" style={{ color: 'var(--color-status-warn)' }}>
-                  {' *'}
-                </span>
-              </label>
-              <input
-                id="hotline-location-hint"
-                data-testid="hotline-location-hint"
-                type="text"
-                className="submit-form__input"
-                value={locationHint}
-                onChange={(e) => {
-                  setLocationHint(e.target.value);
-                }}
-                maxLength={200}
-                placeholder={tHot('hotlineIntake.fields.locationHintPlaceholder')}
-                disabled={busy}
-                required
-              />
-              <p className="submit-form__hint">{tHot('hotlineIntake.fields.locationHintHelper')}</p>
-              {errors.locationHint && (
-                <p className="submit-form__error" role="status">
-                  {errors.locationHint}
-                </p>
-              )}
-            </div>
-
-            <div className="submit-form__row">
-              <label htmlFor="hotline-outcome" className="submit-form__label">
-                {tHot('hotlineIntake.fields.outcome')}
-                <span aria-hidden="true" style={{ color: 'var(--color-status-warn)' }}>
-                  {' *'}
-                </span>
-              </label>
-              <select
-                id="hotline-outcome"
-                data-testid="hotline-outcome"
-                className="submit-form__input"
-                value={outcome}
-                onChange={(e) => {
-                  setOutcome(e.target.value as Outcome);
-                }}
-                disabled={busy}
+          {/* ui-ux-pro-max (Forms / Focusable Error Summary): focusable
+              summary of fields that blocked submit. Rendered only when
+              submit was attempted and validation failed; the summary
+              links each item to its field so keyboard / AT users can
+              jump straight to the offending input. */}
+          {Object.keys(submitErrorSummary).length > 0 ? (
+            <div
+              ref={errorSummaryRef}
+              tabIndex={-1}
+              role="alert"
+              aria-labelledby="hotline-error-summary-title"
+              className="submit-form__error-summary"
+              data-testid="hotline-error-summary"
+            >
+              <h3
+                id="hotline-error-summary-title"
+                className="submit-form__error-summary-title"
               >
-                <option value="reported_incident">{tHot('hotlineIntake.outcomes.reportedIncident')}</option>
-                <option value="no_incident">{tHot('hotlineIntake.outcomes.noIncident')}</option>
-                <option value="wrong_number">{tHot('hotlineIntake.outcomes.wrongNumber')}</option>
-              </select>
-              <p className="submit-form__hint">{tHot('hotlineIntake.fields.outcomeHelper')}</p>
-              {errors.outcome && (
-                <p className="submit-form__error" role="status">
-                  {errors.outcome}
-                </p>
-              )}
+                {tHot('hotlineIntake.errorSummary.title')}
+              </h3>
+              <ul className="submit-form__error-summary-list">
+                {Object.entries(submitErrorSummary).map(([k, msg]) => (
+                  <li key={k}>
+                    <a href={`#${fieldId(k as keyof FieldErrors)}`}>{msg}</a>
+                  </li>
+                ))}
+              </ul>
             </div>
+          ) : null}
 
-            <div className="submit-form__row submit-form__row--split">
-              <div>
-                <label htmlFor="hotline-call-duration" className="submit-form__label">
+          {/* Two-column grid layout. callerName + callerPhone sit
+              side-by-side on row 1; callTime / description span both
+              columns (datetime-local and textarea both want horizontal
+              space). The remaining fields pair up: locationHint +
+              outcome on row 3, callDuration + sensitiveContent on row 4. */}
+          <div className="submit-form__grid">
+              <div className="submit-form__row">
+                <label htmlFor={fieldId('callerName')} className="submit-form__label">
+                  {tHot('hotlineIntake.fields.callerName')}
+                </label>
+                <input
+                  id={fieldId('callerName')}
+                  data-testid="hotline-caller-name"
+                  type="text"
+                  className="submit-form__input"
+                  value={callerName}
+                  onChange={(e) => {
+                    setCallerName(e.target.value);
+                  }}
+                  maxLength={80}
+                  disabled={busy}
+                  aria-invalid={errors.callerName ? true : undefined}
+                  aria-describedby={errors.callerName ? `${fieldId('callerName')}-error` : undefined}
+                />
+                {errors.callerName && (
+                  <p
+                    id={`${fieldId('callerName')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
+                    {errors.callerName}
+                  </p>
+                )}
+              </div>
+
+              <div className="submit-form__row">
+                <label htmlFor={fieldId('callerPhone')} className="submit-form__label">
+                  {tHot('hotlineIntake.fields.callerPhone')}
+                  <HelpTooltip
+                    label={tHot('hotlineIntake.fields.callerPhoneHelper')}
+                    testId="hotline-caller-phone-help"
+                  />
+                </label>
+                <input
+                  id={fieldId('callerPhone')}
+                  data-testid="hotline-caller-phone"
+                  type="tel"
+                  className="submit-form__input"
+                  value={callerPhone}
+                  onChange={(e) => {
+                    setCallerPhone(e.target.value);
+                  }}
+                  placeholder="+8801712345678"
+                  disabled={busy}
+                  aria-invalid={errors.callerPhone ? true : undefined}
+                  aria-describedby={
+                    errors.callerPhone ? `${fieldId('callerPhone')}-error` : undefined
+                  }
+                />
+                {errors.callerPhone && (
+                  <p
+                    id={`${fieldId('callerPhone')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
+                    {errors.callerPhone}
+                  </p>
+                )}
+              </div>
+
+              {/* callTime spans both columns — datetime-local pickers
+                  benefit from horizontal space, and we don't have a
+                  natural pair for it. */}
+              <div className="submit-form__row submit-form__row--full">
+                <label htmlFor={fieldId('callTime')} className="submit-form__label">
+                  {tHot('hotlineIntake.fields.callTime')}
+                </label>
+                <input
+                  id={fieldId('callTime')}
+                  data-testid="hotline-call-time"
+                  type="datetime-local"
+                  className="submit-form__input"
+                  value={callTime}
+                  onChange={(e) => {
+                    setCallTime(e.target.value);
+                  }}
+                  disabled={busy}
+                  aria-invalid={errors.callTime ? true : undefined}
+                  aria-describedby={errors.callTime ? `${fieldId('callTime')}-error` : undefined}
+                />
+                {errors.callTime && (
+                  <p
+                    id={`${fieldId('callTime')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
+                    {errors.callTime}
+                  </p>
+                )}
+              </div>
+
+              <div className="submit-form__row submit-form__row--full">
+                <label htmlFor={fieldId('description')} className="submit-form__label">
+                  {tHot('hotlineIntake.fields.description')}
+                  <span aria-hidden="true" className="submit-form__required">
+                    {' *'}
+                  </span>
+                </label>
+                <textarea
+                  id={fieldId('description')}
+                  data-testid="hotline-description"
+                  className="submit-form__textarea"
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                  }}
+                  rows={3}
+                  maxLength={500}
+                  placeholder={tHot('hotlineIntake.fields.descriptionPlaceholder')}
+                  disabled={busy}
+                  required
+                  aria-invalid={errors.description ? true : undefined}
+                  aria-describedby={[
+                    errors.description ? `${fieldId('description')}-error` : null,
+                    `${fieldId('description')}-hint`,
+                  ]
+                    .filter(Boolean)
+                    .join(' ') || undefined}
+                />
+                <p id={`${fieldId('description')}-hint`} className="submit-form__hint">
+                  {tHot('hotlineIntake.fields.descriptionHelper')}
+                  {' · '}
+                  <span data-testid="hotline-description-count">
+                    {description.trim().length}
+                  </span>
+                  {' / 500'}
+                </p>
+                {errors.description && (
+                  <p
+                    id={`${fieldId('description')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
+                    {errors.description}
+                  </p>
+                )}
+              </div>
+
+              <div className="submit-form__row">
+                <label htmlFor={fieldId('locationHint')} className="submit-form__label">
+                  {tHot('hotlineIntake.fields.locationHint')}
+                  <span aria-hidden="true" className="submit-form__required">
+                    {' *'}
+                  </span>
+                  <HelpTooltip
+                    label={tHot('hotlineIntake.fields.locationHintHelper')}
+                    testId="hotline-location-hint-help"
+                  />
+                </label>
+                <input
+                  id={fieldId('locationHint')}
+                  data-testid="hotline-location-hint"
+                  type="text"
+                  className="submit-form__input"
+                  value={locationHint}
+                  onChange={(e) => {
+                    setLocationHint(e.target.value);
+                  }}
+                  maxLength={200}
+                  placeholder={tHot('hotlineIntake.fields.locationHintPlaceholder')}
+                  disabled={busy}
+                  required
+                  aria-invalid={errors.locationHint ? true : undefined}
+                  aria-describedby={
+                    errors.locationHint ? `${fieldId('locationHint')}-error` : undefined
+                  }
+                />
+                {errors.locationHint && (
+                  <p
+                    id={`${fieldId('locationHint')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
+                    {errors.locationHint}
+                  </p>
+                )}
+              </div>
+
+              <div className="submit-form__row">
+                <label htmlFor={fieldId('outcome')} className="submit-form__label">
+                  {tHot('hotlineIntake.fields.outcome')}
+                  <span aria-hidden="true" className="submit-form__required">
+                    {' *'}
+                  </span>
+                  <HelpTooltip
+                    label={tHot('hotlineIntake.fields.outcomeHelper')}
+                    testId="hotline-outcome-help"
+                  />
+                </label>
+                <select
+                  id={fieldId('outcome')}
+                  data-testid="hotline-outcome"
+                  className="submit-form__input"
+                  value={outcome}
+                  onChange={(e) => {
+                    setOutcome(e.target.value as Outcome);
+                  }}
+                  disabled={busy}
+                  aria-invalid={errors.outcome ? true : undefined}
+                  aria-describedby={
+                    errors.outcome ? `${fieldId('outcome')}-error` : undefined
+                  }
+                >
+                  <option value="reported_incident">{tHot('hotlineIntake.outcomes.reportedIncident')}</option>
+                  <option value="no_incident">{tHot('hotlineIntake.outcomes.noIncident')}</option>
+                  <option value="wrong_number">{tHot('hotlineIntake.outcomes.wrongNumber')}</option>
+                </select>
+                {errors.outcome && (
+                  <p
+                    id={`${fieldId('outcome')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
+                    {errors.outcome}
+                  </p>
+                )}
+              </div>
+
+              <div className="submit-form__row">
+                <label htmlFor={fieldId('callDuration')} className="submit-form__label">
                   {tHot('hotlineIntake.fields.callDuration')}
                 </label>
                 <input
-                  id="hotline-call-duration"
+                  id={fieldId('callDuration')}
                   data-testid="hotline-call-duration"
                   type="number"
                   min={1}
@@ -557,14 +650,21 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
                     setCallDuration(e.target.value);
                   }}
                   disabled={busy}
+                  aria-invalid={errors.callDuration ? true : undefined}
+                  aria-describedby={errors.callDuration ? `${fieldId('callDuration')}-error` : undefined}
                 />
                 {errors.callDuration && (
-                  <p className="submit-form__error" role="status">
+                  <p
+                    id={`${fieldId('callDuration')}-error`}
+                    className="submit-form__error"
+                    role="status"
+                  >
                     {errors.callDuration}
                   </p>
                 )}
               </div>
-              <div>
+
+              <div className="submit-form__row">
                 <label
                   htmlFor="hotline-sensitive"
                   className="submit-form__label"
@@ -585,7 +685,6 @@ export function HotlineIntakeModal({ open, onClose, onSubmitted }: HotlineIntake
                 </label>
               </div>
             </div>
-          </fieldset>
 
           <div className="submit-form__actions">
             <Button

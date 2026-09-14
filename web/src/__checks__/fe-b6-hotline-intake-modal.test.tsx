@@ -97,7 +97,6 @@ describe('FE-B6 HotlineIntakeModal (hotline-intake-modal.md)', () => {
     expect(screen.getByTestId('hotline-outcome')).toBeTruthy();
     expect(screen.getByTestId('hotline-call-duration')).toBeTruthy();
     expect(screen.getByTestId('hotline-sensitive')).toBeTruthy();
-    expect(screen.getByTestId('hotline-intake-section-notice')).toBeTruthy();
   });
 
   it('Submit disabled until description ≥20, locationHint ≥5, callTime valid', () => {
@@ -250,13 +249,92 @@ describe('FE-B6 HotlineIntakeModal (hotline-intake-modal.md)', () => {
     expect(counter.textContent).toBe('18');
   });
 
+  // ui-ux-pro-max (Forms / Required Indicators): required asterisks
+  // should be styled as required-marker, not just raw text.
+  it('required fields show a styled asterisk via .submit-form__required', () => {
+    const { container: dom } = renderModal();
+    // description, locationHint, outcome all carry the required span.
+    const requiredSpans = dom.querySelectorAll('.submit-form__required');
+
+    expect(requiredSpans.length).toBe(3);
+    requiredSpans.forEach((s) => {
+      // Each asterisk must be aria-hidden so screen readers don't
+      // announce a literal "*".
+      expect(s.getAttribute('aria-hidden')).toBe('true');
+    });
+  });
+
+  // ui-ux-pro-max (Forms / Error Placement): each input must carry a
+  // stable id (so the error-summary anchor href can target it).
+  it('every input carries an id matching the field-key helper', () => {
+    renderModal();
+    // The id helper maps each FieldErrors key to a stable
+    // `hotline-field-<key>` id. Spot-check the 8 fields.
+    const expected = [
+      ['hotline-caller-name', 'hotline-field-callerName'],
+      ['hotline-caller-phone', 'hotline-field-callerPhone'],
+      ['hotline-call-time', 'hotline-field-callTime'],
+      ['hotline-description', 'hotline-field-description'],
+      ['hotline-location-hint', 'hotline-field-locationHint'],
+      ['hotline-outcome', 'hotline-field-outcome'],
+      ['hotline-call-duration', 'hotline-field-callDuration'],
+    ] as const;
+
+    expected.forEach(([testId, id]) => {
+      expect(screen.getByTestId(testId).getAttribute('id')).toBe(id);
+    });
+  });
+
+  // ui-ux-pro-max (Forms / Error Placement): aria-describedby on the
+  // Helper text moved to a `?` icon next to the label that surfaces
+  // the helper on hover/tap. Verify the trigger is rendered with a
+  // proper accessible name and that opening it reveals a panel with
+  // role="tooltip" carrying the helper string.
+  it('callerPhone helper exposes a ?-icon tooltip next to the label', () => {
+    renderModal();
+    const phone = screen.getByTestId('hotline-caller-phone');
+
+    expect(phone.getAttribute('aria-invalid')).toBeNull();
+
+    const trigger = screen.getByTestId('hotline-caller-phone-help');
+
+    expect(trigger).toBeTruthy();
+    // Default tooltip-button a11y name from <HelpTooltip>.
+    expect(trigger.getAttribute('aria-label')).toBe('More information');
+    // Tooltip panel is hidden until the trigger is interacted with.
+    expect(screen.queryByRole('tooltip')).toBeNull();
+    // Open the tooltip via focus (matches keyboard-only path).
+    fireEvent.focus(trigger);
+    const panel = screen.getByRole('tooltip');
+
+    expect(panel).toBeTruthy();
+    // Panel carries the i18n helper string.
+    expect(panel.textContent).toMatch(/hash|plaintext/i);
+    // Trigger now exposes aria-describedby pointing at the panel so
+    // screen readers announce the helper text alongside the field.
+    expect(trigger.getAttribute('aria-describedby')).toBe(panel.getAttribute('id'));
+  });
+
+  // ui-ux-pro-max (Forms / Required Indicators): required asterisks
+  // should be styled as required-marker, not just raw text.
+  it('required fields show a styled asterisk via .submit-form__required', () => {
+    const { container: dom } = renderModal();
+    // description, locationHint, outcome all carry the required span.
+    const requiredSpans = dom.querySelectorAll('.submit-form__required');
+
+    expect(requiredSpans.length).toBe(3);
+    requiredSpans.forEach((s) => {
+      // Each asterisk must be aria-hidden so screen readers don't
+      // announce a literal "*".
+      expect(s.getAttribute('aria-hidden')).toBe('true');
+    });
+  });
+
   it('en/bn key parity: hotlineIntake.* keys exist in both locales', () => {
     expect(enJson.hotlineIntake.title).toBeTruthy();
     expect(bnJson.hotlineIntake.title).toBeTruthy();
     expect(enJson.hotlineIntake.subtitle).toBeTruthy();
     expect(bnJson.hotlineIntake.subtitle).toBeTruthy();
-    expect(enJson.hotlineIntake.sectionNotice).toBeTruthy();
-    expect(bnJson.hotlineIntake.sectionNotice).toBeTruthy();
     expect(enJson.hotlineIntake.submit).toBeTruthy();
     expect(bnJson.hotlineIntake.submit).toBeTruthy();
     expect(enJson.hotlineIntake.cancel).toBeTruthy();
@@ -289,6 +367,10 @@ describe('FE-B6 HotlineIntakeModal (hotline-intake-modal.md)', () => {
       expect(enJson.hotlineIntake.toast[k], `en.hotlineIntake.toast.${k}`).toBeTruthy();
       expect(bnJson.hotlineIntake.toast[k], `bn.hotlineIntake.toast.${k}`).toBeTruthy();
     }
+
+    // ui-ux-pro-max: error-summary title must exist in both locales.
+    expect(enJson.hotlineIntake.errorSummary.title, 'en.hotlineIntake.errorSummary.title').toBeTruthy();
+    expect(bnJson.hotlineIntake.errorSummary.title, 'bn.hotlineIntake.errorSummary.title').toBeTruthy();
 
     expect(enJson.hotlineIntake.confirmDiscard.title).toBeTruthy();
     expect(bnJson.hotlineIntake.confirmDiscard.title).toBeTruthy();

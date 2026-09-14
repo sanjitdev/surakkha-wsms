@@ -9,6 +9,9 @@ export interface ModalProps {
   /** id of an element inside the dialog whose text labels it. */
   ariaLabelledBy?: string;
   testId?: string;
+  /** Optional className appended to the inner .modal panel for size
+   *  variants (e.g. "modal--wide" for two-column forms). */
+  panelClassName?: string;
 }
 const FOCUSABLE =
   'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
@@ -22,7 +25,7 @@ function activeHTMLElement(): HTMLElement | null {
   if (el && el instanceof HTMLElement) return el;
   return null;
 }
-export function Modal({ open, onClose, children, ariaLabel, ariaLabelledBy, testId }: ModalProps) {
+export function Modal({ open, onClose, children, ariaLabel, ariaLabelledBy, testId, panelClassName }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
@@ -107,7 +110,7 @@ export function Modal({ open, onClose, children, ariaLabel, ariaLabelledBy, test
           role="dialog" as non-interactive, hence the per-line disable. */}
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */}
       <div
-        className="modal"
+        className={`modal ${panelClassName ?? ''}`.trim()}
         role="dialog"
         aria-modal="true"
         aria-label={dialogAriaLabel}

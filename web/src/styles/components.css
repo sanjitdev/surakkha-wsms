@@ -182,7 +182,12 @@
 .modal-stage {
   position: fixed;
   inset: 0;
-  z-index: var(--z-modal);
+  /* Use the resolved z-modal token so the modal sits above every
+     sticky chrome band (--z-sticky = 50), table-header sticky
+     (z-index 2 in table.css), and dropdown (--z-dropdown = 70).
+     Without this the modal falls back to z-index: auto and the
+     sticky table headers paint over the scrim. */
+  z-index: var(--z-modal, 1000);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,7 +210,20 @@
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: var(--shadow-modal);
-  z-index: calc(var(--z-modal) + 1);
+  z-index: calc(var(--z-modal, 1000) + 1);
+}
+/* Wider variant for two-column forms (FE-B6 HotlineIntakeModal).
+   The default 480px is too narrow for a 2-column field grid; this
+   variant steps up to a comfortable panel width while still fitting
+   comfortably on a 1024px viewport, with a small-screen fallback
+   to single-column. */
+.modal--wide {
+  max-width: 720px;
+}
+@media (max-width: 720px) {
+  .modal--wide {
+    max-width: 100%;
+  }
 }
 @media (max-width: 480px) {
   .modal {
@@ -218,7 +236,7 @@
   position: fixed;
   right: var(--space-xl);
   bottom: var(--space-xl);
-  z-index: var(--z-modal);
+  z-index: var(--z-modal, 1000);
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -277,6 +295,76 @@
   gap: 0.5em;
 }
 
+/* ── Tooltip (dim 4 §12) ──────────────────────────────────────────
+   Inline hover/tap tooltip for helper text on form labels. The
+   trigger sits inline with the label and the panel anchors above
+   or below via the inline style on .tooltip__panel--{placement}.
+
+   Tokens only:
+     - Surface / border from --bg-elevated + --border-strong so
+       the panel reads as a "raised" callout against the form.
+     - --shadow-modal for a soft elevation.
+     - z-local above dropdown (--z-dropdown = 70) but below modal
+       (--z-modal = 1000) so the panel can overlay the form without
+       escaping the modal it sits inside. */
+.tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.tooltip__help-trigger {
+  /* Small "?" icon button. Visually quiet until focused or hovered. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin-inline-start: var(--space-xs);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--fg-tertiary);
+  cursor: help;
+  transition: color var(--motion-press-120) var(--ease-out),
+              border-color var(--motion-press-120) var(--ease-out),
+              background-color var(--motion-press-120) var(--ease-out);
+  vertical-align: middle;
+}
+.tooltip__help-trigger:hover,
+.tooltip[data-open] .tooltip__help-trigger {
+  color: var(--brand-500);
+  background: var(--bg-elevated);
+  border-color: var(--border-default);
+}
+.tooltip__help-trigger:focus-visible {
+  outline: 2px solid var(--brand-500);
+  outline-offset: 2px;
+}
+.tooltip__panel {
+  position: absolute;
+  z-index: calc(var(--z-dropdown, 70) + 10);
+  width: max-content;
+  max-width: 240px;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-modal);
+  color: var(--fg-default);
+  font-size: var(--font-size-xs);
+  line-height: var(--line-height-body);
+  text-align: left;
+  white-space: normal;
+  pointer-events: none;
+}
+/* Bangla locale needs a slightly wider panel for the longer word
+   lengths. */
+[data-locale='bn'] .tooltip__panel {
+  max-width: 280px;
+  line-height: var(--line-height-body-bangla, 1.6);
+}
+
 /* ── Error screen (B2.2 — ErrorBoundary fallback) ────────────────── */
 .error-screen {
   position: fixed;
@@ -286,7 +374,7 @@
   justify-content: center;
   padding: var(--space-xl);
   background: var(--bg-app, var(--bg-surface));
-  z-index: var(--z-modal);
+  z-index: var(--z-modal, 1000);
 }
 .error-screen__panel {
   display: flex;
@@ -422,7 +510,7 @@
   padding: 0 var(--space-lg);
   position: sticky;
   top: 0;
-  z-index: var(--z-sticky);
+  z-index: var(--z-sticky, 50);
 }
 .top-chrome__left {
   display: flex;
