@@ -16,6 +16,15 @@ export interface ButtonProps {
    * without blocking the click.
    */
   title?: string;
+  /**
+   * Optional className appended to the base button class. Used by
+   * consumers that need to attach ephemeral state classes — e.g.
+   * WO-012 citizen-ack's 200ms green pulse on the Confirm button
+   * (applied on focus/hover, removed after the animation finishes).
+   */
+  className?: string;
+  onFocus?: ButtonHTMLAttributes<HTMLButtonElement>['onFocus'];
+  onMouseEnter?: ButtonHTMLAttributes<HTMLButtonElement>['onMouseEnter'];
 }
 export function Button({
   variant,
@@ -26,12 +35,17 @@ export function Button({
   disabled = false,
   testId,
   title,
+  className,
+  onFocus,
+  onMouseEnter,
 }: ButtonProps) {
   return (
     <button
-      className={`button button--${variant} button--${size}`}
+      className={`button button--${variant} button--${size}${className ? ` ${className}` : ''}`}
       type={type}
       onClick={onClick}
+      onFocus={onFocus}
+      onMouseEnter={onMouseEnter}
       disabled={disabled}
       title={title}
       data-testid={testId ?? `button-${variant}`}
