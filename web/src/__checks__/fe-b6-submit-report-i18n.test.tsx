@@ -36,7 +36,7 @@ vi.mock('../hooks/useIncidentActions', () => {
     useIncidentActions: () => ({
       busy: false,
       lastError: null,
-      submitReport: vi.fn(async () => {return { chain_ref: '01STUBCHAINREF' }}),
+      submitReport: vi.fn(async () => {return { chain_ref: '01STUBCHAINREF', incident_id: 'inc-stub', reporter_kind: 'anchor' as const }}),
       post: vi.fn(async () => ({ event_id: '01STUB' })),
       assignTech: vi.fn(async () => true),
       requestAck: vi.fn(async () => true),

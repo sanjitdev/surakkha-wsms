@@ -59,7 +59,12 @@ export interface UseIncidentActionsResult {
     photo_url?: string;
     voice_url?: string;
     gps?: { lat: number; lng: number };
-  }) => Promise<{ chain_ref: string } | null>;
+  }) => Promise<{
+    chain_ref: string;
+    incident_id: string;
+    /** Reporter-badge dimension projected from the chain (WO-011). */
+    reporter_kind: 'anchor';
+  } | null>;
   /** Field tech records arrival at the incident site. */
   techArrived: (input: { incident_id: string; technician_id: string }) => Promise<boolean>;
   /** Field tech submits a diagnosis note (still on site, not yet fixed). */
@@ -213,13 +218,16 @@ export function useIncidentActions(): UseIncidentActionsResult {
 
   const submitReport = useCallback<UseIncidentActionsResult['submitReport']>(
     async (input) => {
-      // Lockdown cascade (2026-09-11): urgency is the citizen-asserted
-      // severity hint; it stays on the chain payload mapped to a T-code
-      // so operator surfaces keep their existing taxonomy (T1/T2/T3).
-      // The trust_band itself is computed server-side from verification
-      // signals on later chain events (AnjaliNidVerified, etc.) — not
-      // from this urgency field. Reporter-badge dimension (anchor vs
-      // webform) is set server-side from the session.
+      // WO-011 Submit Report Page — Anjali's /submit surface emits
+      // `IncidentCreated{reporter_kind: anchor, band: T1, …}` per the
+      // lockdown cascade. The trust band defaults to T1 (unverified)
+      // because no verification signals have landed yet — operators
+      // promote to T2 (verified) when an anchor NID + photo + hotline
+      // call line up. Reporter-badge dimension is set to `anchor` for
+      // citizen reports whose session has a verified NID (foundation
+      // §1.1 + §6.2) — anchor reporter-badge is the SEPARATE dimension
+      // from trust band; a citizen reporter can be an anchor at any
+      // trust band.
       const urgencyToTCode = (u: typeof input.urgency): 'T1' | 'T2' | 'T3' => {
         if (u === 'not_urgent') return 'T1';
         if (u === 'needs_attention') return 'T2';
@@ -238,12 +246,17 @@ export function useIncidentActions(): UseIncidentActionsResult {
           incident_id,
           title: input.title,
           urgency: input.urgency,
+          urgency_hint: input.urgency,
           severity: tcode,
           ward_id: input.ward_id,
           description: input.description,
           photo_url: input.photo_url ?? null,
           voice_url: input.voice_url ?? null,
           gps: input.gps ?? null,
+          // Reporter-badge attribute per WO-011 §Wire contract — the
+          // citizen anchor surfaces anchor on the inbox via the
+          // reporter_kind chip on each row.
+          reporter_kind: 'anchor',
         },
       });
 
@@ -252,10 +265,29 @@ export function useIncidentActions(): UseIncidentActionsResult {
         event_type: 'IncidentCreated',
         payload: {
           incident_id,
+          // Lockdown cascade: trust band defaults to T1 (unverified).
+          // The operator's verify flow promotes T1 → T2 when an anchor
+          // NID + photo + hotline verification line up (foundation §1.1).
+          band: 'T1',
+          // Reporter-badge dimension — set to `anchor` per WO-011 §Wire
+          // contract. This is the SEPARATE dimension from trust band.
+          reporter_kind: 'anchor',
+          // Citizen-asserted urgency hint kept on payload so operator
+          // surfaces can render it before verification (the trust band
+          // promotes independently on verification signals).
+          urgency_hint: input.urgency,
+          // Legacy `severity` field retained for inbox-row sorting /
+          // OperatorDashboard's existing buildRows projection (per
+          // web/src/pages/inboxListModel.ts — sort by severity).
           severity: tcode,
           ward_id: input.ward_id,
+          location: input.gps
+            ? { lat: input.gps.lat, lng: input.gps.lng }
+            : null,
           title: input.title,
+          description: input.description,
           summary: input.description,
+          photo_hash: input.photo_url ?? null,
           // The inbox-row model (buildRows in inboxListModel.ts) reads
           // payload.inbox for owner/status/triage hint. Default the new
           // incident to "needs operator review".
@@ -275,7 +307,11 @@ export function useIncidentActions(): UseIncidentActionsResult {
 
       if (created) {
         toast.success(tCommon('toast.reportSubmitted'));
-        return { chain_ref: created.event_id };
+        return {
+          chain_ref: created.event_id,
+          incident_id,
+          reporter_kind: 'anchor' as const,
+        };
       }
       return null;
     },

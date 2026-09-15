@@ -205,8 +205,16 @@ describe('FE-F1 useIncidentActions', () => {
         description: 'Reported by 3 households since 6am',
       });
 
-      // Lockdown cascade 2026-09-11: hook returns { chain_ref } on success.
-      expect(ok).toEqual({ chain_ref: '01ABC' });
+      // WO-011 lockdown cascade: hook returns { chain_ref, incident_id,
+      // reporter_kind } on success (chain_ref is the chain event id;
+      // incident_id is the AnjaliReportSubmitted ↔ IncidentCreated join
+      // key; reporter_kind is the badge attribute projected onto the
+      // operator inbox row).
+      expect(ok).toMatchObject({
+        chain_ref: '01ABC',
+        reporter_kind: 'anchor',
+      });
+      expect((ok as { incident_id?: string } | null)?.incident_id).toBeTruthy();
     });
 
     // (1) AnjaliReportSubmitted event with the citizen's input.
@@ -218,6 +226,8 @@ describe('FE-F1 useIncidentActions', () => {
     // severity on chain = mapped T-code (urgency 'needs_attention' → T2).
     expect(report?.payload.severity).toBe('T2');
     expect(report?.payload.ward_id).toBe('W04');
+    // reporter-badge dimension (WO-011 §Wire contract) — anchor.
+    expect(report?.payload.reporter_kind).toBe('anchor');
     // (2) IncidentCreated event with the same incident_id so the
     // inbox projection joins them.
     const created = captured.find((c) => c.event_type === 'IncidentCreated');
@@ -227,6 +237,11 @@ describe('FE-F1 useIncidentActions', () => {
 
     expect((created?.payload as { incident_id?: string }).incident_id).toBe(incidentId);
     expect((created?.payload as { source?: string }).source).toBe('citizen_report');
+    // WO-011 wire contract: IncidentCreated carries reporter_kind +
+    // band (T1 unverified at submission time; promotes to T2 when
+    // verification signals land).
+    expect((created?.payload as { reporter_kind?: string }).reporter_kind).toBe('anchor');
+    expect((created?.payload as { band?: string }).band).toBe('T1');
   });
 
   it('techArrived POSTs TechnicianArrived with technician_id', async () => {
