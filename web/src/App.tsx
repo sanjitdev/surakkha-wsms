@@ -165,7 +165,11 @@ function RoutedSurface() {
         <Route path="/field/*" element={<FieldQueuePage />} />
         {/* /submit is role-gated inside <SubmitReportPage /> so the
             route stays registered for every persona but the page
-            renders an EmptyState for non-Anjali roles. */}
+            renders an EmptyState for non-Anjali roles.
+            WO-016: /submit was the historic ComingSoonPage placeholder
+            for Anjali; it now resolves to the real SubmitReportPage.
+            ComingSoonPage placeholder is wired only for the still-
+            pending persona landings below (PLACEHOLDERS). */}
         <Route path="/submit" element={<SubmitReportPage />} />
         {/* /ack/:incident_id is the citizen ack surface — Anjali only. */}
         <Route path="/ack/:incident_id" element={<CitizenAckPage />} />
