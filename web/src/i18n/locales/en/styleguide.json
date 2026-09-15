@@ -11,5 +11,11 @@
   "footer": {
     "specLabel": "Spec:",
     "devOnlyLabel": "· Dev-only route — stripped in production builds via"
+  },
+  "reporterBadge": {
+    "anchor": "Anchor",
+    "hotline": "Hotline",
+    "webform": "Webform",
+    "sensor": "Sensor"
   }
 }

@@ -25,6 +25,7 @@ import { Card } from '../components/ui/Card';
 import { Modal } from '../components/ui/Modal';
 import { Toast } from '../components/ui/Toast';
 import { BandPill } from '../components/ui/BandPill';
+import { ReporterBadge } from '../components/operator/ReporterBadge';
 import { Container } from '../components/layout/Container';
 import { EmptyState } from '../components/layout/EmptyState';
 import { TopChrome } from '../components/layout/TopChrome';
@@ -617,19 +618,29 @@ export function StyleguidePage() {
 
       <Section
         title="Reporter-badge — lockdown dimension"
-        blurb="Per foundation §1.1 the reporter badge is a separate dimension from trust band. 4 reporter kinds, each paired with its own --color-reporter-* token. Use these on incident-card bylines, audit-log actor columns, and inbox 'filed by' metadata."
+        blurb="Per foundation §1.1 the reporter badge is a separate dimension from trust band. 4 reporter kinds, each paired with its own --color-reporter-* token + a Lucide-style glyph (Anchor / Phone / Edit / RadioTower). Use these on incident-card bylines, audit-log actor columns, and inbox 'filed by' metadata."
+        testId="sg-section-reporter-badge"
       >
         <Row label="anchor (verified citizen)">
-          <span className="badge badge--reporter-anchor">Anchor</span>
+          <ReporterBadge kind="anchor" i18nNamespace="styleguide" i18nKeyPrefix="reporterBadge" testId="styleguide-reporter-anchor" />
         </Row>
         <Row label="hotline (operator on phone)">
-          <span className="badge badge--reporter-hotline">Hotline</span>
+          <ReporterBadge kind="hotline" i18nNamespace="styleguide" i18nKeyPrefix="reporterBadge" testId="styleguide-reporter-hotline" />
         </Row>
         <Row label="webform (anon / unverified citizen)">
-          <span className="badge badge--reporter-webform">Web form</span>
+          <ReporterBadge kind="webform" i18nNamespace="styleguide" i18nKeyPrefix="reporterBadge" testId="styleguide-reporter-webform" />
         </Row>
         <Row label="sensor (machine-fired)">
-          <span className="badge badge--reporter-sensor">Sensor</span>
+          <ReporterBadge kind="sensor" i18nNamespace="styleguide" i18nKeyPrefix="reporterBadge" testId="styleguide-reporter-sensor" />
+        </Row>
+        <Row label="paired with band (T2 + anchor)">
+          <div className="sg-reporter-grid__chips" data-testid="styleguide-reporter-paired-demo">
+            <span className="badge badge--t2-locked">
+              <span className="badge__glyph" aria-hidden="true">◑</span>
+              <span>T2 VERIFIED</span>
+            </span>
+            <ReporterBadge kind="anchor" i18nNamespace="styleguide" i18nKeyPrefix="reporterBadge" />
+          </div>
         </Row>
       </Section>
 
