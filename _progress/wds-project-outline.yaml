@@ -1,23 +1,13 @@
 wds-version: "1.0.0"
-project: ""
+project: "Surakkha WSMS"
 created: "2026-09-10"
+last-updated: "2026-09-15"
 rendering-tool: excalidraw
 
 phases:
   product-brief: complete
   trigger-map: complete
   ux-scenarios: complete
-    scenarios:
-      - 01-priya-triage-verify-assign
-      - 02-adi-mark-resolved-handoff
-      - 03-anjali-citizen-arc-report-ack-progress-close
-      - 04-karim-onsite-ack-diagnose-submit-proof
-      - 05-pia-data-contract-pha-deferred
-      - 06-audit-chain-timeline-cross-cutting
-    gap-screens-identified:
-      - citizen-status-timeline
-      - hotline-intake-modal
-      - per-incident-chain-segment-viewer
   ux-design: complete
     lockdown-reconciliation:
       signed-off: 2026-09-11
@@ -36,11 +26,26 @@ phases:
       tier-3: 9 # light infrastructure pages
       total: 17
       lines: 3428
+      layout-note: "Flattened into docs/D-UX-Design/ flat on 2026-09-15 per WDS spec-writer convention."
     migration-plan:
       tier-1: 3 new builds + chain-verify utility
       tier-2: 95-step plan across 5 PRs (114 reconciliation items: 24 OK / 57 MINOR / 26 MEDIUM / 7 MAJOR)
       tier-3: 5 MAJOR items flagged for fix
     open-questions: 37
-  development: not-started
+  development: in-progress
+    prep-stage: 2-of-9
+    last-milestone: "WDS scaffolding (E-Development/ + design log + session stubs) — 2026-09-15"
+    pending:
+      - brownfield-tech-audit
+      - master-prd
+      - 17-work-orders
+      - 17-feature-prds
 
 output-folder: docs
+
+stage-0-decisions-locked: 2026-09-15
+  D1-wireframes-md-mirrors: deleted
+  D2-decisions-folder: keep-as-is
+  D3-tokens-md-mirrors: keep-as-is
+  D4-leading-numbers: keep
+  D5-audit-doc-numbering: keep

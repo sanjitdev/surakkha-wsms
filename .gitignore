@@ -28,3 +28,8 @@ pnpm-debug.log*
 
 # Project-specific: BMAD skill scratch (out of repo scope)
 skills/
+
+# WDS machine-local session state (per WDS glossary: progress/ vs _progress/)
+# `_progress/` is tracked (project outline + design log).
+# `progress/` is machine-local (saga/freya/mimir session stubs).
+progress/
