@@ -93,36 +93,36 @@ These need a call before any mechanical work starts.
 
 ### 5.1 Tier 1 (gap screens, 3 WOs)
 
-- [ ] **5.1.a** Run `/sync` to refresh WDS
-- [ ] **5.1.b** Wake Freya with `work-order` workflow
-- [ ] **5.1.c** WO-001 — Citizen Status Timeline (`docs/E-Development/WO-001-citizen-status-timeline.md`)
-- [ ] **5.1.d** WO-002 — Hotline Intake Modal (`docs/E-Development/WO-002-hotline-intake-modal.md`)
-- [ ] **5.1.e** WO-003 — Per-Incident Chain Segment (`docs/E-Development/WO-003-per-incident-chain-segment.md`)
-- [ ] **5.1.f** Tier 1 commit: `docs(development): tier 1 work orders`
+- [x] **5.1.a** Run `/sync` to refresh WDS — **N/A** (direct authoring approach)
+- [x] **5.1.b** Wake Freya with `work-order` workflow — **N/A** (direct authoring)
+- [x] **5.1.c** WO-001 — Citizen Status Timeline — **done 2026-09-15**
+- [x] **5.1.d** WO-002 — Hotline Intake Modal — **done 2026-09-15**
+- [x] **5.1.e** WO-003 — Per-Incident Chain Segment — **done 2026-09-15**
+- [x] **5.1.f** Tier 1 commit: `docs(development): tier 1 work orders` — **in flight 2026-09-15**
 
 ### 5.2 Tier 2 (load-bearing, 5 WOs)
 
-- [ ] **5.2.a** Run `/sync` to refresh WDS
-- [ ] **5.2.b** WO-004 — Operator Dashboard
-- [ ] **5.2.c** WO-005 — Inbox Detail
-- [ ] **5.2.d** WO-006 — Field Queue
-- [ ] **5.2.e** WO-007 — Field Incident Detail
-- [ ] **5.2.f** WO-008 — Audit Log
-- [ ] **5.2.g** Tier 2 commit: `docs(development): tier 2 work orders`
+- [x] **5.2.a** Run `/sync` to refresh WDS — **N/A**
+- [x] **5.2.b** WO-004 — Operator Dashboard — **done 2026-09-15**
+- [x] **5.2.c** WO-005 — Inbox Detail — **done 2026-09-15**
+- [x] **5.2.d** WO-006 — Field Queue — **done 2026-09-15**
+- [x] **5.2.e** WO-007 — Field Incident Detail — **done 2026-09-15**
+- [x] **5.2.f** WO-008 — Audit Log — **done 2026-09-15**
+- [x] **5.2.g** Tier 2 commit: `docs(development): tier 2 work orders` — **in flight 2026-09-15**
 
 ### 5.3 Tier 3 (light, 9 WOs)
 
-- [ ] **5.3.a** Run `/sync` to refresh WDS
-- [ ] **5.3.b** WO-009 — Inbox List
-- [ ] **5.3.c** WO-010 — Inbox Rail
-- [ ] **5.3.d** WO-011 — Submit Report Page
-- [ ] **5.3.e** WO-012 — Citizen Ack Page
-- [ ] **5.3.f** WO-013 — Login Page
-- [ ] **5.3.g** WO-014 — Settings Page
-- [ ] **5.3.h** WO-015 — Styleguide Page
-- [ ] **5.3.i** WO-016 — Coming Soon Page
-- [ ] **5.3.j** WO-017 — Verify Flow
-- [ ] **5.3.k** Tier 3 commit: `docs(development): tier 3 work orders`
+- [x] **5.3.a** Run `/sync` to refresh WDS — **N/A**
+- [x] **5.3.b** WO-009 — Inbox List — **done 2026-09-15**
+- [x] **5.3.c** WO-010 — Inbox Rail — **done 2026-09-15**
+- [x] **5.3.d** WO-011 — Submit Report Page — **done 2026-09-15**
+- [x] **5.3.e** WO-012 — Citizen Ack Page — **done 2026-09-15**
+- [x] **5.3.f** WO-013 — Login Page — **done 2026-09-15**
+- [x] **5.3.g** WO-014 — Settings Page — **done 2026-09-15**
+- [x] **5.3.h** WO-015 — Styleguide Page — **done 2026-09-15**
+- [x] **5.3.i** WO-016 — Coming Soon Page — **done 2026-09-15**
+- [x] **5.3.j** WO-017 — Verify Flow — **done 2026-09-15**
+- [x] **5.3.k** Tier 3 commit: `docs(development): tier 3 work orders` — **in flight 2026-09-15**
 
 ---
 

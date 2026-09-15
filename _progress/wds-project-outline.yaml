@@ -33,10 +33,9 @@ phases:
       tier-3: 5 MAJOR items flagged for fix
     open-questions: 37
   development: in-progress
-    prep-stage: 4-of-9
-    last-milestone: "Master PRD (000-PRD.md) — 2026-09-15"
+    prep-stage: 5-of-9
+    last-milestone: "17 Work Orders (WO-001 → WO-017) — 2026-09-15"
     pending:
-      - 17-work-orders
       - 17-feature-prds
 
 output-folder: docs

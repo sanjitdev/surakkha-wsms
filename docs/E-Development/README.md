@@ -24,9 +24,9 @@ Plus change orders:
 
 | Slot | File | Status |
 |---|---|---|
-| `000-tech-audit.md` | — | ○ pending (Mimir) |
-| `000-PRD.md` | — | ○ pending (Saga) |
-| `WO-001-…` through `WO-017-…` | — | ○ pending (Freya) |
+| `000-tech-audit.md` | ✓ done | ✓ complete 2026-09-15 |
+| `000-PRD.md` | ✓ done | ✓ complete 2026-09-15 |
+| `WO-001-…` through `WO-017-…` | ✓ done | ✓ complete 2026-09-15 |
 | `001-…` through `017-…` feature PRDs | — | ○ pending (Mimir) |
 
 ## Naming convention (WDS)
