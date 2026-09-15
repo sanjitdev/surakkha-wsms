@@ -41,7 +41,11 @@ interface ChainStatus {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  // WO-013 — bind to the `login` namespace so locale-at-container
+  // toggle (downstream i18n.changeLanguage) re-resolves every key
+  // without falling back to common. Implicit-ns is also acceptable
+  // per cascade §11.4; explicit-ns is the more defensive binding.
+  const { t } = useTranslation('login');
   const [selected, setSelected] = useState<Persona>(PERSONAS[0]);
   const [status, setStatus] = useState<'pending' | 'ready' | 'error'>('pending');
   const [chainHeight, setChainHeight] = useState<number | null>(null);
@@ -100,24 +104,28 @@ export function LoginPage() {
     <div className="login-shell">
       <aside className="brand-panel">
         <div className="brand-panel__mark">
-          <div className="brand-panel__mark-glyph" aria-hidden="true">
+          <div
+            className="brand-panel__mark-glyph"
+            data-testid="login-brand-mark"
+            aria-hidden="true"
+          >
             S
           </div>
           <div className="brand-panel__mark-text">Surakkha</div>
         </div>
         <h1 className="brand-panel__title">
-          {t('login:brandPanel.title')}
+          {t('brandPanel.title')}
           <br />
-          {t('login:brandPanel.titleLine2')}
+          {t('brandPanel.titleLine2')}
         </h1>
         <div className="brand-panel__live">
           <span className="brand-panel__live-dot" aria-hidden="true"></span>
           <span>
             {status === 'ready' && chainHeight !== null
-              ? t('login:chain.liveWithCount', { count: chainHeight })
+              ? t('chain.liveWithCount', { count: chainHeight })
               : status === 'pending'
-                ? t('login:chain.connecting')
-                : t('login:chain.unreachable')}
+                ? t('chain.connecting')
+                : t('chain.unreachable')}
           </span>
         </div>
       </aside>
@@ -136,18 +144,18 @@ export function LoginPage() {
           >
             <span className="picker-status__dot" aria-hidden="true"></span>
             {status === 'ready'
-              ? t('login:picker.statusReady')
+              ? t('picker.statusReady')
               : status === 'error'
-                ? t('login:picker.statusError')
-                : t('login:picker.statusPending')}
+                ? t('picker.statusError')
+                : t('picker.statusPending')}
           </div>
 
-          <h2 className="picker-panel__heading">{t('login:picker.heading')}</h2>
+          <h2 className="picker-panel__heading">{t('picker.heading')}</h2>
 
           <div
             className="picker-list"
             role="radiogroup"
-            aria-label={t('login:picker.radiogroupLabel')}
+            aria-label={t('picker.radiogroupLabel')}
           >
             {PERSONAS.map((p) => {
               const isSel = p.id === selected.id;
@@ -201,7 +209,7 @@ export function LoginPage() {
               onClick={handleContinue}
               disabled={isLoggingIn}
             >
-              {isLoggingIn ? t('login:picker.signingIn') : t('login:picker.continue')}
+              {isLoggingIn ? t('picker.signingIn') : t('picker.continue')}
             </button>
             {loginError ? (
               <div
