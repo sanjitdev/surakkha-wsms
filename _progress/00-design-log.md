@@ -56,7 +56,7 @@ Per WDS `references/ux-design-workflow.md`:
 
 | Page | Spec | Wireframe | Approved | Built | Reviewed | Tokens | WO | PRD |
 |---|---|---|---|---|---|---|---|---|
-| inbox-list.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| inbox-list.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
 | inbox-rail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | submit-report-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | citizen-ack-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
@@ -111,6 +111,22 @@ From `02-phase-4-closeout.md`:
 - A reporter can be an anchor at any trust band.
 - Hotline-sourced = T1 default + hotline reporter-badge (not T3).
 - T3 is reserved for consumer-notice issuance path (build-time lint-enforced).
+
+---
+
+## 6. Tier 3 build log
+
+### WO-009 inbox-list — Mimir 2026-09-15
+
+Built. 6 REQs (001..006) + 6 acceptance criteria + lockdown sweep pinned via `web/src/__checks__/fe-inbox-list-reconcile.test.tsx` (14 tests, all green).
+
+Key reconciliations:
+- Trust band = verification state; reporter-badge = source attribute. Both chips land on every row in a new `chrome` column (BandPill locked + ReporterBadge from WO-006 + age + missing-evidence chips).
+- URL persistence: `?filter=band=…&reporter=…&status=…&from=…&to=…` round-trips on mount + every chip toggle.
+- Loading / error / empty states split into 3 branches: chain-unreachable vs fetch-error vs no-matches.
+- Pagination via `<Pagination>` primitive, default 20/page.
+
+Files: `web/src/pages/InboxList.tsx` (+258 LOC), `web/src/pages/inboxListModel.ts` (+45), `web/src/types/inbox.ts` (+150), `web/src/styles/inbox.css` (+90), i18n en+bn (+60 LOC), test file new (561 LOC).
 
 ---
 

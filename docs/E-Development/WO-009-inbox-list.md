@@ -45,3 +45,16 @@ Add to `inboxList.json` (en + bn): filter labels, pagination, empty/loading/erro
 ---
 
 _Ready for Stage 6._
+
+## Build status (Mimir, 2026-09-15)
+
+Built. 6 REQs closed + 6 acceptance criteria pinned. See `fe-inbox-list-reconcile.test.tsx` for the test matrix (14 tests, all green).
+
+| REQ | Title | Status |
+|-----|-------|--------|
+| 001 | Sort priority-first / age-second | ✓ built |
+| 002 | Filter chips function (priority, band, reporter-badge, status, date range) | ✓ built |
+| 003 | URL persistence of filter state | ✓ built |
+| 004 | Row chrome (BandPill + ReporterBadge + age + missing-evidence chips) | ✓ built |
+| 005 | Pagination (default 20 per page) | ✓ built |
+| 006 | Lockdown sweep (focus rings + no Hindi + area labels + empty/loading/error states) | ✓ built |
