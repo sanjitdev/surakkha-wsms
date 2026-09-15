@@ -156,6 +156,10 @@ Key reconciliations:
 
 Files: `web/src/pages/SubmitReportPage.tsx` (+~110 LOC), `web/src/hooks/useIncidentActions.ts` (wire contract extended; +reporter_kind/incident_id in return), `web/src/styles/submit.css` (+110), i18n en+bn submitReport.json (+~30 LOC), test file new (~580 LOC).
 
+### WO-012 citizen-ack — Mimir 2026-09-15
+
+Built = ✓  (Tier 3 build 4/9)
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._
