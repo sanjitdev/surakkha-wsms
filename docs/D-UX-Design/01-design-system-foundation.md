@@ -4,7 +4,7 @@
 > **Lockdown-bound:** every rule below is bound to `_bmad-output/design/` (18 dimension files) + `_bmad-output/planning-artifacts/ux-designs/ux-Surakkha-2026-09-06/{DESIGN,EXPERIENCE}.md`.
 > **Token mirror (2026-09-14):** per-group token navigability in [`tokens/`](tokens/) — README, 01-colors, 02-typography, 03-spacing, 04-radii-and-elevation, 05-motion, 06-trust-bands, 07-reporter-badges. The mirror is navigation-only; this doc is the source of truth.
 > Per `DESIGN.md`: "Spine wins on conflict." Both DESIGN.md and EXPERIENCE.md win against any mock, wireframe, or import.
-> Page specs in `docs/D-UX-Design/specs/` reference this document and don't re-spec its rules.
+> Page specs (17 files, flat in `docs/D-UX-Design/`) reference this document and don't re-spec its rules.
 > Produced by Saga/Freya — 2026-09-11 (rewritten after lockdown reconciliation; superseded foundation at git history).
 
 ---
@@ -450,4 +450,4 @@ The container decides locale; no per-string locale tags. i18n keys at the page l
 
 _Foundation bound to bmad lockdown system — Saga/Freya — 2026-09-11_
 _Supersedes Phase 4 foundation written 2026-09-10 (git history)._
-_Referenced by all specs in `docs/D-UX-Design/specs/`._
+_Referenced by all 17 page specs in `docs/D-UX-Design/`._

@@ -92,13 +92,15 @@ These are the only colour-coded categorical badges in Phase 1. Use neutrals for 
 docs/D-UX-Design/
 ├── 00-phase-4-plan.md             (this file)
 ├── 01-design-system-foundation.md (locked tokens + components + rules)
-├── specs/                         (17 canonical page specs; source of truth)
-│   ├── Tier 1 (3): citizen-status-timeline, hotline-intake-modal, per-incident-chain-segment
-│   ├── Tier 2 (5): operator-dashboard, inbox-detail, field-queue, field-incident-detail, audit-log
-│   └── Tier 3 (9): inbox-list, inbox-rail, submit-report-page, citizen-ack-page,
-│                    login-page, settings-page, styleguide-page, coming-soon-page, verify-flow
-├── wireframes/                    (mirror of specs/ — navigable navigation copy, 2026-09-14)
-├── decisions/                     (per-page reconciliation log)
+├── 02-phase-4-closeout.md         (Phase 4 closeout summary)
+├── 03-wds-convention-audit.md     (WDS v1.0.0 convention audit)
+├── 04-phase-5-prep-todo.md        (Phase 5 prep tracker)
+├── Tier 1 (3): citizen-status-timeline.md, hotline-intake-modal.md, per-incident-chain-segment.md
+├── Tier 2 (5): operator-dashboard.md, inbox-detail.md, field-queue.md, field-incident-detail.md, audit-log.md
+├── Tier 3 (9): inbox-list.md, inbox-rail.md, submit-report-page.md, citizen-ack-page.md,
+│               login-page.md, settings-page.md, styleguide-page.md, coming-soon-page.md, verify-flow.md
+├── wireframes/                    (WDS-spec home for .excalidraw + .png; see wireframes/README.md)
+├── decisions/                     (per-page reconciliation log; project-specific, not WDS)
 │   ├── 00-lockdown-audit.md
 │   └── 01-token-deconfliction-plan.md
 └── tokens/                        (mirror of foundation doc — navigable token groups, 2026-09-14)
@@ -112,7 +114,7 @@ docs/D-UX-Design/
     └── 07-reporter-badges.md
 ```
 
-> **Mirror folders added 2026-09-14.** `tokens/` and `wireframes/` are navigation-only mirrors; the canonical source of truth remains `01-design-system-foundation.md` and `specs/` respectively. Do not edit token values in `tokens/` — edit the foundation doc instead.
+> **Folder layout note (2026-09-15).** Per WDS `agents/spec-writer.md`, page specs live flat in `D-UX-Design/`. The 17 page specs were previously nested under a `specs/` subfolder and have been moved flat. The `wireframes/` folder is reserved for `.excalidraw` + `.png` exports per WDS `agents/wireframe.md`; the previous `.md` "mirror" copies were removed (source of truth is the flat spec). The `tokens/` folder remains a navigation mirror — do not edit token values in `tokens/`, edit the foundation doc instead.
 
 ## 6. Constraints honoured throughout
 

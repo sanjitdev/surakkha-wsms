@@ -12,8 +12,8 @@
 
 | Tier | Pages | Specs |
 |------|-------|-------|
-| **Tier 1** (gap screens, no implementation) | 3 | [citizen-status-timeline.md](specs/citizen-status-timeline.md), [hotline-intake-modal.md](specs/hotline-intake-modal.md), [per-incident-chain-segment.md](specs/per-incident-chain-segment.md) |
-| **Tier 2** (load-bearing existing pages) | 5 | [operator-dashboard.md](specs/operator-dashboard.md), [inbox-detail.md](specs/inbox-detail.md), [field-queue.md](specs/field-queue.md), [field-incident-detail.md](specs/field-incident-detail.md), [audit-log.md](specs/audit-log.md) |
+| **Tier 1** (gap screens, no implementation) | 3 | [citizen-status-timeline.md](citizen-status-timeline.md), [hotline-intake-modal.md](hotline-intake-modal.md), [per-incident-chain-segment.md](per-incident-chain-segment.md) |
+| **Tier 2** (load-bearing existing pages) | 5 | [operator-dashboard.md](operator-dashboard.md), [inbox-detail.md](inbox-detail.md), [field-queue.md](field-queue.md), [field-incident-detail.md](field-incident-detail.md), [audit-log.md](audit-log.md) |
 | **Tier 3** (light infrastructure pages) | 9 | inbox-list, inbox-rail, submit-report-page, citizen-ack-page, login-page, settings-page, styleguide-page, coming-soon-page, verify-flow |
 
 **Total: 17 spec files, 3,428 lines.**
@@ -116,7 +116,7 @@ docs/D-UX-Design/
 ├── 00-phase-4-plan.md                     (this file's predecessor; preserved)
 ├── 01-design-system-foundation.md         (lockdown-bound; rewritten 2026-09-11)
 ├── 02-phase-4-closeout.md                 (this file)
-├── specs/                                 (17 canonical page specs; source of truth)
+├── 17 page specs (flat; per WDS spec-writer convention, 2026-09-15):
 │   ├── Tier 1 (3):
 │   │   ├── citizen-status-timeline.md
 │   │   ├── hotline-intake-modal.md
@@ -137,7 +137,7 @@ docs/D-UX-Design/
 │       ├── styleguide-page.md
 │       ├── coming-soon-page.md
 │       └── verify-flow.md
-├── wireframes/                            (mirror of specs/ — added 2026-09-14 for navigation)
+├── wireframes/                            (WDS-spec home for .excalidraw + .png; added 2026-09-15)
 ├── tokens/                                (mirror of foundation doc — added 2026-09-14)
 │   ├── README.md
 │   ├── 01-colors.md
@@ -154,7 +154,7 @@ docs/D-UX-Design/
 
 Plus CSS update at `web/mockups/theme.css` (442 lines; lockdown tokens added additively).
 
-> **Note (2026-09-14):** `tokens/` and `wireframes/` are navigation-only mirrors. The canonical source of truth remains `01-design-system-foundation.md` (tokens) and `specs/` (wireframes). Edit those files; the mirrors are regenerated when needed.
+> **Note (2026-09-15):** `tokens/` is a navigation-only mirror of the foundation doc (source of truth: `01-design-system-foundation.md`). `wireframes/` is reserved for `.excalidraw` + `.png` exports per WDS `agents/wireframe.md` — the previous `.md` mirror copies were removed because they conflicted with that convention.
 
 ---
 

@@ -42,8 +42,8 @@ The `--band-*` / `--brand-*` legacy tokens and the lockdown `--color-*` tokens *
 - Foundation: [`../01-design-system-foundation.md`](../01-design-system-foundation.md)
 - Lockdown audit: [`../decisions/00-lockdown-audit.md`](../decisions/00-lockdown-audit.md)
 - Token deconfliction plan: [`../decisions/01-token-deconfliction-plan.md`](../decisions/01-token-deconfliction-plan.md)
-- 17 page wireframes: [`../wireframes/`](../wireframes/) (mirrors of `specs/`)
-- 15 specs that reference tokens: [`../specs/`](../specs/)
+- 17 page specs: [`../`](../) (flat per WDS spec-writer convention)
+- 17 page wireframes: [`../wireframes/`](../wireframes/) (WDS-spec folder for `.excalidraw` + `.png` exports)
 
 ---
 

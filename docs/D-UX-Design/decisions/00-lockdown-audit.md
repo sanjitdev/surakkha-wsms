@@ -318,7 +318,9 @@ Each row: lockdown says X, Phase 4 says Y, conflict level.
 | `--space-xs/sm/md/lg/xl/2xl/3xl` | Tailwind `1/2/3/4/6/8/12/16` | no name collision (different naming scheme) |
 | `--radius-xs/sm/md/lg` | Tailwind `rounded-sm/md/lg/full` | no name collision |
 
-The trust-band token-name collisions are the **highest-risk conflict**: a developer who reads `docs/D-UX-Design/specs/` first and writes `--color-trust-t1: emerald` in a stylesheet will have a name collision with the lockdown token, and the build-time lint may or may not catch it.
+The trust-band token-name collisions are the **highest-risk conflict**: a developer who reads the page specs in `docs/D-UX-Design/` first and writes `--color-trust-t1: emerald` in a stylesheet will have a name collision with the lockdown token, and the build-time lint may or may not catch it.
+
+> **Layout note (2026-09-15):** At the time of this audit the specs were nested under `docs/D-UX-Design/specs/`. Per WDS `agents/spec-writer.md`, page specs live flat in `docs/D-UX-Design/` — the layout was flattened in the convention cleanup commit.
 
 ---
 

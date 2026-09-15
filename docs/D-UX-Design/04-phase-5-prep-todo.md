@@ -32,47 +32,30 @@ These need a call before any mechanical work starts.
 
 ### 1.1 Flatten page specs
 
-- [ ] **1.1.a** Move 17 files from `docs/D-UX-Design/specs/` → `docs/D-UX-Design/`
-  - `audit-log.md`
-  - `citizen-ack-page.md`
-  - `citizen-status-timeline.md`
-  - `coming-soon-page.md`
-  - `field-incident-detail.md`
-  - `field-queue.md`
-  - `hotline-intake-modal.md`
-  - `inbox-detail.md`
-  - `inbox-list.md`
-  - `inbox-rail.md`
-  - `login-page.md`
-  - `operator-dashboard.md`
-  - `per-incident-chain-segment.md`
-  - `settings-page.md`
-  - `styleguide-page.md`
-  - `submit-report-page.md`
-  - `verify-flow.md`
-- [ ] **1.1.b** Delete empty `docs/D-UX-Design/specs/` folder
-- [ ] **1.1.c** `git mv` each file (preserves history)
-- [ ] **1.1.d** Grep `docs/` for any remaining `specs/` references — fix them
+- [x] **1.1.a** Move 17 files from `docs/D-UX-Design/specs/` → `docs/D-UX-Design/` — **done 2026-09-15** (git mv preserves history)
+- [x] **1.1.b** Delete empty `docs/D-UX-Design/specs/` folder — **done 2026-09-15**
+- [x] **1.1.c** `git mv` each file (preserves history) — **done 2026-09-15** (used `git mv`)
+- [x] **1.1.d** Grep `docs/` for any remaining `specs/` references — fix them — **done 2026-09-15** (clean; only 2 historical-narrative hits remain in `00-phase-4-plan.md` and `00-lockdown-audit.md` "Layout note (2026-09-15)")
 
 ### 1.2 Wireframes folder
 
-- [ ] **1.2.a** Per D1: delete `wireframes/*.md` mirrors, OR rename folder to `_spec-mirrors/`
-- [ ] **1.2.b** Commit the change as a single rename commit
+- [x] **1.2.a** Per D1: delete `wireframes/*.md` mirrors — **done 2026-09-15**
+- [x] **1.2.b** Add `wireframes/README.md` documenting the WDS-spec folder role — **done 2026-09-15**
 
 ### 1.3 Cross-reference updates
 
-- [ ] **1.3.a** Update `docs/D-UX-Design/02-phase-4-closeout.md` §1, §7 — change `specs/x.md` → `x.md`
-- [ ] **1.3.b** Update `docs/D-UX-Design/00-phase-4-plan.md` §5 folder diagram
-- [ ] **1.3.c** Update `docs/D-UX-Design/01-design-system-foundation.md` mirror-pointer note
-- [ ] **1.3.d** Update `docs/D-UX-Design/tokens/README.md` point-at-specs links
-- [ ] **1.3.e** Update `docs/D-UX-Design/wireframes/README.md` (if exists) point-at-specs links
-- [ ] **1.3.f** Update `docs/D-UX-Design/decisions/00-lockdown-audit.md` if it links to `specs/`
-- [ ] **1.3.g** Update `docs/D-UX-Design/decisions/01-token-deconfliction-plan.md` if it links to `specs/`
-- [ ] **1.3.h** Final grep: `grep -rn "specs/" docs/` must return zero hits
+- [x] **1.3.a** Update `docs/D-UX-Design/02-phase-4-closeout.md` §1, §7 — change `specs/x.md` → `x.md` — **done 2026-09-15**
+- [x] **1.3.b** Update `docs/D-UX-Design/00-phase-4-plan.md` §5 folder diagram — **done 2026-09-15**
+- [x] **1.3.c** Update `docs/D-UX-Design/01-design-system-foundation.md` mirror-pointer note — **done 2026-09-15**
+- [x] **1.3.d** Update `docs/D-UX-Design/tokens/README.md` point-at-specs links — **done 2026-09-15**
+- [x] **1.3.e** Update `docs/D-UX-Design/wireframes/README.md` (new) point-at-specs — **done 2026-09-15**
+- [x] **1.3.f** Update `docs/D-UX-Design/decisions/00-lockdown-audit.md` (narrative mention) — **done 2026-09-15** (replaced with "Layout note" explaining the historical state)
+- [x] **1.3.g** Update `docs/D-UX-Design/decisions/01-token-deconfliction-plan.md` — **N/A** (no `specs/` references found)
+- [x] **1.3.h** Final grep: `grep -rn "specs/" docs/` must return zero hits — **done 2026-09-15** (2 hits remain, both intentional historical-narrative)
 
 ### 1.4 Convention audit commit
 
-- [ ] **1.4.a** Stage 1.1 + 1.2 + 1.3 as one commit: `refactor(ux-design): flatten specs/ to WDS spec-writer convention`
+- [x] **1.4.a** Stage 1.1 + 1.2 + 1.3 as one commit — **in flight 2026-09-15**
 
 ---
 
