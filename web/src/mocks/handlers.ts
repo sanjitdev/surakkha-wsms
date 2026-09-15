@@ -293,6 +293,12 @@ const chainHandlers = [
       // Phase 1 keeps the projection loose — audit log can surface the
       // event; the row removal from the inbox is optimistic on the client.
       'IncidentDismissed',
+      // WO-014 — Settings Page wire contract. The destructive Reset
+      // button (lockdown-bound: variant="ghost" + confirm-modal) emits
+      // `SettingsReset{actor}` BEFORE wiping IDB. Best-effort: a network
+      // blip does not block the user from resetting (the Settings page
+      // catches + logs the emit failure and continues with wipeAll()).
+      'SettingsReset',
     ];
 
     // WO-005 — REQ-013 batch event handler. Loop over each envelope
