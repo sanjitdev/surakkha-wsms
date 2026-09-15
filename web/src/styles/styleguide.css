@@ -240,3 +240,158 @@
   max-width: 480px;
   white-space: pre-wrap;
 }
+
+/* WO-015 — 5-band lockdown trust band showcase row + swatch.
+   Each badge renders glyph + label + a 14px square colour swatch so
+   the swatch is visible in dev + pinned by the reconciliation test. */
+.sg-band-row {
+  gap: var(--space-sm);
+}
+.sg-band-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-default);
+  margin-left: var(--space-sm);
+}
+.badge--t0-locked .sg-band-swatch { background: var(--bg-subtle); }
+.badge--t1-locked .sg-band-swatch { background: var(--color-trust-t1); }
+.badge--t2-locked .sg-band-swatch { background: var(--color-trust-t2); }
+.badge--t3-locked .sg-band-swatch { background: var(--color-trust-t3-issuance); }
+.badge--resolved-locked .sg-band-swatch { background: var(--color-trust-resolved); }
+
+/* WO-015 — Reporter-badge showcase row (4 kinds paired with band). */
+.sg-reporter-grid {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: var(--space-md);
+  align-items: center;
+}
+.sg-reporter-grid__chips {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* WO-015 — Focus-ring demo. Visual 2px --color-primary-tint ring with
+   2px offset on a button + an input. Used by the reconciliation test
+   to pin the lockdown §10.2 binding. */
+.sg-focus-ring-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  align-items: flex-start;
+}
+.sg-focus-ring-demo .button:focus-visible,
+.sg-focus-ring-button:focus-visible,
+.sg-focus-ring-input:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+
+/* WO-015 — Bangla line-height demo. Side-by-side columns at 1.5 vs
+   1.6 leading so reviewers can verify Bangla body spacing without a
+   re-render. The Bangla sentence uses real Bengali script from the
+   citizen-status timeline copy. */
+.sg-line-height-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+.sg-line-height-col {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--bg-surface);
+}
+.sg-line-height-col h3 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide, 0.05em);
+  color: var(--fg-tertiary);
+}
+.sg-line-height-col p {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--fg-default);
+}
+.sg-line-height-col--1-5 p { line-height: var(--line-height-body, 1.5); }
+.sg-line-height-col--1-6 p { line-height: var(--line-height-body-bangla, 1.6); }
+
+/* WO-015 — VS15 demo. Two side-by-side check glyphs on a Bangla
+   consumer message. The plain `✓` falls back to the platform emoji
+   presentation on most renderers; the `✓\uFE0E` form forces text
+   presentation so the glyph matches the Inbox/Operator body type. */
+.sg-vs15-demo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-lg);
+}
+.sg-vs15-col {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  background: var(--bg-surface);
+}
+.sg-vs15-col h3 {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide, 0.05em);
+  color: var(--fg-tertiary);
+}
+.sg-vs15-col p {
+  margin: 0;
+  font-size: var(--font-size-md);
+  color: var(--fg-default);
+  line-height: var(--line-height-body-bangla, 1.6);
+}
+.sg-vs15-glyph {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-lg);
+  margin-right: var(--space-xs);
+  display: inline-block;
+  min-width: 1.25em;
+  text-align: center;
+}
+
+/* WO-015 — Mono font showcase. Binds the .mono class to the
+   --font-family-mono token (IBM Plex Mono). Used by chain hashes +
+   event IDs in audit + incident detail + styleguide. */
+.mono {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+.sg-mono-demo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+.sg-mono-demo code {
+  background: var(--bg-subtle);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  display: inline-block;
+  max-width: 100%;
+  word-break: break-all;
+}
+
+/* WO-015 — Destructive operator action row (secondary + warn icon).
+   Spaced so the warning glyph + label pair reads as a single CTA
+   unit without crowding neighbouring rows. */
+.sg-destructive-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.sg-destructive-cta__icon {
+  font-size: var(--font-size-md);
+  line-height: 1;
+}

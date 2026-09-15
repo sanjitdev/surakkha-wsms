@@ -50,15 +50,17 @@ function Section({
   title,
   blurb,
   children,
+  testId,
 }: {
   title: string;
   blurb: string;
   children: React.ReactNode;
+  testId?: string;
 }) {
   return (
     <section
       className="sg-section card"
-      data-testid={`sg-section-${title.toLowerCase().replace(/\s+/g, '-')}`}
+      data-testid={testId ?? `sg-section-${title.toLowerCase().replace(/\s+/g, '-')}`}
     >
       <header className="sg-section__head">
         <h2 className="sg-section__title">{title}</h2>
@@ -527,20 +529,83 @@ export function StyleguidePage() {
       </Section>
 
       <Section
-        title="BandPill — lockdown palette"
-        blurb="5-band lockdown palette per docs/D-UX-Design/01-design-system-foundation.md §1.1 / §4.1. Glyph + text redundancy (TextStyle VS15). The legacy BandPill with the High/Medium/Low trio is preserved for existing consumers (InboxRow, OperatorDashboard) but is no longer the canonical showcase."
+        title="Trust band — 5-band lockdown palette"
+        blurb="WO-015 migration: the canonical showcase now demonstrates the 5-band lockdown palette per docs/D-UX-Design/01-design-system-foundation.md §1.1 / §4.1 (T0 unverified / T1 divider neutral / T2 verified / T3 issuance / resolved). Glyph + text redundancy forces text presentation (TextStyle VS15). The legacy BandPill 3-band (High/Medium/Low) trio is preserved below for existing consumers (InboxRow, OperatorDashboard) but is no longer the canonical showcase."
+        testId="sg-section-trust-band"
       >
-        <Row label="locked: all 5 bands">
-          <BandPill band={Band.High} locked />
-          <BandPill band={Band.Medium} locked />
-          <BandPill band={Band.Low} locked />
-          <span className="badge badge--resolved-locked" data-testid="styleguide-band-resolved-locked">
-            <span className="badge__glyph" aria-hidden="true">✓︎</span>
-            <span>RESOLVED</span>
-          </span>
-          <span className="badge badge--t0-locked" data-testid="styleguide-band-t0-locked">
+        <Row label="T0 unverified">
+          <span
+            className="badge badge--t0-locked sg-band-row"
+            data-testid="styleguide-band-t0"
+            aria-label="T0 unverified trust band (lockdown palette)"
+          >
             <span className="badge__glyph" aria-hidden="true">○</span>
             <span>T0 INTAKE</span>
+            <span
+              className="sg-band-swatch"
+              data-testid="styleguide-band-t0-swatch"
+              aria-hidden="true"
+            />
+          </span>
+        </Row>
+        <Row label="T1 divider neutral">
+          <span
+            className="badge badge--t1-locked sg-band-row"
+            data-testid="styleguide-band-t1"
+            aria-label="T1 divider neutral trust band (lockdown palette)"
+          >
+            <span className="badge__glyph" aria-hidden="true">◔</span>
+            <span>T1 UNVERIFIED</span>
+            <span
+              className="sg-band-swatch"
+              data-testid="styleguide-band-t1-swatch"
+              aria-hidden="true"
+            />
+          </span>
+        </Row>
+        <Row label="T2 verified">
+          <span
+            className="badge badge--t2-locked sg-band-row"
+            data-testid="styleguide-band-t2"
+            aria-label="T2 verified trust band (lockdown palette)"
+          >
+            <span className="badge__glyph" aria-hidden="true">◑</span>
+            <span>T2 VERIFIED</span>
+            <span
+              className="sg-band-swatch"
+              data-testid="styleguide-band-t2-swatch"
+              aria-hidden="true"
+            />
+          </span>
+        </Row>
+        <Row label="T3 issuance">
+          <span
+            className="badge badge--t3-locked sg-band-row"
+            data-testid="styleguide-band-t3"
+            aria-label="T3 issuance trust band (lockdown palette, alert-red reserved)"
+          >
+            <span className="badge__glyph" aria-hidden="true">●</span>
+            <span>T3 ISSUANCE</span>
+            <span
+              className="sg-band-swatch"
+              data-testid="styleguide-band-t3-swatch"
+              aria-hidden="true"
+            />
+          </span>
+        </Row>
+        <Row label="resolved">
+          <span
+            className="badge badge--resolved-locked sg-band-row"
+            data-testid="styleguide-band-resolved"
+            aria-label="Resolved trust band (lockdown palette, safe-green)"
+          >
+            <span className="badge__glyph" aria-hidden="true">{'\u2713\uFE0E'}</span>
+            <span>RESOLVED</span>
+            <span
+              className="sg-band-swatch"
+              data-testid="styleguide-band-resolved-swatch"
+              aria-hidden="true"
+            />
           </span>
         </Row>
         <Row label="legacy: BandPill (deprecated)">
