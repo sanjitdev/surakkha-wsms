@@ -206,10 +206,18 @@ const chainHandlers = [
 
     if (!session) return HttpResponse.json({ error: 'unauthenticated' }, { status: 401 });
 
-    const envelope = (await request.json()) as Partial<ChainBlock> & {
-      event_type: string;
-      payload: unknown;
-    };
+    const body = (await request.json()) as unknown;
+
+    // WO-005 — REQ-013 batch event handler. The endpoint accepts EITHER
+    // a single envelope (back-compat with existing one-shot POSTs) OR
+    // an array of envelopes (batch). Each envelope is processed by the
+    // canonical append path; the chain head advances per envelope so the
+    // batch lands atomically (one transaction in idb-keyval — same
+    // head, no interleaving from other writers within the handler).
+    const isBatch = Array.isArray(body);
+    const envelopes = (isBatch ? body : [body]) as Array<
+      Partial<ChainBlock> & { event_type: string; payload: unknown }
+    >;
 
     // Closed enum check (dim 7 §3 — 33 event types as of 2026-09-08).
     // Field-tech side events added: TechnicianAssigned, TechnicianArrived,
@@ -287,126 +295,150 @@ const chainHandlers = [
       'IncidentDismissed',
     ];
 
-    if (!ALLOWED.includes(envelope.event_type)) {
-      return HttpResponse.json(
-        {
-          error: 'CommandRejected',
-          reason: 'UnknownEventType',
-          event_type: envelope.event_type,
-        },
-        { status: 409 },
-      );
-    }
-
-    // WO-002 — Hotline Intake Modal wire contract synthesis.
+    // WO-005 — REQ-013 batch event handler. Loop over each envelope
+    // (single envelope = 1 iteration; batch = N iterations). Each
+    // envelope runs through the canonical validation + append path
+    // so atomicity is preserved: the chain head advances per envelope
+    // inside this handler, no other writer interleaves between them.
     //
-    // The modal POSTs /api/events directly (chain-as-source-of-truth
-    // shape), so we synthesise server-side fields that the modal
-    // is not responsible for minting: incident_id for hotline-sourced
-    // IncidentCreated (mirror /api/incidents hotline path), and
-    // outcome validation for HotlineCallLogged. The block's
-    // `payload` field carries the canonical record that downstream
-    // projections (GET /api/incidents, audit log) read from.
-    const payload = (envelope.payload ?? {}) as Record<string, unknown>;
-    let finalPayload: Record<string, unknown> = payload;
+    // Back-compat: single envelope → returns the block (existing wire).
+    // Batch → returns { blocks: [...] } (new wire for verifyAndAssign).
+    const results: ChainBlock[] = [];
 
-    if (envelope.event_type === 'IncidentCreated' && payload.source === 'hotline') {
-      const existingIncidentId = typeof payload.incident_id === 'string' ? payload.incident_id : '';
-      const incidentId = existingIncidentId || `inc_${ulid()}`;
-      finalPayload = {
-        ...payload,
-        incident_id: incidentId,
-        // Hotline defaults: trust_band T1 unless caller explicitly
-        // promoted it (none of the 5 verification signals are
-        // available for hotline callers). T3 reserved for
-        // consumer-notice issuance only (lockdown cascade 2026-09-11).
-        trust_band: typeof payload.trust_band === 'string' ? payload.trust_band : 'T1',
-        // Hash phone server-side (matches /api/incidents hotline path).
-        caller_phone_hash: typeof payload.caller_phone === 'string' && payload.caller_phone
-          ? `sha256:${btoa(payload.caller_phone).slice(0, 32)}`
-          : null,
-      };
-    }
-
-    if (envelope.event_type === 'HotlineCallLogged') {
-      const outcome = payload.outcome;
-
-      if (outcome !== 'no_incident' && outcome !== 'wrong_number') {
+    for (const envelope of envelopes) {
+      if (!ALLOWED.includes(envelope.event_type)) {
         return HttpResponse.json(
           {
             error: 'CommandRejected',
-            reason: 'BadOutcome',
+            reason: 'UnknownEventType',
             event_type: envelope.event_type,
           },
           { status: 409 },
         );
       }
-      finalPayload = {
-        ...payload,
-        // Server-side phone hash for hotline call log records (matches
-        // /api/hotline-calls handler).
-        caller_phone_hash: typeof payload.caller_phone === 'string' && payload.caller_phone
-          ? `sha256:${btoa(payload.caller_phone).slice(0, 32)}`
-          : null,
+
+      // WO-002 — Hotline Intake Modal wire contract synthesis.
+      //
+      // The modal POSTs /api/events directly (chain-as-source-of-truth
+      // shape), so we synthesise server-side fields that the modal
+      // is not responsible for minting: incident_id for hotline-sourced
+      // IncidentCreated (mirror /api/incidents hotline path), and
+      // outcome validation for HotlineCallLogged. The block's
+      // `payload` field carries the canonical record that downstream
+      // projections (GET /api/incidents, audit log) read from.
+      const payload = (envelope.payload ?? {}) as Record<string, unknown>;
+      let finalPayload: Record<string, unknown> = payload;
+
+      if (envelope.event_type === 'IncidentCreated' && payload.source === 'hotline') {
+        const existingIncidentId = typeof payload.incident_id === 'string' ? payload.incident_id : '';
+        const incidentId = existingIncidentId || `inc_${ulid()}`;
+        finalPayload = {
+          ...payload,
+          incident_id: incidentId,
+          // Hotline defaults: trust_band T1 unless caller explicitly
+          // promoted it (none of the 5 verification signals are
+          // available for hotline callers). T3 reserved for
+          // consumer-notice issuance only (lockdown cascade 2026-09-11).
+          trust_band: typeof payload.trust_band === 'string' ? payload.trust_band : 'T1',
+          // Hash phone server-side (matches /api/incidents hotline path).
+          caller_phone_hash: typeof payload.caller_phone === 'string' && payload.caller_phone
+            ? `sha256:${btoa(payload.caller_phone).slice(0, 32)}`
+            : null,
+        };
+      }
+
+      if (envelope.event_type === 'HotlineCallLogged') {
+        const outcome = payload.outcome;
+
+        if (outcome !== 'no_incident' && outcome !== 'wrong_number') {
+          return HttpResponse.json(
+            {
+              error: 'CommandRejected',
+              reason: 'BadOutcome',
+              event_type: envelope.event_type,
+            },
+            { status: 409 },
+          );
+        }
+        finalPayload = {
+          ...payload,
+          // Server-side phone hash for hotline call log records (matches
+          // /api/hotline-calls handler).
+          caller_phone_hash: typeof payload.caller_phone === 'string' && payload.caller_phone
+            ? `sha256:${btoa(payload.caller_phone).slice(0, 32)}`
+            : null,
+        };
+      }
+
+      const head = await getChainHead();
+      const event_id = envelope.event_id ?? ulid();
+      const occurred_at = envelope.occurred_at ?? new Date().toISOString();
+      const ingested_at = new Date().toISOString();
+
+      // Idempotency: scan existing blocks for (tenant_id, event_id).
+      const all = await getAllBlocks();
+      const existing = all.find((b) => b.event_id === event_id);
+
+      if (existing) {
+        if (!isBatch) {
+          return HttpResponse.json({ ...existing, deduplicated: true }, { status: 200 });
+        }
+        // In a batch, surface the existing block in the result list.
+        results.push(existing);
+        continue;
+      }
+
+      const prev_block_hash = head?.block_hash ?? GENESIS_PREV_HASH;
+      const block_hash = await blockHash({
+        prev_block_hash,
+        tenant_id: TENANT,
+        schema_version: SCHEMA_VERSION,
+        event_type: envelope.event_type,
+        event_id,
+        occurred_at,
+        ingested_at,
+        actor_identity: envelope.actor_identity ?? {
+          kind: 'operator',
+          ref: session.actor_ref,
+          display: session.display_name,
+        },
+        payload: finalPayload,
+      });
+
+      const block: ChainBlock = {
+        block_hash,
+        height: (head?.height ?? 0) + 1,
+        prev_block_hash,
+        tenant_id: TENANT,
+        schema_version: SCHEMA_VERSION,
+        event_type: envelope.event_type,
+        event_id,
+        occurred_at,
+        ingested_at,
+        actor_identity: envelope.actor_identity ?? {
+          kind: 'operator',
+          ref: session.actor_ref,
+          display: session.display_name,
+        },
+        payload: finalPayload,
       };
+
+      await appendBlock(block);
+      await setChainHead({
+        block_hash: block.block_hash,
+        height: block.height,
+        ingested_at,
+      });
+
+      results.push(block);
     }
 
-    const head = await getChainHead();
-    const event_id = envelope.event_id ?? ulid();
-    const occurred_at = envelope.occurred_at ?? new Date().toISOString();
-    const ingested_at = new Date().toISOString();
-
-    // Idempotency: scan existing blocks for (tenant_id, event_id).
-    const all = await getAllBlocks();
-    const existing = all.find((b) => b.event_id === event_id);
-
-    if (existing) {
-      return HttpResponse.json({ ...existing, deduplicated: true }, { status: 200 });
+    // Single envelope → back-compat shape (existing callers receive a
+    // single block, not an array).
+    if (!isBatch && results.length === 1) {
+      return HttpResponse.json(results[0], { status: 201 });
     }
-
-    const prev_block_hash = head?.block_hash ?? GENESIS_PREV_HASH;
-    const block_hash = await blockHash({
-      prev_block_hash,
-      tenant_id: TENANT,
-      schema_version: SCHEMA_VERSION,
-      event_type: envelope.event_type,
-      event_id,
-      occurred_at,
-      ingested_at,
-      actor_identity: envelope.actor_identity ?? {
-        kind: 'operator',
-        ref: session.actor_ref,
-        display: session.display_name,
-      },
-      payload: finalPayload,
-    });
-
-    const block: ChainBlock = {
-      block_hash,
-      height: (head?.height ?? 0) + 1,
-      prev_block_hash,
-      tenant_id: TENANT,
-      schema_version: SCHEMA_VERSION,
-      event_type: envelope.event_type,
-      event_id,
-      occurred_at,
-      ingested_at,
-      actor_identity: envelope.actor_identity ?? {
-        kind: 'operator',
-        ref: session.actor_ref,
-        display: session.display_name,
-      },
-      payload: finalPayload,
-    };
-
-    await appendBlock(block);
-    await setChainHead({
-      block_hash: block.block_hash,
-      height: block.height,
-      ingested_at,
-    });
-
-    return HttpResponse.json(block, { status: 201 });
+    return HttpResponse.json({ blocks: results }, { status: 201 });
   }),
 
   http.get('/api/events', async ({ request }) => {

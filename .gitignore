@@ -33,3 +33,5 @@ skills/
 # `_progress/` is tracked (project outline + design log).
 # `progress/` is machine-local (saga/freya/mimir session stubs).
 progress/
+
+.tmp/
