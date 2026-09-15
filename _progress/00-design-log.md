@@ -199,6 +199,38 @@ Lockdown sweep (4 checks):
 
 Net test count: 504 baseline → 520 passing (+16 new settings tests; 0 regression).
 
+### WO-015 styleguide-page — Mimir 2026-09-15
+
+Built = ✓  (Tier 3 build 7/9)
+
+Reconciliation summary:
+- **MAJOR #4 (5-band)**: Replaced the BandPill 3-band (High/Medium/Low) showcase with a 5-band lockdown palette per foundation §1.1 / §4.1. Each band renders glyph + label + 14px colour swatch (testid `styleguide-band-{t0,t1,t2,t3,resolved}`):
+  - T0 = ○ / INTAKE / `--bg-subtle`
+  - T1 = ◔ / UNVERIFIED / `--color-trust-t1` (divider neutral, NOT sky-blue)
+  - T2 = ◑ / VERIFIED / `--color-trust-t2`
+  - T3 = ● / ISSUANCE / `--color-trust-t3-issuance` (alert-red reserved)
+  - resolved = ✓︎ / RESOLVED / `--color-trust-resolved`
+  Legacy BandPill 3-band (High/Medium/Low) trio preserved below as a "legacy: BandPill (deprecated)" row for existing consumers.
+- **MAJOR #4 (Danger misuse removed)**: Danger button showcase relabeled to "Confirm consumer notice" (the single sanctioned issuance-path label) with `testid="styleguide-button-danger-issuance"`. Added a dedicated "destructive operator action" row with `testid="styleguide-button-destructive-secondary"` using `variant="secondary"` + warning glyph (⚠ + VS15) — for Reject / Override / Force resolve. The destructive buttons are explicitly NOT danger.
+- Reporter-badge section now uses the shared `<ReporterBadge />` component (Anchor / Phone / Edit / RadioTower glyphs) instead of stub spans. Added a paired-with-band row showing T2 + anchor as the canonical anchor-citizen-verified composition.
+- Added focus-ring section (button + input, both `:focus-visible` with 2px solid `--color-primary-tint` + 2px offset — lockdown §10.2).
+- Added Bangla line-height demo (side-by-side 1.5 vs 1.6 leading on a real Bangla consumer sentence).
+- Added VS15 demo (plain ✓ vs ✓︎ on a Bangla consumer message — lockdown §2.7).
+- Bound `.mono` class to `var(--font-family-mono)` (IBM Plex Mono) replacing the ui-monospace system fallback. Three sample IDs (chain head / incident / event) demonstrate tabular alignment.
+- Locale files: en + bn `styleguide.json` gained `reporterBadge.*` keys (anchor / hotline / webform / sensor) so the badges render in plain language without depending on the fieldQueue namespace. Hindi lockdown sweep returns no matches.
+- `fe-styleguide-reconcile.test.tsx` new (17 tests, all green): pins the 7 acceptance criteria (page mounts / 5-band trust band / no 3-band vocab / danger issuance row / destructive secondary row / 4 reporter kinds / focus-ring section / VS15 demo / Bangla line-height demo / locale + theme toggles / Hindi sweep).
+
+Files: `web/src/pages/StyleguidePage.tsx` (+~220 LOC showcase + testid wiring), `web/src/styles/styleguide.css` (+~135 LOC for sg-band-row / sg-band-swatch / sg-reporter-grid / sg-focus-ring-demo / sg-line-height-demo / sg-vs15-demo / .mono / sg-destructive-cta / sg-mono-demo), en+bn `styleguide.json` (added `reporterBadge` namespace, +6 keys each), test file new (423 LOC).
+
+Lockdown sweep (4 checks):
+- `styleguide.css` `:focus-visible` rule binds to `--color-primary-tint` ✓
+- No Hindi letters in en/bn `styleguide.json` ✓
+- `StyleguidePage.tsx` contains no `alert-red` / `red-600` / `bg-red` / `High/Medium/Low` literals ✓
+- `StyleguidePage.tsx` contains no `emerald-600` / `sky-` / `sky-blue` / `0EA5E9` literals ✓
+- `tech.css` focus rings all use `--color-primary-tint` ✓
+
+Net test count: 520 baseline → 537 passing (+17 new styleguide tests; 0 regression).
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._

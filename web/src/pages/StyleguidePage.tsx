@@ -550,7 +550,7 @@ export function StyleguidePage() {
 
       <Section
         title="Trust band — 5-band lockdown palette"
-        blurb="WO-015 migration: the canonical showcase now demonstrates the 5-band lockdown palette per docs/D-UX-Design/01-design-system-foundation.md §1.1 / §4.1 (T0 unverified / T1 divider neutral / T2 verified / T3 issuance / resolved). Glyph + text redundancy forces text presentation (TextStyle VS15). The legacy BandPill 3-band (High/Medium/Low) trio is preserved below for existing consumers (InboxRow, OperatorDashboard) but is no longer the canonical showcase."
+        blurb="WO-015 migration: the canonical showcase now demonstrates the 5-band lockdown palette per docs/D-UX-Design/01-design-system-foundation.md §1.1 / §4.1 (T0 unverified / T1 divider neutral / T2 verified / T3 issuance / resolved). Glyph + text redundancy forces text presentation (TextStyle VS15). The legacy BandPill 3-band trio is preserved below for existing consumers (InboxRow, OperatorDashboard) but is no longer the canonical showcase."
         testId="sg-section-trust-band"
       >
         <Row label="T0 unverified">
@@ -602,7 +602,7 @@ export function StyleguidePage() {
           <span
             className="badge badge--t3-locked sg-band-row"
             data-testid="styleguide-band-t3"
-            aria-label="T3 issuance trust band (lockdown palette, alert-red reserved)"
+            aria-label="T3 issuance trust band (lockdown palette, issuance-only reservation)"
           >
             <span className="badge__glyph" aria-hidden="true">●</span>
             <span>T3 ISSUANCE</span>
