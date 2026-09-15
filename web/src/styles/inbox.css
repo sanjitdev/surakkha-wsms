@@ -245,6 +245,91 @@
   outline-offset: 2px;
 }
 
+/* ── Inbox incident rail (WO-010) — 240 px compact ranked-incident
+      list rendered left of the main inbox surface. Each row pairs a
+      compact BandPill (glyph only) with an icon-only ReporterBadge,
+      age, and the incident title. Rows are full-width buttons so
+      keyboard activation matches the click target. ──────────────── */
+.inbox-rail {
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs, 4px);
+  padding: var(--space-sm, 8px);
+  border: 1px solid var(--color-divider, var(--border-subtle));
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-surface);
+}
+.inbox-rail__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs, 4px);
+  padding: var(--space-xs, 4px) var(--space-sm, 8px);
+  border: 1px solid transparent;
+  border-radius: var(--radius-xs, 2px);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  width: 100%;
+  outline: none;
+}
+.inbox-rail__row:hover,
+.inbox-rail__row:focus-visible {
+  background: var(--bg-subtle);
+  border-color: var(--border-subtle);
+}
+.inbox-rail__row:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.inbox-rail__row.is-selected {
+  background: var(--bg-subtle);
+  border-color: var(--color-primary-tint);
+}
+.inbox-rail__row-title {
+  font-size: var(--font-size-2, 14px);
+  font-weight: 500;
+  color: var(--fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.inbox-rail__row-age {
+  font-size: var(--font-size-1, 12px);
+  color: var(--fg-tertiary);
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+/* Compact band pill — glyph only, ~18 px wide, fits the rail. */
+.band-pill--compact {
+  padding: 2px 4px;
+  font-size: 0;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.band-pill--compact .band-pill__icon {
+  font-size: 14px;
+  line-height: 1;
+}
+/* Icon-only reporter badge — small inline SVG only, no label. */
+.reporter-badge-chip--icon-only {
+  padding: 2px 4px;
+  font-size: 0;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.reporter-badge-chip--icon-only svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+
 /* ── Loading state (REQ-006) — calm placeholder, no spinner per §8.4
       sub-second rule (skeleton acceptable for graceful degradation). ── */
 .inbox-loading {

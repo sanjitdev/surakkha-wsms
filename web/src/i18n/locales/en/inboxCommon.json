@@ -15,5 +15,11 @@
     "heading": "Recent decisions",
     "emptyTime": "—",
     "emptyText": "No decisions yet"
+  },
+  "inboxIncidentRail": {
+    "heading": "Ranked incidents",
+    "empty": "No incidents",
+    "rowAriaLabel": "Open incident {{title}}, severity {{severity}}, reported via {{reporter}}",
+    "railLabel": "Ranked incidents rail"
   }
 }

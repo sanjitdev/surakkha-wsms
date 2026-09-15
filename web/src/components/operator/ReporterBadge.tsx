@@ -27,6 +27,13 @@ export interface ReporterBadgeProps {
   /** Class hook for callers that need to attach their own testid. */
   className?: string;
   testId?: string;
+  /**
+   * WO-010 (inbox-rail) — icon-only rendering for the 240 px rail.
+   * Hides the visible text label so the chip fits within ~24 px wide
+   * alongside the compact BandPill. The aria-label + title still carry
+   * the full text for screen-reader + tooltip access (foundation §10.4).
+   */
+  iconOnly?: boolean;
 }
 
 /**
@@ -131,21 +138,24 @@ export function ReporterBadge({
   i18nKeyPrefix = 'reporterBadge',
   className,
   testId,
+  iconOnly = false,
 }: ReporterBadgeProps) {
   const { t } = useTranslation(i18nNamespace);
   const Glyph = GLYPH[kind];
   const label = t(`${i18nKeyPrefix}.${KIND_LABEL_KEY[kind]}`);
+  const compactClass = iconOnly ? ' reporter-badge-chip--icon-only' : '';
 
   return (
     <span
-      className={`chip chip-reporter-${kind} badge--reporter-${kind} reporter-badge-chip${className ? ` ${className}` : ''}`}
+      className={`chip chip-reporter-${kind} badge--reporter-${kind} reporter-badge-chip${compactClass}${className ? ` ${className}` : ''}`}
       data-testid={testId ?? `field-queue-reporter-badge-chip-${kind}`}
+      data-icon-only={iconOnly ? 'true' : undefined}
       data-reporter-kind={kind}
       aria-label={`Reporter: ${label}`}
       title={label}
     >
       <Glyph />
-      <span>{label}</span>
+      {iconOnly ? null : <span>{label}</span>}
     </span>
   );
 }
