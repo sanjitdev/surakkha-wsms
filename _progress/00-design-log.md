@@ -160,6 +160,23 @@ Files: `web/src/pages/SubmitReportPage.tsx` (+~110 LOC), `web/src/hooks/useIncid
 
 Built = ✓  (Tier 3 build 4/9)
 
+### WO-013 login-page — Mimir 2026-09-15
+
+Built = ✓  (Tier 3 build 5/9)
+
+Reconciliation summary:
+- Persona count: kept all 6 personas (priya, anjali, pha_approver, pha_viewer, vendor, karim) — the WO's "5 personas" is a stale count; the MSW `/api/auth/personas` handler returns all 6 and the existing test fixtures reference them. Per WO guidance: "PREFER keeping all 6 personas from the existing implementation UNLESS the WO is explicit."
+- LoginPage calls `loginAs(selected.id)` directly from `mocks/session.ts` rather than POSTing `/api/auth/login` first; the MSW handler at `/api/auth/login` delegates back to `loginAs()` so the wire contract + page path both terminate in the same `setSession()` write. The page wires `surakkha:session-changed` via `notifySessionChanged()` from session-bus.
+- Locale files: en/login.json holds English, bn/login.json holds Bangla (the previous state had them swapped). Hindi lockdown sweep returns no matches in either file.
+- Brand mark glyph binds to `--color-primary` (deep teal) per foundation §7.1.
+- Focus rings (`persona`, `.button`) bind to `--color-primary-tint` 2px solid replacing the audit-flagged emerald-600 ring.
+- `.picker-status--error` dot binds to `--color-status-warn` (amber) — alert-red is reserved for T3+ issuance surfaces per cascade rule.
+- `.button--primary` background binds to `--color-primary` (deep teal) replacing the legacy `--brand-500` blue.
+- Bind to `useTranslation('login')` explicit namespace; the cascade allows `useTranslation()` implicit-ns but explicit is the more defensive binding.
+- Added `.brand-panel__live-dot--error` and `--pending` modifiers wiring to `--color-status-warn` for parity; not yet wired in JSX (the design spec marks it out-of-scope).
+
+Files: `web/src/pages/LoginPage.tsx` (+7 LOC ns binding + testid), `web/src/styles/app.css` (+18 lines lockdown binding), `web/src/styles/components.css` (+5 lines --color-primary-tint focus ring + button--primary deep teal), en+bn login.json (verified parallel keys), test file new (454 LOC, 13 tests).
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._
