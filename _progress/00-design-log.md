@@ -2,7 +2,7 @@
 
 > WDS Phase 4 / 5 progress.
 > Maintained by Freya (Phase 4) and Mimir (Phase 5).
-> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed; GAP-TRIG-KARIM closed; wireframe convention migrated to Mermaid + mmdc; outline rendering-tool updated; WO-008 audit-log reconciled — **Tier 2 DONE**: WO-004 · WO-005 · WO-006 · WO-007 · WO-008).
+> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed; GAP-TRIG-KARIM closed; wireframe convention migrated to Mermaid + mmdc; outline rendering-tool updated; WO-008 audit-log reconciled — **Tier 2 DONE**: WO-004 · WO-005 · WO-006 · WO-007 · WO-008; **Tier 3 builds**: WO-009 inbox-list · WO-010 inbox-rail · WO-011 submit-report-page).
 >
 > **Handoff status:** All 17 PRDs in `docs/E-Development/NNN-[slug].xml` are
 > `status="planned"` and ready for `mimir build`. Master PRD at
@@ -58,7 +58,7 @@ Per WDS `references/ux-design-workflow.md`:
 |---|---|---|---|---|---|---|---|---|
 | inbox-list.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
 | inbox-rail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
-| submit-report-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| submit-report-page.md | S✓ | ○ | ○ | ✓ | ○ | T | ✓ | S✓ |
 | citizen-ack-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | login-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | settings-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
@@ -140,6 +140,21 @@ Key reconciliations:
 - Lockdown sweep: focus rings 2px `--color-primary-tint`, EN + BN locales (no Hindi), area labels on the rail card.
 
 Files: `web/src/pages/InboxRail.tsx` (+185 LOC), `web/src/pages/InboxList.tsx` (+5), `web/src/components/ui/BandPill.tsx` (+12), `web/src/components/operator/ReporterBadge.tsx` (+14), `web/src/styles/inbox.css` (+80), i18n en+bn inboxCommon.json (+12 LOC), test file new (~390 LOC).
+
+### WO-011 submit-report-page — Mimir 2026-09-15
+
+Built ✓. 5 REQs (001..005) + 8 acceptance criteria + lockdown sweep pinned via `web/src/__checks__/fe-submit-report-reconcile.test.tsx` (15 tests, all green).
+
+Key reconciliations:
+- Plain-language urgency dropdown (3 Bangla-first options: "জরুরি নয় / মনোযোগ দরকার / জরুরি"). T-codes stay on the chain payload for operator surfaces but never surface to the citizen (foundation §1.1 — trust band is verification state, an operator concept).
+- Wire contract: `POST /api/events` with `IncidentCreated{reporter_kind: 'anchor', band: 'T1', …}` per the WO-011 §"Wire contract". Trust band defaults to T1 (unverified) — operators promote to T2 when anchor NID + photo + hotline verification line up. Reporter-badge dimension (anchor) is separate from trust band.
+- Success page renders the real chain `event_id` from projection + a "View your report" link to `/my-reports/:incident_id/timeline` (WO-001).
+- 5-min dual-channel ack surface (stub for Phase 1) — `SMS + portal` channels enumerated on the receipt; Phase 2 ships the real gateway.
+- Photo capture with auto-EXIF strip (lat/lon/timestamp/device, all editable). Phase 1 desktop demo stubs the capture; Phase 2 mobile lockdown swaps for a real camera bridge.
+- Anchor chip on receipt when chain projection reports `reporter_kind: anchor` — reuses the shared `<ReporterBadge />` from WO-006 (icon + label per foundation §6.2).
+- Lockdown sweep: focus rings 2px `--color-primary-tint` (binding), EN + BN locales only (no Hindi / Devanagari), area labels, reporter-badge chip on the receipt when applicable.
+
+Files: `web/src/pages/SubmitReportPage.tsx` (+~110 LOC), `web/src/hooks/useIncidentActions.ts` (wire contract extended; +reporter_kind/incident_id in return), `web/src/styles/submit.css` (+110), i18n en+bn submitReport.json (+~30 LOC), test file new (~580 LOC).
 
 ---
 

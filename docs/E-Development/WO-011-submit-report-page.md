@@ -49,4 +49,16 @@ Add to `submitReport.json` (en + bn): plain-language categories, ack messaging, 
 
 ---
 
+## REQ checklist
+
+- [x] REQ-001 — Plain-language urgency dropdown (MAJOR #1; 3 Bangla-first options; T-codes only on chain payload, never on form)
+- [x] REQ-002 — Submit emits `IncidentCreated{reporter_kind: anchor, band: T1, …}` via `useIncidentActions().submitReport`
+- [x] REQ-003 — Success page with incident ID + "View your report" link → `/my-reports/:incident_id/timeline` (WO-001)
+- [x] REQ-004 — 5-min dual-channel ack surface (stub: "SMS + portal" message; Phase 2 ships the real gateway)
+- [x] REQ-005 — Lockdown sweep (focus rings 2px `--color-primary-tint` + no Hindi + area labels + anchor chip on receipt when chain projection returns `reporter_kind=anchor`)
+
+**Status:** Built ✓ — 15 vitest tests passing on `fe-submit-report-reconcile.test.tsx`. Tier 3 build 3/9.
+
+---
+
 _Ready for Stage 6._
