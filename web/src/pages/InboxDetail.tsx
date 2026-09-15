@@ -12,6 +12,15 @@
  *     so the swap is a pure left↔right flip.
  *   - Drops to single pane below <bp-lg> (768 px).
  *
+ * WO-017 cross-reference (added 2026-09-15): the standalone /verify-flow
+ * wizard (web/src/pages/VerifyFlow.tsx) is a Tier 3 dev/demo surface
+ * that mirrors this page's verify-and-assign flow. Both surfaces reuse
+ * the same `verifyBlockHash()` helper from web/src/lib/chain-verify.ts
+ * (no copy-paste — single source of truth). The InboxDetail per-row
+ * verify pattern (timeline rows → button → typed badge) is the
+ * canonical implementation; the standalone /verify-flow wizard wraps
+ * the same helper in a 3-step modal flow for dev demos.
+ *
  * Header CTAs (FE-F3 → inbox-detail.md #14 reconciled 2026-09-11):
  *   - The two previous modal CTAs (AssignTechModal + RequestAckModal)
  *     collapse to a single inline form below the page header. Both
