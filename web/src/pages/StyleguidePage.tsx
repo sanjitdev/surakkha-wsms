@@ -664,6 +664,87 @@ export function StyleguidePage() {
       </Section>
 
       <Section
+        title="Focus ring — lockdown §10.2"
+        blurb="Every interactive surface gets a 2px solid --color-primary-tint ring with a 2px offset. Tab into the demo button + input to feel the ring. The same rule ships in tech.css / components.css / submit.css / inbox.css / citizenAck.css / login styles."
+        testId="sg-section-focus-ring"
+      >
+        <div className="sg-focus-ring-demo">
+          <Button
+            variant="primary"
+            size="md"
+            className="sg-focus-ring-button"
+            data-testid="styleguide-focus-ring-button"
+          >
+            Focus me (button)
+          </Button>
+          <Input
+            value=""
+            onChange={() => {}}
+            placeholder="Focus me (input)…"
+            testId="styleguide-focus-ring-input"
+          />
+        </div>
+      </Section>
+
+      <Section
+        title="Bangla line-height — lockdown §2.3"
+        blurb="Bangla body copy uses --line-height-body-bangla: 1.6 for the extra spacing Bengali glyphs need. The Latin default stays at --line-height-body: 1.5. Side-by-side comparison so reviewers can verify the leading change at a glance."
+        testId="sg-section-bangla-line-height"
+      >
+        <div className="sg-line-height-demo" data-testid="styleguide-bangla-line-height-demo">
+          <div className="sg-line-height-col sg-line-height-col--1-5" data-testid="styleguide-bangla-line-height-1-5">
+            <h3>Latin 1.5</h3>
+            <p>
+              বন্যার পানি বাড়ছে। গুলশান এলাকার ৩ নম্বর ওয়ার্ডে পরিবারগুলোকে
+              নিরাপদ স্থানে সরিয়ে নিন। আপনার সহায়তা দরকার হতে পারে।
+            </p>
+          </div>
+          <div className="sg-line-height-col sg-line-height-col--1-6" data-testid="styleguide-bangla-line-height-1-6">
+            <h3>Bangla 1.6</h3>
+            <p>
+              বন্যার পানি বাড়ছে। গুলশান এলাকার ৩ নম্বর ওয়ার্ডে পরিবারগুলোকে
+              নিরাপদ স্থানে সরিয়ে নিন। আপনার সহায়তা দরকার হতে পারে।
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        title="VS15 — text presentation lockdown §2.7"
+        blurb="Consumer surfaces must force text presentation on the ✓ and ⚠ glyphs so they match the body type and avoid falling back to emoji on iOS / Android. The VS15 (\uFE0E) sequence forces text presentation. Compare the plain glyph (left) vs the VS15 forced glyph (right) on the same Bangla consumer message."
+        testId="sg-section-vs15"
+      >
+        <div className="sg-vs15-demo" data-testid="styleguide-vs15-demo">
+          <div className="sg-vs15-col" data-testid="styleguide-vs15-plain">
+            <h3>Plain ✓ (no VS15)</h3>
+            <p>
+              <span className="sg-vs15-glyph">✓</span>
+              আপনার রিপোর্ট গ্রহণ করা হয়েছে।
+            </p>
+          </div>
+          <div className="sg-vs15-col" data-testid="styleguide-vs15-forced">
+            <h3>{'\u2713\uFE0E'} (VS15 forced)</h3>
+            <p>
+              <span className="sg-vs15-glyph">{'\u2713\uFE0E'}</span>
+              আপনার রিপোর্ট গ্রহণ করা হয়েছে।
+            </p>
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        title="Mono font — IBM Plex Mono"
+        blurb="Token --font-family-mono binds the .mono class to IBM Plex Mono (with JetBrains Mono + ui-monospace fallbacks). Used by chain hashes, event IDs, audit-log actor refs, and field-incident chain segments. The showcase renders three sample IDs so reviewers can verify the tabular alignment."
+        testId="sg-section-mono-font"
+      >
+        <div className="sg-mono-demo" data-testid="styleguide-mono-demo">
+          <code className="mono">chain_head: 01HFX9C2P3YV4K5M6N7Q8R9S0T</code>
+          <code className="mono">incident_id: inc-7f8a9b0c-1d2e-3f4a-5b6c-7d8e9f0a1b2c</code>
+          <code className="mono">event_id: 01HFX9D4Q8Z1X2C3V5B6N7M8K9J</code>
+        </div>
+      </Section>
+
+      <Section
         title="EmptyState"
         blurb="8 dim-5 §8 patterns. Heading level 2/3/4. Linked via aria-labelledby. Always renders card--with-heading."
       >

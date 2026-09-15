@@ -286,7 +286,7 @@
 }
 .sg-focus-ring-demo .button:focus-visible,
 .sg-focus-ring-button:focus-visible,
-.sg-focus-ring-input:focus-visible {
+.sg-focus-ring-demo .input:focus-visible {
   outline: 2px solid var(--color-primary-tint);
   outline-offset: 2px;
 }
