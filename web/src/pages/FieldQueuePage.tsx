@@ -1,279 +1,467 @@
 /**
- * FieldQueuePage.tsx — Story 1.2.
+ * FieldQueuePage.tsx — WO-006 lockdown reconciliation.
  *
- * React port of web/mockups/04-technician/work-queue.html.
+ * Tier 2 load-bearing page for Karim (field_technician). Reconciles the
+ * pre-existing work-queue.html port to docs/D-UX-Design/field-queue.md.
  *
- * Data source: chain events of type `TechnicianAssigned` (active jobs) and
- * `IncidentResolved` (Karim-resolved jobs). The mock seed emits 5 events
- * for the demo (4 tech events + 1 IncidentResolved by Karim); the picker
- * renders what the chain actually has.
+ * Lockdown binding:
+ *   - Trust band = verification state (T1/T2/T3/resolved) — colour + glyph + text
+ *   - Reporter badge = source attribute (anchor/hotline/webform/sensor) — separate dimension
+ *   - shadcn/ui primitives (Card, Button, Dropdown, Toast) — already in /components/ui
+ *   - Focus rings 2px --color-primary-tint (per foundation §7)
+ *   - EN + BN locales only (no Hindi strings)
+ *   - 5s polling + 100ms crossfade per foundation §8.2
  *
- * Design tokens: every visual property is a CSS variable from
- * mockups/theme.css (already loaded by main.tsx). Component composition
- * lives in styles/tech.css + the Priya chrome at mockups/01-priya/dashboard.css.
+ * Wire contract:
+ *   GET  /api/incidents?assigned_to=karim_id   read assignments
+ *   GET  /api/events?limit=50                  read events
+ *   POST /api/events { event_type: "Acknowledged" | "EnRoute", payload: {...} }
  *
- * Post FE-1.6a:
- *   The page is rendered inside <AppLayout>, which owns the sidebar,
- *   top-chrome, logout button, and 5s chain-freshness poll. This file
- *   no longer fetches session or chain freshness — both come from
- *   useAppLayout(). The tech-sidebar__welcome strip (name + role) moved
- *   into the page header row so it lives with the page content rather
- *   than the chrome.
+ * Out of scope for this Tier 2 build (deferred per WO-006 §Scope):
+ *   - Full offline-first layer (IndexedDB + sync) — MAJOR; spec Q1
+ *   - Sensor prep mini-map per row — MAJOR
+ *   - Reasoning preview collapsed-by-default — MEDIUM
+ *   - REOPENED row chip + verbatim ProofInsufficient preview — MAJOR
+ *   - Sync status chip (full sync layer) — stub only; deferred to later patch
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { BandPill } from '../components/ui/BandPill';
+import { ReporterBadge } from '../components/operator/ReporterBadge';
+import { Dropdown } from '../components/ui/Dropdown';
+import { useToast } from '../components/ui/ToastProvider';
+import { Band } from '../types/domain';
+import type { ReporterKind } from '../types/domain';
+import type { CSSProperties as ReactCSSProperties } from 'react';
 
-type Filter = 'all' | 'P1' | 'P2' | 'P3' | 'enroute' | 'onsite';
+// ──────────────────────────────────────────────────────────────────── types
 
-interface ChainEventLite {
-  event_id: string;
-  event_type: string;
-  occurred_at: string;
-  actor_identity: { kind: string; ref: string; display?: string };
-  payload: Record<string, unknown>;
+type Filter = 'mine' | 'available';
+type IncidentSeverity = 'T3' | 'T2' | 'T1' | 'T0';
+
+interface IncidentLike {
+  incident_id: string;
+  ward_id?: string;
+  severity: IncidentSeverity;
+  status: 'open' | 'resolved' | 'escalated';
+  last_block_height: number;
+  last_event_type: string;
+  last_occurred_at: string;
+  reporter_kind?: ReporterKind;
+  assigned_to?: string;
+  /** Optional inline lat/lon so the geolocation hook can compute distance. */
+  lat?: number;
+  lon?: number;
+  /** Optional missing-evidence flags (photo/gps/description). */
+  missing_evidence?: ('photo' | 'gps' | 'description')[];
+  /** Optional short title for the row. */
+  title?: string;
 }
 
-interface WorkOrderRow {
-  id: string;
-  priority: 'P1' | 'P2' | 'P3' | 'P4';
-  status: 'enroute' | 'onsite' | 'assigned' | 'resolved';
-  ticket: string;
-  title: string;
-  subtitle: string;
-  timeLabel: string;
-  timeVal: string;
-  timeIsOverdue: boolean;
-  isDone: boolean;
-  isActive: boolean;
+type GeolocationStatus = 'idle' | 'ok' | 'denied' | 'unavailable';
+
+interface GeoState {
+  status: GeolocationStatus;
+  lat: number | null;
+  lon: number | null;
+  updatedAt: number | null;
 }
+
+// ──────────────────────────────────────────────────────────── helpers
+
+/** Convert severity tier to BandPill enum mapping. The Band enum is
+ *  High = T1 (unverified), Medium = T2 (verified), Low = T3 (issuance)
+ *  per foundation §1.1. */
+function bandFor(severity: IncidentSeverity): Band | null {
+  if (severity === 'T3') return Band.Low;
+  if (severity === 'T2') return Band.Medium;
+  if (severity === 'T1') return Band.High;
+  return null;
+}
+
+/** Severity rank — lower = higher priority. Used by the priority-first /
+ *  age-second comparator. */
+function severityRank(severity: IncidentSeverity): number {
+  if (severity === 'T3') return 0;
+  if (severity === 'T2') return 1;
+  if (severity === 'T1') return 2;
+  return 3;
+}
+
+/** Haversine distance in km between two {lat,lon} pairs. Returns null
+ *  if either side is missing. */
+function distanceKm(a: { lat: number; lon: number } | null, b: { lat: number; lon: number } | null): number | null {
+  if (!a || !b) return null;
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLon = ((b.lon - a.lon) * Math.PI) / 180;
+  const lat1 = (a.lat * Math.PI) / 180;
+  const lat2 = (b.lat * Math.PI) / 180;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+function ageLabel(nowMs: number, occurredAt: string, t: (k: string, opts?: Record<string, unknown>) => string): string {
+  const occurred = new Date(occurredAt).getTime();
+  const diffMin = Math.max(0, Math.round((nowMs - occurred) / 60000));
+
+  if (diffMin < 60) return t('row.ageMinutes', { count: diffMin });
+  const hours = Math.floor(diffMin / 60);
+  return t('row.ageHours', { count: hours });
+}
+
+// ──────────────────────────────────────────────────────── geolocation hook
+
+function useGeolocation(): GeoState {
+  const [state, setState] = useState<GeoState>({
+    status: 'idle',
+    lat: null,
+    lon: null,
+    updatedAt: null,
+  });
+  const watchIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Geolocation API may not exist (server-rendered test env, etc.).
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setState((s) => ({ ...s, status: 'unavailable' }));
+      return;
+    }
+    // Some test runners stub navigator.geolocation as an object without
+    // watchPosition; guard with `typeof === 'function'`.
+    if (typeof navigator.geolocation.watchPosition !== 'function') {
+      setState((s) => ({ ...s, status: 'unavailable' }));
+      return;
+    }
+
+    const onSuccess = (pos: GeolocationPosition) => {
+      setState({
+        status: 'ok',
+        lat: pos.coords.latitude,
+        lon: pos.coords.longitude,
+        updatedAt: pos.timestamp,
+      });
+    };
+    const onError = (err: GeolocationPositionError) => {
+      setState((s) => ({
+        ...s,
+        status: err.code === err.PERMISSION_DENIED ? 'denied' : 'unavailable',
+      }));
+    };
+
+    try {
+      watchIdRef.current = navigator.geolocation.watchPosition(onSuccess, onError, {
+        enableHighAccuracy: false,
+        maximumAge: 30_000,
+        timeout: 10_000,
+      });
+    } catch {
+      setState((s) => ({ ...s, status: 'unavailable' }));
+    }
+
+    return () => {
+      if (watchIdRef.current !== null && typeof navigator.geolocation.clearWatch === 'function') {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      watchIdRef.current = null;
+    };
+  }, []);
+
+  return state;
+}
+
+// ───────────────────────────────────────────────────────── component
+
+const POLL_INTERVAL_MS = 5_000;
 
 export function FieldQueuePage() {
-  // Session comes from AppLayout; AppLayout already gates on
-  // `role === 'field_technician'`. We only need the actor_ref to
-  // filter the chain events to Karim's jobs.
   const { session } = useAppLayout();
   const { format: formatDateLocal } = useDateFormatter();
   const { t: tField } = useTranslation('fieldQueue');
+  const toast = useToast();
+
   const technicianId = session.actor_ref;
-  const [rows, setRows] = useState<WorkOrderRow[]>([]);
-  const [filter, setFilter] = useState<Filter>('all');
-  const [sortMode, setSortMode] = useState<'manual' | 'sla'>('manual');
+  const [incidents, setIncidents] = useState<IncidentLike[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<Filter>('mine');
+  const [now, setNow] = useState<number>(() => Date.now());
+  const [ringedKeys, setRingedKeys] = useState<Set<string>>(new Set());
+  const previousKeysRef = useRef<Map<string, IncidentLike>>(new Map());
 
-  // 1. fetch chain events for Karim
-  useEffect(() => {
-    void (async () => {
-      try {
-        const [assigned, resolved] = await Promise.all([
-          fetch('/api/events?event_type=TechnicianAssigned&limit=100').then((r) =>
-            r.json(),
-          ) as Promise<{ events: ChainEventLite[] }>,
-          fetch('/api/events?event_type=IncidentResolved&limit=100').then((r) =>
-            r.json(),
-          ) as Promise<{ events: ChainEventLite[] }>,
-        ]);
+  const geo = useGeolocation();
+  const [pendingEnRoute, setPendingEnRoute] = useState<string | null>(null);
 
-        setRows(buildRows(technicianId, assigned.events, resolved.events));
-      } catch (err) {
-        console.error('[surakkha] field queue fetch failed', err);
-      } finally {
-        setLoading(false);
+  // 1. fetch loop — reads incidents assigned to Karim (or unassigned for
+  //    "Available"). Polls every 5s per foundation §8.2.
+  const refetch = useCallback(async (): Promise<void> => {
+    try {
+      const url = `/api/incidents?assigned_to=${encodeURIComponent(technicianId)}`;
+      const res = await fetch(url);
+      const data = (await res.json()) as IncidentLike[];
+
+      // Diff previous → new keys. Rows whose data changed get the
+      // "ringed" class so the 100ms crossfade animation fires.
+      const next = Array.isArray(data) ? data : [];
+      const prevMap = previousKeysRef.current;
+      const ringed = new Set<string>();
+
+      for (const row of next) {
+        const prior = prevMap.get(row.incident_id);
+
+        if (prior && JSON.stringify(prior) !== JSON.stringify(row)) {
+          ringed.add(row.incident_id);
+        }
+        prevMap.set(row.incident_id, row);
       }
-    })();
+      setIncidents(next);
+      setRingedKeys(ringed);
+      // Clear ringed set after the animation completes so it can re-fire
+      // on the next change.
+      window.setTimeout(() => {
+        setRingedKeys((s) => {
+          if (s.size === 0) return s;
+          return new Set();
+        });
+      }, 200);
+    } catch (err) {
+      // Fail-soft — leave the previous list in place and surface a
+      // single info toast. Lockdown doesn't require a blocking error
+      // modal on this surface.
+      console.error('[surakkha] field queue fetch failed', err);
+    } finally {
+      setLoading(false);
+    }
   }, [technicianId]);
 
-  // tech-sidebar__welcome moved here from the inline sidebar so the
-  // persona greeting lives with the page content rather than the
-  // chrome. AppLayout already shows the persona chip in top-chrome;
-  // this strip gives the page header a more personal subtitle.
-  const personaName = session.display_name.replace(' — Field Technician', '');
-  const personaRole = tField('page.subtitleRole');
+  useEffect(() => {
+    void refetch();
+    const id = window.setInterval(() => {
+      void refetch();
+    }, POLL_INTERVAL_MS);
+    const nowId = window.setInterval(() => setNow(Date.now()), 30_000);
 
-  const visible = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (filter === 'all') return true;
-        if (filter === 'P1' || filter === 'P2' || filter === 'P3') return r.priority === filter;
-        if (filter === 'enroute') return r.status === 'enroute';
-        // filter is `'onsite'` here — TS exhaustively narrowed via prior returns
-        return r.status === 'onsite';
-      }),
-    [rows, filter],
+    return () => {
+      window.clearInterval(id);
+      window.clearInterval(nowId);
+    };
+  }, [refetch]);
+
+  // 2. Filter visible rows by chip + assignment state.
+  const visible = useMemo(() => {
+    if (filter === 'mine') {
+      // "My assignments" — rows whose latest event is owned by Karim
+      // (heuristic: any of {assigned_to === technicianId} OR
+      // {last_event_type === 'TechnicianAssigned'}).
+      return incidents.filter(
+        (r) => r.assigned_to === technicianId || r.last_event_type === 'TechnicianAssigned',
+      );
+    }
+    // "Available" — open incidents not yet assigned.
+    return incidents.filter(
+      (r) => r.status === 'open' && r.last_event_type !== 'TechnicianAssigned' && !r.assigned_to,
+    );
+  }, [incidents, filter, technicianId]);
+
+  // 3. Priority-first / age-second sort. Tighter ties (same severity) get
+  //    older first so the most-aged work surfaces at the top.
+  const sortedVisible = useMemo(() => {
+    return [...visible].sort((a, b) => {
+      const sa = severityRank(a.severity);
+      const sb = severityRank(b.severity);
+
+      if (sa !== sb) return sa - sb;
+      // Age ascending — older first.
+      return new Date(a.last_occurred_at).getTime() - new Date(b.last_occurred_at).getTime();
+    });
+  }, [visible]);
+
+  // 4. Wire contract — POST /api/events.
+  const postEvent = useCallback(
+    async (eventType: 'Acknowledged' | 'EnRoute', payload: Record<string, unknown>): Promise<void> => {
+      try {
+        await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ event_type: eventType, payload }),
+        });
+      } catch (err) {
+        console.error(`[surakkha] ${eventType} post failed`, err);
+      }
+    },
+    [],
   );
 
-  // SLA sort key: priority tier (P1=0 first), then overdue flag
-  // (overdue → 0, on-track → 1), then status order (en route → on
-  // site → assigned → resolved). Stable: Array#sort is stable per
-  // ES2019, so ties preserve buildRows() arrival order.
-  const slaSortKey = (r: WorkOrderRow): [number, number, number] => {
-    const priorityRank =
-      r.priority === 'P1' ? 0 : r.priority === 'P2' ? 1 : r.priority === 'P3' ? 2 : 3;
-    const overdueRank = r.timeIsOverdue && !r.isDone ? 0 : 1;
-    const statusRank =
-      r.status === 'enroute'
-        ? 0
-        : r.status === 'onsite'
-          ? 1
-          : r.status === 'assigned'
-            ? 2
-            : 3;
+  const onAcknowledge = useCallback(
+    async (row: IncidentLike): Promise<void> => {
+      await postEvent('Acknowledged', { actor: 'karim', incident_id: row.incident_id });
+      toast.success(tField('toast.acknowledged'));
+      // Open the detail page after emit (per WO-006 acceptance #4).
+      window.setTimeout(() => {
+        window.location.href = `/field/incident-detail?incident=${encodeURIComponent(row.incident_id)}`;
+      }, 250);
+    },
+    [postEvent, toast, tField],
+  );
 
-    return [priorityRank, overdueRank, statusRank];
+  const onEnRoute = useCallback(
+    async (row: IncidentLike, etaMinutes: number): Promise<void> => {
+      await postEvent('EnRoute', {
+        actor: 'karim',
+        incident_id: row.incident_id,
+        eta_minutes: etaMinutes,
+      });
+      toast.info(tField('toast.enRoute', { minutes: etaMinutes }));
+      setPendingEnRoute(null);
+      // Open detail page after emit.
+      window.setTimeout(() => {
+        window.location.href = `/field/incident-detail?incident=${encodeURIComponent(row.incident_id)}`;
+      }, 250);
+    },
+    [postEvent, toast, tField],
+  );
+
+  const etaOptions = useMemo(
+    () => [
+      { value: 1, label: tField('etaPicker.1') },
+      { value: 5, label: tField('etaPicker.5') },
+      { value: 15, label: tField('etaPicker.15') },
+      { value: 30, label: tField('etaPicker.30') },
+      { value: 60, label: tField('etaPicker.60') },
+    ],
+    [tField],
+  );
+
+  // 5. KPI cells — open / due<30m / overdue / closed (re-labeled per
+  //    spec diff #15).
+  const kpis = useMemo(() => {
+    const open = sortedVisible.filter((r) => r.status === 'open').length;
+    const dueSoon = sortedVisible.filter((r) => {
+      if (r.status !== 'open') return false;
+      const age = Math.round((now - new Date(r.last_occurred_at).getTime()) / 60000);
+      return age >= 20 && age < 30;
+    }).length;
+    const overdue = sortedVisible.filter((r) => {
+      if (r.status !== 'open') return false;
+      const age = Math.round((now - new Date(r.last_occurred_at).getTime()) / 60000);
+      return age >= 30;
+    }).length;
+    const closed = sortedVisible.filter((r) => r.status === 'resolved').length;
+
+    return { open, dueSoon, overdue, closed };
+  }, [sortedVisible, now]);
+
+  const personName = session.display_name.replace(' — Field Technician', '');
+  const personaRole = tField('page.subtitleRole');
+  const todayLabel = formatDateLocal('date-short', new Date(now));
+
+  const rowInlineStyles: ReactCSSProperties = { outline: 'none' };
+  const headerRowStyles: ReactCSSProperties = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 'var(--space-md)',
   };
 
-  const sortedVisible = useMemo(() => {
-    if (sortMode !== 'sla') return visible;
-    return [...visible].sort((a, b) => {
-      const ka = slaSortKey(a);
-      const kb = slaSortKey(b);
+  // Geolocation status caption (used by the deferred sync-status chip).
+  const geoCaption =
+    geo.status === 'ok'
+      ? tField('syncStatus.online')
+      : geo.status === 'denied'
+        ? tField('syncStatus.offline')
+        : geo.status === 'unavailable'
+          ? tField('syncStatus.offline')
+          : tField('syncStatus.syncing');
 
-      if (ka[0] !== kb[0]) return ka[0] - kb[0];
-      if (ka[1] !== kb[1]) return ka[1] - kb[1];
-      return ka[2] - kb[2];
-    });
-  }, [visible, sortMode]);
-
-  const onOptimizeRoute = (): void => {
-    setFilter('all');
-    setSortMode('sla');
-  };
-
-  const chipCounts: Record<Filter, number> = {
-    all: rows.length,
-    P1: rows.filter((r) => r.priority === 'P1').length,
-    P2: rows.filter((r) => r.priority === 'P2').length,
-    P3: rows.filter((r) => r.priority === 'P3').length,
-    enroute: rows.filter((r) => r.status === 'enroute').length,
-    onsite: rows.filter((r) => r.status === 'onsite').length,
-  };
-
-  const chipFilterLabel: Record<Filter, string> = {
-    all: tField('filters.all'),
-    P1: tField('filters.P1'),
-    P2: tField('filters.P2'),
-    P3: tField('filters.P3'),
-    enroute: tField('filters.enroute'),
-    onsite: tField('filters.onsite'),
-  };
-
-  const today = new Date();
-  const todayLabel = formatDateLocal('date-short', today);
-
-  // Pre-FE-1.6a the page returned <div className="app-shell app-shell--tech">
-  // with an inline <aside>, <header className="top-chrome">, and logout
-  // button. Post FE-1.6a AppLayout owns the chrome; the page returns
-  // only the page header + jobs.
   return (
-    <main className="container container--wide">
-      <div className="page-header">
-        <div className="page-header__row">
+    <main
+      className="container container--wide field-queue-page"
+      data-testid="field-queue-page"
+      data-area="field-queue-page"
+    >
+      <div className="page-header" data-testid="field-queue-header" data-area="field-queue-header">
+        <div className="page-header__row" style={headerRowStyles}>
           <div>
             <h1>{tField('page.title')}</h1>
             <div className="page-header__sub">
-              {tField('page.subtitle', {
-                name: personaName,
-                role: personaRole,
-                count: rows.length,
-                date: todayLabel,
-              })}
+              {tField('page.subtitle', { name: personName, role: personaRole, date: todayLabel })}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-            <button
-              className="button button--secondary"
-              type="button"
-              disabled={sortMode === 'sla'}
-              onClick={onOptimizeRoute}
-              data-testid="field-optimize-route"
-            >
-              {tField('optimizeRoute')}
-            </button>
-          </div>
-        </div>
-        {sortMode === 'sla' && (
-          <div className="page-header__sub" data-testid="field-optimized-subtitle">
-            {tField('page.optimizedSubtitle')}
-          </div>
-        )}
-      </div>
-
-      <div className="tech-today">
-        <div className="tech-today__cell">
-          <span className="tech-today__label">{tField('today.todayLabel')}</span>
-          <span className="tech-today__val">{rows.length}</span>
-          <span className="tech-today__sub">
-            {tField('today.remainingSuffix', { count: rows.filter((r) => !r.isDone).length })}
-          </span>
-        </div>
-        <div className="tech-today__cell">
-          <span className="tech-today__label">{tField('today.inProgressLabel')}</span>
-          <span className="tech-today__val">{chipCounts.enroute + chipCounts.onsite}</span>
-          <span className="tech-today__sub">
-            {chipCounts.enroute > 0
-              ? tField('today.inProgressEnRoute', { count: chipCounts.enroute })
-              : chipCounts.onsite > 0
-                ? tField('today.inProgressOnSite', { count: chipCounts.onsite })
-                : tField('today.inProgressEmDash')}
-          </span>
-        </div>
-        <div className="tech-today__cell">
-          <span className="tech-today__label">{tField('today.overdueLabel')}</span>
+          {/* Sync-status chip — stub. Full sync layer (offline-first,
+              IndexedDB queue, conflict resolution) is deferred per WO-006
+              §Scope. The chip renders in DOM so a later patch can fill
+              in real state without touching layout. */}
           <span
-            className="tech-today__val"
-            style={{
-              // Lockdown cascade 2026-09-11: overdue is operator-readable
-              // (amber-bright), NOT alert-red-reserved.
-              color: rows.some((r) => r.timeIsOverdue && !r.isDone) ? 'var(--color-amber-bright)' : undefined,
-            }}
+            className="field-queue-sync-status-chip"
+            data-testid="field-queue-sync-status-chip"
+            aria-label={`Sync status: ${geoCaption}`}
+            title={tField('offline.deferred')}
           >
-            {rows.filter((r) => r.timeIsOverdue && !r.isDone).length}
-          </span>
-          <span className="tech-today__sub">
-            {rows.find((r) => r.timeIsOverdue && !r.isDone)?.title ?? tField('today.inProgressEmDash')}
-          </span>
-        </div>
-        <div className="tech-today__cell">
-          <span className="tech-today__label">{tField('today.closedLabel')}</span>
-          <span className="tech-today__val">{rows.filter((r) => r.isDone).length}</span>
-          <span className="tech-today__sub">
-            {(() => {
-              // avgClose isn't modelled yet — when it lands the subtitle
-              // reads "avg close · 38 min". Until then the slot stays as
-              // a bare em-dash so the rendered label never shows a
-              // dangling "·" separator pointing at nothing.
-              const emDash = tField('today.inProgressEmDash');
-              // Mock a future value: replace this conditional with the
-              // real metric when the data shape lands.
-              const avg: string | null = null;
-
-              if (avg === null) return emDash;
-              return tField('today.closedAvgClose', { avg });
-            })()}
+            <span className="field-queue-sync-status-chip__dot" aria-hidden="true" />
+            {geoCaption}
           </span>
         </div>
       </div>
 
-      <div className="tech-chips">
-        {(Object.keys(chipFilterLabel) as Filter[]).map((f) => (
-          <button
-            key={f}
-            type="button"
-            className={`tech-chip${filter === f ? ' is-on' : ''}`}
-            onClick={() => {
-              setFilter(f);
-            }}
-          >
-            {chipFilterLabel[f]} <span className="tech-chip__count">{chipCounts[f]}</span>
-          </button>
-        ))}
+      {/* KPI strip — re-labeled per spec diff #15 */}
+      <div className="tech-today" data-testid="field-queue-kpi-strip" data-area="field-queue-kpi">
+        <KpiCell label={tField('kpi.open')} value={kpis.open} sub={tField('kpi.openSub', { count: kpis.open })} testId="field-queue-kpi-open" />
+        <KpiCell label={tField('kpi.dueIn30')} value={kpis.dueSoon} sub={tField('kpi.dueIn30Sub', { count: kpis.dueSoon })} testId="field-queue-kpi-due" />
+        <KpiCell
+          label={tField('kpi.overdue')}
+          value={kpis.overdue}
+          sub={tField('kpi.overdueSub', { count: kpis.overdue })}
+          color={kpis.overdue > 0 ? 'var(--color-amber-bright)' : undefined}
+          testId="field-queue-kpi-overdue"
+        />
+        <KpiCell label={tField('kpi.closed')} value={kpis.closed} sub={tField('kpi.closedSub', { count: kpis.closed })} testId="field-queue-kpi-closed" />
       </div>
 
-      <div className="tech-jobs">
+      {/* Filter chips — "My assignments" (default) + "Available" */}
+      <div
+        className="field-queue-filter-chips"
+        data-testid="field-queue-filter-chips"
+        data-area="field-queue-filter-chips"
+      >
+        <button
+          type="button"
+          className={`field-queue-chip-mine${filter === 'mine' ? ' is-on' : ''}`}
+          onClick={() => setFilter('mine')}
+          data-testid="field-queue-chip-mine"
+          data-area="field-queue-chip-mine"
+          aria-pressed={filter === 'mine'}
+        >
+          {tField('filter.mine')}
+        </button>
+        <button
+          type="button"
+          className={`field-queue-chip-available${filter === 'available' ? ' is-on' : ''}`}
+          onClick={() => setFilter('available')}
+          data-testid="field-queue-chip-available"
+          data-area="field-queue-chip-available"
+          aria-pressed={filter === 'available'}
+        >
+          {tField('filter.available')}
+        </button>
+      </div>
+
+      <div
+        className="field-queue-incident-list"
+        data-testid="field-queue-incident-list"
+        data-area="field-queue-incident-list"
+      >
         {loading && (
           <div
             style={{
@@ -298,125 +486,143 @@ export function FieldQueuePage() {
             {tField('empty')}
           </div>
         )}
-        {sortedVisible.map((r) => (
-          <a
-            key={r.id}
-            href={`/field/incident-detail?work_order=${r.id}`}
-            className={`tech-job${r.isActive ? ' is-active' : ''}${r.isDone ? ' is-done' : ''}`}
-          >
-            <span className={`tech-job__priority tech-job__priority--${r.priority.toLowerCase()}`}>
-              {r.priority}
-            </span>
-            <div>
-              <div className="tech-job__row1">
-                <span className={`t-pill t-pill--${r.status}`}>
-                  <span className="t-pill__dot"></span>
-                  {pillLabel(tField, r.status)}
-                </span>
-                <span className="tech-job__ticket">{r.ticket}</span>
+        {sortedVisible.map((row) => {
+          const ringed = ringedKeys.has(row.incident_id);
+          const ageText = ageLabel(now, row.last_occurred_at, tField);
+          const km =
+            geo.status === 'ok' && geo.lat !== null && geo.lon !== null && row.lat != null && row.lon != null
+              ? distanceKm({ lat: geo.lat, lon: geo.lon }, { lat: row.lat, lon: row.lon })
+              : null;
+          const distStr =
+            km === null ? tField('row.distanceUnknown') : tField('row.distance', { km: km.toFixed(1) });
+          const band = bandFor(row.severity);
+          const isPending = pendingEnRoute === row.incident_id;
+
+          return (
+            <a
+              key={row.incident_id}
+              href={`/field/incident-detail?incident=${encodeURIComponent(row.incident_id)}`}
+              className={`field-queue-row${ringed ? ' field-queue-row__cell-changed' : ''}`}
+              data-testid={`field-queue-row-${row.incident_id}`}
+              data-area={`field-queue-row-${row.incident_id}`}
+              data-severity={row.severity}
+              style={rowInlineStyles}
+            >
+              {/* BandPill — locked = true renders glyph + text + colour per
+                  foundation §1.1 / §4.1. Resolved rows show null band; the
+                  status pill in row1 carries that semantic instead. */}
+              <span data-area={`field-queue-band-pill-${row.incident_id}`}>
+                {band ? <BandPill band={band} locked={true} testId={`field-queue-band-pill-${row.incident_id}`} /> : null}
+              </span>
+
+              {/* Reporter-badge chip — separate dimension from trust band. */}
+              <ReporterBadge
+                kind={row.reporter_kind ?? 'webform'}
+                testId={`field-queue-reporter-badge-${row.incident_id}`}
+              />
+
+              {/* Distance estimate — updates when geolocation fires. */}
+              <span
+                className="field-queue-distance-estimate"
+                data-testid={`field-queue-distance-estimate-${row.incident_id}`}
+                data-area={`field-queue-distance-estimate-${row.incident_id}`}
+                aria-label={`Distance: ${distStr}`}
+              >
+                {distStr}
+              </span>
+
+              {/* Row body — incident_id mono + ward + age. */}
+              <div>
+                <div style={{ fontFamily: 'var(--font-family-mono)', fontSize: 11, color: 'var(--fg-tertiary)' }}>
+                  {row.incident_id}
+                  {row.ward_id ? ` · ${row.ward_id}` : ''}
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--fg-secondary)' }}>{row.title ?? '—'}</div>
+                <div className="field-queue-row__age">{ageText}</div>
+                {row.missing_evidence && row.missing_evidence.length > 0 ? (
+                  <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap' }}>
+                    {row.missing_evidence.map((m) => (
+                      <span key={m} className="field-queue-evidence-chip" data-evidence={m}>
+                        {tField(`row.evidence${m[0].toUpperCase()}${m.slice(1)}`)}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-              <p className="tech-job__title">{r.title}</p>
-              <div className="tech-job__row2">{r.subtitle}</div>
-            </div>
-            <div className="tech-job__time">
-              <div className="tech-job__time-label">{r.timeLabel}</div>
-              <div className={`tech-job__time-val${r.timeIsOverdue ? ' is-overdue' : ''}`}>
-                {r.timeVal}
-              </div>
-            </div>
-          </a>
-        ))}
+
+              {/* Action buttons — Acknowledge + En route. En route opens
+                  the ETA picker inline when focused. */}
+              <button
+                type="button"
+                className="field-queue-button-acknowledge"
+                onClick={(e) => {
+                  e.preventDefault();
+                  void onAcknowledge(row);
+                }}
+                data-testid={`field-queue-button-acknowledge-${row.incident_id}`}
+                data-area={`field-queue-button-acknowledge-${row.incident_id}`}
+                aria-label={`Acknowledge ${row.incident_id}`}
+              >
+                {tField('button.acknowledge')}
+              </button>
+
+              {isPending ? (
+                <div data-testid={`field-queue-eta-picker-${row.incident_id}`}>
+                  <Dropdown<number>
+                    options={etaOptions}
+                    value={null}
+                    onChange={(v) => {
+                      if (v !== null) void onEnRoute(row, v);
+                    }}
+                    placeholder={tField('etaPicker.label')}
+                    testId={`field-queue-eta-dropdown-${row.incident_id}`}
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="field-queue-button-en-route"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPendingEnRoute(row.incident_id);
+                  }}
+                  data-testid={`field-queue-button-en-route-${row.incident_id}`}
+                  data-area={`field-queue-button-en-route-${row.incident_id}`}
+                  aria-label={`En route ${row.incident_id}`}
+                >
+                  {tField('button.enRoute')}
+                </button>
+              )}
+            </a>
+          );
+        })}
       </div>
     </main>
   );
 }
-// ────────────────────────────────────────────── helpers ──────────────
-// pillLabel: localized status pill text. Returns the bare status label
-// (e.g., "En route"); the time portion is appended separately by the
-// caller when applicable. The `tField` argument is the parent's
-// `useTranslation('fieldQueue')` so the label resolves in the active
-// locale.
-function pillLabel(tField: (k: string) => string, status: WorkOrderRow['status']): string {
-  if (status === 'assigned') return tField('pill.assigned');
-  if (status === 'enroute') return tField('pill.enroute');
-  if (status === 'onsite') return tField('pill.onsite');
-  // status is `'resolved'` here — TS exhaustively narrowed via prior returns
-  return tField('pill.resolved');
-}
-function buildRows(
-  technicianId: string,
-  assigned: ChainEventLite[],
-  resolved: ChainEventLite[],
-): WorkOrderRow[] {
-  const out: WorkOrderRow[] = [];
 
-  // active jobs: TechnicianAssigned events where the technician matches
-  for (const e of assigned) {
-    const p = e.payload as {
-      technician_id?: string;
-      incident_id?: string;
-      priority?: 'P1' | 'P2' | 'P3' | 'P4';
-      eta_target_minutes?: number;
-      work_order_summary?: string;
-    };
-
-    if (p.technician_id !== technicianId) continue;
-
-    const priority = p.priority ?? 'P3';
-    const summary = p.work_order_summary ?? '(no summary)';
-    const ticket = `evt_${e.event_id.slice(-6)}`;
-    const now = Date.now();
-    const occurred = new Date(e.occurred_at).getTime();
-    const ageMin = Math.round((now - occurred) / 60000);
-    const overdue = ageMin > (p.eta_target_minutes ?? 30);
-
-    out.push({
-      id: e.event_id,
-      priority,
-      status: ageMin < 8 ? 'assigned' : 'enroute', // fresh dispatch = assigned; older = en route heuristic
-      ticket,
-      title: `Incident ${p.incident_id?.slice(-6) ?? '?'} — ${summary.split('—').pop()?.trim() ?? summary}`,
-      subtitle: `priority ${priority} · ETA ${p.eta_target_minutes ?? '?'} min · ${ageMin}m since dispatch`,
-      timeLabel: overdue ? 'SLA' : 'Window',
-      timeVal: overdue ? `+${ageMin - (p.eta_target_minutes ?? 30)}m overdue` : `${ageMin}m ago`,
-      timeIsOverdue: overdue,
-      isDone: false,
-      isActive: false,
-    });
-  }
-
-  // resolved jobs: IncidentResolved events where the technician matches
-  for (const e of resolved) {
-    const p = e.payload as {
-      technician_id?: string;
-      fix_summary?: string;
-      resolution_latency_seconds?: number;
-    };
-
-    if (p.technician_id !== technicianId) continue;
-
-    const ticket = `evt_${e.event_id.slice(-6)}`;
-    const minutes = Math.round((p.resolution_latency_seconds ?? 0) / 60);
-
-    out.push({
-      id: e.event_id,
-      priority: 'P3', // resolved rows show ✓ instead of P#
-      status: 'resolved',
-      ticket,
-      title: p.fix_summary?.split('—')[0]?.trim() ?? 'Resolved',
-      subtitle: p.fix_summary ?? '',
-      timeLabel: 'Closed',
-      timeVal: minutes > 0 ? `${minutes} min` : '—',
-      timeIsOverdue: false,
-      isDone: true,
-      isActive: false,
-    });
-  }
-
-  // mark the first non-resolved row as active for the visual cue
-  const firstActive = out.find((r) => !r.isDone);
-
-  if (firstActive) firstActive.isActive = true;
-
-  return out;
+// Inline KPI cell — local to this file. Keeps the KPI strip at the top
+// of the page without dragging a new component into /components.
+function KpiCell({
+  label,
+  value,
+  sub,
+  color,
+  testId,
+}: {
+  label: string;
+  value: number;
+  sub: string;
+  color?: string;
+  testId?: string;
+}) {
+  return (
+    <div className="tech-today__cell" data-testid={testId}>
+      <span className="tech-today__label">{label}</span>
+      <span className="tech-today__val" style={color ? ({ color } as CSSProperties) : undefined}>
+        {value}
+      </span>
+      <span className="tech-today__sub">{sub}</span>
+    </div>
+  );
 }

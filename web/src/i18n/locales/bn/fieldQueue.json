@@ -1,47 +1,82 @@
 {
   "page": {
     "title": "কাজের সারি",
-    "subtitle": "{{name}} · {{role}} · {{count}}টি কাজ · {{date}} · ০৭:০০–১৫:০০",
+    "subtitle": "আপনার বরাদ্দকৃত ঘটনাসমূহ",
     "subtitleRole": "ফিল্ড টেক · উত্তর-পূর্ব জোন",
-    "optimizedSubtitle": "অপ্টিমাইজ — SLA ক্রম"
+    "optimizedSubtitle": "সাজানো — অগ্রাধিকার আগে, বয়স পরে"
   },
-  "today": {
-    "todayLabel": "আজ",
-    "remainingSuffix_one": "{{count}}টি বাকি",
-    "remainingSuffix_other": "{{count}}টি বাকি",
-    "inProgressLabel": "চলমান",
-    "inProgressEnRoute": "{{count}}টি পথে",
-    "inProgressOnSite": "{{count}}টি মাঠে",
-    "inProgressEmDash": "—",
-    "overdueLabel": "বিলম্বিত",
-    "closedLabel": "এই সপ্তাহে বন্ধ",
-    "closedAvgClose": "গড় বন্ধ · {{avg}}"
+  "filter": {
+    "mine": "আমার বরাদ্দ",
+    "available": "উপলব্ধ"
   },
-  "filters": {
-    "all": "সব",
-    "P1": "P1 গুরুতর",
-    "P2": "P2",
-    "P3": "P3",
-    "enroute": "পথে",
-    "onsite": "মাঠে"
+  "row": {
+    "distance": "{km} কিমি দূরে",
+    "eta": "ETA {minutes} মিনিট",
+    "distanceUnknown": "— কিমি",
+    "ageMinutes": "{count} মিনিট আগে",
+    "ageHours": "{count} ঘণ্টা আগে",
+    "noSummary": "(কোনো সারাংশ নেই)",
+    "ticketPrefix": "evt_",
+    "evidencePhoto": "ছবি",
+    "evidenceGps": "GPS",
+    "evidenceDescription": "বিবরণ"
+  },
+  "kpi": {
+    "open": "খোলা",
+    "dueIn30": "<৩০ মিনিটে বাকি",
+    "overdue": "বিলম্বিত",
+    "closed": "বন্ধ",
+    "openSub": "{count} সক্রিয়",
+    "dueIn30Sub": "{count} শীঘ্রই বাকি",
+    "overdueSub": "{count} বিলম্বিত",
+    "closedSub": "{count} সমাধান",
+    "emDash": "—"
   },
   "loading": "চেইন থেকে সারি লোড হচ্ছে…",
-  "empty": "এই ফিল্টারে কোনো কাজ নেই — ফিল্টার রিসেট করুন, অথবা সারি থেকে পুল-টু-রিফ্রেশ করুন।",
-  "optimizeRoute": "রুট অপ্টিমাইজ করুন",
-  "pill": {
-    "assigned": "নিযুক্ত",
-    "enroute": "পথে",
-    "onsite": "মাঠে",
+  "empty": "এখন কোনো বরাদ্দ নেই। আপনি কাজের আগে আছেন।",
+  "button": {
+    "acknowledge": "স্বীকার করুন",
+    "enRoute": "পথে"
+  },
+  "etaPicker": {
+    "label": "ETA",
+    "1": "১ মিনিট",
+    "5": "৫ মিনিট",
+    "15": "১৫ মিনিট",
+    "30": "৩০ মিনিট",
+    "60": "৬০ মিনিট"
+  },
+  "toast": {
+    "acknowledged": "স্বীকৃত",
+    "enRoute": "পথে — ETA {minutes} মিনিট"
+  },
+  "reporterBadge": {
+    "anchor": "অ্যাঙ্কর",
+    "hotline": "হটলাইন",
+    "webform": "ওয়েবফর্ম",
+    "sensor": "সেন্সর"
+  },
+  "band": {
+    "t1": "T1",
+    "t2": "T2",
+    "t3": "T3",
     "resolved": "সমাধান"
   },
-  "buildRows": {
-    "noSummary": "(কোনো সারাংশ নেই)",
-    "titleFallback": "ঘটনা {{id}} — {{summary}}",
-    "titleUnknown": "?",
-    "subtitleActive": "অগ্রাধিকার {{priority}} · ETA {{eta}} মিনিট · প্রেরণের পর {{age}} মিনিট",
-    "etaUnknown": "?",
-    "summaryTitle": "{{fix}}",
-    "summaryUnknown": "সমাধান",
-    "noFixSummary": ""
+  "pill": {
+    "new": "নতুন",
+    "acknowledged": "স্বীকৃত",
+    "en_route": "পথে",
+    "on_site": "মাঠে",
+    "resolved": "সমাধান",
+    "reopened": "পুনরায় খোলা"
+  },
+  "offline": {
+    "cachedSnapshot": "অফলাইন: ক্যাশ্‌ড স্ন্যাপশট",
+    "deferred": "সিঙ্ক চিপ পরে প্যাচে স্থগিত"
+  },
+  "syncStatus": {
+    "online": "অনলাইন",
+    "syncing": "সিঙ্ক হচ্ছে…",
+    "offline": "অফলাইন"
   }
 }
