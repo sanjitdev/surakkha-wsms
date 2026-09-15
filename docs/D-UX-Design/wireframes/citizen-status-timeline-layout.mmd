@@ -1,0 +1,49 @@
+%% Citizen Status Timeline — Layout (public mode)
+%% Page: docs/D-UX-Design/citizen-status-timeline.md
+%% Route: /my-reports/:incident_id/timeline
+%% Public-mode render: trust band badge + reporter badge + motion-only timeline
+flowchart TB
+    subgraph Page["Mobile-first container (Bangla default for Anjali)"]
+        subgraph Header["AppHeader — minimal, Bangla-first"]
+            HRow["Back link ← My reports | Logo (left)<br/>Title: Report timeline | Locale toggle (right)"]
+        end
+        Divider1["Divider — hairline"]
+        subgraph Summary["Summary card — top of page, padding 24, rounded-lg"]
+            SRow1["Reporter-badge pill<br/>(anchor / hotline / webform / sensor)"]
+            SRow2["Trust-band badge — T1 / T2 / T3 / resolved<br/>(color-trust-t1/t2/t3 + glyph redundancy)"]
+            SRow3["Headline: short status string (Bangla)"]
+            SRow4["Subline: short reassurance string (Bangla)"]
+        end
+        subgraph Action["ActionCall — sticky, renders 1 of 4 states"]
+            AS1["Closure ack — primary button: Mark as read"]
+            AS2["Silent-closure reopen — primary: Reopen + optional reason"]
+            AS3["In-progress reassurance — read-only + Open My reports"]
+            AS4["All caught up — read-only message (after ack)"]
+        end
+        subgraph Timeline["StatusTimeline — vertical list, newest first"]
+            TItem1["Event card 1 (newest): time-ago, status-string, sub-text"]
+            TItem2["Event card 2: same shape"]
+            TItem3["Event card N: same shape"]
+            TMore["Empty state: No visible activity yet. (Bangla)"]
+            TItem1 --> TItem2 --> TItem3
+        end
+        Footer["Footer — link to verify-flow, contact utility, settings"]
+        Header --- Divider1 --- Summary --- Action --- Timeline --- Footer
+    end
+
+    Note1["Public mode: NO chain hashes, NO JSON payloads, NO block N labels"]
+    Note2["Reporter-badge and trust-band render separately at any band"]
+    Note3["ActionCall renders exactly ONE of 4 states based on latest CitizenVisibleEventType"]
+    Note4["Timeline filtered to CitizenVisibleEventType — hides internal events"]
+
+    classDef chrome fill:#e2e8f0,stroke:#64748b,stroke-width:1px,color:#0f172a
+    classDef zone fill:#dbeafe,stroke:#1e40af,stroke-width:1px,color:#0f172a
+    classDef card fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#1e293b
+    classDef state fill:#ecfeff,stroke:#0e7490,stroke-width:1px,color:#0f172a
+    classDef note fill:#fef3c7,stroke:#92400e,stroke-width:1px,color:#451a03,stroke-dasharray: 3 3
+
+    class Page,Header,Divider1,Footer chrome
+    class Summary,Action,Timeline zone
+    class SRow1,SRow2,SRow3,SRow4,HRow,TItem1,TItem2,TItem3,TMore card
+    class AS1,AS2,AS3,AS4 state
+    class Note1,Note2,Note3,Note4 note

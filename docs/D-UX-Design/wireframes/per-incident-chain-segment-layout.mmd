@@ -1,0 +1,62 @@
+%% Per-incident Chain Segment Viewer — Layout (operator mode)
+%% Page: docs/D-UX-Design/per-incident-chain-segment.md
+%% Route: /incidents/:id/chain
+%% Two modes: operator (forensic) | public (motion-only). Layout diagram for OPERATOR mode.
+flowchart TB
+    subgraph Page["Operator shell (AppLayout chrome — left rail visible)"]
+        direction TB
+        subgraph TopBar["Top bar — sticky"]
+            TB1["Back to inbox (← Inbox) | Incident header:<br/>INC-2026-0142 — Reporter: hotline · Trust band: T1"]
+            TB2["Mode toggle: Operator | Public (segmented control)"]
+            TB3["Verify control: Verify segment (primary)<br/>+ Result chip: ● Verified | ◔ Partial | ◑ Anomaly"]
+        end
+        Divider1["Divider — hairline"]
+        subgraph SegMeta["Segment meta strip"]
+            SM1["incident_id: INC-2026-0142"]
+            SM2["target_seq: 7 (latest)"]
+            SM3["event_count: 6"]
+            SM4["head_hash: 9f3e…c12b (truncated)"]
+        end
+        subgraph Timeline["Chain segment timeline — vertical, oldest → newest"]
+            direction TB
+            E0["Event #0 — genesis (system)<br/>seq=0 · prev=0x0000 · block_hash=0x4a7c…<br/>type=Genesis"]
+            E1["Event #1 — IncidentCreated<br/>seq=1 · prev=0x4a7c… · block_hash=0xb219…<br/>type=IncidentCreated · actor=anchor-anjali"]
+            E2["Event #2 — IncidentVerified (on-site)<br/>seq=2 · prev=0xb219… · block_hash=0xc301…<br/>type=IncidentVerified · actor=operator-priya"]
+            E3["Event #3 — FieldVisitScheduled<br/>seq=3 · prev=0xc301… · block_hash=0xd4f0…<br/>type=FieldVisitScheduled · actor=operator-priya"]
+            E4["Event #4 — FieldVisitCompleted<br/>seq=4 · prev=0xd4f0… · block_hash=0xe5a1…<br/>type=FieldVisitCompleted · actor=field-karim"]
+            E5["Event #5 — IncidentResolved<br/>seq=5 · prev=0xe5a1… · block_hash=0xf618…<br/>type=IncidentResolved · actor=operator-priya"]
+            E6["Event #6 — CitizenAcknowledged<br/>seq=6 · prev=0xf618… · block_hash=0x9f3e…<br/>type=CitizenAcknowledged · actor=anchor-anjali"]
+        end
+        subgraph Detail["Event detail drawer (right side, 400px, slide-in)"]
+            direction TB
+            DD1["Header: seq + event_type + actor"]
+            DD2["Timestamps: chain-stored ISO + wall-clock"]
+            DD3["Payload (JSON, syntax-highlighted)"]
+            DD4["Hashes: prev_hash · block_hash (copy buttons)"]
+            DD5["Inline verify badge: ● ok · ◑ mismatch · ◔ unknown"]
+        end
+        subgraph Footer["Footer (sticky)"]
+            F1["j/k — prev/next event"]
+            F2["Enter — open detail drawer"]
+            F3["v — verify segment"]
+            F4["a — anomaly focus (if any)"]
+            F5["e — export segment (JSON download)"]
+        end
+    end
+
+    E0 --> E1 --> E2 --> E3 --> E4 --> E5 --> E6
+
+    TopBar -. "Operator mode shows ALL fields,<br/>hashes, payloads, actor IDs." .- Page
+    Timeline -. "Each row is keyboard-focusable,<br/>aria-label = 'Event N, type, actor'." .- Page
+    Detail -. "Public mode REPLACES this with<br/>a motion-only summary card." .- Page
+
+    classDef zone fill:#f5f7fa,stroke:#475569,stroke-width:1px,color:#0f172a
+    classDef event fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#1e293b
+    classDef verified fill:#ecfdf5,stroke:#047857,stroke-width:1px,color:#064e3b
+    classDef chrome fill:#e2e8f0,stroke:#64748b,stroke-width:1px,color:#0f172a
+    classDef detail fill:#fef3c7,stroke:#92400e,stroke-width:1px,color:#451a03
+
+    class Page,TopBar,Divider1,SegMeta,Footer chrome
+    class Timeline zone
+    class E0,E1,E2,E3,E4,E5,E6 event
+    class DD1,DD2,DD3,DD4,DD5 detail

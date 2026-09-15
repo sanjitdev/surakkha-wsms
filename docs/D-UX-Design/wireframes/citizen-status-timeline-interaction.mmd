@@ -1,0 +1,49 @@
+%% Citizen Status Timeline — Interaction
+%% Page: docs/D-UX-Design/citizen-status-timeline.md
+%% Anjali (anchor, T1 default) on mobile. Reads from chain events filtered to CitizenVisibleEventType.
+sequenceDiagram
+    autonumber
+    actor Anjali as Anjali (citizen, mobile)
+    participant Page as CitizenStatusTimeline
+    participant Hook as useIncidentTimeline(id)
+    participant Filter as CitizenVisibleEventType
+    participant API as GET /api/chain/blocks?from=…&to=…
+    participant Action as ActionCall component
+    participant Toast as ToastProvider
+
+    Anjali->>Page: Tap report in /my-reports
+    Page->>Hook: load timeline
+    Hook->>API: GET /api/chain/blocks
+    API-->>Hook: events[]
+    Hook->>Filter: keep only CitizenVisibleEventType
+    Filter-->>Hook: visible[]
+    Hook-->>Page: state (loading | ready | empty)
+    Page->>Anjali: summary card + timeline list (newest first, Bangla)
+
+    alt Journey A — in-flight check (latest = ReportReceived)
+        Page->>Action: render "In-progress reassurance"
+        Action-->>Anjali: read-only message + "Open My reports"
+    else Journey B — after a day (latest = FieldVisitScheduled)
+        Page->>Action: render "In-progress reassurance"
+    else Journey C — closure-tap (latest = IncidentResolved,<br/>30-day window open)
+        Page->>Action: render "Closure ack"<br/>Primary: Mark as read
+        Anjali->>Action: Tap Mark as read
+        Action->>API: POST /api/events { kind: CitizenAcknowledged }
+        API-->>Action: 201
+        Action->>Toast: success "Acknowledged"
+        Action->>Page: re-render → "All caught up"
+    else Journey D — silent-closure (>30 days since resolved,<br/>no ack)
+        Page->>Action: render "Silent-closure reopen"<br/>Primary: Reopen + optional reason (5–280 chars)
+        Anjali->>Action: Tap Reopen
+        Action->>API: POST /api/events { kind: ReopenRequest,<br/>reason? }
+        API-->>Action: 201
+        Action->>Toast: success "Reopened"
+        Action->>Page: re-render → "In-progress reassurance"
+    end
+
+    alt Locale toggle
+        Anjali->>Page: Tap EN/BN toggle
+        Page->>Anjali: re-render in selected locale (idb persist)
+    end
+
+    Note over Page,Filter: Public mode hides hash, seq, payload,<br/>reporter_id internals. Only motion + status.<br/>Quiet-for-X-days note appears after 24h of no events.

@@ -1,0 +1,48 @@
+%% Per-incident Chain Segment Viewer — Interaction
+%% Page: docs/D-UX-Design/per-incident-chain-segment.md
+%% Operator mode verifies by recomputing SHA-256 over prev_hash || seq || actor ||
+%% event_type || JSON.stringify(payload) || timestamp and comparing to block_hash.
+sequenceDiagram
+    autonumber
+    actor User as Operator (Priya, Adi, or Karim)
+    participant Page as IncidentChainSegmentPage
+    participant Chain as GET /api/chain/blocks
+    participant Cache as VerifyCache (60s TTL, key=(incident_id,target_seq,last_event_hash))
+    participant Verify as verifyChainSegment()
+    participant Api as POST /api/chain/verify (per-block)
+
+    User->>Page: Click Verify segment (button or press 'v')
+    Page->>Cache: hit?
+    alt Cache hit
+        Cache-->>Page: cached result
+        Page->>User: render immediately
+    else Cache miss
+        Page->>Chain: GET blocks for incident_id, ordered by seq asc
+        Chain-->>Page: events[]
+        Page->>Verify: verifyChainSegment(incident_id, target_seq, events)
+        loop for each event (oldest → newest)
+            Verify->>Verify: input = prev_hash + '|' + seq + '|' + actor + '|' + event_type + '|' + JSON.stringify(payload) + '|' + timestamp
+            Verify->>Verify: expected_hash = sha256(input)
+            alt expected_hash !== event.block_hash
+                Verify-->>Page: anomaly result with anomaly_at_seq + expected_hash + actual_hash
+                Page->>User: ◑ Anomaly chip + jump-to-event (press 'a')
+            end
+        end
+        Verify-->>Page: { status: verified, final_hash }
+        Page->>Cache: store(60s TTL)
+    end
+
+    User->>Page: Click event row (or press Enter)
+    Page->>Page: Open detail drawer with payload + hashes
+
+    User->>Page: Press j / k
+    Page->>Page: focus prev / next event row
+    Page-->>User: arrow roving focus, aria-selected=true
+
+    User->>Page: Press e (export)
+    Page->>User: download segment JSON<br/>{ incident_id, events, head_hash, verified_at }
+
+    User->>Page: Toggle to Public mode
+    Page->>User: render motion-only summary card<br/>(no hashes, no payloads)
+
+    Note over Verify: Pure function, target <200 ms for chains ≤50 events.<br/>Cache key includes last_event_hash so any new block<br/>invalidates the cache automatically.

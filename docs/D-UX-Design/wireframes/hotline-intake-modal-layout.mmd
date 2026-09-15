@@ -1,0 +1,33 @@
+%% Hotline Intake Modal — Layout
+%% Page: docs/D-UX-Design/hotline-intake-modal.md
+%% WDS wireframe pair: layout (zones) + interaction (sequence)
+%% Notes: 640px modal centred; sticky footer; 6 fields; dim backdrop
+flowchart TB
+    subgraph Backdrop["Backdrop (dim, ~60% opacity, scroll-locked)"]
+        subgraph Modal["Modal shell — 640px, rounded-lg, shadow-2xl, role=dialog, aria-modal=true"]
+            Header["Header — sticky top<br/>Title: Log hotline call<br/>Subtitle: Captures a phone-sourced report.<br/>Close button X — right aligned"]
+            Divider1["Divider — hairline"]
+            subgraph Body["Body — vertical stack, padding-y 24, gap 16"]
+                BRow1["Row 1 — two columns<br/>Caller name (text) | Caller phone (tel)"]
+                BRow2["Row 2 — single column<br/>Call time (datetime-local, default now)"]
+                BRow3["Row 3 — single column<br/>Description (textarea, 120px,<br/>required 20–500 chars, counter bottom-right)"]
+                BRow4["Row 4 — single column<br/>Location hint (text, required 5–200 chars)"]
+                BRow5["Row 5 — single column<br/>Call outcome (select, required)<br/>— reported_incident (default)<br/>— no_incident<br/>— wrong_number"]
+                BRow1 --> BRow2 --> BRow3 --> BRow4 --> BRow5
+            end
+            Divider2["Divider — hairline"]
+            Footer["Footer — sticky bottom<br/>Primary: Submit report (creates incident)<br/>Secondary: Cancel — ghost, dirty-check<br/>Submit enabled only when all 5 required fields valid"]
+        end
+    end
+
+    Header --- Divider1
+    Body --- Divider2
+    Divider2 --- Footer
+
+    classDef chrome fill:#e2e8f0,stroke:#64748b,stroke-width:1px,color:#0f172a
+    classDef field fill:#ffffff,stroke:#94a3b8,stroke-width:1px,color:#1e293b
+    classDef shell fill:#dbeafe,stroke:#1e40af,stroke-width:1px,color:#0f172a
+    classDef body fill:#f0fdf4,stroke:#15803d,stroke-width:1px,color:#0f172a
+
+    class Backdrop,Modal,Header,Divider1,Divider2,Footer chrome
+    class BRow1,BRow2,BRow3,BRow4,BRow5 field

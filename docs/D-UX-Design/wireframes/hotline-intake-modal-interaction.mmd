@@ -1,0 +1,57 @@
+%% Hotline Intake Modal — Interaction
+%% Page: docs/D-UX-Design/hotline-intake-modal.md
+%% Three outcomes branch from Call-outcome select.
+%% Submit POSTs /api/events with hotline reporter-badge; T1 default.
+sequenceDiagram
+    autonumber
+    actor Operator as Operator (Priya)
+    participant Dash as OperatorDashboard
+    participant Modal as HotlineIntakeModal
+    participant Val as Zod Schema
+    participant API as POST /api/events
+    participant Chain as Chain
+    participant Toast as ToastProvider
+
+    Operator->>Dash: Click "Log hotline call" (secondary, Phone icon)
+    Dash->>Modal: Open (mount, focus first field, scroll-lock body)
+    Modal-->>Operator: aria-modal=true, Esc bound
+
+    Operator->>Modal: Fill caller name + phone
+    Operator->>Modal: Accept call time default (now)
+    Operator->>Modal: Type description (20–500)
+    Operator->>Modal: Type location hint (5–200)
+    Operator->>Modal: Pick call outcome
+
+    alt outcome = reported_incident
+        Operator->>Modal: Click Submit
+        Modal->>Val: parse(form)
+        Val-->>Modal: ok
+        Modal->>API: POST /api/events { ...,<br/>reporter_badge: hotline,<br/>trust_band: T1 }
+        API->>Chain: append IncidentCreated event
+        Chain-->>API: 201, block_hash
+        API-->>Modal: ok
+        Modal->>Toast: success "Hotline report filed"
+        Modal->>Dash: close + refresh inbox
+    else outcome = no_incident
+        Operator->>Modal: Click Submit (label: Log call only)
+        Modal->>API: POST /api/events { kind: call_log,<br/>outcome: no_incident }
+        API-->>Modal: 201
+        Modal->>Toast: success "Call logged"
+    else outcome = wrong_number
+        Operator->>Modal: Click Submit (label: Log call only)
+        Modal->>API: POST /api/events { kind: call_log,<br/>outcome: wrong_number }
+        API-->>Modal: 201
+        Modal->>Toast: success "Call logged"
+    end
+
+    alt User presses Esc or Cancel with dirty fields
+        Operator->>Modal: Esc / Cancel
+        Modal->>Operator: Confirm dialog "Discard changes?"
+        alt Confirm
+            Modal->>Dash: close, no submit
+        else Keep editing
+            Modal-->>Operator: focus returns to first invalid field
+        end
+    end
+
+    Note over Modal,API: All outcomes set reporter_badge=hotline.<br/>Only reported_incident creates a new incident.
