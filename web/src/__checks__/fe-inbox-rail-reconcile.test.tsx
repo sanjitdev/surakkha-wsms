@@ -42,7 +42,7 @@ import { LocaleProvider } from '../hooks/useLocale';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import { ToastProvider } from '../components/ui/ToastProvider';
 import { InboxList } from '../pages/InboxList';
-import { InboxIncidentRail } from '../pages/InboxRail';
+import { AwaitingActionRail, InboxIncidentRail } from '../pages/InboxRail';
 import { handlers } from '../mocks/handlers';
 import type { InboxRow } from '../types/inbox';
 import type { SessionRow } from '../mocks/idb';
@@ -425,26 +425,33 @@ describe('WO-010 Inbox Incident Rail reconciliation', () => {
   });
 
   // (REQ-004a) AwaitingActionRail shows reporter-badge column per row.
-  // We render the AwaitingActionRail via InboxList (the consumer page)
-  // and assert the reporter-badge test ids appear on the awaiting rows.
-  // Because the InboxList fetches /api/events and shows only rows with
-  // isAwaitingSig = true, we mount with an empty fixture and just
-  // confirm the rail card is wired (the rows are conditional on data).
-  // The unit-level guarantee for the reporter column lives in the
-  // AwaitingActionRail component contract — pinned here via the
-  // data-testid prefix.
-  it('AwaitingActionRail exposes a reporter-badge test id per awaiting row', () => {
-    renderRailOnly();
+  // Render the AwaitingActionRail with rows that have isAwaitingSig and
+  // verify each row carries a reporter-badge chip via testid + class.
+  it('AwaitingActionRail shows reporter-badge column per row', () => {
+    render(
+      <I18nextProvider i18n={i18n}>
+        <LocaleProvider>
+          <MemoryRouter
+            initialEntries={['/inbox']}
+            future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+          >
+            <AwaitingActionRail rows={RAIL_ROWS.slice(0, 2)} />
+          </MemoryRouter>
+        </LocaleProvider>
+      </I18nextProvider>,
+    );
 
-    // The AwaitingActionRail component is rendered separately — this
-    // test pins the reporter-badge column contract by checking that
-    // any future row would expose `awaiting-action-reporter-<id>`
-    // test ids. The IDs come from InboxRail.tsx awaiting branch.
-    // (No rows in this fixture are isAwaitingSig → list may be empty,
-    // so we assert the contract by inspecting the source.)
-    const source = readFileSync(resolve(__dirname, '../pages/InboxRail.tsx'), 'utf8');
-
-    expect(source).toMatch(/awaiting-action-reporter-/);
+    // Each awaiting-action row gets a reporter-badge test id matching
+    // `awaiting-action-reporter-<id>`. Both rows (T3 anchor + T3 hotline)
+    // expose their own badge.
+    expect(screen.getByTestId('awaiting-action-reporter-inc-rail-t3-anchor')).toBeTruthy();
+    expect(screen.getByTestId('awaiting-action-reporter-inc-rail-t3-hotline')).toBeTruthy();
+    // Reporter kind is data-attribute so the column carries both visual
+    // (icon colour) + semantic (kind) info per foundation §1.1.
+    expect(screen.getByTestId('awaiting-action-reporter-inc-rail-t3-anchor').getAttribute('data-reporter-kind')).toBe('anchor');
+    expect(screen.getByTestId('awaiting-action-reporter-inc-rail-t3-hotline').getAttribute('data-reporter-kind')).toBe('hotline');
+    // Icon-only chip (compact rail width).
+    expect(screen.getByTestId('awaiting-action-reporter-inc-rail-t3-anchor').getAttribute('data-icon-only')).toBe('true');
   });
 
   // (REQ-004b) No Hindi / Devanagari letters in inboxCommon.json.
