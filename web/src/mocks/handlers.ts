@@ -993,6 +993,33 @@ const incidentHandlers = [
   }),
 ];
 
+// ───────────────────────────────────────────────────────── photos ────────
+
+/**
+ * WO-007 — POST /api/photos (multipart stub).
+ *
+ * Karim's proof bundle uploads a photo from the on-device camera/gallery.
+ * Phase 1 stub: read the body, ignore the binary, mint a synthetic
+ * photo_hash and return it. The Phase 2 gateway will write the bytes to
+ * object storage + record a hash on the chain; Phase 1 just keeps the
+ * round-trip honest so the FE can prove the photo_hash reaches the
+ * FixSubmitted payload.
+ */
+const photoHandlers = [
+  http.post('/api/photos', async ({ request }) => {
+    await delay(LATENCY_MS() / 4); // faster than data fetch — pure ingest
+    // Read multipart body so MSW doesn't warn about an unused body.
+    try {
+      await request.formData();
+    } catch {
+      // jsdom / curl may not always populate a body; that's fine.
+    }
+    const photo_hash = `photo_${ulid()}`;
+
+    return HttpResponse.json({ photo_hash }, { status: 201 });
+  }),
+];
+
 // ───────────────────────────────────────────────────────── heatmap ───────
 
 const heatmapHandlers = [
@@ -1029,5 +1056,6 @@ export const handlers = [
   ...chainHandlers,
   ...sensorHandlers,
   ...incidentHandlers,
+  ...photoHandlers,
   ...heatmapHandlers,
 ];

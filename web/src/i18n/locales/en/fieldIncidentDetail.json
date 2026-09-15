@@ -2,11 +2,11 @@
   "header": {
     "backToQueue": "← Back to queue",
     "workOrderFallback": "(no summary)",
-    "pageTitle": "Work order",
+    "pageTitle": "Incident detail",
     "loading": "Loading work order…",
     "notFound": "Work order not found",
     "notFoundEvent": "Event {{id}} is not in the current chain.",
-    "notFoundNoId": "No work order id supplied in the URL.",
+    "notFoundNoId": "No incident id supplied in the URL.",
     "notFoundEmptyHeading": "No matching work order",
     "fieldTechOnly": {
       "heading": "Field-tech only",
@@ -15,7 +15,22 @@
   },
   "meta": {
     "workOrderRef": "Work order {{workOrder}} · incident {{incident}}",
-    "dispatched": "Dispatched {{date}} · {{time}} · ETA {{eta}} min"
+    "dispatched": "Dispatched {{date}} · {{time}} · ETA {{eta}} min",
+    "priorityLabel": "Priority {{priority}}"
+  },
+  "dueAt": {
+    "countdown": "Due in {{hours}}h {{minutes}}m"
+  },
+  "reporterBadge": {
+    "anchor": "Anchor citizen",
+    "hotline": "Hotline",
+    "webform": "Web form",
+    "sensor": "Sensor"
+  },
+  "band": {
+    "t1": "T1 unverified",
+    "t2": "T2 verified",
+    "t3": "T3 issuance"
   },
   "steps": {
     "stepNumber": "Step {{n}}",
@@ -24,37 +39,56 @@
       "onsite": "On site",
       "diagnosis": "Diagnosis",
       "fix": "Fix submitted",
-      "resolved": "Operator confirmed"
+      "proof": "Proof",
+      "confirmed": "Confirmed"
     }
   },
   "actions": {
     "sealing": "Sealing…",
-    "markArrivedHeading": "Mark arrived on site",
+    "markArrivedHeading": "On-site",
     "markArrivedBody": "Logs your arrival on the incident's chain thread.",
-    "markArrivedSubmit": "Mark arrived on site",
-    "diagnosisHeading": "Submit diagnosis",
-    "diagnosisBody": "What you found on site; the operator reads this before authorising the fix.",
-    "diagnosisLabel": "Diagnosis",
-    "diagnosisPlaceholder": "Chlorine pump #4 dead — needs replacement",
-    "diagnosisHint": "Min 5 characters.",
-    "diagnosisSubmit": "Submit diagnosis",
-    "partsLabel": "Parts needed (comma-separated)",
-    "partsPlaceholder": "chlorine pump #4, 1/2 inch washer",
-    "fixHeading": "Submit fix",
-    "fixBody": "Operator reviews this and either confirms or sends you back.",
-    "fixSummaryLabel": "Fix summary",
-    "fixSummaryPlaceholder": "Replaced chlorine pump #4; output verified at 1.5 ppm.",
-    "fixSummaryHint": "Min 5 characters.",
-    "resolutionLabel": "Resolution note",
-    "resolutionPlaceholder": "Optional — handed off to PHA for monitoring.",
-    "photoLabel": "Photo URL",
-    "photoPlaceholder": "https://example.com/site.jpg",
-    "fixSubmit": "Submit fix",
-    "resolvedHeading": "Operator confirmed",
-    "resolvedBody": "The fix is sealed; the next step is the citizen's acknowledgement.",
-    "resolveLabel": "Operator resolution note",
-    "resolvePlaceholder": "Optional — seal a public notice; defaults to \"Operator confirmed fix\".",
-    "resolveSubmit": "Confirm resolution"
+    "diagnosisHeading": "Diagnosis",
+    "diagnosisBody": "What you found on site; the operator reads this before authorising the fix."
+  },
+  "diagnosis": {
+    "heading": "Structured diagnosis",
+    "body": "Capture what you found on site. Three structured fields — never a freeform textarea.",
+    "severity": {
+      "label": "Severity"
+    },
+    "category": {
+      "label": "Category",
+      "mechanical": "Mechanical",
+      "electrical": "Electrical",
+      "chemical": "Chemical",
+      "structural": "Structural"
+    },
+    "tags": {
+      "label": "Tags (comma-separated)",
+      "placeholder": "e.g. leak, corrosion, low-pressure",
+      "hint": "Min 1 tag."
+    }
+  },
+  "fix": {
+    "heading": "Fix bundle",
+    "body": "What you used + a photo of the fix. Photo is required to seal the proof.",
+    "summaryLabel": "Fix summary",
+    "photo": {
+      "label": "Proof photo",
+      "required": "Required",
+      "requiredHint": "Add a photo of the fix before submitting."
+    },
+    "parts": {
+      "label": "Parts used",
+      "namePlaceholder": "Part name",
+      "qtyPlaceholder": "Qty",
+      "addRow": "Add part",
+      "removeRow": "Remove"
+    }
+  },
+  "submit": {
+    "heading": "Submit proof",
+    "body": "Emits FixSubmitted in one transaction. All fields required."
   },
   "timeline": {
     "title": "Thread timeline",
@@ -62,5 +96,24 @@
     "emptyHeading": "No events yet",
     "emptyBody": "Once the technician submits status updates they show here.",
     "unknownActor": "—"
+  },
+  "photo": {
+    "capture": "Capture photo",
+    "fromGallery": "From gallery",
+    "label": "Photo metadata"
+  },
+  "override": {
+    "title": "Trust band override",
+    "subtitle": "A previous operator overrode the trust band on this incident.",
+    "viewReasoning": "View override reasoning"
+  },
+  "button": {
+    "markArrived": "Mark arrived",
+    "submitProof": "Submit proof"
+  },
+  "toast": {
+    "proofSubmitted": "Proof submitted — awaiting review",
+    "markArrived": "Marked on site",
+    "photoUploaded": "Photo attached"
   }
 }
