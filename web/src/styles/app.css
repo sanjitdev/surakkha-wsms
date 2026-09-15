@@ -79,6 +79,9 @@
   height: 32px;
   border: 1.5px solid var(--brand-on-color);
   border-radius: var(--radius-sm);
+  /* WO-013 — lockdown: bind logo glyph background to --color-primary
+     (deep teal) per foundation §7.1. */
+  background: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -123,6 +126,15 @@
   border-radius: 50%;
   background: var(--success);
   animation: login-pulse 1600ms ease-out infinite;
+}
+/* WO-013 — lockdown: alert-red is reserved for consumer-notice
+   issuance surfaces (T3+). Login chain-status dot uses amber warn
+   on error / pending so it cannot be confused with T3 issuance. */
+.brand-panel__live-dot--error {
+  background: var(--color-status-warn);
+}
+.brand-panel__live-dot--pending {
+  background: var(--color-status-warn);
 }
 
 @keyframes login-pulse {
