@@ -3,6 +3,7 @@
 > Tracking file for the WDS convention cleanup and Phase 5 (development) preparation work.
 > Source audit: `docs/D-UX-Design/03-wds-convention-audit.md`
 > Date opened: 2026-09-15
+> Status: Stages 0-6 complete (2026-09-15); Stages 7-9 pending
 
 ---
 
@@ -196,4 +197,4 @@ These need a call before any mechanical work starts.
 
 ---
 
-_Last updated: 2026-09-15_
+_Last updated: 2026-09-15 (Stage 6 complete — 17 PRDs authored + committed)_
