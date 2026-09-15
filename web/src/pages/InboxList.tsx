@@ -32,6 +32,7 @@ import {
   buildRows,
   countByFilter,
   mergeRecentDecisions,
+  sortRowsByPriorityAge,
 } from './inboxListModel';
 import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRail';
 
@@ -105,9 +106,14 @@ export function InboxList() {
   }, [locale]);
 
   const chipCounts = useMemo(() => countByFilter(rows), [rows]);
+  // Lockdown-bound sort (REQ-001): priority-first / age-second.
+  // T3 → T2 → T1 → Resolved, then oldest within tier. Applied before
+  // the filter so the user sees the same row order regardless of which
+  // chip is active.
+  const sortedRows = useMemo(() => sortRowsByPriorityAge(rows), [rows]);
   const visibleRows = useMemo(
     () =>
-      rows.filter((r) => {
+      sortedRows.filter((r) => {
         if (filter === 'all') return true;
         if (filter === 'T3') return r.severity === 'T3';
         if (filter === 'sig') return r.isAwaitingSig;
@@ -116,7 +122,7 @@ export function InboxList() {
         // filter is `'resolved'` here — TS exhaustively narrowed via prior returns
         return r.status === 'chain_verify';
       }),
-    [rows, filter],
+    [sortedRows, filter],
   );
   const sevCounts = useMemo(() => {
     return {
@@ -257,7 +263,7 @@ export function InboxList() {
   );
 
   return (
-    <Container width={ContainerWidth.Wide}>
+    <Container width={ContainerWidth.Wide} testId="inbox-list-page">
       <div className="page-header">
         <div className="page-header__row">
           <div>

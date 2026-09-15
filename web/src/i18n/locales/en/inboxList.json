@@ -18,14 +18,23 @@
     "awaitingSigs": "Awaiting sigs",
     "myDrafts": "My drafts",
     "citizenReports": "Citizen reports",
-    "resolvedToday": "Resolved · today"
+    "resolvedToday": "Resolved · today",
+    "priorityBand": "Priority band",
+    "status": "Status",
+    "reporterBadge": "Source",
+    "dateRange": "Date range",
+    "open": "Open",
+    "inFlight": "In-flight",
+    "resolved": "Resolved"
   },
   "columns": {
     "thread": "Thread",
     "where": "Where",
     "owner": "Owner",
     "ownerUnknown": "?",
-    "severity": "Severity"
+    "severity": "Severity",
+    "age": "Age",
+    "missingEvidence": "Missing evidence"
   },
   "card": {
     "title": "Action queue",
@@ -35,7 +44,32 @@
   "empty": {
     "icon": "○",
     "heading": "No incidents",
-    "body": "Chain unreachable — pull-to-refresh in Phase 2"
+    "body": "Chain unreachable — pull-to-refresh in Phase 2",
+    "noMatches": "No incidents match the current filters"
+  },
+  "loading": {
+    "message": "Loading inbox…"
+  },
+  "error": {
+    "title": "Failed to load inbox",
+    "body": "The chain did not respond. Retry to refresh."
+  },
+  "reporterBadge": {
+    "anchor": "Anchor",
+    "hotline": "Hotline",
+    "webform": "Webform",
+    "sensor": "Sensor"
+  },
+  "evidence": {
+    "photo": "photo",
+    "gps": "gps",
+    "description": "description"
+  },
+  "bandPill": {
+    "T1": "T1 unverified",
+    "T2": "T2 verified",
+    "T3": "T3 issuance",
+    "resolved": "Resolved"
   },
   "bulkBar": {
     "count_one": "{{count}} selected",

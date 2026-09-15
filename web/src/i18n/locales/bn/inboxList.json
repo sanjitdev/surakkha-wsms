@@ -18,14 +18,23 @@
     "awaitingSigs": "স্বাক্ষরের অপেক্ষায়",
     "myDrafts": "আমার খসড়া",
     "citizenReports": "নাগরিক প্রতিবেদন",
-    "resolvedToday": "আজ সমাধান"
+    "resolvedToday": "আজ সমাধান",
+    "priorityBand": "অগ্রাধিকার স্তর",
+    "status": "অবস্থা",
+    "reporterBadge": "উৎস",
+    "dateRange": "তারিখ পরিসীমা",
+    "open": "খোলা",
+    "inFlight": "চলমান",
+    "resolved": "সমাধান"
   },
   "columns": {
     "thread": "থ্রেড",
     "where": "কোথায়",
     "owner": "মালিক",
     "ownerUnknown": "?",
-    "severity": "তীব্রতা"
+    "severity": "তীব্রতা",
+    "age": "বয়স",
+    "missingEvidence": "অনুপস্থিত প্রমাণ"
   },
   "card": {
     "title": "পদক্ষেপ সারি",
@@ -35,7 +44,32 @@
   "empty": {
     "icon": "○",
     "heading": "কোনো ঘটনা নেই",
-    "body": "চেইন অনুপলব্ধ — ফেজ ২-এ পুল-টু-রিফ্রেশ"
+    "body": "চেইন অনুপলব্ধ — ফেজ ২-এ পুল-টু-রিফ্রেশ",
+    "noMatches": "বর্তমান ফিল্টারে কোনো ঘটনা মেলে না"
+  },
+  "loading": {
+    "message": "ইনবক্স লোড হচ্ছে…"
+  },
+  "error": {
+    "title": "ইনবক্স লোড ব্যর্থ",
+    "body": "চেইন সাড়া দেয়নি। রিফ্রেশ করতে আবার চেষ্টা করুন।"
+  },
+  "reporterBadge": {
+    "anchor": "নাগরিক প্রতিবেদক",
+    "hotline": "হটলাইন",
+    "webform": "ওয়েবফর্ম",
+    "sensor": "সেন্সর"
+  },
+  "evidence": {
+    "photo": "ছবি",
+    "gps": "জিপিএস",
+    "description": "বিবরণ"
+  },
+  "bandPill": {
+    "T1": "T1 যাচাই হয়নি",
+    "T2": "T2 যাচাইকৃত",
+    "T3": "T3 ইস্যু পথ",
+    "resolved": "সমাধান"
   },
   "bulkBar": {
     "count_one": "{{count}} নির্বাচিত",

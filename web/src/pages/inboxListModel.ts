@@ -152,3 +152,37 @@ export function countByFilter(rows: InboxRowType[]): ChipCounts {
     resolved: rows.filter((r) => r.status === 'chain_verify').length,
   };
 }
+
+/**
+ * Lockdown-bound sort: priority-first / age-second.
+ * Tier order per inbox-list.md §3 #4 + foundation §1.1: T3 > T2 > T1 > Resolved.
+ * Within a tier, oldest first (ascending age by timestamp).
+ *
+ * The "resolved" pseudo-tier sits at the bottom — rows whose status is
+ * 'chain_verify' (verified/closed) rank below T1 so the operator sees
+ * live work first and audit history last. T0 sits below T1 in operator
+ * chrome (uninitialised; not a real priority).
+ */
+const TIER_RANK: Record<IncidentSeverity | 'resolved', number> = {
+  T3: 0,
+  T2: 1,
+  T1: 2,
+  T0: 3,
+  resolved: 4,
+};
+
+function tierFor(row: InboxRowType): IncidentSeverity | 'resolved' {
+  if (row.status === 'chain_verify') return 'resolved';
+  return row.severity;
+}
+
+export function sortRowsByPriorityAge(rows: InboxRowType[]): InboxRowType[] {
+  return [...rows].sort((a, b) => {
+    const ta = TIER_RANK[tierFor(a)];
+    const tb = TIER_RANK[tierFor(b)];
+
+    if (ta !== tb) return ta - tb;
+    // Within a tier: oldest first (ascending timestamp).
+    return a.timestamp.localeCompare(b.timestamp);
+  });
+}
