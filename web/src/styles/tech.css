@@ -441,3 +441,68 @@
   color: var(--fg-tertiary);
   white-space: nowrap;
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   WO-007 lockdown reconciliation — field-incident-detail.md.
+   Adds CSS for the EXIF strip, parts list, override affordance, and
+   the photo-capture area. Foundation §7 — focus rings 2px primary-tint.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Page area (foundation §10.2 — area labels for keyboard nav). */
+.field-incident-detail-page {
+  /* container fills AppLayout slot */
+}
+.field-incident-detail-header {
+  margin-top: var(--space-sm);
+}
+
+/* Parts list — add/remove rows (REQ-004). The row uses a 1fr/80px/auto
+   grid so the name field grows, the qty stays compact, and the remove
+   button hugs the right edge. */
+.field-incident-detail-parts-row {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+}
+.field-incident-detail-parts-row:focus-within {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.field-incident-detail-remove-part {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: 0 var(--space-sm);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  cursor: pointer;
+}
+.field-incident-detail-remove-part:hover {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+}
+.field-incident-detail-remove-part:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.field-incident-detail-add-part {
+  background: var(--bg-surface);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  cursor: pointer;
+  margin-top: var(--space-xs);
+}
+.field-incident-detail-add-part:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+.field-incident-detail-add-part:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
