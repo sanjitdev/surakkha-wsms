@@ -179,3 +179,84 @@
 [data-locale='bn'] .data-table--inbox tr td {
   padding-block: calc(var(--space-md) + var(--space-xs));
 }
+
+/* ── Row chrome (REQ-004) — BandPill + ReporterBadge + age + missing-evidence chips.
+      Trust band is a SEPARATE dimension from the reporter badge. ──── */
+.inbox-row-chrome {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.inbox-row-age {
+  font-size: var(--font-size-1, 12px);
+  color: var(--fg-tertiary);
+  white-space: nowrap;
+}
+.inbox-row-evidence {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.inbox-row-evidence-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: var(--radius-xs, 2px);
+  background: var(--bg-subtle);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-1, 12px);
+  border: 1px solid var(--border-default);
+}
+
+/* ── Rich filter chip row (REQ-002 / REQ-003) ──────────────────────── */
+.inbox-toolbar--rich {
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+}
+.inbox-toolbar__label {
+  font-size: var(--font-size-1, 12px);
+  color: var(--fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-right: var(--space-xs);
+}
+.inbox-rich-date {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2, 14px);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm, 3px);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+}
+
+/* ── Focus rings (foundation §7 / §10.2) — 2px --color-primary-tint
+      with 2px offset. The shared chip + button styles already cover
+      filter-chip + dropdown; we re-affirm the rule here for chips
+      added by WO-009 (date inputs, clear-all, rich-filter chips). ── */
+.inbox-rich-date:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+
+/* ── Loading state (REQ-006) — calm placeholder, no spinner per §8.4
+      sub-second rule (skeleton acceptable for graceful degradation). ── */
+.inbox-loading {
+  padding: var(--space-2xl, 32px);
+  text-align: center;
+  color: var(--fg-secondary);
+  font-size: var(--font-size-3, 16px);
+}
+
+/* ── Pagination chrome — the <Pagination> primitive ships its own
+      styles in components.css / table.css. This file just adds a
+      vertical rhythm above the bulk-bar. ────────────────────────── */
+.inbox-pagination {
+  margin-top: var(--space-md);
+}

@@ -7,7 +7,7 @@
  */
 
 import type { InboxRowStatus, InboxRow as InboxRowType, IncidentSeverity } from '../types/inbox';
-import type { Locale } from '../types/domain';
+import type { Locale, ReporterKind } from '../types/domain';
 import { formatDate } from '../hooks/useDateFormatter';
 
 /**
@@ -82,6 +82,22 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       toStr(inbox.href, '') ||
       (payloadIncidentId ? `/inbox/${payloadIncidentId}` : `/inbox/${e.event_id}`);
 
+    // Reporter kind comes from inbox.reporter_kind (set by hotline
+    // intake + webform submit + sensor ingestion). Default 'webform'
+    // so a row without an explicit reporter_kind still gets a chip.
+    const rawReporter = toStr(inbox.reporter_kind, '');
+    const reporterKind: ReporterKind =
+      rawReporter === 'anchor' || rawReporter === 'hotline' || rawReporter === 'sensor'
+        ? (rawReporter as ReporterKind)
+        : 'webform';
+
+    // Missing evidence: chain payload surfaces a flat array on inbox.missing_evidence.
+    const rawEvidence = (inbox.missing_evidence ?? []) as unknown[];
+    const missingEvidence = rawEvidence.filter(
+      (e): e is 'photo' | 'gps' | 'description' =>
+        e === 'photo' || e === 'gps' || e === 'description',
+    );
+
     return {
       id: e.event_id,
       severity,
@@ -99,6 +115,8 @@ export function buildRows(events: ChainEventLite[]): InboxRowType[] {
       ownerName: toStr(inbox.owner_display, 'System'),
       ownerKind,
       status,
+      reporterKind,
+      missingEvidence,
       action: { label: actionLabelFor(status), href: actionHref },
       href: actionHref,
       timestamp: e.occurred_at,

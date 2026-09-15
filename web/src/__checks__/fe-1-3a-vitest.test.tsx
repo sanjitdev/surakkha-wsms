@@ -32,6 +32,8 @@ function buildRow(overrides: Partial<InboxRowType> = {}): InboxRowType {
     ownerName: 'Priya',
     ownerKind: 'priya',
     status: 'awaiting_ack',
+    reporterKind: 'anchor',
+    missingEvidence: [],
     action: { label: 'Open', href: '/inbox-detail' },
     href: '/inbox-detail',
     timestamp: '2026-09-08T10:00:00.000Z',

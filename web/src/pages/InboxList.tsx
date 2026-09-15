@@ -8,11 +8,19 @@
  *   consumed via useAppLayout() and the parent layout route.
  *
  *   The page returns a <Container> directly, no .app-shell wrapper.
+ *
+ * WO-009 lockdown reconciliation (2026-09-15):
+ *   - Sort: priority-first / age-second (T3 > T2 > T1 > Resolved)
+ *   - Filter chips: priority band, reporter-badge, status (open/in-flight/resolved), date range
+ *   - URL persistence: ?filter=band=T3&reporter=anchor&status=open&from=…&to=…
+ *   - Rows carry BandPill (locked=true) + ReporterBadge + age + missing-evidence chips
+ *   - Pagination via <Pagination> primitive, default 20 per page
+ *   - Empty / loading / error states pinned
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
 import { Container } from '../components/layout/Container';
@@ -22,9 +30,24 @@ import { Button } from '../components/ui/Button';
 import { Table } from '../components/ui/Table';
 import type { TableColumn } from '../components/ui/Table.types';
 import { FilterChip } from '../components/pages/FilterChip';
-import type { InboxRowFilter, InboxRow as InboxRowType } from '../types/inbox';
+import { BandPill } from '../components/ui/BandPill';
+import { ReporterBadge } from '../components/operator/ReporterBadge';
+import { Pagination } from '../components/ui/Pagination';
+import { Band } from '../types/domain';
+import {
+  type FilterState,
+  type InboxRowFilter,
+  type InboxRow as InboxRowType,
+  type IncidentSeverity,
+  EMPTY_FILTERS,
+  applyFilters,
+  parseFiltersFromQuery,
+  serialiseFiltersToQuery,
+} from '../types/inbox';
+import type { ReporterKind } from '../types/domain';
 import { ContainerWidth } from '../types/domain';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { useRelativeTime } from '../hooks/useRelativeTime';
 import { useIncidentActions } from '../hooks/useIncidentActions';
 import {
   type ChainEventLite,
@@ -38,13 +61,28 @@ import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRa
 
 export function InboxList() {
   const { format: formatTime, locale } = useDateFormatter();
+  const { formatRelative } = useRelativeTime();
   const { t: tInbox } = useTranslation('inboxList');
   const actions = useIncidentActions();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [rows, setRows] = useState<InboxRowType[]>([]);
   const [recent, setRecent] = useState<RecentDecision[]>([]);
+  // Legacy single-filter chip row (left side of the toolbar). Kept so
+  // the existing pattern (all / T3 / sig / drafts / citizen / resolved)
+  // stays as a fast-path; the rich FilterState (REQ-002) handles
+  // multi-dimensional filtering per inbox-list.md §3 #3.
   const [filter, setFilter] = useState<InboxRowFilter>('all');
+  // Rich filter state — bands / reporters / status / date range.
+  // Pre-populates from `?filter=...` on mount (REQ-003 URL persistence).
+  const [richFilter, setRichFilter] = useState<FilterState>(
+    () => parseFiltersFromQuery(searchParams.toString()) ?? EMPTY_FILTERS,
+  );
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  // Pagination state (REQ-005).
+  const [page, setPage] = useState(1);
+  const pageSize = 20;
 
   // (1) inbox rows — gated on chain head & recent fetches via separate effects
   // refetchRows is pulled out so the bulk-bar Mark-reviewed CTA can call it
@@ -53,12 +91,18 @@ export function InboxList() {
   const refetchRows = useCallback(async (): Promise<void> => {
     try {
       const r = await fetch('/api/events?event_type=IncidentCreated&limit=100');
+
+      if (!r.ok) {
+        throw new Error(`chain responded ${r.status}`);
+      }
       const data = (await r.json()) as { events: ChainEventLite[] };
 
       setRows(buildRows(data.events));
+      setError(null);
     } catch (err) {
       console.error('[surakkha] inbox fetch failed', err);
       setRows([]);
+      setError((err as Error).message ?? 'unknown error');
     } finally {
       setLoading(false);
     }
@@ -111,19 +155,21 @@ export function InboxList() {
   // the filter so the user sees the same row order regardless of which
   // chip is active.
   const sortedRows = useMemo(() => sortRowsByPriorityAge(rows), [rows]);
-  const visibleRows = useMemo(
-    () =>
-      sortedRows.filter((r) => {
-        if (filter === 'all') return true;
-        if (filter === 'T3') return r.severity === 'T3';
-        if (filter === 'sig') return r.isAwaitingSig;
-        if (filter === 'drafts') return r.isDraft;
-        if (filter === 'citizen') return r.isCitizen;
-        // filter is `'resolved'` here — TS exhaustively narrowed via prior returns
-        return r.status === 'chain_verify';
-      }),
-    [sortedRows, filter],
-  );
+  // Compose legacy single-chip filter + rich multi-dimensional filter.
+  // The legacy chip is a fast-path AND applies on top of the rich filter.
+  const visibleRows = useMemo(() => {
+    const richFiltered = applyFilters(sortedRows, richFilter);
+
+    return richFiltered.filter((r) => {
+      if (filter === 'all') return true;
+      if (filter === 'T3') return r.severity === 'T3';
+      if (filter === 'sig') return r.isAwaitingSig;
+      if (filter === 'drafts') return r.isDraft;
+      if (filter === 'citizen') return r.isCitizen;
+      // filter is `'resolved'` here — TS exhaustively narrowed via prior returns
+      return r.status === 'chain_verify';
+    });
+  }, [sortedRows, filter, richFilter]);
   const sevCounts = useMemo(() => {
     return {
       T3: rows.filter((r) => r.severity === 'T3').length,
@@ -133,6 +179,77 @@ export function InboxList() {
     };
   }, [rows]);
   const total = Math.max(1, rows.length);
+
+  // ── URL persistence (REQ-003) — serialise the rich filter to ?filter=… on change.
+  // Uses replace:true so the back button doesn't pile up one entry per chip toggle.
+  // Does not touch search params that aren't ours.
+  useEffect(() => {
+    const next = serialiseFiltersToQuery(richFilter);
+
+    if (next === '') {
+      // Strip the `filter` param entirely when the user clears all chips.
+      if (searchParams.has('filter')) {
+        const clone = new URLSearchParams(searchParams.toString());
+
+        clone.delete('filter');
+        setSearchParams(clone, { replace: true });
+      }
+      return;
+    }
+
+    const currentFilter = searchParams.get('filter');
+
+    if (currentFilter !== next.slice('?filter='.length)) {
+      const clone = new URLSearchParams(searchParams.toString());
+
+      clone.set('filter', next.slice('?filter='.length));
+      setSearchParams(clone, { replace: true });
+    }
+  }, [richFilter, searchParams, setSearchParams]);
+
+  // ── Pagination slice (REQ-005).
+  // The Pagination primitive is page + pageSize driven. We slice the
+  // sorted, filtered rows and pass the count up to it.
+  const pagedRows = useMemo(
+    () => visibleRows.slice((page - 1) * pageSize, page * pageSize),
+    [visibleRows, page, pageSize],
+  );
+
+  // Reset to page 1 when filters change so the user isn't stranded on
+  // an empty page after a chip toggle.
+  useEffect(() => {
+    setPage(1);
+  }, [filter, richFilter]);
+
+  // ── Filter-chip toggles (REQ-002).
+  const toggleBand = (b: IncidentSeverity): void => {
+    setRichFilter((cur) => ({
+      ...cur,
+      band: cur.band.includes(b) ? cur.band.filter((x) => x !== b) : [...cur.band, b],
+    }));
+  };
+
+  const toggleReporter = (r: ReporterKind): void => {
+    setRichFilter((cur) => ({
+      ...cur,
+      reporter: cur.reporter.includes(r) ? cur.reporter.filter((x) => x !== r) : [...cur.reporter, r],
+    }));
+  };
+
+  const toggleStatus = (s: 'open' | 'in-flight' | 'resolved'): void => {
+    setRichFilter((cur) => ({
+      ...cur,
+      status: cur.status.includes(s) ? cur.status.filter((x) => x !== s) : [...cur.status, s],
+    }));
+  };
+
+  const setDateRange = (from: string | null, to: string | null): void => {
+    setRichFilter((cur) => ({ ...cur, from, to }));
+  };
+
+  const clearFilters = (): void => {
+    setRichFilter(EMPTY_FILTERS);
+  };
 
   // Bulk-bar Mark-reviewed CTA handler. F1's markReviewed posts one
   // SignatureAttestation(action: reviewed_by_operator) per selected
@@ -181,6 +298,59 @@ export function InboxList() {
           );
         },
         className: 'col-warn',
+      },
+      // ── Row chrome column (REQ-004) — BandPill + ReporterBadge + age + missing-evidence chips.
+      // Trust band is a SEPARATE dimension from the reporter badge (foundation §1.1).
+      // Both render side-by-side so the operator sees verification state (T1/T2/T3/Resolved)
+      // and source attribute (anchor/hotline/webform/sensor) without conflating them.
+      {
+        key: 'chrome',
+        header: tInbox('columns.severity'),
+        render: (r) => {
+          const band =
+            r.severity === 'T3'
+              ? Band.Low
+              : r.severity === 'T2'
+                ? Band.Medium
+                : Band.High;
+
+          return (
+            <div
+              data-testid={`inbox-row-chrome-${r.id}`}
+              className="inbox-row-chrome"
+            >
+              <BandPill band={band} locked={true} testId={`inbox-row-band-${r.id}`} />
+              <ReporterBadge
+                kind={r.reporterKind}
+                i18nNamespace="inboxList"
+                i18nKeyPrefix="reporterBadge"
+                testId={`inbox-row-reporter-badge-${r.id}`}
+              />
+              <span
+                className="inbox-row-age"
+                data-testid={`inbox-row-age-${r.id}`}
+                title={r.timestamp}
+              >
+                {formatRelative(r.timestamp)}
+              </span>
+              {r.missingEvidence.length > 0 ? (
+                <span className="inbox-row-evidence" data-testid={`inbox-row-evidence-${r.id}`}>
+                  {r.missingEvidence.map((m) => (
+                    <span
+                      key={m}
+                      className="inbox-row-evidence-chip"
+                      data-evidence={m}
+                      data-testid={`inbox-row-evidence-chip-${r.id}-${m}`}
+                    >
+                      {tInbox(`evidence.${m}`)}
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+            </div>
+          );
+        },
+        className: 'col-chrome',
       },
       {
         key: 'thread',
@@ -242,14 +412,6 @@ export function InboxList() {
         className: 'col-owner',
       },
       {
-        key: 'severity',
-        header: tInbox('columns.severity'),
-        render: (r) => (
-          <span className={`badge badge--${r.severity.toLowerCase()}`}>{r.severity}</span>
-        ),
-        className: 'col-status',
-      },
-      {
         key: 'action',
         // Action column has no visible header — rows link directly to the
         // work surface. Empty literal avoids the i18n-key-leak when t()
@@ -259,7 +421,7 @@ export function InboxList() {
         className: 'col-action',
       },
     ],
-    [selectedRows, tInbox],
+    [selectedRows, tInbox, formatTime],
   );
 
   return (
@@ -350,6 +512,119 @@ export function InboxList() {
           />
         </div>
       </div>
+      {/* Rich filter chip row (REQ-002): priority band, reporter-badge,
+          status, date range. Multi-select inside a chip row is OR;
+          chip rows compose AND with the legacy single-filter above. */}
+      <div
+        className="inbox-toolbar inbox-toolbar--rich"
+        data-testid="inbox-rich-filter-row"
+      >
+        <div
+          className="filter-chips"
+          role="tablist"
+          aria-label={tInbox('filters.priorityBand')}
+          data-testid="inbox-rich-filter-band"
+        >
+          <span className="inbox-toolbar__label">{tInbox('filters.priorityBand')}</span>
+          {(['T3', 'T2', 'T1'] as IncidentSeverity[]).map((b) => (
+            <FilterChip
+              key={b}
+              label={tInbox(`bandPill.${b}`)}
+              active={richFilter.band.includes(b)}
+              onClick={() => {
+                toggleBand(b);
+              }}
+              testId={`inbox-rich-band-${b.toLowerCase()}`}
+            />
+          ))}
+        </div>
+        <div
+          className="filter-chips"
+          role="tablist"
+          aria-label={tInbox('filters.reporterBadge')}
+          data-testid="inbox-rich-filter-reporter"
+        >
+          <span className="inbox-toolbar__label">{tInbox('filters.reporterBadge')}</span>
+          {(['anchor', 'hotline', 'webform', 'sensor'] as ReporterKind[]).map((r) => (
+            <FilterChip
+              key={r}
+              label={tInbox(`reporterBadge.${r}`)}
+              active={richFilter.reporter.includes(r)}
+              onClick={() => {
+                toggleReporter(r);
+              }}
+              testId={`inbox-rich-reporter-${r}`}
+            />
+          ))}
+        </div>
+        <div
+          className="filter-chips"
+          role="tablist"
+          aria-label={tInbox('filters.status')}
+          data-testid="inbox-rich-filter-status"
+        >
+          <span className="inbox-toolbar__label">{tInbox('filters.status')}</span>
+          {(['open', 'in-flight', 'resolved'] as const).map((s) => (
+            <FilterChip
+              key={s}
+              label={tInbox(`filters.${s}`)}
+              active={richFilter.status.includes(s)}
+              onClick={() => {
+                toggleStatus(s);
+              }}
+              testId={`inbox-rich-status-${s}`}
+            />
+          ))}
+        </div>
+        <div
+          className="filter-chips"
+          role="tablist"
+          aria-label={tInbox('filters.dateRange')}
+          data-testid="inbox-rich-filter-daterange"
+        >
+          <span className="inbox-toolbar__label">{tInbox('filters.dateRange')}</span>
+          <input
+            type="date"
+            className="inbox-rich-date"
+            data-testid="inbox-rich-date-from"
+            value={richFilter.from ?? ''}
+            onChange={(e) => {
+              setDateRange(e.target.value || null, richFilter.to);
+            }}
+            aria-label={tInbox('filters.dateRange')}
+          />
+          <input
+            type="date"
+            className="inbox-rich-date"
+            data-testid="inbox-rich-date-to"
+            value={richFilter.to ?? ''}
+            onChange={(e) => {
+              setDateRange(richFilter.from, e.target.value || null);
+            }}
+            aria-label={tInbox('filters.dateRange')}
+          />
+          {richFilter.from !== null || richFilter.to !== null ? (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setDateRange(null, null);
+              }}
+              testId="inbox-rich-date-clear"
+            >
+              ×
+            </Button>
+          ) : null}
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={clearFilters}
+          testId="inbox-rich-clear-all"
+        >
+          {tInbox('filters.all')}
+        </Button>
+      </div>
       <div className="grid-12" style={{ marginTop: 'var(--space-md)' }}>
         <div className="col-8">
           <Card modifier="with-heading" testId="inbox-card">
@@ -373,37 +648,35 @@ export function InboxList() {
               </span>
             </div>
             {loading ? (
-              <Table<InboxRowType>
-                columns={inboxColumns}
-                rows={visibleRows}
-                rowKey="id"
-                testId="table-inbox"
-                selectable
-                selectedRows={selectedRows}
-                onSelectionChange={setSelectedRows}
-                loading
+              <div
+                className="inbox-loading"
+                data-testid="inbox-loading"
+                aria-label={tInbox('loading.message')}
+              >
+                {tInbox('loading.message')}
+              </div>
+            ) : error !== null ? (
+              <EmptyState
+                icon={<span>{tInbox('empty.icon')}</span>}
+                heading={tInbox('error.title')}
+                body={tInbox('error.body')}
               />
             ) : rows.length === 0 ? (
-              <Table<InboxRowType>
-                columns={inboxColumns}
-                rows={visibleRows}
-                rowKey="id"
-                testId="table-inbox"
-                selectable
-                selectedRows={selectedRows}
-                onSelectionChange={setSelectedRows}
-                emptyState={
-                  <EmptyState
-                    icon={<span>{tInbox('empty.icon')}</span>}
-                    heading={tInbox('empty.heading')}
-                    body={tInbox('empty.body')}
-                  />
-                }
+              <EmptyState
+                icon={<span>{tInbox('empty.icon')}</span>}
+                heading={tInbox('empty.heading')}
+                body={tInbox('empty.body')}
+              />
+            ) : pagedRows.length === 0 ? (
+              <EmptyState
+                icon={<span>{tInbox('empty.icon')}</span>}
+                heading={tInbox('empty.heading')}
+                body={tInbox('empty.noMatches')}
               />
             ) : (
               <Table<InboxRowType>
                 columns={inboxColumns}
-                rows={visibleRows}
+                rows={pagedRows}
                 rowKey="id"
                 testId="table-inbox"
                 selectable
@@ -437,11 +710,22 @@ export function InboxList() {
               </div>
             </div>
           </Card>
-          <div className="inbox-pager">
-            <span className="inbox-pager__meta">
-              {tInbox('pager.meta', { visible: visibleRows.length, total: rows.length })}
-            </span>
-          </div>
+          {/* Pagination (REQ-005): <Pagination> primitive, default 20/page. */}
+          {visibleRows.length > pageSize ? (
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              total={visibleRows.length}
+              onPageChange={setPage}
+              testId="inbox-pagination"
+            />
+          ) : (
+            <div className="inbox-pager">
+              <span className="inbox-pager__meta">
+                {tInbox('pager.meta', { visible: visibleRows.length, total: rows.length })}
+              </span>
+            </div>
+          )}
         </div>
         <div className="col-4">
           <SeverityRail
