@@ -2,7 +2,7 @@
 
 > WDS Phase 4 / 5 progress.
 > Maintained by Freya (Phase 4) and Mimir (Phase 5).
-> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed; GAP-TRIG-KARIM closed; wireframe convention migrated to Mermaid + mmdc; outline rendering-tool updated).
+> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed; GAP-TRIG-KARIM closed; wireframe convention migrated to Mermaid + mmdc; outline rendering-tool updated; WO-008 audit-log reconciled — **Tier 2 DONE**: WO-004 · WO-005 · WO-006 · WO-007 · WO-008).
 >
 > **Handoff status:** All 17 PRDs in `docs/E-Development/NNN-[slug].xml` are
 > `status="planned"` and ready for `mimir build`. Master PRD at
@@ -50,7 +50,7 @@ Per WDS `references/ux-design-workflow.md`:
 | inbox-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | field-queue.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
 | field-incident-detail.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
-| audit-log.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| audit-log.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
 
 ### 2.3 Tier 3 — light infrastructure pages
 
