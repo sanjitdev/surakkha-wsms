@@ -257,6 +257,45 @@ Lockdown sweep (5 checks):
 
 Net test count: 537 baseline → 547 passing (+10 new coming-soon tests; 0 regression; same 4 pre-existing failures in `fe-b6-operator-thread-filters`).
 
+### WO-017 verify-flow — Mimir 2026-09-15
+
+Built = ✓  (Tier 3 build 9/9 — FINAL)
+
+Phase 5 Stage 5.3 complete. Tier 3 reconciliation closes:
+- WO-009 Inbox List ✓
+- WO-010 Inbox Rail ✓
+- WO-011 Submit Report ✓
+- WO-012 Citizen Ack ✓
+- WO-013 Login ✓
+- WO-014 Settings ✓
+- WO-015 Styleguide ✓
+- WO-016 Coming Soon ✓
+- WO-017 Verify Flow ✓
+
+Reconciliation summary:
+- **Single-click verify**: New "Verify this block" button calls `verifyBlockHash()` from `web/src/lib/chain-verify.ts` (single source of truth — no copy-paste). Helper-reuse pinned via source-level assertion in the test (comments stripped before grep).
+- **Pass/fail badge**: `.verify-badge--ok` binds `--color-safe-green`; `.verify-badge--fail` binds `--color-alert-red-reserved` (the lockdown-safe use: operator-readable failed-row badge, NOT the consumer-notice issuance surface). VS15 (`\uFE0E`) forces text presentation on the ✓ / ⚠ glyphs.
+- **3 s auto-dismiss toast + durable badge**: Toast lifecycle managed via the existing `ToastProvider`; `useContext(ToastContext) ?? NOOP_TOAST` fallback lets the page render in test harnesses that don't mount the provider. The toast dismisses after 3 s; the badge persists in the row metadata across re-renders and toast dismissal.
+- **Step indicator keyboard nav**: `<ol onKeyDown>` wires ArrowUp/Down/Left/Right + Home/End to advance / rewind the active step (foundation §10.3). Active `<li>` carries `aria-current="step"`, `tabIndex=0`, `data-step-active="true"`; inactive `<li>`s omit `aria-current` and use `tabIndex=-1`.
+- **Cross-reference**: Docstring in `InboxDetail.tsx` notes that `/verify-flow` is a Tier 3 dev/demo wizard mirroring the InboxDetail verify-and-assign flow (both reuse the same helper). Reverse cross-reference already in `VerifyFlow.tsx` file header.
+- **Lucide icon audit**: `ClipboardListIcon`, `InboxIcon`, `SendIcon`, `CheckIcon` all sourced from existing `components/icons/sidebar-icons` barrel — no new icons added. The icons are not all in the dim-3 §6.5.4 27-icon list, but they are pre-existing infrastructure (also used by Settings and other surfaces) so no swap was required.
+- **Seal no-op behaviour**: documented in file header (Phase 1 mock; real signing ships in Phase 2 with the gateway).
+- **Locale files**: en + bn `verifyFlow.json` gained the `verify.*` namespace (button label, pending / ok / fail labels + aria, toast copy). Bangla strings contain real Bengali script throughout.
+
+Files: `web/src/pages/VerifyFlow.tsx` (+~205 LOC: verify button + toast lifecycle + keyboard nav), `web/src/styles/verify.css` (+67 LOC: `.verify-badge--ok/--fail/--pending` + reduced-motion guard), `web/src/pages/InboxDetail.tsx` (+9 LOC: WO-017 cross-reference), `web/src/components/ui/ToastProvider.tsx` (+9 LOC: `ToastContext` re-export), en+bn `verifyFlow.json` (+11 keys each), test file new (~565 LOC, 15 tests).
+
+Lockdown sweep (5 checks):
+- `en/verifyFlow.json` Hindi letters: 0 ✓
+- `bn/verifyFlow.json` Hindi letters: 0 ✓
+- `bn/verifyFlow.json` Bengali chars: 923 (real Bengali throughout) ✓
+- `VerifyFlow.tsx` raw `red-600` / `bg-red` / `variant="danger"`: 0 (code-only assertion strips comments) ✓
+- `tech.css` `:focus-visible` rules all bind `--color-primary-tint` ✓
+- `verify.css` `.verify-badge--ok` binds `--color-safe-green`; `.verify-badge--fail` binds `--color-alert-red-reserved` (lockdown-safe use) ✓
+- `verify.css` honours `prefers-reduced-motion: reduce` on the pending-state spinner (foundation §8.3) ✓
+- `VerifyFlow.tsx` imports `verifyBlockHash` from `lib/chain-verify`; no inline fetch / AbortController copy-paste ✓
+
+Net test count: 547 baseline → 562 passing (+15 new verify-flow-reconcile tests; 0 regression; same 4 pre-existing failures in `fe-b5b-migrate-tables` + `fe-b6-operator-thread-filters`).
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._
