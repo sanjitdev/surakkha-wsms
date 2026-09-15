@@ -152,6 +152,35 @@
       </refs>
     </requirement>
 
+    <requirement id="001-REQ-012" type="behavior" status="built">
+      <title>Filter T3 incidents from citizen view (consumer-notice reservation)</title>
+      <description>Per PRD §3.3, T3 (issuance / consumer notice) is reserved for the consumer-notice issuance path and is build-time lint-enforced. Citizen timeline MUST defensively filter out any T3-tagged incident — never render trust band T3 to a citizen, even if the chain contains it. Defensive guard only; T3 should not normally reach this surface.</description>
+      <acceptance>
+        <criterion>Timeline renders zero rows for incidents with trust_band === 'T3'</criterion>
+        <criterion>Empty state ("Nothing yet — we'll update this page when there's news") renders for T3 incidents</criterion>
+        <criterion>Vitest check asserts T3 hide-out at DOM level</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §3.3 (T3 reservation)</spec>
+        <spec>docs/D-UX-Design/decisions/00-lockdown-audit.md §5 (T3 issuance-only)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-013" type="behavior" status="built">
+      <title>Reopen flow emits ChainReopened with reason</title>
+      <description>When citizen taps ❌ in ActionCall, open reason picker modal. On confirm, POST /api/events with ChainReopened{actor: 'citizen', incident_id, reason} body. Reason field is required (1-280 chars). Without reason, the reopen submit button is disabled. Empty reopen attempts do not POST.</description>
+      <acceptance>
+        <criterion>Reason picker modal opens on ❌ tap</criterion>
+        <criterion>Submit button disabled until reason ≥ 1 char entered</criterion>
+        <criterion>On submit, POST /api/events with type=ChainReopened, actor='citizen', incident_id from route, reason from input</criterion>
+        <criterion>Vitest check asserts event payload shape matches spec §6</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md §6 (Reopen flow)</spec>
+        <spec>docs/E-Development/WO-001-citizen-status-timeline.md §Wire contract (emit reopen)</spec>
+      </refs>
+    </requirement>
+
   </requirements>
 
   <test-protocol>
