@@ -15,7 +15,7 @@
 | 2 | Trigger Map | ✓ complete (2026-09-10) |
 | 3 | UX Scenarios | ✓ complete (2026-09-10) |
 | 4 | UX Design | ✓ complete (2026-09-11, lockdown-bound) |
-| 5 | Agentic Development | 🔄 in-progress (tech audit complete 2026-09-15) |
+| 5 | Agentic Development | 🔄 in-progress (master PRD complete 2026-09-15) |
 | 6 | Asset Generation | ○ not started |
 | 7 | Design System | 🔄 partial (foundation + tokens extracted; full atomic library deferred) |
 | 8 | Product Evolution | ○ not started |
@@ -71,7 +71,7 @@ Tracked in `docs/D-UX-Design/04-phase-5-prep-todo.md`.
 | 1 | Convention cleanup (flatten specs/) | ✓ complete (2026-09-15) |
 | 2 | WDS scaffolding (E-Development/ + design log) | ✓ complete (2026-09-15) |
 | 3 | Brownfield tech audit (Mimir) | ✓ complete (2026-09-15) |
-| 4 | Master PRD (Saga) | ○ pending |
+| 4 | Master PRD (Saga) | ✓ complete (2026-09-15) |
 | 5 | 17 Work Orders (Freya) | ○ pending |
 | 6 | 17 feature PRDs (Mimir) | ○ pending |
 | 7 | Resolve open questions + 5 MAJOR items | ○ pending |

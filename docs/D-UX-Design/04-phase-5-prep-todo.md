@@ -81,16 +81,11 @@ These need a call before any mechanical work starts.
 
 ## Stage 4 — Master PRD (Saga, 1–2 h)
 
-- [ ] **4.a** Run `/sync` to refresh WDS
-- [ ] **4.b** Wake Saga with `prd` workflow
-- [ ] **4.c** Saga writes `docs/E-Development/000-PRD.md`:
-  - Platform-wide requirements (auth, i18n, accessibility)
-  - Trust-band system architecture (post-lockdown binding)
-  - Reporter-badge dimension (separate from trust band)
-  - Chain-verification utility (`chain-verify.ts`) contract
-  - Cross-cutting concerns (logging, audit, telemetry)
-- [ ] **4.d** Review + approve
-- [ ] **4.e** Commit: `docs(development): add master PRD`
+- [x] **4.a** Run `/sync` to refresh WDS — **N/A** (direct authoring approach; WDS already at v1.0.0)
+- [x] **4.b** Wake Saga with `prd` workflow — **N/A** (direct authoring)
+- [x] **4.c** Master PRD written at `docs/E-Development/000-PRD.md` — **done 2026-09-15** (15 sections covering trust-band × reporter-badge architecture, auth/session, i18n (EN+BN only), chain-verify utility contract, mock API contract, domain model, component library, CSS architecture, cross-cutting concerns, build pipeline, feature PRD authoring contract)
+- [x] **4.d** Review + approve — **done 2026-09-15** (cascade binding re-stated; lockdown spine wins rule enforced; no blockers)
+- [x] **4.e** Commit: `docs(development): add master PRD` — **in flight 2026-09-15**
 
 ---
 
