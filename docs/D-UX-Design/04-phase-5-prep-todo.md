@@ -61,11 +61,11 @@ These need a call before any mechanical work starts.
 
 ## Stage 2 — WDS-mandated scaffolding (~5 min)
 
-- [ ] **2.a** Create `docs/E-Development/` folder
-- [ ] **2.b** Create `_progress/00-design-log.md` with initial Design Loop Status table (one row per page, all `S✓` since specced + approved)
-- [ ] **2.c** Create `progress/saga.md`, `progress/freya.md`, `progress/mimir.md` stub session-state files
-- [ ] **2.d** Update `_progress/wds-project-outline.yaml` to mark `ux-design: complete` and `development: in-progress`
-- [ ] **2.e** Commit: `chore(ux-design): create E-Development/ scaffold + design-log`
+- [x] **2.a** Create `docs/E-Development/` folder (with README documenting the slot inventory + WO-001→WO-017 mapping) — **done 2026-09-15**
+- [x] **2.b** Create `_progress/00-design-log.md` with Design Loop Status table (17 rows across Tier 1/2/3) — **done 2026-09-15**
+- [x] **2.c** Create `progress/saga.md`, `progress/freya.md`, `progress/mimir.md` stub session-state files — **done 2026-09-15** (gitignored — machine-local per WDS glossary)
+- [x] **2.d** Update `_progress/wds-project-outline.yaml` to mark `ux-design: complete`, `development: in-progress`, prep-stage 2-of-9, and lock the 5 stage-0 decisions — **done 2026-09-15**
+- [x] **2.e** Commit: `chore(ux-design): create E-Development/ scaffold + design-log` — **done 2026-09-15** (commit `db4c8f4`)
 
 ---
 
