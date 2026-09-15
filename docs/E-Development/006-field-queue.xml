@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="006" title="Field Queue (Karim)" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Field Queue is Karim's landing page after login. It is the field-tech equivalent of the Operator Dashboard: priority-first / age-second sort, distance-from-current-location estimate, and one-tap Acknowledge + En route actions. 5s live update with 100ms crossfade on changed cells per foundation §8.2. This is the load-bearing surface for Goal 2.2 (status visible across personas).
+  </overview>
+
+  <scope>
+    <scenarios>04-karim-the-technician-field-lane (Screen 1)</scenarios>
+    <views>/field for field_technician</views>
+    <platform>Reconcile web/src/pages/FieldQueuePage.tsx (422 LOC); emit Acknowledged + EnRoute; poll /api/incidents every 5s</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="006-REQ-001" type="platform" status="planned">
+      <title>Mount route at /field for field_technician</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for field_technician.</description>
+      <acceptance>
+        <criterion>Route renders for field_technician</criterion>
+        <criterion>Non-field roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-002" type="behavior" status="planned">
+      <title>Priority-first / age-second sort (same contract as OperatorDashboard)</title>
+      <description>Sort incidents P1 > P2 > P3 > P4, then ascending age. Same contract as WO-004 OperatorDashboard locked #1.</description>
+      <acceptance>
+        <criterion>P1 row above P2 row at same age</criterion>
+        <criterion>Older row first within same priority</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md §Sort</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-003" type="interface" status="planned">
+      <title>Per-row composition (band + reporter + distance + age + missing-evidence)</title>
+      <description>Each row renders: BandPill (glyph + text), reporter-badge chip, distance estimate (km from current location), age, missing-evidence chips.</description>
+      <acceptance>
+        <criterion>All five row elements render in order</criterion>
+        <criterion>Band and reporter chips are independent DOM elements</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md §Row</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-004" type="platform" status="planned">
+      <title>One-tap Acknowledge emits Acknowledged event</title>
+      <description>Acknowledge button on each row emits POST /api/events with Acknowledged{actor: karim, incident_id}. Click opens detail page on return.</description>
+      <acceptance>
+        <criterion>Click emits Acknowledged with correct payload</criterion>
+        <criterion>After event, detail page renders</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md §Acknowledge</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-005" type="platform" status="planned">
+      <title>One-tap En route with ETA picker</title>
+      <description>En route button on each row opens ETA picker (1/5/15/30/60 min). On confirm, emits POST /api/events with EnRoute{actor: karim, incident_id, eta_minutes}. Opens detail page on return.</description>
+      <acceptance>
+        <criterion>Click opens ETA picker with 5 options</criterion>
+        <criterion>Confirm emits EnRoute with selected minutes</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md §En route</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-006" type="behavior" status="planned">
+      <title>Distance estimate from navigator.geolocation</title>
+      <description>Use navigator.geolocation.watchPosition() to track current location. Each row shows distance estimate in km. Graceful fallback (hide distance cell) if permission denied.</description>
+      <acceptance>
+        <criterion>Distance cell renders with km value</criterion>
+        <criterion>Distance updates when geolocation changes</criterion>
+        <criterion>Permission denial hides distance cell (no broken state)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md §Distance</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-007" type="interface" status="planned">
+      <title>Filter chips (mine / available)</title>
+      <description>Render two filter chips: "My assignments" (default) and "Available". Click toggles active state. "My assignments" filters to incidents with assigned_to=karim_id; "Available" filters to unassigned.</description>
+      <acceptance>
+        <criterion>Both chips render</criterion>
+        <criterion>Default = "My assignments"</criterion>
+        <criterion>Filtered rows match chip intent</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-queue.md §Filter chips</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-008" type="behavior" status="planned">
+      <title>5s live update + 100ms crossfade (foundation §8.2)</title>
+      <description>Poll /api/incidents every 5s. Changed cells crossfade over 100ms. New rows mount instantly. Per foundation §8.2.</description>
+      <acceptance>
+        <criterion>Polling fires every 5s</criterion>
+        <criterion>Changed cell transition is 100ms crossfade</criterion>
+        <criterion>New rows mount instantly (no fade-in delay)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §8.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-009" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: field-queue-page, …-header, …-main, …-filter-chips, …-chip-mine, …-chip-available, …-incident-list, …-row, …-band-pill, …-reporter-badge-chip, …-distance-estimate, …-button-acknowledge, …-button-en-route.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-010" type="interface" status="planned">
+      <title>i18n keys (EN + BN; ETA picker labels)</title>
+      <description>Add i18n keys for page title, filter chips, row distance/ETA, button labels, ETA picker options, toast messages. EN + BN parity. ETA picker options: 1/5/15/30/60 min.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-006-field-queue.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-011" type="platform" status="planned">
+      <title>MSW: Acknowledge + EnRoute event handlers</title>
+      <description>Extend web/src/mocks/handlers.ts POST /api/events to accept Acknowledged + EnRoute event types. Persist via idb-keyval.</description>
+      <acceptance>
+        <criterion>POST /api/events with type=Acknowledged returns 200</criterion>
+        <criterion>POST /api/events with type=EnRoute returns 200</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="006-REQ-012" type="interface" status="planned">
+      <title>Reconciliation: confirm field-tech role gating + no Hindi</title>
+      <description>Verify field_technician role guard works; verify no Hindi strings; verify distance estimate graceful fallback.</description>
+      <acceptance>
+        <criterion>grep 'hi' locale returns zero hits</criterion>
+        <criterion>Role guard test passes</criterion>
+        <criterion>Distance fallback test passes (denied permission)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="006-REQ-002">
+      <steps>Seed mixed priorities + ages; assert rendered order.</steps>
+      <expected>Sort correct.</expected>
+    </test>
+    <test ref="006-REQ-004">
+      <steps>Click Acknowledge on row; intercept POST /api/events; assert Acknowledged event.</steps>
+      <expected>Event fires correctly.</expected>
+    </test>
+    <test ref="006-REQ-005">
+      <steps>Click En route; assert ETA picker opens; select 15; confirm; assert EnRoute with eta_minutes=15.</steps>
+      <expected>EnRoute flow works.</expected>
+    </test>
+    <test ref="006-REQ-006">
+      <steps>Mock geolocation; assert distance cell updates. Mock permission denied; assert cell hidden.</steps>
+      <expected>Geolocation integration + fallback work.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

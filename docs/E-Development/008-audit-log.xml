@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="008" title="Audit Log" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Audit Log is the cross-incident chain view. Operators filter by incident / event-type / actor / band / reporter-badge / date range; every filter change emits a ChainRead event per PRD §11.1. Anomaly surfacing propagates from any incident in the filter set. Drill-into per-incident segment via "Open chain segment" link to WO-003. This is the load-bearing surface for Goal 2.3 (100% of chain reads logged) and Goal 2.1 (chain verifiable).
+  </overview>
+
+  <scope>
+    <scenarios>06-audit-chain-timeline-cross-cutting (Screen 1)</scenarios>
+    <views>/audit-log for utility_operator</views>
+    <platform>Reconcile web/src/pages/AuditLog.tsx (582 LOC); filter chips with URL persistence; emit ChainRead on filter change; cross-incident grouping</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="008-REQ-001" type="platform" status="planned">
+      <title>Mount route at /audit-log for utility_operator</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for utility_operator.</description>
+      <acceptance>
+        <criterion>Route renders for utility_operator</criterion>
+        <criterion>Non-operator roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-002" type="interface" status="planned">
+      <title>Six filter chips (incident, event-type, actor, band, reporter-badge, date range)</title>
+      <description>Render six filter chips: incident (search input), event-type (multi-select), actor (search input), band (multi-select T1/T2/T3/resolved), reporter-badge (multi-select), date range picker.</description>
+      <acceptance>
+        <criterion>All six chips render with correct primitives</criterion>
+        <criterion>Each chip is interactive (verified by click/keyboard)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md §Filter chips</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-003" type="behavior" status="planned">
+      <title>Filter chip URL persistence</title>
+      <description>Filter chip state serialises to URL query string (e.g., ?band=T1,T2&reporter=hotline). Loading URL params pre-populates chip state. Round-trips correctly.</description>
+      <acceptance>
+        <criterion>Setting chip updates URL</criterion>
+        <criterion>Loading URL populates chip state</criterion>
+        <criterion>Round-trip serialisation preserves all chip values</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md §URL persistence</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-004" type="platform" status="planned">
+      <title>Filter change emits ChainRead event</title>
+      <description>Every filter change emits POST /api/events with ChainRead{actor, incident_id: null, filter_combo: [serialised chip values]}. Per PRD §11.1, 100% of chain reads must be logged.</description>
+      <acceptance>
+        <criterion>Filter change emits ChainRead with correct payload</criterion>
+        <criterion>filter_combo array contains all active chip values</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §11.1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-005" type="interface" status="planned">
+      <title>Cross-incident grouping by incident_id</title>
+      <description>Render chain events grouped by incident_id. Each group has a header with incident ID + reporter-badge + band. Rows under each group sorted chronologically (ascending).</description>
+      <acceptance>
+        <criterion>Events grouped by incident_id</criterion>
+        <criterion>Within group, rows sorted chronologically ascending</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md §Cross-incident view</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-006" type="interface" status="planned">
+      <title>Row composition (timestamp + actor + event-type icon + band + reporter + hash)</title>
+      <description>Each row renders: timestamp (relative + absolute on hover), actor chip, event-type icon (27 approved Lucide), band pill, reporter-badge chip, hash anchor (copy-to-clipboard).</description>
+      <acceptance>
+        <criterion>All row elements render in order</criterion>
+        <criterion>Event-type icon from 27 approved Lucide list</criterion>
+        <criterion>Hash anchor copy-to-clipboard works</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md §Row</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-007" type="interface" status="planned">
+      <title>Anomaly surfacing (row ⚠️ + top banner)</title>
+      <description>Row ⚠️ when recomputed hash != stored hash for any block. Persistent top banner: Chain anomaly in filter set — acknowledge or escalate. Banner has aria-live=polite and persists until acknowledged.</description>
+      <acceptance>
+        <criterion>Anomaly row renders ⚠️ icon</criterion>
+        <criterion>Top banner shows escalation prompt</criterion>
+        <criterion>Banner has aria-live=polite attribute</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md §Anomaly</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-008" type="interface" status="planned">
+      <title>Open chain segment link → WO-003 page</title>
+      <description>Each row renders "Open chain segment" link → /incidents/:incident_id/chain (WO-003 dedicated page). Click navigates and ChainRead fires on that page mount.</description>
+      <acceptance>
+        <criterion>Link target correct (/incidents/:id/chain)</criterion>
+        <criterion>Click navigates; target page mounts and fires ChainRead</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/audit-log.md §Drill-into</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-009" type="platform" status="planned">
+      <title>Date range picker uses DateRangePicker primitive</title>
+      <description>Date range filter uses DateRangePicker primitive from web/src/components/ui/. Not raw &lt;input type="date"&gt;. Per lockdown decision #4.</description>
+      <acceptance>
+        <criterion>DateRangePicker primitive used (no raw date inputs in DOM)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §3.4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-010" type="platform" status="planned">
+      <title>Inline single-block verify reuses chain-verify helper</title>
+      <description>Inline verify button per row calls verifyBlock() from web/src/lib/chain-verify.ts. Never copy-pasted. Per lockdown §7 audit gap.</description>
+      <acceptance>
+        <criterion>verifyBlock call goes through helper (verified by import trace)</criterion>
+        <criterion>Helper never throws (network failure returns VerifyState.fail)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §7</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-011" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: audit-log-page, …-header, …-main, …-filter-chips, …-chip-incident, …-chip-event-type, …-chip-actor, …-chip-band, …-chip-reporter-badge, …-chip-date-range, …-event-list, …-event-row, …-event-timestamp, …-actor-chip, …-event-type-icon, …-band-pill, …-reporter-badge-chip, …-hash-anchor, …-button-open-chain-segment, …-button-verify-inline, …-anomaly-banner.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-012" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for page title/subtitle, filter chip labels, button labels, anomaly banner, timestamp relative strings. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-008-audit-log.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="008-REQ-013" type="platform" status="planned">
+      <title>Reconciliation: confirm helper reuse + URL persistence</title>
+      <description>Verify chain-verify.ts helper reused (no copy-paste); verify URL persistence round-trips; verify ChainRead emitted on every filter change (not just initial load).</description>
+      <acceptance>
+        <criterion>grep 'verifyBlock' import trace shows helper import</criterion>
+        <criterion>URL round-trip test passes</criterion>
+        <criterion>Filter change debounce/emission test passes (one event per change, not per chip toggle)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="008-REQ-003">
+      <steps>Set chip values; assert URL query string. Reload; assert chips populated from URL.</steps>
+      <expected>URL persistence round-trips.</expected>
+    </test>
+    <test ref="008-REQ-004">
+      <steps>Toggle a filter chip; intercept POST /api/events; assert ChainRead with filter_combo array.</steps>
+      <expected>ChainRead emitted correctly.</expected>
+    </test>
+    <test ref="008-REQ-007">
+      <steps>Use anomaly fixture; mount; assert row ⚠️ + banner with aria-live=polite.</steps>
+      <expected>Anomaly UI renders.</expected>
+    </test>
+    <test ref="008-REQ-010">
+      <steps>Click inline verify on row; assert helper import; force network failure; assert VerifyState.fail.</steps>
+      <expected>Helper reused; never throws.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

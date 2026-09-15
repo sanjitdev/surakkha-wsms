@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="004" title="Operator Dashboard" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Operator Dashboard is Priya's landing page after login. It collapses the previous three-layout toggle (Overview / Sensors / Wards) into a single status-board grid showing ranked incidents. Each row renders BandPill (glyph + text) and reporter-badge chip as independent dimensions. Sort is priority-first / age-second. The hotline-intake trigger lives in the top-chrome action bar (mounted via WO-002). This is the load-bearing surface for Goal 1.1 (incident enters queue &lt; 10s) and Goal 2.2 (status visible across personas).
+  </overview>
+
+  <scope>
+    <scenarios>01-priya-the-pipeline-pilot-triage-verify-assign (Screen 1)</scenarios>
+    <views>/dashboard for utility_operator</views>
+    <platform>Reconcile web/src/pages/OperatorDashboard.tsx (1,362 LOC) to spec lockdown; remove A/B/C toggle; mount HotlineIntakeModal trigger; emit IncidentDismissed on quick-dismiss</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="004-REQ-001" type="platform" status="planned">
+      <title>Status-board grid only (no A/B/C toggle)</title>
+      <description>Remove the three-layout (Overview / Sensors / Wards) toggle. Page renders only the status-board grid. Sensor/ward widgets deferred to dedicated routes (Phase 1.7+).</description>
+      <acceptance>
+        <criterion>No layout toggle control in DOM</criterion>
+        <criterion>Single status-board grid renders for /dashboard</criterion>
+        <criterion>Removed code is not re-rendered via any fallback</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/operator-dashboard.md §locked decision #1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-002" type="behavior" status="planned">
+      <title>Priority-first / age-second sort (locked)</title>
+      <description>Sort incidents: priority P1 > P2 > P3 > P4, then ascending age. Same contract as FieldQueue (WO-006). Sort applied at render time (no re-fetch).</description>
+      <acceptance>
+        <criterion>P1 row appears above P2 row at same age</criterion>
+        <criterion>Within same priority, older row appears first</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/operator-dashboard.md §locked decision #1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-003" type="interface" status="planned">
+      <title>Trust-band glyph + text pattern</title>
+      <description>Each row renders BandPill with glyph + text: ◔ T1 / ◑ T2 / ● T3 / ✓ resolved. Per foundation §4.1; lockdown-binding; never color-only.</description>
+      <acceptance>
+        <criterion>Glyph + text rendered for each band state</criterion>
+        <criterion>Color alone never used to convey band (verified by DOM inspection)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §4.1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-004" type="interface" status="planned">
+      <title>Reporter-badge chip per row (independent dimension)</title>
+      <description>Each row renders reporter-badge chip: ⚓ anchor / ☎ hotline / ✎ webform / 📡 sensor. Independent of trust band; never collapses into it. Per foundation §6.2.</description>
+      <acceptance>
+        <criterion>Each row has reporter-badge chip with correct icon per reporter_kind</criterion>
+        <criterion>Trust band and reporter badge render as two separate DOM chips</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §6.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-005" type="platform" status="planned">
+      <title>Mount hotline-intake trigger in top-chrome action bar</title>
+      <description>Mount `+ New hotline report` button in top-chrome action bar (leftmost position). Click opens HotlineIntakeModal (WO-002). Phone icon (lucide 16px). Button variant: secondary (slate outline).</description>
+      <acceptance>
+        <criterion>Button visible on /dashboard for utility_operator</criterion>
+        <criterion>Click opens HotlineIntakeModal with focus trap</criterion>
+        <criterion>Button is leftmost in action bar (verified by tab order)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/operator-dashboard.md §Trigger</spec>
+        <spec>docs/D-UX-Design/hotline-intake-modal.md §Trigger</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-006" type="interface" status="planned">
+      <title>Filter chips (needs me / in flight)</title>
+      <description>Render two filter chips: "needs me" (default active) and "in flight". Click toggles active state. Filter applied at render time; chip state ephemeral (URL persistence deferred to Phase 1.7+).</description>
+      <acceptance>
+        <criterion>Both chips render in top-chrome</criterion>
+        <criterion>Default = "needs me"; click on "in flight" toggles</criterion>
+        <criterion>Filtered rows match chip intent</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/operator-dashboard.md §Filter chips</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-007" type="interface" status="planned">
+      <title>Auto-routed-tail chip (collapsed, top-right)</title>
+      <description>Render auto-routed-tail chip top-right showing count + "system handled, hide" affordance. Collapsed by default. Click expands to show 1-line summary per auto-routed incident.</description>
+      <acceptance>
+        <criterion>Chip renders collapsed with count</criterion>
+        <criterion>"Hide" affordance collapses chip</criterion>
+        <criterion>Expand shows 1-line summary per auto-routed incident</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/operator-dashboard.md §Auto-routed tail</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-008" type="platform" status="planned">
+      <title>Quick-dismiss affordance on low-band rows</title>
+      <description>Render quick-dismiss button on T1/T2 rows. Click emits POST /api/events with IncidentDismissed{actor, incident_id, reason}. Confirmation not required (low-band, low-risk).</description>
+      <acceptance>
+        <criterion>Quick-dismiss button visible on T1/T2 rows; not on T3/resolved</criterion>
+        <criterion>Click emits IncidentDismissed event with correct payload</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/operator-dashboard.md §Quick dismiss</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-009" type="interface" status="planned">
+      <title>Focus rings use --color-primary-tint</title>
+      <description>Replace brand-400 focus rings with --color-primary-tint per foundation §10.2. Applies to all interactive elements on this page.</description>
+      <acceptance>
+        <criterion>Computed style of focused element resolves --color-primary-tint</criterion>
+        <criterion>No element uses var(--brand-400) for focus ring</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §10.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-010" type="interface" status="planned">
+      <title>Tab order matches visual order (foundation §10.3)</title>
+      <description>Tab order matches visual order: hotline trigger → filter chips → auto-routed chip → first row → ... → last row. Help (?) key opens help modal.</description>
+      <acceptance>
+        <criterion>Tab order assertion test passes</criterion>
+        <criterion>? key opens help modal (foundation §10.3)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §10.3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-011" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: operator-dashboard-page, …-header, …-main, …-action-bar, …-button-log-hotline-call, …-filter-chips, …-chip-needs-me, …-chip-in-flight, …-auto-routed-tail-chip, …-incident-list, …-row, …-band-pill, …-reporter-badge-chip, …-quick-dismiss.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-012" type="interface" status="planned">
+      <title>i18n keys (EN + BN only, no Hindi)</title>
+      <description>Verify EN + BN parity for all keys; no Hindi strings anywhere. Operator mode locale defaults to English; Bangla-toggleable; preference persists per session.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>grep 'hi' locale returns zero hits in this component</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="004-REQ-013" type="platform" status="planned">
+      <title>Reconciliation: collapse 3-layout toggle; mount hotline trigger</title>
+      <description>The existing file pre-dates the lockdown cascade. Verify no A/B/C toggle controls in DOM; verify HotlineIntakeModal trigger wired correctly; verify no T3 default for hotline incidents (T1 only).</description>
+      <acceptance>
+        <criterion>grep for 'layoutA|layoutB|layoutC' returns zero hits in OperatorDashboard.tsx</criterion>
+        <criterion>HotlineIntakeModal mounted and reachable</criterion>
+        <criterion>No band=T3 default in any code path</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="004-REQ-001">
+      <steps>Mount /dashboard as utility_operator; assert no layout toggle; assert single grid renders.</steps>
+      <expected>Status-board only.</expected>
+    </test>
+    <test ref="004-REQ-002">
+      <steps>Seed incidents with mixed priorities and ages; assert rendered order matches priority-first / age-second.</steps>
+      <expected>Sort correct.</expected>
+    </test>
+    <test ref="004-REQ-003">
+      <steps>Render with each band; assert glyph + text present; assert no element conveys band via color alone.</steps>
+      <expected>Glyph + text pattern enforced.</expected>
+    </test>
+    <test ref="004-REQ-005">
+      <steps>Click Log hotline call; assert modal opens with focus trap.</steps>
+      <expected>Modal opens via trigger.</expected>
+    </test>
+    <test ref="004-REQ-008">
+      <steps>Click quick-dismiss on T1 row; intercept POST /api/events; assert IncidentDismissed with correct payload.</steps>
+      <expected>Event fires correctly.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="007" title="Field Incident Detail (Karim)" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    Field Incident Detail is Karim's on-site workspace. Photo capture with auto-EXIF strip, structured diagnosis (severity / category / tags), fix submission (parts list + photo proof), and proof-of-completion flow emitting FixSubmitted in one transaction. Lifecycle actions in order: Acknowledged → TechnicianArrived → DiagnosisSubmitted → FixSubmitted. This is the load-bearing surface for Goal 1.4 (field proof &lt; 30 min).
+  </overview>
+
+  <scope>
+    <scenarios>04-karim-the-technician-field-lane (Screen 2)</scenarios>
+    <views>/field/:incident_id for field_technician</views>
+    <platform>Reconcile web/src/pages/FieldIncidentDetailPage.tsx (601 LOC); photo upload via POST /api/photos; emit TechnicianArrived + FixSubmitted</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="007-REQ-001" type="platform" status="planned">
+      <title>Mount route at /field/:incident_id for field_technician</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for field_technician.</description>
+      <acceptance>
+        <criterion>Route renders for field_technician</criterion>
+        <criterion>Non-field roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-002" type="interface" status="planned">
+      <title>Header (band + reporter + due_at countdown + Mark arrived)</title>
+      <description>Header renders BandPill, reporter-badge chip (citizen's source), due_at countdown (if assigned), and Mark arrived button.</description>
+      <acceptance>
+        <criterion>All four header elements render</criterion>
+        <criterion>Countdown shows "Due in {hours}h {minutes}m" when assigned</criterion>
+        <criterion>Mark arrived button emits TechnicianArrived on click</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Header</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-003" type="platform" status="planned">
+      <title>Photo capture with auto-EXIF strip</title>
+      <description>Render photo capture control (camera or gallery). After selection, auto-populate EXIF strip (lat/lon/timestamp/device). All EXIF fields editable.</description>
+      <acceptance>
+        <criterion>Capture control opens picker (camera + gallery options)</criterion>
+        <criterion>EXIF strip auto-populates from image metadata</criterion>
+        <criterion>EXIF fields are editable (verified by DOM)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Photo capture</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-004" type="behavior" status="planned">
+      <title>Structured diagnosis (severity / category / tags)</title>
+      <description>Diagnosis form renders structured fields: severity dropdown, category dropdown, tags input. Never single textarea; never free-form-only input. Per foundation §12 #7.</description>
+      <acceptance>
+        <criterion>Three structured fields render</criterion>
+        <criterion>No single textarea for diagnosis (verified by DOM inspection)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §12 #7</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-005" type="interface" status="planned">
+      <title>Fix form (parts list + photo proof)</title>
+      <description>Fix form renders parts list (add/remove rows) and photo proof capture (required before submit). Parts rows: part name + quantity.</description>
+      <acceptance>
+        <criterion>Parts list supports add/remove rows</criterion>
+        <criterion>Photo proof control renders; required before submit</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Fix form</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-006" type="behavior" status="planned">
+      <title>Submit proof emits FixSubmitted (single transaction)</title>
+      <description>Submit proof button emits POST /api/events with FixSubmitted{actor: karim, incident_id, parts, photo_hash, diagnosis} in one transaction. Button disabled until all required fields filled.</description>
+      <acceptance>
+        <criterion>Submit disabled when diagnosis/parts/photo missing</criterion>
+        <criterion>Submit enabled when all required filled</criterion>
+        <criterion>Click emits FixSubmitted with correct payload</criterion>
+        <criterion>Toast confirms "Proof submitted — awaiting review"</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Submit proof</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-007" type="platform" status="planned">
+      <title>Mark arrived emits TechnicianArrived (with lat/lon)</title>
+      <description>Mark arrived button emits POST /api/events with TechnicianArrived{actor: karim, incident_id, lat, lon}. Captures current geolocation at click time.</description>
+      <acceptance>
+        <criterion>Click captures current geolocation</criterion>
+        <criterion>Event payload includes lat/lon</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Mark arrived</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-008" type="platform" status="planned">
+      <title>MSW: photo upload + FixSubmitted event handler</title>
+      <description>Extend web/src/mocks/handlers.ts: POST /api/photos (multipart stub) returns photo_hash; POST /api/events accepts FixSubmitted event type. Photo fixture in web/src/mocks/fixtures.ts.</description>
+      <acceptance>
+        <criterion>POST /api/photos accepts multipart; returns photo_hash</criterion>
+        <criterion>POST /api/events with type=FixSubmitted returns 200</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-009" type="interface" status="planned">
+      <title>Citizen context (read-only)</title>
+      <description>Render citizen context panel: location hint + description (from original incident). Read-only.</description>
+      <acceptance>
+        <criterion>Context panel renders with location + description</criterion>
+        <criterion>No editable controls in context panel</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Citizen context</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-010" type="interface" status="planned">
+      <title>Override surface (View override reasoning)</title>
+      <description>When chain segment contains TrustBandOverridden event, render "View override reasoning" affordance. Click expands to show the reasoning payload.</description>
+      <acceptance>
+        <criterion>Affordance visible when override event in segment</criterion>
+        <criterion>Click expands reasoning payload</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/field-incident-detail.md §Override surface</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-011" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: field-incident-detail-page, …-header, …-main, …-button-mark-arrived, …-photo-capture, …-exif-strip, …-exif-lat, …-exif-lon, …-exif-timestamp, …-exif-device, …-diagnosis-form, …-severity, …-category, …-tags, …-fix-form, …-parts-list, …-parts-row, …-add-part, …-remove-part, …-fix-photo, …-button-submit-proof.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-012" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for page title, button labels, photo capture modes, EXIF labels, diagnosis fields, parts list labels, fix photo, submit proof, toast, override. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-007-field-incident-detail.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="007-REQ-013" type="platform" status="planned">
+      <title>Reconciliation: confirm role gating + structured diagnosis</title>
+      <description>Verify field_technician role guard; verify diagnosis form uses structured fields (not single textarea); verify FixSubmitted single transaction.</description>
+      <acceptance>
+        <criterion>grep 'textarea' in DiagnosisForm returns zero hits (single textarea is forbidden)</criterion>
+        <criterion>Role guard test passes</criterion>
+        <criterion>FixSubmitted fires once per submit (no double-fire on photo upload)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="007-REQ-003">
+      <steps>Capture photo with EXIF; assert EXIF strip auto-populates; edit a field; assert value persists.</steps>
+      <expected>EXIF capture + edit works.</expected>
+    </test>
+    <test ref="007-REQ-004">
+      <steps>Inspect diagnosis form DOM; assert no textarea element.</steps>
+      <expected>Structured fields enforced.</expected>
+    </test>
+    <test ref="007-REQ-006">
+      <steps>Fill diagnosis; add parts; upload photo; click Submit; intercept POST /api/events; assert FixSubmitted with parts + photo_hash + diagnosis in payload.</steps>
+      <expected>FixSubmitted fires correctly.</expected>
+    </test>
+    <test ref="007-REQ-007">
+      <steps>Mock geolocation; click Mark arrived; assert TechnicianArrived event with lat/lon.</steps>
+      <expected>Geolocation captured.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

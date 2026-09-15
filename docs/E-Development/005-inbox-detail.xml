@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="005" title="Inbox Detail" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    Inbox Detail is the operator's per-incident workspace. Three-column layout (240px InboxRail / flex DetailPane / 360px EventChain) per locked #5. The center pane hosts structured per-decision reasoning capture (path picker → path-dependent fields, never single textarea) and the load-bearing single-click Submit verify + assign that fires four downstream events atomically (Verified + Assigned + CitizenAckInProgress + TechnicianDispatched). Single-click verify reuses web/src/lib/chain-verify.ts. This page is the structural answer to Goal 1.2 (verify + assign in &lt; 60s).
+  </overview>
+
+  <scope>
+    <scenarios>01-priya-the-pipeline-pilot-triage-verify-assign (Screen 4)</scenarios>
+    <views>/inbox/:id for utility_operator</views>
+    <platform>Reconcile web/src/pages/InboxDetail.tsx (904 LOC) to three-column layout; structured reasoning; single-click submit firing 4-event batch; secondary defer + escalate actions</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="005-REQ-001" type="platform" status="planned">
+      <title>Three-column layout (240 / flex / 360)</title>
+      <description>Render three-column layout: left 240px InboxRail, center flex DetailPane, right 360px EventChain. Proportions locked at 240/flex/360 per locked #5.</description>
+      <acceptance>
+        <criterion>InboxRail column is 240px wide</criterion>
+        <criterion>EventChain column is 360px wide</criterion>
+        <criterion>DetailPane flex-fills remaining space</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §locked decision #5</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-002" type="interface" status="planned">
+      <title>InboxRail ranked list with band + reporter chips</title>
+      <description>Left rail renders ranked incidents with BandPill (glyph + text), reporter-badge chip, age, missing-evidence chips. Active incident highlighted.</description>
+      <acceptance>
+        <criterion>Each rail entry has band + reporter chips</criterion>
+        <criterion>Active incident visually distinguished</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Left rail</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-003" type="interface" status="planned">
+      <title>DetailPane composition (band + reporter + 5 signal cards + photo + map)</title>
+      <description>Center pane renders: BandPill, reporter-badge chip, missing-evidence chips, five verification signal cards, photo viewer + EXIF strip, map (incident marker + nearest sensor).</description>
+      <acceptance>
+        <criterion>Five signal cards render in order</criterion>
+        <criterion>Photo viewer + EXIF strip renders</criterion>
+        <criterion>Map shows incident marker + nearest sensor pin</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §DetailPane</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-004" type="behavior" status="planned">
+      <title>Structured reasoning capture (path picker → fields)</title>
+      <description>Path picker renders A/B/C/D options. Selected path reveals path-dependent reasoning fields (severity / category / tags / reasoning text). Never single textarea; never free-form-only input. Per foundation §12 #7.</description>
+      <acceptance>
+        <criterion>Path picker renders A/B/C/D</criterion>
+        <criterion>Selected path reveals correct subset of structured fields</criterion>
+        <criterion>No single textarea for reasoning capture (verified by DOM inspection)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §12 #7</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-005" type="behavior" status="planned">
+      <title>Single-click Submit verify + assign (4-event batch)</title>
+      <description>Single Submit button click fires four downstream events atomically in one batch POST /api/events: Verified{actor, incident_id, path, reasoning} + Assigned{actor, incident_id, to: karim_id, due_at} + CitizenAckInProgress{actor, incident_id} + TechnicianDispatched{actor, incident_id, technician_id}.</description>
+      <acceptance>
+        <criterion>One click fires all 4 events in one transaction</criterion>
+        <criterion>MSW batch handler accepts array payload</criterion>
+        <criterion>Toast confirms "Verified and assigned"</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §locked decisions #2 + #6</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-006" type="platform" status="planned">
+      <title>Defer with callback (secondary)</title>
+      <description>Ghost button "Defer with callback" opens callback-time picker. On confirm, emits IncidentDeferred{actor, incident_id, callback_at}.</description>
+      <acceptance>
+        <criterion>Button visible alongside Submit</criterion>
+        <criterion>Click opens callback-time picker</criterion>
+        <criterion>Confirm emits IncidentDeferred with correct payload</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Defer</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-007" type="platform" status="planned">
+      <title>Escalate to Pia (secondary)</title>
+      <description>Ghost button "Escalate to Pia" emits IncidentEscalatedToPha{actor, incident_id}. Routes to placeholder Phase 2 queue.</description>
+      <acceptance>
+        <criterion>Button visible alongside Submit and Defer</criterion>
+        <criterion>Click emits IncidentEscalatedToPha with correct payload</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Escalate</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-008" type="interface" status="planned">
+      <title>Hotline reporter-badge chip on detail header</title>
+      <description>Detail header shows hotline reporter-badge chip (☎ + reporter-hotline color) when reporter_kind = hotline. Independent of band pill.</description>
+      <acceptance>
+        <criterion>Hotline chip renders when reporter_kind = hotline</criterion>
+        <criterion>Hidden when reporter_kind != hotline</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §6.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-009" type="interface" status="planned">
+      <title>Override surface (View override reasoning)</title>
+      <description>When chain segment contains a TrustBandOverridden event, render "View override reasoning" affordance. Click expands to show the reasoning payload.</description>
+      <acceptance>
+        <criterion>Affordance visible when override event in segment</criterion>
+        <criterion>Click expands reasoning payload</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Override surface</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-010" type="platform" status="planned">
+      <title>Single-click verification reuses chain-verify helper</title>
+      <description>Inline verify button calls verifyBlock() from web/src/lib/chain-verify.ts (never copy-pasted). Pass badge within 200ms. Per lockdown §7 audit gap.</description>
+      <acceptance>
+        <criterion>verifyBlock call goes through helper (verified by import trace)</criterion>
+        <criterion>Pass badge renders within 200ms</criterion>
+        <criterion>Helper never throws (network failure returns VerifyState.fail)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §7</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-011" type="platform" status="planned">
+      <title>Karim picker + due_at picker + priority override</title>
+      <description>Render Karim picker (dropdown of field_technicians), due_at picker (DateTime picker), and priority override dropdown (P1/P2/P3/P4). All required for the Submit batch.</description>
+      <acceptance>
+        <criterion>All three pickers render in DetailPane</criterion>
+        <criterion>Submit button disabled if Karim or due_at missing</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Pickers</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-012" type="interface" status="planned">
+      <title>Modal enter/exit 200ms ease-out (foundation §8)</title>
+      <description>Modal-style elements (callback picker, override expansion, help modal) use 200ms ease-out enter/exit per foundation §8.</description>
+      <acceptance>
+        <criterion>Modal animation matches foundation §8 spec</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-013" type="platform" status="planned">
+      <title>MSW: batch event handler</title>
+      <description>Extend web/src/mocks/handlers.ts POST /api/events to accept array payload (batch). All four verify+assign events persist via idb-keyval in one write.</description>
+      <acceptance>
+        <criterion>POST /api/events with array payload returns 200</criterion>
+        <criterion>All events in batch persist atomically</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-014" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: inbox-detail-page, …-header, …-main, …-rail-inbox, …-detail-pane, …-event-chain, …-band-pill, …-reporter-badge-chip, …-signal-card-{1..5}, …-photo-viewer, …-map, …-reasoning-path-picker, …-path-{A,B,C,D}, …-reasoning-field-{severity,category,tags,reasoning}, …-karim-picker, …-due-at-picker, …-priority-override, …-button-submit-verify-assign, …-button-defer, …-button-escalate, …-override-reasoning-affordance.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="005-REQ-015" type="interface" status="planned">
+      <title>i18n keys (EN + BN; no Hindi; hash anchors not translated)</title>
+      <description>Add i18n keys for path picker, reasoning fields, Karim/due_at/priority labels, button labels, toast. EN + BN parity. Trust band + reporter labels localised; hash anchors never translated.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+        <criterion>Hash anchors rendered verbatim (not localised)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-005-inbox-detail.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="005-REQ-001">
+      <steps>Mount /inbox/inc_... as utility_operator; assert column widths 240/flex/360.</steps>
+      <expected>Three-column proportions correct.</expected>
+    </test>
+    <test ref="005-REQ-005">
+      <steps>Fill Karim + due_at; select Path A; fill reasoning fields; click Submit; intercept POST /api/events; assert batch of 4 events with correct payloads.</steps>
+      <expected>4-event batch fires atomically.</expected>
+    </test>
+    <test ref="005-REQ-010">
+      <steps>Click inline verify; assert helper import trace; force network failure; assert VerifyState.fail (no throw).</steps>
+      <expected>Helper reused; never throws.</expected>
+    </test>
+    <test ref="005-REQ-006">
+      <steps>Click Defer; assert picker opens; pick time; confirm; assert IncidentDeferred event.</steps>
+      <expected>Defer flow works.</expected>
+    </test>
+  </test-protocol>
+
+</prd>
