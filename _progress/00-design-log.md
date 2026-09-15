@@ -128,6 +128,19 @@ Key reconciliations:
 
 Files: `web/src/pages/InboxList.tsx` (+258 LOC), `web/src/pages/inboxListModel.ts` (+45), `web/src/types/inbox.ts` (+150), `web/src/styles/inbox.css` (+90), i18n en+bn (+60 LOC), test file new (561 LOC).
 
+### WO-010 inbox-rail — Mimir 2026-09-15
+
+Built ✓. 4 REQs (001..004) + 4 acceptance criteria + lockdown sweep pinned via `web/src/__checks__/fe-inbox-rail-reconcile.test.tsx` (11 tests, all green).
+
+Key reconciliations:
+- New `InboxIncidentRail` — a 240 px compact ranked-incident list per foundation §3.2. Lives inside the `InboxList` consumer surface (left rail of the operator three-column layout).
+- Compact BandPill (glyph only, ~18 px wide) + icon-only ReporterBadge (WO-006 shared chip). Trust band stays a SEPARATE dimension from the reporter badge (foundation §1.1).
+- URL sync (`?selected=<incident_id>`) on click + pre-populate on mount via `useSearchParams`. Click navigates to `/inbox/:id` carrying the selected param.
+- AwaitingActionRail gains a reporter-badge column per row (icon-only chip, data-reporter-kind attribute).
+- Lockdown sweep: focus rings 2px `--color-primary-tint`, EN + BN locales (no Hindi), area labels on the rail card.
+
+Files: `web/src/pages/InboxRail.tsx` (+185 LOC), `web/src/pages/InboxList.tsx` (+5), `web/src/components/ui/BandPill.tsx` (+12), `web/src/components/operator/ReporterBadge.tsx` (+14), `web/src/styles/inbox.css` (+80), i18n en+bn inboxCommon.json (+12 LOC), test file new (~390 LOC).
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._

@@ -41,4 +41,11 @@ Compact labels only — add to `inboxCommon.json` (en + bn).
 
 ---
 
-_Ready for Stage 6._
+## REQ checklist
+
+- [x] REQ-001 — Compact band pill + reporter badge icons fit the rail width
+- [x] REQ-002 — Selection state syncs to URL
+- [x] REQ-003 — Click navigates to detail
+- [x] REQ-004 — Lockdown sweep (focus rings + no Hindi + area labels + reporter-badge column on AwaitingActionRail)
+
+**Status:** Built ✓ — 11 vitest tests passing on `fe-inbox-rail-reconcile.test.tsx`.
