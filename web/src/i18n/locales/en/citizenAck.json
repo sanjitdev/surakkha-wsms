@@ -13,8 +13,8 @@
   },
   "submitted": {
     "subtitle": "Recorded on the chain.",
-    "approveHeading": "You approved the fix",
-    "disputeHeading": "You disputed the fix",
+    "approveHeading": "You approved the fix ✓\uFE0E",
+    "disputeHeading": "You disputed the fix ✗\uFE0E",
     "approveBody": "Thank you. The operator will seal the incident as resolved on the chain.",
     "disputeBody": "Thank you. The operator will reopen the incident for review.",
     "approvedBadge": "APPROVED",
@@ -24,9 +24,13 @@
     "decidedLabel": "Decided"
   },
   "expired": {
-    "heading": "We marked this closed",
-    "body": "The 5-minute acknowledgement window passed without a response at {{time}}. The operator's fix is now sealed on the chain.",
-    "reopenHint": "If the issue is still present, contact the hotline within 30 days to reopen the incident."
+    "heading": "This report is closed. You can reopen within 30 days.",
+    "body": "The 24-hour acknowledgement window passed at {{time}}. The operator's fix is now sealed on the chain.",
+    "reopenHint": "If the issue is still present, request a reopen below. After 30 days the report is permanently closed."
+  },
+  "permanent": {
+    "heading": "This report is permanently closed ⚠\uFE0E",
+    "body": "The 30-day reopen window has closed. The report is now read-only on the chain."
   },
   "form": {
     "subtitle": "{{name}} · incident {{id}} · ward {{ward}} · see inbox detail",
@@ -35,9 +39,26 @@
     "noticeMetaNone": "No notice was sent. You can still respond to the operator.",
     "noticeFallback": "The operator confirmed the fix for incident {{id}}.",
     "decisionHeading": "Did the fix resolve the issue?",
-    "decisionBody": "Approve to close the incident. Dispute to reopen it for review.",
-    "approve": "Approve & close",
-    "dispute": "Dispute & reopen",
+    "decisionBody": "Confirm to close the incident. Reopen to dispute it for review.",
+    "confirm": "Confirm the fix",
+    "approve": "Confirm the fix",
+    "reopen": "Reopen the report",
+    "dispute": "Reopen the report",
     "sealing": "Sealing…"
+  },
+  "reopen": {
+    "heading": "Reopen the report",
+    "body": "Tell the operator what is still wrong. The reason is sealed on the chain alongside the reopen action.",
+    "reasonLabel": "Why is the fix not enough?",
+    "reasonPlaceholder": "Describe what is still wrong. Minimum 200 characters, maximum 400.",
+    "minHint": "At least {{min}} characters; up to {{max}} ({{count}} typed).",
+    "cancel": "Cancel",
+    "submit": "Send reopen"
+  },
+  "reporterBadge": {
+    "anchor": "Anchor",
+    "hotline": "Hotline",
+    "webform": "Webform",
+    "sensor": "Sensor"
   }
 }

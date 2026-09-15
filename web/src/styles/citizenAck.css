@@ -1,0 +1,229 @@
+/* ════════════════════════════════════════════════════════════════════
+   citizenAck.css — Citizen acknowledgement surface (/ack/:incident_id).
+
+   Composition for the Anjali closure-ack flow. Lockdown cascade (every
+   WO since WO-004):
+     - Trust band badge = locked <BandPill locked /> with glyph + text
+       per foundation §4.1 (foundation rule 1.1).
+     - Reporter badge = shared <ReporterBadge /> (WO-006) — SEPARATE
+       dimension from trust band.
+     - Focus rings 2px --color-primary-tint (foundation §7 + §10.2).
+     - VS15 (\uFE0E) on every ✓ and ⚠ literal so the page renders
+       text-style glyphs (lockdown §2.7).
+     - Approval = 200ms green pulse on the focused element only (no
+       confetti, no sound, no celebration).
+     - Alert-red is RESERVED for T3+ consumer-notice issuance surfaces
+       only. The dispute path IS the issuance path here — the dispute
+       receipt is allowed to render alert-red on the dispute badge.
+
+   Token usage: every color comes from a CSS custom property already
+   declared in mockups/01-priya/dashboard.css (theme.css under it) —
+   no new tokens are introduced in this file.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Page chrome ────────────────────────────────────────────────── */
+.citizen-ack-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.citizen-ack-page__chrome-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+/* ── Band pill (locked) ─────────────────────────────────────────── */
+.citizen-ack-page__band-pill {
+  /* Reuses the .band-pill + .band-pill--{t1,t2,t3,resolved}-locked
+     styles already declared in components.css — no override needed. */
+}
+
+/* ── Reporter badge chip ────────────────────────────────────────── */
+.citizen-ack-page__reporter-badge {
+  /* Reuses .chip-reporter-* colour tokens from lockdown-bridge.css
+     via the shared <ReporterBadge />. */
+}
+
+/* ── Decision card ──────────────────────────────────────────────── */
+.citizen-ack-page__decision-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+/* ── 200ms green pulse on the focused/hovered approval button ─────
+   Lockdown §8.1: closure celebration is a calm pulse on the focused
+   element only. No confetti, no sound. The class is applied on hover
+   or focus and removed after 220ms (200ms animation + small tail). */
+@keyframes citizen-ack-pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-primary-tint, var(--brand-500));
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px var(--color-primary-tint, var(--brand-500));
+  }
+  100% {
+    box-shadow: 0 0 0 0 var(--color-primary-tint, var(--brand-500));
+  }
+}
+
+.citizen-ack-page__approve-pulse {
+  animation: citizen-ack-pulse-green 200ms ease-out 1;
+}
+
+/* ── Reopen reason picker (in-page disclosure) ──────────────────── */
+.citizen-ack-page__reopen-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+}
+
+.citizen-ack-page__reopen-textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: var(--space-sm);
+  font-family: inherit;
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--fg-default);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+  resize: vertical;
+}
+
+.citizen-ack-page__reopen-textarea:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 1px;
+}
+
+.citizen-ack-page__reopen-hint {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  margin: 0;
+}
+
+.citizen-ack-page__reopen-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+}
+
+.citizen-ack-page__reopen-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Ack-window expired surface (foundation rule 11) ────────────── */
+.citizen-ack-page__expired {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+}
+
+.citizen-ack-page__expired-headline {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  color: var(--fg-default);
+}
+
+.citizen-ack-page__expired-body {
+  margin: 0;
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-body);
+}
+
+.citizen-ack-page__expired-hint {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--fg-tertiary);
+}
+
+/* ── Permanently-closed (after 30-day reopen window) ────────────── */
+.citizen-ack-page__permanent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.citizen-ack-page__permanent-headline {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-bold);
+  color: var(--fg-default);
+}
+
+.citizen-ack-page__permanent-body {
+  margin: 0;
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* ── Locked receipt (post-submission) ───────────────────────────── */
+.citizen-ack-page__receipt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.citizen-ack-page__receipt-badges {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Receipt band-pill uses the locked variants declared in components.css.
+   T1 = divider neutral (resolved path), T3 = alert-red-reserved
+   (issuance path; dispute is the issuance path here per citizen-ack
+   spec §2 row 3). */
+.citizen-ack-page__receipt-band-pill {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* ── Mono code spans (chain refs, timestamps) ───────────────────── */
+.citizen-ack-page__mono {
+  font-family: var(--font-family-mono);
+}
+
+/* ── Notice blockquote ──────────────────────────────────────────── */
+.citizen-ack-page__notice-quote {
+  margin: 0;
+  padding: var(--space-md);
+  border-left: 3px solid var(--color-primary);
+  background: var(--bg-inset);
+  font-size: var(--font-size-sm);
+  color: var(--fg-default);
+  line-height: var(--line-height-body);
+}
+
+/* ── Action row ─────────────────────────────────────────────────── */
+.citizen-ack-page__action-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
