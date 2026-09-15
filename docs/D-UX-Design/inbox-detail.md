@@ -295,6 +295,9 @@ Namespaces: `inboxDetail.*` (page-level), `chain.operator.*` (right rail, aligne
 
 ## Open questions
 
+> **Stage 7 resolutions:** All 7 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §inbox-detail.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#inbox-detailmd).
+
 - **Q1:** Does the single submit action call a single gateway endpoint `POST /api/incidents/:id/verify-and-assign` (transactional), or does it fire 4 separate events client-side? Defer to backend contract review; spec assumes single gateway endpoint for atomicity.
 - **Q2:** Path D's escalation-path-template list (`WASA specialist` / `PHA on call` / `councillor` / `lab`) — is this a fixed enum or populated from prior incidents per Scenario 02? Defer; spec assumes enum for Phase 1, future Phase pulls from history.
 - **Q3:** When the 4 events fire and Anjali's phone is offline, does the SMS still queue (Goal 3 in-progress beat)? Defer to SMS gateway contract.

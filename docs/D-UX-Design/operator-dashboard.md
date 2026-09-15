@@ -263,6 +263,9 @@ Namespace `operatorDashboard.*`. Keys per lockdown §11.4 (locale-at-container).
 
 ## Open questions
 
+> **Stage 7 resolutions:** All 6 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §operator-dashboard.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#operator-dashboardmd).
+
 - **Q1:** Does the page own the KPI row's "live data" feel via polling, or does `AppLayout` provide a shared polling context? Defer to AppLayout contract review.
 - **Q2:** Auto-routed-tail chip's count source — is it a separate API endpoint or a derived slice from `useIncidents()`? Defer to backend contract.
 - **Q3:** Quick-dismiss on T1 rows — does it require operator role check (only Priya, not Karim or reporter)? Defer to auth contract; default = all operator roles can dismiss with reason.

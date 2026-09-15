@@ -282,6 +282,9 @@ Namespace `auditLog.*`. Chain event type names stay English (foundation §11.5).
 
 ## Open questions
 
+> **Stage 7 resolutions:** All 8 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §audit-log.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#audit-logmd).
+
 - **Q1:** `ChainRead` emission — does it fire on every filter change, or only when filter_combo actually changes (debounced)? Spec assumes debounced 300ms.
 - **Q2:** Per-role authorization — Karim's authorized window includes only his own assignments; Priya's includes inbox + ward; Adi's includes all in her queue. Confirm exact window per role with backend.
 - **Q3:** Per-incident segment drill-down — does this route to a new `/audit-log/segment/:incident_id` URL, or to `/inbox/:id` with the chain segment expanded? Spec assumes new URL; confirm with router.

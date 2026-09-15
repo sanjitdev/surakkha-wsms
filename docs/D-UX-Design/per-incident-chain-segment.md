@@ -500,6 +500,9 @@ Hash anchors and chain event type names are **not translated** — they are tech
 
 ## 17. Remaining open questions
 
+> **Stage 7 resolutions:** All 7 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §per-incident-chain-segment.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#per-incident-chain-segmentmd).
+
 1. **Web Worker for chains >50 events.** The §5 algorithm runs synchronously in the page. For incident histories that grow beyond 50 events (e.g., multi-reopen arcs), should we move recomputation to a Web Worker to keep the main thread responsive? Phase 2 candidate.
 2. **Cross-tenant chain export.** Scenario 06 references "shares the segment with Pia via the per-incident chain export (URL with HMAC + per-tenant boundary; out of scope for UI design here but flagged for Phase 4)." — this page exposes a "Share with Pia" button that is a placeholder until the export format is locked.
 3. **Phase 2 PHA dashboard integration.** When Phase 2 ships, this page becomes the drill-down target for Pia's aggregates. URL stability across phases is required (no URL breaking changes).

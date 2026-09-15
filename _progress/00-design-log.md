@@ -74,7 +74,7 @@ Tracked in `docs/D-UX-Design/04-phase-5-prep-todo.md`.
 | 4 | Master PRD (Saga) | ✓ complete (2026-09-15) |
 | 5 | 17 Work Orders (Freya) | ✓ complete (2026-09-15; 3 Tier 1, 5 Tier 2, 9 Tier 3) |
 | 6 | 17 feature PRDs (Mimir) | ✓ complete (2026-09-15) |
-| 7 | Resolve open questions + 5 MAJOR items | ○ pending |
+| 7 | Resolve open questions + 5 MAJOR items | ✓ complete (2026-09-15; 51 questions + 4 MAJOR items via `000-STAGE-7-RESOLUTIONS.md`) |
 | 9 | Ready-for-build handoff | ○ pending |
 
 ---

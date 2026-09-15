@@ -3,7 +3,7 @@
 > Tracking file for the WDS convention cleanup and Phase 5 (development) preparation work.
 > Source audit: `docs/D-UX-Design/03-wds-convention-audit.md`
 > Date opened: 2026-09-15
-> Status: Stages 0-6 complete (2026-09-15); Stages 7-9 pending
+> Status: Stages 0-7 complete (2026-09-15); Stages 8-9 pending
 
 ---
 
@@ -139,13 +139,13 @@ These need a call before any mechanical work starts.
 
 ## Stage 7 — Open questions / MAJOR items
 
-- [ ] **7.a** Resolve 37 open questions across Tier 2 specs (mostly structural — defer to implementation per current plan)
-- [ ] **7.b** Fix 5 MAJOR Tier 3 items:
-  - SubmitReportPage dropdown → plain-language
-  - CitizenAckPage VS15 + glyph chars + ack-window expiry
-  - Settings Reset → ghost variant + confirmation modal
-  - Styleguide 3-band → 5-band docs + remove Danger button misuse demo
-  - (1 more — verify from `02-phase-4-closeout.md` §4.3)
+- [x] **7.a** Resolve 51 open questions across Tier 1 + Tier 2 specs — **done 2026-09-15** (16 Tier 1 + 35 Tier 2; see `docs/E-Development/000-STAGE-7-RESOLUTIONS.md`)
+- [x] **7.b** Close 4 Tier 3 MAJOR items — **done 2026-09-15** (via PRDs 011, 012, 014, 015; see resolutions doc §Tier 3 MAJOR items — closure)
+  - SubmitReportPage dropdown → plain-language (PRD-011-REQ-002)
+  - CitizenAckPage VS15 + glyph chars + ack-window expiry (PRD-012-REQ-002, 003)
+  - Settings Reset → ghost variant + confirmation modal (PRD-014-REQ-005)
+  - Styleguide 3-band → 5-band docs + remove Danger button misuse demo (PRD-015-REQ-002, 003)
+  - Note: §4.3 closeout text says "5 MAJOR items" but only lists 4; the "5" is a counter artifact (no missing item)
 
 ---
 
@@ -197,4 +197,4 @@ These need a call before any mechanical work starts.
 
 ---
 
-_Last updated: 2026-09-15 (Stage 6 complete — 17 PRDs authored + committed)_
+_Last updated: 2026-09-15 (Stage 7 complete — 51 open questions resolved + 4 MAJOR items closed)_

@@ -283,6 +283,9 @@ Namespace `fieldQueue.*`. Operator-mode English-default per Scenario 04 locked #
 
 ## Open questions
 
+> **Stage 7 resolutions:** All 6 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §field-queue.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#field-queuemd).
+
 - **Q1:** Does the offline-first layer live in `FieldQueuePage.tsx` or in a shared `useOfflineCache` hook used by all Karim-side surfaces? Spec assumes shared hook; defer to refactor.
 - **Q2:** Sync conflict resolution — when gateway and client disagree, which side wins? Spec assumes `prev_block_hash` wins (per Scenario 04); confirm with backend.
 - **Q3:** GPS detection — 30s interval while detail page is open; does the queue page also poll? Spec says no (battery); GPS only fires on detail page.

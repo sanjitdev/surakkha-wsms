@@ -428,6 +428,9 @@ The projection layer (the filter from 33 closed-enum events → `CitizenVisibleE
 
 ## 15. Remaining open questions
 
+> **Stage 7 resolutions:** All 5 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §citizen-status-timeline.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#citizen-status-timelinemd).
+
 1. **Should `TechnicianEnRoute` be a separate event from `TechnicianArrived`?** Scenario 03's locked state list does not include `TechnicianEnRoute`; Scenario 06's `CitizenVisibleEventType` table does. If `TechnicianEnRoute` is not in the final 33-event enum, the row simply doesn't render. The "Field crew on the way" line is best-effort.
 
 2. **Band label wording on `TrustBandAssigned` for citizens.** The foundation §1.1 mandates plain language ("verified citizen anchor" / "verified reporter" / "hotline-sourced report"); localized strings across **en + bn only** (Hindi removed in lockdown reconciliation 2026-09-11) need i18n review before shipping. Bangla-first binding per lockdown §11.2. Strings are pending in the `citizen.statusTimeline.bandLabel` namespace.

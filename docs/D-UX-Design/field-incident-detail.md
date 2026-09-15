@@ -321,6 +321,9 @@ Namespace `fieldIncidentDetail.*`. Operator-mode English-default per Scenario 04
 
 ## Open questions
 
+> **Stage 7 resolutions:** All 8 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §field-incident-detail.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#field-incident-detailmd).
+
 - **Q1:** Step 2 form's GPS confirmation — does it auto-capture from device GPS, or does Karim tap "Capture GPS" explicitly? Spec assumes auto-captured at submit (matches Scenario 04 locked #7). Confirm.
 - **Q2:** Voice note STT — server-side or client-side? Spec assumes server-side; STT draft fills reasoning field on Step 3. Confirm with backend.
 - **Q3:** Sensor readback reference (Step 3 field 5) — manual entry or auto-fetch from nearest sensor? Spec assumes manual entry (Karim reads it off the on-site display or his phone).

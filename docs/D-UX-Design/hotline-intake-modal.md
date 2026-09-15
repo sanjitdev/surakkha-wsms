@@ -459,6 +459,9 @@ This modal's submission flow emits the same `IncidentCreated` chain event as:
 
 ## Remaining open questions
 
+> **Stage 7 resolutions:** All 4 questions in this section resolved 2026-09-15.
+> See [`docs/E-Development/000-STAGE-7-RESOLUTIONS.md` §hotline-intake-modal.md](../E-Development/000-STAGE-7-RESOLUTIONS.md#hotline-intake-modalmd).
+
 1. **Should the modal capture the caller's preferred language?** Operators might log "Bangla" if the caller spoke Bangla; this would let the Phase 2 PHA dashboard track language-as-cohort. Currently no field captures it. Deferred — not a Phase 1 requirement.
 2. **Auto-routing of T1 hotline incidents:** per Scenario 01, T1 hotline incidents do NOT jump the priority sort above higher-band work in progress. The modal currently relies on the existing inbox sort to honor this. If the inbox sort changes, the modal needs no change — but the behavioural contract should be re-confirmed.
 3. **Escaping accent / non-Bangla character handling** in the location hint and description (Bangla IME, Unicode normalisation). Out of scope for this spec but worth a smoke test before Phase 1 demo bar.
