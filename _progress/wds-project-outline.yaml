@@ -33,10 +33,9 @@ phases:
       tier-3: 5 MAJOR items flagged for fix
     open-questions: 37
   development: in-progress
-    prep-stage: 2-of-9
-    last-milestone: "WDS scaffolding (E-Development/ + design log + session stubs) — 2026-09-15"
+    prep-stage: 3-of-9
+    last-milestone: "Brownfield tech audit (000-tech-audit.md) — 2026-09-15"
     pending:
-      - brownfield-tech-audit
       - master-prd
       - 17-work-orders
       - 17-feature-prds

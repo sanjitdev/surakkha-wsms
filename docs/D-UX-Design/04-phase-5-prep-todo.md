@@ -71,15 +71,11 @@ These need a call before any mechanical work starts.
 
 ## Stage 3 — Brownfield tech audit (Mimir, 2–3 h)
 
-- [ ] **3.a** Run `/sync` to refresh WDS to latest
-- [ ] **3.b** Wake `/mimir` (or invoke `mimir/SKILL.md` directly) with phase = tech-audit
-- [ ] **3.c** Mimir produces `docs/E-Development/000-tech-audit.md` covering:
-  - Stack inventory (`web/`, `src/`, mockups, etc.)
-  - Existing routes/pages/components map
-  - Data model audit
-  - Risks and constraints
-- [ ] **3.d** Review audit; resolve any blockers before moving to PRDs
-- [ ] **3.e** Commit: `docs(development): add brownfield tech audit`
+- [x] **3.a** Run `/sync` to refresh WDS to latest — **N/A** (audit produced via direct codebase inventory; WDS already at v1.0.0)
+- [x] **3.b** Wake `/mimir` (or invoke `mimir/SKILL.md` directly) with phase = tech-audit — **N/A** (direct inventory approach)
+- [x] **3.c** Mimir produces `docs/E-Development/000-tech-audit.md` covering stack inventory, routes, components, domain, mock API, i18n, CSS, tests, build, lockdown binding, risks — **done 2026-09-15** (16 sections, ~410 lines)
+- [x] **3.d** Review audit; resolve any blockers before moving to PRDs — **done 2026-09-15** (no blockers identified; all open items already documented in §14)
+- [x] **3.e** Commit: `docs(development): add brownfield tech audit` — **in flight 2026-09-15**
 
 ---
 
