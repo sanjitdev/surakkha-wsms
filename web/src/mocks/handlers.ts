@@ -260,6 +260,13 @@ const chainHandlers = [
       'ChainRead',
       'ChainAccepted',
       'ChainReopened',
+      // WO-002 — Hotline Intake Modal. IncidentCreated is already
+      // accepted via /api/incidents; the wire contract per WO-002
+      // §"Wire contract" emits IncidentCreated AND HotlineCallLogged
+      // via POST /api/events so the chain is the single source of
+      // truth. HotlineCallLogged carries outcome: no_incident |
+      // wrong_number and the hotline_call_id lineage key.
+      'HotlineCallLogged',
     ];
 
     if (!ALLOWED.includes(envelope.event_type)) {
@@ -271,6 +278,59 @@ const chainHandlers = [
         },
         { status: 409 },
       );
+    }
+
+    // WO-002 — Hotline Intake Modal wire contract synthesis.
+    //
+    // The modal POSTs /api/events directly (chain-as-source-of-truth
+    // shape), so we synthesise server-side fields that the modal
+    // is not responsible for minting: incident_id for hotline-sourced
+    // IncidentCreated (mirror /api/incidents hotline path), and
+    // outcome validation for HotlineCallLogged. The block's
+    // `payload` field carries the canonical record that downstream
+    // projections (GET /api/incidents, audit log) read from.
+    const payload = (envelope.payload ?? {}) as Record<string, unknown>;
+    let finalPayload: Record<string, unknown> = payload;
+
+    if (envelope.event_type === 'IncidentCreated' && payload.source === 'hotline') {
+      const existingIncidentId = typeof payload.incident_id === 'string' ? payload.incident_id : '';
+      const incidentId = existingIncidentId || `inc_${ulid()}`;
+      finalPayload = {
+        ...payload,
+        incident_id: incidentId,
+        // Hotline defaults: trust_band T1 unless caller explicitly
+        // promoted it (none of the 5 verification signals are
+        // available for hotline callers). T3 reserved for
+        // consumer-notice issuance only (lockdown cascade 2026-09-11).
+        trust_band: typeof payload.trust_band === 'string' ? payload.trust_band : 'T1',
+        // Hash phone server-side (matches /api/incidents hotline path).
+        caller_phone_hash: typeof payload.caller_phone === 'string' && payload.caller_phone
+          ? `sha256:${btoa(payload.caller_phone).slice(0, 32)}`
+          : null,
+      };
+    }
+
+    if (envelope.event_type === 'HotlineCallLogged') {
+      const outcome = payload.outcome;
+
+      if (outcome !== 'no_incident' && outcome !== 'wrong_number') {
+        return HttpResponse.json(
+          {
+            error: 'CommandRejected',
+            reason: 'BadOutcome',
+            event_type: envelope.event_type,
+          },
+          { status: 409 },
+        );
+      }
+      finalPayload = {
+        ...payload,
+        // Server-side phone hash for hotline call log records (matches
+        // /api/hotline-calls handler).
+        caller_phone_hash: typeof payload.caller_phone === 'string' && payload.caller_phone
+          ? `sha256:${btoa(payload.caller_phone).slice(0, 32)}`
+          : null,
+      };
     }
 
     const head = await getChainHead();
@@ -300,7 +360,7 @@ const chainHandlers = [
         ref: session.actor_ref,
         display: session.display_name,
       },
-      payload: envelope.payload,
+      payload: finalPayload,
     });
 
     const block: ChainBlock = {
@@ -318,7 +378,7 @@ const chainHandlers = [
         ref: session.actor_ref,
         display: session.display_name,
       },
-      payload: envelope.payload,
+      payload: finalPayload,
     };
 
     await appendBlock(block);

@@ -248,5 +248,56 @@
   },
   "common": {
     "emDash": "—"
+  },
+  "hotline": {
+    "modal": {
+      "title": "Log hotline call",
+      "subtitle": "Records will be added to the audit chain. Hotline-sourced incidents default to T1 (unverified) + hotline reporter-badge.",
+      "sectionNotice": "Required fields below create the incident. Outcomes 'Inquiry handled' and 'Wrong number' only log the call.",
+      "field": {
+        "callerName": "Caller name",
+        "callerPhone": "Caller phone",
+        "callerPhoneHelper": "Stored as a hash. We never keep the number in plaintext.",
+        "callTime": "Call time",
+        "description": "Incident description",
+        "descriptionHelper": "20–500 characters",
+        "locationHint": "Location hint",
+        "locationHintHelper": "5–200 characters. Free text — ward, landmark, standpipe #.",
+        "outcome": "Call outcome",
+        "outcomeHelper": "Use 'no incident' when the caller had a question but no contamination was reported."
+      },
+      "outcome": {
+        "incident": "Reported an incident",
+        "inquiry": "Inquiry only",
+        "missed": "Missed call / wrong number"
+      },
+      "button": {
+        "cancel": "Cancel",
+        "submit": "Submit"
+      },
+      "submitting": "Submitting…",
+      "submitDisabledTooltip": "Fill required fields to submit.",
+      "validation": {
+        "callerNameTooLong": "Caller name must be 80 characters or fewer.",
+        "phoneShape": "Phone must be E.164 (e.g. +8801712345678) or a 10-digit local number.",
+        "callTimeFuture": "Call time cannot be in the future.",
+        "descriptionLength": "Description must be 20–500 characters.",
+        "locationHintLength": "Location hint must be 5–200 characters.",
+        "outcomeRequired": "Pick an outcome."
+      },
+      "toast": {
+        "incidentCreated": "Incident created with ID {{incidentId}} (T1 default, hotline source)",
+        "incidentIdFallback": "inc_pending",
+        "callLogged": "Call logged. No incident created.",
+        "errorRetryIncident": "Couldn't create incident — submit when ready.",
+        "errorRetryCall": "Couldn't log call — submit when ready."
+      },
+      "discardConfirm": {
+        "title": "Discard this call log?",
+        "body": "You can keep editing.",
+        "keepEditing": "Keep editing",
+        "discard": "Discard"
+      }
+    }
   }
 }

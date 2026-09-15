@@ -13,7 +13,7 @@
 
   <requirements>
 
-    <requirement id="002-REQ-001" type="interface" status="planned">
+    <requirement id="002-REQ-001" type="interface" status="built">
       <title>Mount trigger button on OperatorDashboard top-chrome</title>
       <description>Add Log hotline call button to OperatorDashboard action bar. Leftmost position (before View Audit Log and Settings). Phone icon (lucide 16px). Button variant: secondary (slate outline).</description>
       <acceptance>
@@ -26,7 +26,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-002" type="interface" status="planned">
+    <requirement id="002-REQ-002" type="interface" status="built">
       <title>Six-field form in spec order</title>
       <description>Render 6 fields in order: caller name (opt), caller phone (opt), call time (default now, editable via DatePicker), incident description (req, 500c), location hint (req), call outcome (req, dropdown with 3 options: incident / inquiry / missed).</description>
       <acceptance>
@@ -39,7 +39,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-003" type="behavior" status="planned">
+    <requirement id="002-REQ-003" type="behavior" status="built">
       <title>Submit gating by required fields</title>
       <description>Submit button disabled until description, location hint, and outcome are all filled. Visual disabled state per foundation §10.</description>
       <acceptance>
@@ -51,7 +51,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-004" type="behavior" status="planned">
+    <requirement id="002-REQ-004" type="behavior" status="built">
       <title>Outcome branching: incident vs no-incident</title>
       <description>Outcome = 'incident': emit IncidentCreated{reporter_kind: hotline_operator, hotline_call_id, description, location_hint, call_time, band: T1}. Close modal. Toast confirms with incident ID. New incident appears at top of inbox with Phone icon + --color-reporter-hotline chip. Outcome = 'inquiry' OR 'missed': emit HotlineCallLogged{reporter_kind: hotline_operator, hotline_call_id, outcome: no_incident, call_time}. Close modal. Different toast: Call logged. No incident created.</description>
       <acceptance>
@@ -64,7 +64,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-005" type="behavior" status="planned">
+    <requirement id="002-REQ-005" type="behavior" status="built">
       <title>ESC / Cancel with dirty confirmation</title>
       <description>ESC key or Cancel button: if any required field has content, open confirmation dialog (Discard this call log? You can keep editing.). On confirm: discard and close. On keep editing: dismiss dialog. If no dirty fields: close immediately.</description>
       <acceptance>
@@ -77,7 +77,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-006" type="platform" status="planned">
+    <requirement id="002-REQ-006" type="platform" status="built">
       <title>MSW: HotlineCallLogged event handler</title>
       <description>Extend web/src/mocks/handlers.ts POST /api/events to accept HotlineCallLogged event type. Persist via idb-keyval. Add hotline_call_id mint helper (UUID v7 pattern).</description>
       <acceptance>
@@ -89,7 +89,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-007" type="interface" status="planned">
+    <requirement id="002-REQ-007" type="interface" status="built">
       <title>Modal primitives from web/src/components/ui/</title>
       <description>Use Modal (640px wide, centred, focus trap), Input, DatePicker, Dropdown, Button (primary + ghost), Toast. Per lockdown decision #4.</description>
       <acceptance>
@@ -102,7 +102,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-008" type="interface" status="planned">
+    <requirement id="002-REQ-008" type="interface" status="built">
       <title>Bangla-first labels for text-heavy fields</title>
       <description>All field labels, button text, outcome names translated to BN; Bangla is default on this surface (operator dashboard chrome can be EN). Toggle works; preference persists in IDB.</description>
       <acceptance>
@@ -114,7 +114,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-009" type="interface" status="planned">
+    <requirement id="002-REQ-009" type="interface" status="built">
       <title>i18n keys added (EN + BN parity)</title>
       <description>Add to web/src/i18n/locales/en/operatorDashboard.json and bn/: actions.logHotlineCall, hotline.modal.{title,subtitle,callerName,callerPhone,callTime,description,locationHint,outcome,button.cancel,button.submit,toast.incidentCreated,toast.callLogged,discardConfirm.{title,body,discard,keepEditing}}. Hotline outcome labels: incident / inquiry / missed.</description>
       <acceptance>
@@ -126,7 +126,7 @@
       </refs>
     </requirement>
 
-    <requirement id="002-REQ-010" type="behavior" status="planned">
+    <requirement id="002-REQ-010" type="behavior" status="built">
       <title>Reconciliation: pre-lockdown draft if exists</title>
       <description>Verify no Hindi strings; replace any band=T3 default; ensure reporter_kind: hotline_operator is the ONLY reporter-kind for hotline events.</description>
       <acceptance>

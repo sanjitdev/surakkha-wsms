@@ -5,8 +5,10 @@
  * mount contract:
  *   1) The button renders in the dashboard top-chrome with the i18n label.
  *   2) Clicking it mounts HotlineIntakeModal (test-id hotline-intake-modal).
- *   3) Submitting reported_incident fires POST /api/incidents and the new
- *      incident refetches back into the inbox with reporter_kind=hotline.
+ *   3) Submitting reported_incident fires POST /api/events with
+ *      event_type IncidentCreated and the new incident refetches back
+ *      into the inbox with reporter_kind=hotline (per WO-002 §Wire
+ *      contract).
  *   4) en/bn key parity for actions.logHotlineCall.
  */
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -67,20 +69,14 @@ function installFetchStub() {
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = typeof input === 'string' ? input : input.toString();
 
-    if (init?.method === 'POST' && url === '/api/incidents') {
+    if (init?.method === 'POST' && url === '/api/events') {
       const body = init.body ? JSON.parse(String(init.body)) : null;
       capturePosts.push({ url, body });
+      // Server mints incident_id per WO-002 §Wire contract.
       return new Response(
         JSON.stringify({
-          incident_id: 'inc_hotline_test_001',
-          status: 'open',
-          severity: 'T2',
-          ward_id: 'unknown',
-          last_block_height: 99,
-          last_event_type: 'IncidentCreated',
-          last_occurred_at: new Date().toISOString(),
-          reporter_kind: 'hotline',
-          trust_band: 'T1',
+          event_type: (body as { event_type: string }).event_type,
+          payload: { incident_id: 'inc_hotline_test_001' },
         }),
         { status: 201, headers: { 'content-type': 'application/json' } },
       );
@@ -169,32 +165,35 @@ describe('FE-B6 OperatorDashboard Log hotline call mount (operator-dashboard.md 
     });
   });
 
-  it('submitting reported_incident fires POST /api/incidents', async () => {
+  it('submitting reported_incident fires POST /api/events with IncidentCreated', async () => {
     renderDash();
     fireEvent.click(screen.getByTestId('dashboard-log-hotline-call'));
     await waitFor(() => {
       expect(screen.getByTestId('hotline-intake-modal')).toBeTruthy();
     });
 
-    fireEvent.change(screen.getByTestId('hotline-description'), {
+    fireEvent.change(screen.getByTestId('hotline-input-description'), {
       target: { value: 'Foul smell from the kitchen tap since this morning.' },
     });
-    fireEvent.change(screen.getByTestId('hotline-location-hint'), {
+    fireEvent.change(screen.getByTestId('hotline-input-location-hint'), {
       target: { value: 'Ward 14, Mohammadpur, standpipe #7' },
     });
-    fireEvent.click(screen.getByTestId('hotline-submit'));
+    fireEvent.click(screen.getByTestId('hotline-button-submit'));
 
     await waitFor(() => {
       expect(capturePosts.length).toBeGreaterThan(0);
     });
 
-    const call = capturePosts.find((c) => c.url === '/api/incidents');
+    const call = capturePosts.find((c) => c.url === '/api/events');
 
     expect(call).toBeTruthy();
     expect(call!.body).toMatchObject({
-      source: 'hotline',
-      reporter_kind: 'hotline_operator',
-      outcome: 'reported_incident',
+      event_type: 'IncidentCreated',
+      payload: {
+        source: 'hotline',
+        reporter_kind: 'hotline_operator',
+        trust_band: 'T1',
+      },
     });
   });
 
