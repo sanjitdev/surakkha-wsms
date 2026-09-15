@@ -5,6 +5,12 @@
  * `useTranslation('fieldIncidentDetail')`. Same pattern as
  * fe-b6-operator-dashboard-i18n.test.tsx — render under the i18next
  * provider, assert Bengali regex on the surface text.
+ *
+ * Migration note (WO-007 / 2026-09-15): the lockdown-bound reconciliation
+ * re-architected the page around a 3-step actions ladder
+ * (diagnosis → fix → proof). The old 5-step ladder testids
+ * (`field-step-{name}` / `field-step-list`) are gone. New testids
+ * live under `field-incident-detail-*` per foundation §13.
  */
 
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
@@ -153,26 +159,30 @@ describe('FE-B6 FieldIncidentDetail i18n', () => {
     expect(document.body.textContent ?? '').toMatch(BENGALI);
   });
 
-  it('step ladder labels render in Bengali when locale=bn', async () => {
+  it('actions ladder renders in Bengali when locale=bn', async () => {
     renderPage(Locale.Bn, 'field_technician', 'evt_assigned_001');
     await waitFor(() => {
       expect(i18n.language).toBe('bn');
     });
     await waitFor(() => {
-      expect(screen.getByTestId('field-step-list')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-page')).toBeTruthy();
     });
-    // At least one of the step labels is bn — "প্রেরিত" (Dispatched) is
-    // the bn translation of `assigned`.
-    expect(document.body.textContent ?? '').toContain('প্রেরিত');
+    // WO-007 — header shows the priority chip + reporter-badge + due_at
+    // countdown + Mark arrived button. Bangla locale renders Bangla
+    // labels for these elements.
+    expect(document.body.textContent ?? '').toMatch(BENGALI);
+    // The Mark arrived button label is localised; assert at least one
+    // Bangla character is in the surface text (the bn "ফিল্ড" / "কিউ").
+    expect(document.body.textContent ?? '').toContain('কিউ');
   });
 
-  it('en locale keeps English step labels (regression guard)', async () => {
+  it('en locale keeps English copy (regression guard)', async () => {
     renderPage(Locale.En, 'field_technician', 'evt_assigned_001');
     await waitFor(() => {
-      expect(screen.getByTestId('field-step-list')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-page')).toBeTruthy();
     });
-    // English labels: "Dispatched", "On site", "Diagnosis", ...
-    expect(document.body.textContent ?? '').toContain('Dispatched');
+    // English copy: title or button text.
+    expect(document.body.textContent ?? '').toContain('Mark arrived');
     expect(document.body.textContent ?? '').not.toMatch(BENGALI);
   });
 });

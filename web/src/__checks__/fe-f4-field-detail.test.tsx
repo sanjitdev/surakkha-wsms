@@ -5,12 +5,20 @@
  *   1) role_gate_blocks_non_field_tech — non-tech sees "Field-tech only" empty state.
  *   2) missing_work_order_id_renders_not_found — empty ?work_order= renders not-found.
  *   3) no_matching_event_renders_not_found — bogus work_order renders not-found.
- *   4) renders_step_timeline_assigned — page renders the 5-step ladder.
- *   5) initial_action_card_is_mark_arrived — onsite step is the default.
- *   6) onsite_submit_calls_techArrived — fires TechnicianArrived.
- *   7) diagnosis_step_renders_when_arrived_event_present — advances step.
- *   8) fix_step_renders_when_diagnosis_event_present — advances step.
- *   9) resolved_step_renders_when_fix_or_resolved_event_present — terminal state.
+ *   4) renders_header_chrome — BandPill + reporter-badge + due_at countdown + Mark arrived.
+ *   5) photo_capture_input_mounts — file input + EXIF strip in DOM.
+ *   6) diagnosis_form_is_structured — severity / category / tags fields.
+ *   7) fix_form_parts_list — parts add/remove works.
+ *   8) submit_proof_disabled_at_start — submit gated on photo_hash + diagnosis.
+ *   9) override_affordance_renders — when TrustBandOverridden event present.
+ *
+ * Migration note (WO-007 / 2026-09-15): the lockdown-bound reconciliation
+ * re-architected the page around a 3-step actions ladder
+ * (diagnosis → fix → proof). The old 5-step ladder testids
+ * (`field-step-{name}`, `field-step-{name}-card`, `field-mark-arrived`,
+ * `field-diagnosis-form`, `field-fix-form`, `field-resolve`) are gone.
+ * New testids live under `field-incident-detail-*` per foundation §13
+ * and the WO-007 §Area Labels table.
  *
  * Composition pattern matches F3: stub AppLayoutContext for the
  * session, mock useIncidentActions via vi.mock. Global fetch is
@@ -168,140 +176,108 @@ describe('FE-F4 FieldIncidentDetailPage loading + missing', () => {
   });
 });
 
-describe('FE-F4 FieldIncidentDetailPage step ladder', () => {
-  // (4) Page renders the 5-step ladder with assigned as the active
-  //     step (because there's no en-route / arrived / diagnosis /
-  //     fix event yet).
-  it('renders_step_timeline_assigned: 5 steps visible, first is active', async () => {
+describe('FE-F4 FieldIncidentDetailPage header chrome (WO-007)', () => {
+  // (4) Page renders the new lockdown header chrome:
+  //   BandPill + reporter-badge + due_at countdown + Mark arrived.
+  it('renders_header_chrome: BandPill + reporter-badge + due_at + Mark arrived', async () => {
     renderPage('field_technician', 'evt_assigned_001');
     await waitFor(() => {
-      expect(screen.getByTestId('field-detail-title')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-page')).toBeTruthy();
     });
-    expect(screen.getByTestId('field-step-assigned')).toBeTruthy();
-    expect(screen.getByTestId('field-step-onsite')).toBeTruthy();
-    expect(screen.getByTestId('field-step-diagnosis')).toBeTruthy();
-    expect(screen.getByTestId('field-step-fix')).toBeTruthy();
-    expect(screen.getByTestId('field-step-resolved')).toBeTruthy();
-    // First step is done (work dispatched), onsite is active (next
-    // action is "Mark arrived on site").
-    const assigned = screen.getByTestId('field-step-assigned');
-    const onsite = screen.getByTestId('field-step-onsite');
-
-    expect(assigned.className).toContain('verify-step--done');
-    expect(onsite.className).toContain('verify-step--active');
+    expect(screen.getByTestId('field-incident-detail-title')).toBeTruthy();
+    expect(screen.getByTestId('field-incident-detail-priority')).toBeTruthy();
+    expect(screen.getByTestId('field-incident-detail-due-at-countdown')).toBeTruthy();
+    expect(screen.getByTestId('field-incident-detail-button-mark-arrived')).toBeTruthy();
   });
 });
 
-describe('FE-F4 FieldIncidentDetailPage step transitions', () => {
-  // (5) Default action card is "Mark arrived on site".
-  it('initial_action_card_is_mark_arrived: onsite card visible by default', async () => {
+describe('FE-F4 FieldIncidentDetailPage photo capture (WO-007)', () => {
+  // (5) Photo capture input + EXIF strip render in DOM.
+  it('photo_capture_input_mounts: file input + EXIF strip', async () => {
     renderPage('field_technician', 'evt_assigned_001');
     await waitFor(() => {
-      expect(screen.getByTestId('field-step-onsite-card')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-photo-input')).toBeTruthy();
     });
-    expect(screen.getByTestId('field-mark-arrived')).toBeTruthy();
+    // EXIF strip blocks render (lat / lon / timestamp / device) — they're
+    // emitted as soon as a photo is chosen, but the form scaffold is in DOM.
+    expect(screen.getByTestId('field-incident-detail-exif-strip')).toBeTruthy();
   });
+});
 
-  // (6) Clicking "Mark arrived" calls techArrived with the full payload.
-  it('onsite_submit_calls_techArrived: post is dispatched', async () => {
-    const techArrived = vi.fn(async () => true);
-
-    currentActions = { ...currentActions, techArrived };
+describe('FE-F4 FieldIncidentDetailPage diagnosis form (WO-007)', () => {
+  // (6) Diagnosis form is STRUCTURED — severity / category / tags.
+  //     Foundation §12 #7 forbids single-textarea diagnosis.
+  it('diagnosis_form_is_structured: severity / category / tags fields', async () => {
     renderPage('field_technician', 'evt_assigned_001');
     await waitFor(() => {
-      expect(screen.getByTestId('field-mark-arrived')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-diagnosis-form')).toBeTruthy();
     });
+    expect(screen.getByTestId('field-incident-detail-diagnosis-severity')).toBeTruthy();
+    expect(screen.getByTestId('field-incident-detail-diagnosis-category')).toBeTruthy();
+    expect(screen.getByTestId('field-incident-detail-diagnosis-tags')).toBeTruthy();
+  });
+});
 
+describe('FE-F4 FieldIncidentDetailPage fix form (WO-007)', () => {
+  // (7) Fix form parts list add/remove: starts with 1 empty row, add
+  //     creates a second, remove drops one.
+  it('fix_form_parts_list: add / remove works', async () => {
+    renderPage('field_technician', 'evt_assigned_001');
+    await waitFor(() => {
+      expect(screen.getByTestId('field-incident-detail-fix-form')).toBeTruthy();
+    });
+    const partsList = screen.getByTestId('field-incident-detail-parts-list');
+    // Initially 1 empty parts row.
+    expect(partsList.querySelectorAll('[data-testid^="field-incident-detail-parts-row-"]').length).toBe(1);
+    // Click "Add part" — a second row appears.
     await act(async () => {
-      fireEvent.click(screen.getByTestId('field-mark-arrived'));
+      fireEvent.click(screen.getByTestId('field-incident-detail-add-part'));
     });
-
-    await waitFor(() => {
-      expect(techArrived).toHaveBeenCalledTimes(1);
+    expect(partsList.querySelectorAll('[data-testid^="field-incident-detail-parts-row-"]').length).toBe(2);
+    // Click "Remove" on row 0 — back to 1.
+    await act(async () => {
+      fireEvent.click(screen.getByTestId('field-incident-detail-remove-part-0'));
     });
-    const calls = techArrived.mock.calls as unknown as [Record<string, unknown>][];
-    const arg = calls[0]?.[0];
-
-    expect(arg).toEqual({
-      incident_id: 'inc_test_001',
-      technician_id: 'karim-001',
-    });
+    expect(partsList.querySelectorAll('[data-testid^="field-incident-detail-parts-row-"]').length).toBe(1);
   });
+});
 
-  // (7) When the chain has a TechnicianArrived event for this incident,
-  //     the page renders the diagnosis card.
-  it('diagnosis_step_renders_when_arrived_event_present: advances to fix-card-on-ack', async () => {
-    fixtureEvents = [
-      ASSIGNED_EVT,
-      {
-        event_id: 'evt_arrived_001',
-        event_type: 'TechnicianArrived',
-        occurred_at: '2024-01-01T10:05:00.000Z',
-        actor_identity: { kind: 'technician', ref: 'karim-001', display: 'Karim' },
-        payload: { incident_id: 'inc_test_001', technician_id: 'karim-001' },
-      },
-    ];
+describe('FE-F4 FieldIncidentDetailPage submit gate (WO-007)', () => {
+  // (8) Submit proof is gated on photo_hash + diagnosis + fix summary.
+  //     At start, no fields filled → submit button disabled.
+  it('submit_proof_disabled_at_start: photo_hash required + diagnosis + fix summary', async () => {
     renderPage('field_technician', 'evt_assigned_001');
     await waitFor(() => {
-      expect(screen.getByTestId('field-step-diagnosis-card')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-button-submit-proof')).toBeTruthy();
     });
-    expect(screen.getByTestId('field-diagnosis-form')).toBeTruthy();
-    // Submit disabled at start.
-    expect((screen.getByTestId('field-submit-diagnosis') as HTMLButtonElement).disabled).toBe(true);
-  });
+    const submit = screen.getByTestId('field-incident-detail-button-submit-proof') as HTMLButtonElement;
 
-  // (8) When the chain has a DiagnosisSubmitted event, the page renders
-  //     the fix form.
-  it('fix_step_renders_when_diagnosis_event_present: fix card visible', async () => {
+    expect(submit.disabled).toBe(true);
+  });
+});
+
+describe('FE-F4 FieldIncidentDetailPage override affordance (WO-007)', () => {
+  // (9) When the chain has a TrustBandOverridden event for this incident,
+  //     the page renders the "View override reasoning" affordance.
+  it('override_affordance_renders: TrustBandOverridden event present', async () => {
     fixtureEvents = [
       ASSIGNED_EVT,
       {
-        event_id: 'evt_arrived_001',
-        event_type: 'TechnicianArrived',
-        occurred_at: '2024-01-01T10:05:00.000Z',
-        actor_identity: { kind: 'technician', ref: 'karim-001', display: 'Karim' },
-        payload: { incident_id: 'inc_test_001', technician_id: 'karim-001' },
-      },
-      {
-        event_id: 'evt_diag_001',
-        event_type: 'DiagnosisSubmitted',
-        occurred_at: '2024-01-01T10:10:00.000Z',
-        actor_identity: { kind: 'technician', ref: 'karim-001', display: 'Karim' },
+        event_id: 'evt_override_001',
+        event_type: 'TrustBandOverridden',
+        occurred_at: '2024-01-01T10:30:00.000Z',
+        actor_identity: { kind: 'admin', ref: 'adi-001', display: 'Adi' },
         payload: {
           incident_id: 'inc_test_001',
-          technician_id: 'karim-001',
-          diagnosis: 'Pump #4 dead — needs replacement',
+          from_band: 'T3',
+          to_band: 'T1',
+          reason: 'Two corroborating sensor signals + hotline call',
         },
       },
     ];
     renderPage('field_technician', 'evt_assigned_001');
     await waitFor(() => {
-      expect(screen.getByTestId('field-step-fix-card')).toBeTruthy();
+      expect(screen.getByTestId('field-incident-detail-button-view-override-reasoning')).toBeTruthy();
     });
-    expect(screen.getByTestId('field-fix-form')).toBeTruthy();
-  });
-
-  // (9) When the chain has a FixSubmitted or IncidentResolved event,
-  //     the page renders the operator-confirm card.
-  it('resolved_step_renders_when_fix_or_resolved_event_present: terminal card visible', async () => {
-    fixtureEvents = [
-      ASSIGNED_EVT,
-      {
-        event_id: 'evt_fix_001',
-        event_type: 'FixSubmitted',
-        occurred_at: '2024-01-01T11:00:00.000Z',
-        actor_identity: { kind: 'technician', ref: 'karim-001', display: 'Karim' },
-        payload: {
-          incident_id: 'inc_test_001',
-          technician_id: 'karim-001',
-          fix_summary: 'Replaced pump #4',
-        },
-      },
-    ];
-    renderPage('field_technician', 'evt_assigned_001');
-    await waitFor(() => {
-      expect(screen.getByTestId('field-step-resolved-card')).toBeTruthy();
-    });
-    expect(screen.getByTestId('field-resolve')).toBeTruthy();
   });
 });
