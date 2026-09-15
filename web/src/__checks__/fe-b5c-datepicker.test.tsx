@@ -21,6 +21,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../i18n';
 import { DatePicker } from '../components/ui/DatePicker';
 import { DateRangePicker } from '../components/ui/DateRangePicker';
 import { Locale } from '../types/domain';
@@ -49,8 +51,15 @@ beforeEach(() => {
 function withLocale(node: React.ReactNode, locale: Locale = Locale.En) {
   if (locale === Locale.Bn) {
     window.localStorage.setItem('surakkha.locale', Locale.Bn);
+    void i18n.changeLanguage(Locale.Bn);
+  } else {
+    void i18n.changeLanguage(Locale.En);
   }
-  return <LocaleProvider>{node}</LocaleProvider>;
+  return (
+    <I18nextProvider i18n={i18n}>
+      <LocaleProvider>{node}</LocaleProvider>
+    </I18nextProvider>
+  );
 }
 
 function getCells() {
