@@ -4,7 +4,11 @@
     "loading": "Loading…",
     "severityUrgent": "{{severity}} urgent",
     "incidentTitle": "Incident {{id}}",
-    "metaLine": "Ward {{ward}} · block #{{block}} · {{eventType}}"
+    "metaLine": "Ward {{ward}} · block #{{block}} · {{eventType}}",
+    "reporterChip": {
+      "hotline": "Hotline",
+      "hotlineAria": "Reporter: hotline call"
+    }
   },
   "notFound": {
     "title": "Incident not found",

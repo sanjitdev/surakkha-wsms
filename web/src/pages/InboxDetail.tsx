@@ -39,7 +39,7 @@ import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
-import { AlertIcon, InboxIcon } from '../components/icons/sidebar-icons';
+import { AlertIcon, InboxIcon, ReporterPhoneIcon } from '../components/icons/sidebar-icons';
 
 import { ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
@@ -673,6 +673,24 @@ export function InboxDetail() {
                 {tDetail('header.severityUrgent', { severity: incident.severity })}
               </span>
               <span className={`badge badge--${incident.status}`}>{incident.status}</span>
+              {/* inbox-detail.md #14 + REQ-008 — reporter-badge chip on the
+                  detail header. Renders ONLY when reporter_kind = 'hotline'
+                  (other sources render no chip here; the dashboard surfaces
+                  the full chip set on its thread table). Independent of the
+                  band pill — foundation §1.1 keeps trust-band × reporter-
+                  badge as two separate dimensions. */}
+              {incident.reporter_kind === 'hotline' ? (
+                <span
+                  className="chip chip chip-reporter-hotline badge--reporter-hotline inbox-detail-reporter-badge-chip"
+                  data-testid="inbox-detail-reporter-badge-chip"
+                  data-reporter-kind="hotline"
+                  aria-label={tDetail('header.reporterChip.hotlineAria')}
+                  title={tDetail('header.reporterChip.hotlineAria')}
+                >
+                  <ReporterPhoneIcon size={14} />
+                  {tDetail('header.reporterChip.hotline')}
+                </span>
+              ) : null}
             </div>
             <h1 data-testid="inbox-detail-title" style={{ marginTop: 'var(--space-md)' }}>
               {tDetail('header.incidentTitle', { id: incident.incident_id.slice(0, 8) })}
