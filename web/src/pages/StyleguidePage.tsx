@@ -71,9 +71,9 @@ function Section({
     </section>
   );
 }
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Row({ label, children, testId }: { label: string; children: React.ReactNode; testId?: string }) {
   return (
-    <div className="sg-row">
+    <div className="sg-row" data-testid={testId}>
       <div className="sg-row__label">{label}</div>
       <div className="sg-row__demo">{children}</div>
     </div>
@@ -327,12 +327,13 @@ export function StyleguidePage() {
             Snooze
           </Button>
         </Row>
-        <Row label="danger (issuance path only)">
+        <Row label="danger (issuance path only)" testId="styleguide-button-danger-issuance">
           {/* Lockdown cascade 2026-09-11: variant="danger" is reserved
-              for the T3+ issuance path. Destructive operator actions
-              (reject / override / force resolve) use secondary + warning
-              icon, NOT danger. The danger showcase here documents the
-              single sanctioned use site. */}
+              for the T3+ consumer-notice issuance path. The single
+              sanctioned use site is "Confirm consumer notice". Any
+              other destructive operator action (reject / override /
+              force resolve) must use variant="secondary" + warning
+              icon, NOT danger — see the dedicated row below. */}
           <Button variant="danger" size="sm">
             Confirm consumer notice
           </Button>
@@ -343,15 +344,33 @@ export function StyleguidePage() {
             Confirm consumer notice
           </Button>
         </Row>
-        <Row label="destructive operator action (secondary + warn)">
+        <Row
+          label="destructive operator action (secondary + warn)"
+          testId="styleguide-button-destructive-secondary"
+        >
+          {/* Per lockdown §7.1: variant="danger" is RESERVED for T3+
+              issuance. Operator-internal destructive actions (reject
+              / override / force resolve) MUST use variant="secondary"
+              + a warning icon. Note the warning glyph uses VS15
+              (\uFE0E) so it falls back to text presentation on
+              consumer surfaces. */}
           <Button variant="secondary" size="sm">
-            <span aria-hidden="true">⚠︎</span> Reject
+            <span className="sg-destructive-cta" aria-hidden="true">
+              <span className="sg-destructive-cta__icon">{'\u26A0\uFE0E'}</span>
+              <span>Reject</span>
+            </span>
           </Button>
           <Button variant="secondary" size="md">
-            <span aria-hidden="true">⚠︎</span> Override
+            <span className="sg-destructive-cta" aria-hidden="true">
+              <span className="sg-destructive-cta__icon">{'\u26A0\uFE0E'}</span>
+              <span>Override</span>
+            </span>
           </Button>
           <Button variant="secondary" size="lg">
-            <span aria-hidden="true">⚠︎</span> Force resolve
+            <span className="sg-destructive-cta" aria-hidden="true">
+              <span className="sg-destructive-cta__icon">{'\u26A0\uFE0E'}</span>
+              <span>Force resolve</span>
+            </span>
           </Button>
         </Row>
         <Row label="disabled">
