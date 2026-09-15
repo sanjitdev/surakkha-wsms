@@ -678,8 +678,15 @@ export function InboxDetail() {
   }
 
   return (
-    <Container width={ContainerWidth.Bangla}>
-      <div className="page-header">
+    <Container
+      width={ContainerWidth.Bangla}
+      testId="inbox-detail-page"
+    >
+      {/* foundation §13 — area labels. Header band carries the page
+          title + chips; main band carries the inline form + 2-pane
+          grid below. Both wrap a single region so screen-reader nav
+          can skip past the form to the timeline if desired. */}
+      <div className="page-header" data-testid="inbox-detail-header" aria-label="Incident header">
         <div className="page-header__row">
           <div>
             <Link
@@ -695,7 +702,15 @@ export function InboxDetail() {
               {tDetail('header.backToInbox')}
             </Link>
             <div className="thread-head__row1" style={{ marginTop: 'var(--space-sm)' }}>
-              <span className={severityBadgeClass(incident.severity)}>
+              {/* foundation §1.1 — trust-band × reporter-badge separation:
+                  the severity badge is one dimension (band pill); the
+                  reporter chip below is a separate dimension. Both render
+                  independently on the same row. */}
+              <span
+                className={severityBadgeClass(incident.severity)}
+                data-testid="inbox-detail-band-pill"
+                data-band={incident.severity}
+              >
                 {tDetail('header.severityUrgent', { severity: incident.severity })}
               </span>
               <span className={`badge badge--${incident.status}`}>{incident.status}</span>
@@ -758,14 +773,20 @@ export function InboxDetail() {
         requestAck={actions.requestAck}
       />
 
-      <div className="grid-12">
-        {/* Left pane: related incidents (col-span-7).
-            Per inbox-detail.md #6 (reconciled 2026-09-11), the related
-            pane moves to the LEFT slot; the chain-event timeline now
-            lives on the RIGHT (EventChain rail). The full 240/flex/360
-            3-column grid is a Phase 5 Batch 5 build; this swap is the
-            Tier 2 reconciliation step. */}
-        <div className="col-7" data-testid="inbox-detail-related">
+      <div className="grid-12" data-testid="inbox-detail-main" aria-label="Incident detail body">
+        {/* Left pane: related incidents (col-span-7) — foundation §13
+            area-label `inbox-detail-rail-inbox`. Per inbox-detail.md #6
+            (reconciled 2026-09-11), the related pane moves to the LEFT
+            slot; the chain-event timeline now lives on the RIGHT
+            (EventChain rail). The full 240/flex/360 3-column grid is
+            a Phase 5 Batch 5 build; this swap is the Tier 2
+            reconciliation step. */}
+                <div
+          className="col-7"
+          data-testid="inbox-detail-related"
+          data-area-label="inbox-detail-rail-inbox"
+          aria-label="Related incidents in ward"
+        >
           <Card>
             <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>
               {tDetail('related.title', { ward: incident.ward_id })}
@@ -828,9 +849,16 @@ export function InboxDetail() {
             moves from the LEFT to a new RIGHT rail. Test-id stays
             `inbox-detail-timeline` so existing assertions still find the
             node; this is the Tier 2 reconciliation step that prefigures
-            the Batch 5 Tier 1 `PerIncidentChainSegment` component. */}
-        <div className="col-5" data-testid="inbox-detail-timeline">
-          <Card>
+            the Batch 5 Tier 1 `PerIncidentChainSegment` component.
+            Area labels (foundation §13): outer pane is
+            `inbox-detail-detail-pane`; inner Card is `inbox-detail-event-chain`. */}
+        <div
+          className="col-5"
+          data-testid="inbox-detail-timeline"
+          data-area-label="inbox-detail-detail-pane"
+          aria-label="Chain timeline"
+        >
+          <Card testId="inbox-detail-event-chain" ariaLabel="Chain events">
             <div
               style={{
                 display: 'flex',
