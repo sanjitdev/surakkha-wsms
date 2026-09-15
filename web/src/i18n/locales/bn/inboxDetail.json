@@ -85,6 +85,13 @@
     "emptyBody": "এটি এই ওয়ার্ডের একমাত্র সক্রিয় ঘটনা।",
     "rowMeta": "{{eventType}} · ব্লক #{{height}}"
   },
+  "override": {
+    "viewReasoning_one": "ওভাররাইড যুক্তি দেখুন ({{count}})",
+    "viewReasoning_other": "ওভাররাইড যুক্তি দেখুন ({{count}})",
+    "fromTo": "ব্যান্ড পরিবর্তন: {{from}} → {{to}}",
+    "reasonCategory": "বিভাগ: {{category}}",
+    "blockRef": "ব্লক #{{height}}"
+  },
   "assignModal": {
     "ariaLabel": "ফিল্ড টেকনিশিয়ান নিযুক্ত করুন",
     "title": "ফিল্ড টেকনিশিয়ান নিযুক্ত করুন",

@@ -441,6 +441,15 @@ export function InboxDetail() {
   const actions = useIncidentActions();
   const { t: tDetail } = useTranslation('inboxDetail');
   const [events, setEvents] = useState<ChainEvent[]>([]);
+  /**
+   * inbox-detail.md #15 — override-reasoning affordance. Scans the
+   * incident thread for any band-override chain event so the operator
+   * can expand the reasoning payload inline. The handler is gated on
+   * `event_type === 'OverrideRecorded'` (current wire enum); we also
+   * accept `TrustBandOverridden` so the lock-in stays intact if Phase 2
+   * renames the type per foundation §12 #8.
+   */
+  const [overrideOpen, setOverrideOpen] = useState<boolean>(false);
 
   /**
    * inbox-detail.md #14 (reconciled 2026-09-11) — single inline form
@@ -540,6 +549,23 @@ export function InboxDetail() {
       .filter((i) => i.ward_id === incident.ward_id && i.incident_id !== id)
       .slice(0, 5);
   }, [incidents, incident, id]);
+
+  /**
+   * inbox-detail.md #15 — band-override event(s) on the chain. Surfaces
+   * a "View override reasoning" affordance so the operator can audit the
+   * reason an incident's band was overridden without leaving the page.
+   * Accepts both `OverrideRecorded` (current wire enum) and
+   * `TrustBandOverridden` (PRD/spec name) so the lock-in survives a
+   * future rename. Sorted ascending so the most-recent override is the
+   * last entry in the list.
+   */
+  const overrideEvents = useMemo(
+    () =>
+      threadEvents.filter(
+        (e) => e.event_type === 'OverrideRecorded' || e.event_type === 'TrustBandOverridden',
+      ),
+    [threadEvents],
+  );
 
   if (loading) {
     return (
@@ -824,6 +850,115 @@ export function InboxDetail() {
                 )}
               </span>
             </div>
+            {/* inbox-detail.md #15 + REQ-009 — override-reasoning
+                affordance. Rendered ONLY when the chain contains an
+                OverrideRecorded / TrustBandOverridden event for this
+                incident (foundation §12 #8 — override surface visible).
+                Click expands to show the reasoning payload inline. */}
+            {overrideEvents.length > 0 ? (
+              <div
+                className="inbox-detail-override-reasoning-affordance"
+                data-testid="inbox-detail-override-reasoning-affordance"
+                style={{
+                  marginBottom: 'var(--space-md)',
+                  padding: 'var(--space-sm) var(--space-md)',
+                  border: '1px solid var(--color-divider)',
+                  borderRadius: 'var(--radius-md)',
+                  background: 'var(--color-surface)',
+                }}
+              >
+                <button
+                  type="button"
+                  data-testid="inbox-detail-override-toggle"
+                  aria-expanded={overrideOpen}
+                  aria-controls="inbox-detail-override-payload"
+                  onClick={() => {
+                    setOverrideOpen((v) => !v);
+                  }}
+                  style={{
+                    background: 'transparent',
+                    border: 0,
+                    padding: 0,
+                    color: 'var(--color-primary-tint)',
+                    cursor: 'pointer',
+                    fontSize: 'var(--font-size-sm)',
+                    fontWeight: 'var(--font-weight-semibold)',
+                  }}
+                >
+                  {tDetail('override.viewReasoning', {
+                    count: overrideEvents.length,
+                  })}
+                </button>
+                {overrideOpen ? (
+                  <div
+                    id="inbox-detail-override-payload"
+                    data-testid="inbox-detail-override-payload"
+                    style={{ marginTop: 'var(--space-sm)' }}
+                  >
+                    {overrideEvents.map((ev) => {
+                      const payload = ev.payload as Record<string, unknown>;
+                      const from = typeof payload.from_band === 'string' ? payload.from_band : '—';
+                      const to = typeof payload.to_band === 'string' ? payload.to_band : '—';
+                      const reasonCat =
+                        typeof payload.reason_category === 'string'
+                          ? payload.reason_category
+                          : '—';
+                      const freeText =
+                        typeof payload.reason === 'string'
+                          ? payload.reason
+                          : typeof payload.reason_text === 'string'
+                            ? payload.reason_text
+                            : '';
+
+                      return (
+                        <div
+                          key={ev.event_id}
+                          data-testid={`inbox-detail-override-payload-${ev.event_id}`}
+                          style={{
+                            paddingTop: 'var(--space-xs)',
+                            borderTop: '1px solid var(--color-divider)',
+                          }}
+                        >
+                          <div
+                            className="mono"
+                            style={{ fontSize: 'var(--font-size-xs)', color: 'var(--fg-tertiary)' }}
+                          >
+                            {tDetail('override.blockRef', { height: ev.height })}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 'var(--font-size-sm)',
+                              marginTop: 'var(--space-xs)',
+                            }}
+                          >
+                            {tDetail('override.fromTo', { from, to })}
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 'var(--font-size-sm)',
+                              color: 'var(--fg-tertiary)',
+                              marginTop: 'var(--space-xs)',
+                            }}
+                          >
+                            {tDetail('override.reasonCategory', { category: reasonCat })}
+                          </div>
+                          {freeText ? (
+                            <p
+                              style={{
+                                fontSize: 'var(--font-size-sm)',
+                                margin: 'var(--space-xs) 0 0 0',
+                              }}
+                            >
+                              {freeText}
+                            </p>
+                          ) : null}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             {threadEvents.length === 0 ? (
               <EmptyState
                 icon={<AlertIcon />}

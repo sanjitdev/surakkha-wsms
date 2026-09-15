@@ -85,6 +85,13 @@
     "emptyBody": "This is the only active incident in the ward.",
     "rowMeta": "{{eventType}} · block #{{height}}"
   },
+  "override": {
+    "viewReasoning_one": "View override reasoning ({{count}})",
+    "viewReasoning_other": "View override reasoning ({{count}})",
+    "fromTo": "Band change: {{from}} → {{to}}",
+    "reasonCategory": "Category: {{category}}",
+    "blockRef": "block #{{height}}"
+  },
   "assignModal": {
     "ariaLabel": "Assign field technician",
     "title": "Assign field technician",
