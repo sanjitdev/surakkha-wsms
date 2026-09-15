@@ -28,7 +28,9 @@
  *     /audit-log     → <AuditLog />             (utility_operator)
  *     /settings      → <Settings />             (utility_operator)
  *     /field/*       → <FieldQueuePage />       (field_technician)
- *     /submit        → <ComingSoonPage />       (anjali)
+ *     /submit        → <SubmitReportPage />     (anjali; WO-011; WO-016
+ *                                                removed it from the
+ *                                                ComingSoonPage mapping)
  *     /approve       → <ComingSoonPage />       (pha_approver)
  *     /audit         → <ComingSoonPage />       (pha_viewer)
  *     /vendor        → <ComingSoonPage />       (vendor)

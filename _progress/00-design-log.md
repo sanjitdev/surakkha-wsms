@@ -231,6 +231,32 @@ Lockdown sweep (4 checks):
 
 Net test count: 520 baseline → 537 passing (+17 new styleguide tests; 0 regression).
 
+### WO-016 coming-soon-page — Mimir 2026-09-15
+
+Built = ✓  (Tier 3 build 8/9)
+
+Reconciliation summary:
+- **Route map (App.tsx)**: `/submit` confirmed wired to `<SubmitReportPage />` (WO-011 delivery) and REMOVED from the `PLACEHOLDERS` array. ComingSoonPage placeholder is now wired only for the 3 still-pending persona landings: `/approve` (pha_approver), `/audit` (pha_viewer), `/vendor` (vendor). Updated the top-of-file route map docstring + added an explicit WO-016 annotation above the `<Route path="/submit">` line.
+- **Back → Sign out**: ComingSoonPage's exit button renamed "Sign out" (calls `logout()`). The label matches the actual behaviour — the placeholder is the persona's only exit because their real landing is missing.
+- **variant="secondary"**: Sign out uses `variant="secondary"` per lockdown cascade (Danger variant is RESERVED for T3+ consumer-notice issuance surfaces). Logout, even destructive-in-spirit, MUST NOT be danger.
+- **T0 ○ glyph**: Card heading now prefixes the optional `○` (U+25CB) glyph as the "not-yet-verified / placeholder" cue per foundation §4.1. Rendered as `<span aria-hidden="true">` so screen readers don't announce the decorative cue. Testid `coming-soon-title-glyph` exposes the glyph for the test.
+- **Phase 2 notice**: New `card.phaseNotice` paragraph renders between the title and the description, explaining the surface ships with the Phase 2 PHA flow rollout. Title also reads "Coming in Phase 2" / "দ্বিতীয় পর্যায়ে আসছে".
+- **Locale files**: en + bn `comingSoon.json` gained `card.titlePrefix` (○), `card.phaseNotice`, and renamed `card.back` → `card.signOut`. Bangla strings contain real Bengali characters (U+0980–U+09FF).
+- **Testid hooks**: Card exposes `coming-soon-card` (already), plus `coming-soon-title`, `coming-soon-title-glyph`, `coming-soon-phase-notice`, `coming-soon-trailer`, and `coming-soon-sign-out`.
+- `fe-coming-soon-reconcile.test.tsx` new (10 tests, all green): pins the 5 acceptance criteria + 3 migration pins (Sign out secondary not danger / T0 glyph / logout() invoked) + Hindi lockdown sweep (en + bn) + focus-ring sweep.
+
+Files: `web/src/App.tsx` (route map docstring + WO-016 annotation), `web/src/pages/ComingSoonPage.tsx` (+~30 LOC + docstring), `web/src/i18n/locales/en|bn/comingSoon.json` (5 keys each), test file new (330 LOC).
+
+Lockdown sweep (5 checks):
+- `en/comingSoon.json` no Hindi letters ✓
+- `bn/comingSoon.json` no Hindi letters ✓
+- `ComingSoonPage.tsx` no `alert-red` / `red-600` / `bg-red` (the `variant="danger"` match is inside a docstring comment explaining why Danger is forbidden here) ✓
+- `ComingSoonPage.tsx` no `rounded-none` / `0px` ✓
+- `tech.css` `:focus-visible` rules all bind to `--color-primary-tint` ✓
+- `App.tsx` `/submit` route resolves to `<SubmitReportPage />` (NOT ComingSoonPage) ✓
+
+Net test count: 537 baseline → 547 passing (+10 new coming-soon tests; 0 regression; same 4 pre-existing failures in `fe-b6-operator-thread-filters`).
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._
