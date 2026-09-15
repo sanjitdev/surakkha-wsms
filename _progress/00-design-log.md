@@ -2,7 +2,12 @@
 
 > WDS Phase 4 / 5 progress.
 > Maintained by Freya (Phase 4) and Mimir (Phase 5).
-> Last updated: 2026-09-15 (Stage 6 complete — 17 PRDs authored).
+> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build).
+>
+> **Handoff status:** All 17 PRDs in `docs/E-Development/NNN-[slug].xml` are
+> `status="planned"` and ready for `mimir build`. Master PRD at
+> `docs/E-Development/000-PRD.md`. Open-question resolutions at
+> `docs/E-Development/000-STAGE-7-RESOLUTIONS.md`.
 
 ---
 
@@ -15,7 +20,7 @@
 | 2 | Trigger Map | ✓ complete (2026-09-10) |
 | 3 | UX Scenarios | ✓ complete (2026-09-10) |
 | 4 | UX Design | ✓ complete (2026-09-11, lockdown-bound) |
-| 5 | Agentic Development | 🔄 in-progress (17 Work Orders + 17 PRDs complete 2026-09-15) |
+| 5 | Agentic Development | ✓ ready-for-build (17 WO + 17 PRD + 51 questions resolved + 4 MAJOR closed 2026-09-15) |
 | 6 | Asset Generation | ○ not started |
 | 7 | Design System | 🔄 partial (foundation + tokens extracted; full atomic library deferred) |
 | 8 | Product Evolution | ○ not started |
@@ -40,25 +45,25 @@ Per WDS `references/ux-design-workflow.md`:
 
 | Page | Spec | Wireframe | Approved | Built | Reviewed | Tokens | WO | PRD |
 |---|---|---|---|---|---|---|---|---|
-| operator-dashboard.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| inbox-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| field-queue.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| field-incident-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| audit-log.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
+| operator-dashboard.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| inbox-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| field-queue.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| field-incident-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| audit-log.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 
 ### 2.3 Tier 3 — light infrastructure pages
 
 | Page | Spec | Wireframe | Approved | Built | Reviewed | Tokens | WO | PRD |
 |---|---|---|---|---|---|---|---|---|
-| inbox-list.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| inbox-rail.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| submit-report-page.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| citizen-ack-page.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| login-page.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| settings-page.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| styleguide-page.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| coming-soon-page.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
-| verify-flow.md | S✓ | ○ | ○ | existing (web/) | ○ | partial | ✓ | S✓ |
+| inbox-list.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| inbox-rail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| submit-report-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| citizen-ack-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| login-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| settings-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| styleguide-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| coming-soon-page.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| verify-flow.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 
 ---
 
@@ -75,7 +80,7 @@ Tracked in `docs/D-UX-Design/04-phase-5-prep-todo.md`.
 | 5 | 17 Work Orders (Freya) | ✓ complete (2026-09-15; 3 Tier 1, 5 Tier 2, 9 Tier 3) |
 | 6 | 17 feature PRDs (Mimir) | ✓ complete (2026-09-15) |
 | 7 | Resolve open questions + 5 MAJOR items | ✓ complete (2026-09-15; 51 questions + 4 MAJOR items via `000-STAGE-7-RESOLUTIONS.md`) |
-| 9 | Ready-for-build handoff | ○ pending |
+| 9 | Ready-for-build handoff | ✓ complete (2026-09-15) |
 
 ---
 
