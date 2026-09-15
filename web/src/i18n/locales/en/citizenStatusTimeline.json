@@ -6,10 +6,23 @@
     "title": "Loading status…",
     "ariaLabel": "Loading your report status"
   },
+  "page": {
+    "title": "Your report",
+    "subtitle": "Here's what's happened since you reported."
+  },
   "title": "Status timeline",
   "empty": {
     "heading": "No events yet",
     "body": "Submit your first report from the home page."
+  },
+  "timeline": {
+    "empty": "Nothing yet — we'll update this page when there's news.",
+    "relative": {
+      "justNow": "just now",
+      "minutesAgo": "{n} min ago",
+      "hoursAgo": "{n} hr ago",
+      "daysAgo": "{n} day ago"
+    }
   },
   "time": {
     "justNow": "just now",
@@ -37,6 +50,11 @@
     "CitizenAckWindowExpired": "Marked closed (we haven't heard back)",
     "IncidentClosed": "Report closed"
   },
+  "actor": {
+    "reporter": "You",
+    "operator": "City operator",
+    "field": "Field crew"
+  },
   "actionCall": {
     "in-progress": {
       "title": "We're reviewing your report",
@@ -45,8 +63,10 @@
     "closure-ack": {
       "title": "Is this resolved?",
       "body": "Tap ✓ if the field crew fixed the issue. Tap ✗ if something's still wrong.",
-      "confirm": "✓ Yes, fixed",
-      "reopen": "✗ Not yet"
+      "confirm": "✓ Yes, resolved",
+      "reopen": "✗ No, reopen",
+      "closurePrompt": "Is the issue resolved?",
+      "ackWindowHint": "Acknowledge within 24 hours"
     },
     "silent-closure": {
       "title": "We marked this closed",
@@ -56,6 +76,11 @@
     "all-caught-up": {
       "title": "All caught up",
       "body": "We'll message you when something changes."
-    }
+    },
+    "thanks": "Thanks for confirming. All set.",
+    "reopenReasonPrompt": "What's still wrong? (optional)",
+    "reopenReasonPlaceholder": "Tell us in a few words…",
+    "reopenSubmit": "Submit reopen",
+    "reopenCancel": "Cancel"
   }
 }

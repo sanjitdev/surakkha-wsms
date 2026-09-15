@@ -253,6 +253,13 @@ const chainHandlers = [
       'ChainVerificationFailed',
       'CommandRejected',
       'ProjectionFailed',
+      // WO-001 — Citizen Status Timeline (citizen-status-timeline.md §6).
+      // ChainRead is emitted on every citizen chain read (PRD §11.1);
+      // ChainAccepted / ChainReopened are the two citizen-side closures
+      // emitted from the ActionCall closure tap (Scenario 03 Screen 4).
+      'ChainRead',
+      'ChainAccepted',
+      'ChainReopened',
     ];
 
     if (!ALLOWED.includes(envelope.event_type)) {
@@ -329,6 +336,11 @@ const chainHandlers = [
     const url = new URL(request.url);
     const event_type = url.searchParams.get('event_type');
     const ward_id = url.searchParams.get('ward_id');
+    // WO-001 — Citizen Status Timeline. `incident_id` filter scopes the
+    // public-mode projection to one report so the citizen only sees their
+    // own motion-bearing events (Scenario 06 #6 — "Anjali sees only her
+    // own segments").
+    const incident_id = url.searchParams.get('incident_id');
     const limit = Number(url.searchParams.get('limit') ?? '100');
 
     const all = await getAllBlocks();
@@ -340,6 +352,13 @@ const chainHandlers = [
         const payload = b.payload as { ward_id?: string };
 
         return payload.ward_id === ward_id;
+      });
+    }
+    if (incident_id) {
+      filtered = filtered.filter((b) => {
+        const payload = b.payload as { incident_id?: string };
+
+        return payload.incident_id === incident_id;
       });
     }
     const sorted = filtered.sort((a, b) => a.height - b.height).slice(0, limit);

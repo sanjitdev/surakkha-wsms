@@ -219,9 +219,10 @@ describe('FE-B6 CitizenStatusTimeline (citizen-status-timeline.md)', () => {
     await waitFor(() => {
       expect(screen.getByTestId('citizen-action-call-closure-ack')).toBeTruthy();
     });
-    // Both confirm + reopen buttons should be present.
-    expect(screen.getByTestId('citizen-action-call-confirm')).toBeTruthy();
-    expect(screen.getByTestId('citizen-action-call-reopen')).toBeTruthy();
+    // Both confirm + reopen buttons should be present (WO-001 area-label
+    // table: -confirm-yes / -confirm-no).
+    expect(screen.getByTestId('citizen-action-call-confirm-yes')).toBeTruthy();
+    expect(screen.getByTestId('citizen-action-call-confirm-no')).toBeTruthy();
   });
 
   it('renders the empty state when no events match', async () => {
@@ -257,11 +258,11 @@ describe('FE-B6 CitizenStatusTimeline (citizen-status-timeline.md)', () => {
     }
     for (const s of ['in-progress', 'closure-ack', 'silent-closure', 'all-caught-up']) {
       expect(
-        (enJson.actionCall as Record<string, { title: string }>)[s].title,
+        (enJson.actionCall as unknown as Record<string, { title: string }>)[s].title,
         `en.actionCall.${s}.title`,
       ).toBeTruthy();
       expect(
-        (bnJson.actionCall as Record<string, { title: string }>)[s].title,
+        (bnJson.actionCall as unknown as Record<string, { title: string }>)[s].title,
         `bn.actionCall.${s}.title`,
       ).toBeTruthy();
     }
