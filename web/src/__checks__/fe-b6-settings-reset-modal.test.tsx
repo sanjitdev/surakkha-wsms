@@ -4,12 +4,20 @@
  * Per bmad lockdown §7.1, the Danger button variant is reserved for
  * the T3+ issuance path. The Settings reset action is destructive but
  * not issuance, so it must use a Ghost button + a confirm-modal
- * pattern before invoking resetEverything().
+ * pattern before wiping IDB.
+ *
+ * WO-014 (2026-09-15) updated the wire contract — confirming the
+ * modal now (1) emits `SettingsReset{actor}` to POST /api/events
+ * FIRST and (2) then calls `wipeAll()` to clear IDB. The legacy
+ * `resetEverything()` helper (which only did wipeAll + reload) was
+ * removed; the new handler composes both halves explicitly so the
+ * audit event lands before the wipe.
  *
  *   1) Clicking the reset button opens the confirm modal — no destructive
  *      call lands immediately.
- *   2) Cancelling the modal closes it without calling resetEverything().
- *   3) Confirming the modal calls resetEverything().
+ *   2) Cancelling the modal closes it without wiping IDB or firing POST.
+ *   3) Confirming the modal fires POST /api/events { event_type:
+ *      "SettingsReset", payload: { actor: <ref> } } + calls wipeAll().
  *   4) The persona readout uses badge--t1-locked (divider neutral), not
  *      legacy badge--t1 (which still bound to --info / sky-blue).
  */
@@ -34,12 +42,53 @@ const SESSION: SessionRow = {
   tenant_id: 'tenant-001',
 };
 
-// Mock resetEverything at module level so the test does not actually
-// wipe localStorage / IndexedDB / reload the page.
-vi.mock('../mocks/reset', () => {return {
-  resetEverything: vi.fn(async () => undefined),
-}});
-import { resetEverything } from '../mocks/reset';
+// Stub wipeAll at module level so the test does not actually wipe
+// localStorage / IndexedDB / reload the page. The new handler
+// (WO-014) calls wipeAll() directly instead of going through the
+// legacy resetEverything() helper.
+const { wipeAllSpy, capturePosts, restoreFetchRef } = vi.hoisted(() => {
+  const capture: { url: string; body: unknown }[] = [];
+  const restoreRef: { current: () => void } = { current: () => undefined };
+
+  return {
+    wipeAllSpy: vi.fn(async () => undefined),
+    capturePosts: capture,
+    restoreFetchRef: restoreRef,
+  };
+});
+
+function installFetchStub(): void {
+  capturePosts.length = 0;
+  const original = globalThis.fetch;
+
+  globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = typeof input === 'string' ? input : input.toString();
+
+    if (init?.method === 'POST' && url === '/api/events') {
+      const body = init.body ? JSON.parse(String(init.body)) : null;
+
+      capturePosts.push({ url, body });
+      return new Response(
+        JSON.stringify({ event_id: '01STUB', block_hash: '01STUBHASH' }),
+        { status: 201, headers: { 'content-type': 'application/json' } },
+      );
+    }
+    return original(input as RequestInfo, init);
+  }) as typeof globalThis.fetch;
+
+  restoreFetchRef.current = () => {
+    globalThis.fetch = original;
+  };
+}
+
+vi.mock('../mocks/idb', async () => {
+  const actual = await vi.importActual<typeof import('../mocks/idb')>('../mocks/idb');
+
+  return {
+    ...actual,
+    wipeAll: wipeAllSpy,
+  };
+});
 
 function renderSettings() {
   return render(
@@ -65,16 +114,23 @@ function renderSettings() {
 }
 
 beforeEach(() => {
-  (resetEverything as unknown as { mockClear: () => void }).mockClear();
+  wipeAllSpy.mockClear();
+  installFetchStub();
+  // jsdom has no window.location.reload — stub so confirm doesn't crash.
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { ...window.location, reload: vi.fn() },
+  });
 });
 
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+  restoreFetchRef.current();
 });
 
 describe('FE-B6 Settings reset confirm-modal', () => {
-  it('clicking_reset_button_opens_confirm_modal_without_calling_reset', async () => {
+  it('clicking_reset_button_opens_confirm_modal_without_firing_post', async () => {
     renderSettings();
     fireEvent.click(screen.getByTestId('settings-reset-button'));
 
@@ -82,11 +138,12 @@ describe('FE-B6 Settings reset confirm-modal', () => {
       expect(screen.getByTestId('settings-reset-confirm-modal')).toBeTruthy();
     });
     // Confirmation modal opened — but the destructive call has NOT landed.
-    expect(resetEverything as unknown as { mock: { calls: unknown[] } }).toBeDefined();
-    expect(((resetEverything as unknown as { mock: { calls: unknown[] } }).mock.calls)).toHaveLength(0);
+    // No POST yet, no wipeAll() yet.
+    expect(capturePosts.length).toBe(0);
+    expect(wipeAllSpy).not.toHaveBeenCalled();
   });
 
-  it('cancelling_confirm_modal_closes_it_without_calling_reset', async () => {
+  it('cancelling_confirm_modal_closes_it_without_firing_post', async () => {
     renderSettings();
     fireEvent.click(screen.getByTestId('settings-reset-button'));
     await waitFor(() => {
@@ -96,10 +153,16 @@ describe('FE-B6 Settings reset confirm-modal', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('settings-reset-confirm-modal')).toBeNull();
     });
-    expect(((resetEverything as unknown as { mock: { calls: unknown[] } }).mock.calls)).toHaveLength(0);
+    // Cancel is a no-op — no SettingsReset capture, no wipe.
+    const resetPost = capturePosts.find(
+      (c) => (c.body as { event_type?: string }).event_type === 'SettingsReset',
+    );
+
+    expect(resetPost).toBeFalsy();
+    expect(wipeAllSpy).not.toHaveBeenCalled();
   });
 
-  it('confirming_confirm_modal_calls_resetEverything', async () => {
+  it('confirming_confirm_modal_fires_SettingsReset_then_wipes', async () => {
     renderSettings();
     fireEvent.click(screen.getByTestId('settings-reset-button'));
     await waitFor(() => {
@@ -108,8 +171,26 @@ describe('FE-B6 Settings reset confirm-modal', () => {
     await act(async () => {
       fireEvent.click(screen.getByTestId('settings-reset-confirm-confirm'));
     });
+    // The wire contract: POST SettingsReset{actor} FIRST, then wipeAll().
     await waitFor(() => {
-      expect((resetEverything as unknown as { mock: { calls: unknown[] } }).mock.calls.length).toBeGreaterThanOrEqual(1);
+      expect(capturePosts.length).toBeGreaterThanOrEqual(1);
+    });
+    const resetPost = capturePosts.find(
+      (c) => (c.body as { event_type?: string }).event_type === 'SettingsReset',
+    );
+
+    expect(resetPost).toBeTruthy();
+    expect(resetPost!.body).toMatchObject({
+      event_type: 'SettingsReset',
+      actor_identity: {
+        kind: 'utility_operator',
+        ref: 'priya-001',
+        display: 'Priya',
+      },
+      payload: { actor: 'priya-001' },
+    });
+    await waitFor(() => {
+      expect(wipeAllSpy).toHaveBeenCalled();
     });
   });
 
