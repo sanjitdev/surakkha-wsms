@@ -5,6 +5,10 @@
     "summaryFull": "{{total}}টি ইভেন্ট · চেইন হেড ব্লক #{{height}}",
     "heightEmDash": "—"
   },
+  "page": {
+    "title": "অডিট লগ",
+    "subtitle": "প্রতিটি চেইন পড়া লগ করা হয়।"
+  },
   "actions": {
     "exportCsv": "CSV রপ্তানি",
     "exportPdf": "PDF রপ্তানি"
@@ -17,6 +21,43 @@
     "eventsTotal": "মোট ইভেন্ট",
     "blocks": "ব্লক"
   },
+  "filter": {
+    "incident": {
+      "label": "ইনসিডেন্ট",
+      "placeholder": "ইনসিডেন্ট আইডি দিয়ে ফিল্টার করুন",
+      "all": "সকল ইনসিডেন্ট"
+    },
+    "eventType": {
+      "label": "ইভেন্ট ধরন",
+      "placeholder": "ইভেন্ট ধরন"
+    },
+    "actor": {
+      "label": "অভিনেতা",
+      "placeholder": "অভিনেতা দিয়ে ফিল্টার করুন",
+      "all": "যেকোনো অভিনেতা"
+    },
+    "band": {
+      "label": "ব্যান্ড",
+      "placeholder": "ট্রাস্ট ব্যান্ড"
+    },
+    "reporterBadge": {
+      "label": "রিপোর্টার উৎস",
+      "placeholder": "রিপোর্টার উৎস"
+    },
+    "dateRange": {
+      "label": "তারিখের পরিসর"
+    },
+    "clearAll": "ফিল্টার মুছুন",
+    "compose": "AND-সমন্বিত ফিল্টার"
+  },
+  "chips": {
+    "incident": "ইনসিডেন্ট",
+    "eventType": "ইভেন্ট ধরন",
+    "actor": "অভিনেতা",
+    "band": "ব্যান্ড",
+    "reporterBadge": "রিপোর্টার উৎস",
+    "dateRange": "তারিখের পরিসর"
+  },
   "filters": {
     "ariaLabel": "অডিট লগ ফিল্টার",
     "all": "সব ইভেন্ট",
@@ -26,6 +67,18 @@
     "citizen": "নাগরিক রিপোর্ট",
     "notices": "নোটিশ",
     "auth": "প্রমাণীকরণ"
+  },
+  "band": {
+    "T1": "T1 যাচাই হয়নি",
+    "T2": "T2 যাচাইকৃত",
+    "T3": "T3 ইস্যু",
+    "resolved": "সমাধান"
+  },
+  "reporter": {
+    "anchor": "অ্যাংকর নাগরিক",
+    "hotline": "হটলাইন",
+    "webform": "ওয়েবফর্ম",
+    "sensor": "সেন্সর"
   },
   "range": {
     "fromLabel": "থেকে",
@@ -71,7 +124,26 @@
         "title": "যাচাই অনুরোধ সময়সীমা শেষ",
         "aria": "হ্যাশ যাচাই ব্যর্থ: সময়সীমা শেষ"
       }
-    }
+    },
+    "incidentGroupHeading": "ইনসিডেন্ট {{id}}",
+    "eventRowsLabel": "{{count}}টি চেইন ইভেন্ট"
+  },
+  "anomaly": {
+    "rowBadgeTitle": "হ্যাশ অমিল — চেইন অসঙ্গতি",
+    "rowBadgeAria": "এই সারিতে চেইন অসঙ্গতি সনাক্ত হয়েছে",
+    "bannerTitle": "ফিল্টার সেটে চেইন অসঙ্গতি",
+    "bannerBody": "স্বীকার করুন বা পিয়াকে জানান।",
+    "bannerAcknowledge": "স্বীকার করুন"
+  },
+  "timestamp": {
+    "justNow": "এইমাত্র",
+    "minutesAgo": "{{n}} মিনিট আগে",
+    "hoursAgo": "{{n}} ঘণ্টা আগে",
+    "daysAgo": "{{n}} দিন আগে"
+  },
+  "openChain": {
+    "label": "চেইন সেগমেন্ট খুলুন",
+    "title": "প্রতি-ইনসিডেন্ট চেইন সেগমেন্ট খুলুন"
   },
   "empty": {
     "heading": "কোনো মিলে যাওয়া ইভেন্ট নেই",

@@ -5,6 +5,10 @@
     "summaryFull": "{{total}} events · chain head block #{{height}}",
     "heightEmDash": "—"
   },
+  "page": {
+    "title": "Audit log",
+    "subtitle": "Every chain read is logged."
+  },
   "actions": {
     "exportCsv": "Export CSV",
     "exportPdf": "Export PDF"
@@ -17,6 +21,43 @@
     "eventsTotal": "events total",
     "blocks": "blocks"
   },
+  "filter": {
+    "incident": {
+      "label": "Incident",
+      "placeholder": "Filter by incident id",
+      "all": "All incidents"
+    },
+    "eventType": {
+      "label": "Event type",
+      "placeholder": "Event types"
+    },
+    "actor": {
+      "label": "Actor",
+      "placeholder": "Filter by actor",
+      "all": "Any actor"
+    },
+    "band": {
+      "label": "Band",
+      "placeholder": "Trust band"
+    },
+    "reporterBadge": {
+      "label": "Reporter source",
+      "placeholder": "Reporter source"
+    },
+    "dateRange": {
+      "label": "Date range"
+    },
+    "clearAll": "Clear filters",
+    "compose": "AND-composed filters"
+  },
+  "chips": {
+    "incident": "Incident",
+    "eventType": "Event type",
+    "actor": "Actor",
+    "band": "Band",
+    "reporterBadge": "Reporter source",
+    "dateRange": "Date range"
+  },
   "filters": {
     "ariaLabel": "Filter audit log",
     "all": "All events",
@@ -26,6 +67,18 @@
     "citizen": "Citizen reports",
     "notices": "Notices",
     "auth": "Auth"
+  },
+  "band": {
+    "T1": "T1 unverified",
+    "T2": "T2 verified",
+    "T3": "T3 issuance",
+    "resolved": "Resolved"
+  },
+  "reporter": {
+    "anchor": "Anchor citizen",
+    "hotline": "Hotline",
+    "webform": "Webform",
+    "sensor": "Sensor"
   },
   "range": {
     "fromLabel": "From",
@@ -71,7 +124,26 @@
         "title": "Verification request timed out",
         "aria": "Hash verification failed: timeout"
       }
-    }
+    },
+    "incidentGroupHeading": "Incident {{id}}",
+    "eventRowsLabel": "{{count}} chain events"
+  },
+  "anomaly": {
+    "rowBadgeTitle": "Hash mismatch — chain anomaly",
+    "rowBadgeAria": "Chain anomaly detected on this row",
+    "bannerTitle": "Chain anomaly in filter set",
+    "bannerBody": "Acknowledge or escalate to Pia.",
+    "bannerAcknowledge": "Acknowledge"
+  },
+  "timestamp": {
+    "justNow": "just now",
+    "minutesAgo": "{{n}} min ago",
+    "hoursAgo": "{{n}} hr ago",
+    "daysAgo": "{{n}} day ago"
+  },
+  "openChain": {
+    "label": "Open chain segment",
+    "title": "Open per-incident chain segment"
   },
   "empty": {
     "heading": "No matching events",
