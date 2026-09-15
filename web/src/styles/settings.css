@@ -10,6 +10,15 @@
    and the read-only persona readout.
    ════════════════════════════════════════════════════════════════════ */
 
+/* ── Settings page stack — vertical column of cards with --space-xl
+      gap (foundation §4 spacing). The shared .card primitive does
+      not carry a margin; the page wrapper owns the rhythm. ─────── */
+.settings-page__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+}
+
 /* ── Settings row — 2-col grid (label left, control right) at >= md.
       Drops to a single column below <bp-md> (768 px). ────────────── */
 .settings-row {
