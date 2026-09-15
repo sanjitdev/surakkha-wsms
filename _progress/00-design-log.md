@@ -2,7 +2,7 @@
 
 > WDS Phase 4 / 5 progress.
 > Maintained by Freya (Phase 4) and Mimir (Phase 5).
-> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build).
+> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed).
 >
 > **Handoff status:** All 17 PRDs in `docs/E-Development/NNN-[slug].xml` are
 > `status="planned"` and ready for `mimir build`. Master PRD at
