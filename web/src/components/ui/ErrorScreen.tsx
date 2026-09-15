@@ -59,7 +59,7 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
   const dev = import.meta.env.DEV;
   const reveal = showStack ?? dev;
   const [copied, setCopied] = useState(false);
-  const { t } = useTranslation('common');
+  const { t } = useTranslation();
 
   const onCopy = async () => {
     const text = format(buildDiagnostics(error, componentStack));
@@ -101,18 +101,18 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
   return (
     <div className="error-screen" role="alert" aria-live="assertive">
       <div className="error-screen__panel">
-        <h1 className="error-screen__title">{t('errorScreen.title')}</h1>
-        <p className="error-screen__subtitle">{t('errorScreen.subtitle')}</p>
+        <h1 className="error-screen__title">{t('common:errorScreen.title', { defaultValue: 'Something went wrong' })}</h1>
+        <p className="error-screen__subtitle">{t('common:errorScreen.subtitle', { defaultValue: 'The app hit an unexpected error and recovered itself. Your work in this tab may be lost.' })}</p>
         <p className="error-screen__message" data-testid="error-screen-message">
           <strong>{error.name}:</strong> {error.message}
         </p>
         {reveal && error.stack && (
           <details className="error-screen__stack">
-            <summary>{t('errorScreen.showStack')}</summary>
+            <summary>{t('common:errorScreen.showStack', { defaultValue: 'Show stack trace' })}</summary>
             <pre>{error.stack}</pre>
             {componentStack && (
               <>
-                <h3>{t('errorScreen.componentStack')}</h3>
+                <h3>{t('common:errorScreen.componentStack', { defaultValue: 'Component stack' })}</h3>
                 <pre>{componentStack}</pre>
               </>
             )}
@@ -120,7 +120,7 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
         )}
         <div className="error-screen__actions">
           <button type="button" className="button button--primary" onClick={onReload}>
-            {t('errorScreen.reload')}
+            {t('common:errorScreen.reload', { defaultValue: 'Reload page' })}
           </button>
           <button
             type="button"
@@ -129,7 +129,9 @@ export function ErrorScreen({ error, componentStack, showStack }: ErrorScreenPro
               void onCopy();
             }}
           >
-            {copied ? t('errorScreen.copied') : t('errorScreen.copyDiagnostics')}
+            {copied
+              ? t('common:errorScreen.copied', { defaultValue: 'Copied' })
+              : t('common:errorScreen.copyDiagnostics', { defaultValue: 'Copy diagnostics' })}
           </button>
         </div>
       </div>

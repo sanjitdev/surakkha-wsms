@@ -10,6 +10,10 @@
  * Discriminated union on `mode: 'single' | 'range'` keeps `value` and
  * `onChange` types narrow; range mode is composed via `<DateRangePicker>`,
  * not this component.
+ *
+ * All i18n strings resolve via the `datepicker` namespace + a
+ * `useTranslation` hook so the active locale flows from the i18n
+ * bridge (useLocale → useLocaleSync → i18next.changeLanguage).
  */
 import '../../styles/datepicker.css';
 import {
@@ -21,6 +25,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Calendar } from './Calendar';
 import { useCalendar } from './useCalendar';
 import { Locale } from '../../types/domain';
@@ -47,9 +52,6 @@ export interface DatePickerPropsSingle extends DatePickerPropsBase {
   onChange: (d: Date | null) => void;
 }
 export type DatePickerProps = DatePickerPropsSingle;
-/** Default English trigger placeholder when no value + no explicit placeholder. */
-const DEFAULT_PLACEHOLDER_EN = 'Select a date';
-const DEFAULT_PLACEHOLDER_BN = 'একটি তারিখ নির্বাচন করুন';
 
 export function DatePicker(props: DatePickerProps): ReactNode {
   const {
@@ -62,6 +64,7 @@ export function DatePicker(props: DatePickerProps): ReactNode {
     disabled = false,
     testId = 'datepicker',
   } = props;
+  const { t } = useTranslation();
   const { locale: hookLocale } = useLocale();
   const locale: Locale = localeOverride ?? hookLocale;
   const popoverId = useId();
@@ -113,29 +116,26 @@ export function DatePicker(props: DatePickerProps): ReactNode {
     setOpen(false);
     queueMicrotask(() => triggerRef.current?.focus());
   }, []);
+  // i18n strings — all sourced from the `datepicker` namespace. Single
+  // locale-aware key set so consumers don't have to thread labels in.
+  // `defaultValue` is the English fallback so unit tests without an
+  // I18nextProvider still see the original literal strings.
   const triggerLabel = useMemo(() => {
     if (value) {
       return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(value);
     }
-    return placeholder ?? (locale === Locale.Bn ? DEFAULT_PLACEHOLDER_BN : DEFAULT_PLACEHOLDER_EN);
-  }, [value, locale, placeholder]);
-
-  // i18n strings — kept inline because the spec asked for 12 keys under the
-  // datepicker.* namespace; the consumer wires them in via prop or via the
-  // styleguide. For the primitive itself we derive deterministic English or
-  // Bangla labels so a consumer that doesn't pass `labels` still gets a
-  // working picker.
-  const labels = useMemo(() => {
-    const isBn = locale === Locale.Bn;
-
-    return {
-      previousMonth: isBn ? 'আগের মাস' : 'Previous month',
-      nextMonth: isBn ? 'পরের মাস' : 'Next month',
-      previousYear: isBn ? 'আগের বছর' : 'Previous year',
-      nextYear: isBn ? 'পরের বছর' : 'Next year',
-      today: isBn ? 'আজ' : 'Today',
-    };
-  }, [locale]);
+    return placeholder ?? t('datepicker:selectDate', { defaultValue: 'Select a date' });
+  }, [value, locale, placeholder, t]);
+  const labels = useMemo(
+    () => ({
+      previousMonth: t('datepicker:previousMonth', { defaultValue: 'Previous month' }),
+      nextMonth: t('datepicker:nextMonth', { defaultValue: 'Next month' }),
+      previousYear: t('datepicker:previousYear', { defaultValue: 'Previous year' }),
+      nextYear: t('datepicker:nextYear', { defaultValue: 'Next year' }),
+      today: t('datepicker:today', { defaultValue: 'Today' }),
+    }),
+    [t],
+  );
 
   return (
     <div

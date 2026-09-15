@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface ModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function Modal({ open, onClose, children, ariaLabel, ariaLabelledBy, test
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   const prevOpenRef = useRef(open);
+  const { t } = useTranslation();
 
   // Keep the latest onClose without retriggering the focus-trap effect
   // (consumer-side identity changes must not re-bind the trap).
@@ -91,7 +93,8 @@ export function Modal({ open, onClose, children, ariaLabel, ariaLabelledBy, test
   // pass `ariaLabelledBy` (preferred — point to a heading id) or `ariaLabel`
   // (fallback). If neither is supplied, fall back to a generic label so the
   // dialog is never announced as bare "dialog".
-  const dialogAriaLabel = ariaLabelledBy ? undefined : (ariaLabel ?? 'Dialog');
+  const fallbackAriaLabel = t('common:modal.ariaFallback', { defaultValue: 'Dialog' });
+  const dialogAriaLabel = ariaLabelledBy ? undefined : (ariaLabel ?? fallbackAriaLabel);
   const dialogLabelledBy = ariaLabelledBy;
 
   return (

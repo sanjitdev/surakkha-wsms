@@ -23,6 +23,11 @@
  *   - utility_message_desk → 1 item (Inbox) — currently unhandled by any page
  *                            but defined here so a future message-desk
  *                            landing gets the right nav out of the box.
+ *
+ * Labels are *i18n keys* — the Sidebar resolves them via `useTranslation`
+ * against the `layout` namespace. Centralised here so every persona
+ * sees the same key, but resolved at render time so a locale flip
+ * propagates without remounting the shell.
  */
 import {
   AlertIcon,
@@ -43,7 +48,17 @@ import {
 } from '../icons/sidebar-icons';
 import type { SidebarNavItem } from './Sidebar';
 
-export const NAV_BY_ROLE: Record<string, readonly SidebarNavItem[]> = {
+/**
+ * Each nav item carries a `labelKey` instead of a literal string. The
+ * Sidebar resolves it via `t(labelKey)` against the `layout` namespace.
+ * Slot names follow the `nav.<role>.<item>` convention (see
+ * layout.json).
+ */
+export interface SidebarNavItemI18n extends Omit<SidebarNavItem, 'label'> {
+  labelKey: string;
+}
+
+export const NAV_BY_ROLE: Record<string, readonly SidebarNavItemI18n[]> = {
   utility_operator: [
     { labelKey: 'layout:nav.utility_operator.dashboard', href: '/dashboard', icon: <DashboardIcon /> },
     { labelKey: 'layout:nav.utility_operator.handover', href: '/handover', icon: <HandoverIcon /> },
@@ -60,14 +75,22 @@ export const NAV_BY_ROLE: Record<string, readonly SidebarNavItem[]> = {
     { labelKey: 'layout:nav.field_technician.incidentDetail', href: '/field/incident', icon: <AlertIcon /> },
     { labelKey: 'layout:nav.field_technician.history', href: '/field/history', icon: <LineChartIcon /> },
   ],
-  anjali: [{ labelKey: 'layout:nav.anjali.submit', href: '/submit', icon: <SendIcon /> }],
+  anjali: [
+    { labelKey: 'layout:nav.anjali.submit', href: '/submit', icon: <SendIcon /> },
+  ],
   pha_approver: [
     { labelKey: 'layout:nav.pha_approver.approve', href: '/approve', icon: <CheckIcon /> },
     { labelKey: 'layout:nav.pha_approver.audit', href: '/audit', icon: <AuditIcon /> },
   ],
-  pha_viewer: [{ labelKey: 'layout:nav.pha_viewer.audit', href: '/audit', icon: <AuditIcon /> }],
-  vendor: [{ labelKey: 'layout:nav.vendor.vendor', href: '/vendor', icon: <UploadIcon /> }],
-  utility_message_desk: [{ labelKey: 'layout:nav.utility_message_desk.inbox', href: '/inbox', icon: <InboxIcon /> }],
+  pha_viewer: [
+    { labelKey: 'layout:nav.pha_viewer.audit', href: '/audit', icon: <AuditIcon /> },
+  ],
+  vendor: [
+    { labelKey: 'layout:nav.vendor.vendor', href: '/vendor', icon: <UploadIcon /> },
+  ],
+  utility_message_desk: [
+    { labelKey: 'layout:nav.utility_message_desk.inbox', href: '/inbox', icon: <InboxIcon /> },
+  ],
 };
 /**
  * Resolve the persona's default landing route. Used for the sidebar

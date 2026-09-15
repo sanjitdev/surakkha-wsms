@@ -3,8 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 export interface TopChromeProps {
   personaLabel: string;
-  /** Brand label in the left slot. Defaults to translated "Surakkha";
-   *  pass to override. */
+  /** Brand label in the left slot. Defaults to the `layout:topChrome.brand` key. */
   brand?: string;
   chainFreshSeconds?: number;
   navSlot?: ReactNode;
@@ -17,21 +16,27 @@ export function TopChrome({
   navSlot,
   testId,
 }: TopChromeProps) {
-  const { t } = useTranslation('layout');
+  const { t } = useTranslation();
+
+  // Brand: prop wins; otherwise the localised brand from the layout NS.
+  const resolvedBrand = brand ?? t('layout:topChrome.brand', { defaultValue: 'Surakkha' });
+  // chain label: deterministic from `chainFreshSeconds` (number when known,
+  // undefined while the first poll is in flight → "fresh").
+  const chainLabel =
+    chainFreshSeconds !== undefined
+      ? t('layout:topChrome.chainSeconds', { seconds: chainFreshSeconds })
+      : t('layout:topChrome.chainFresh');
+
   return (
     <header className="top-chrome" data-testid={testId ?? 'top-chrome'}>
       <div className="top-chrome__left">
-        <span className="top-chrome__brand">{brand ?? t('topChrome.brand')}</span>
+        <span className="top-chrome__brand">{resolvedBrand}</span>
         <span className="top-chrome__sep" aria-hidden="true">
           ·
         </span>
         <span className="top-chrome__chain">
           <span className="pulse-dot" aria-hidden="true" />
-          <span className="mono">
-            {chainFreshSeconds !== undefined
-              ? t('topChrome.chainSeconds', { seconds: chainFreshSeconds })
-              : t('topChrome.chainFresh')}
-          </span>
+          <span className="mono">{chainLabel}</span>
         </span>
       </div>
       {navSlot ? <div className="top-chrome__nav">{navSlot}</div> : null}

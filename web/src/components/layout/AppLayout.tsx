@@ -51,7 +51,7 @@ import { LogoutIcon } from '../icons/sidebar-icons';
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
-  const { t: tLayout } = useTranslation('layout');
+  const { t } = useTranslation();
 
   // (1) session — read once on mount. Pages don't fetch it.
   const [session, setSession] = useState<SessionRow | null>(null);
@@ -135,7 +135,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
               <span className="sidebar__icon" aria-hidden="true">
                 <LogoutIcon />
               </span>
-              <span>{tLayout('sidebar.logout')}</span>
+              <span>{t('layout:sidebar.logout', { defaultValue: 'Logout' })}</span>
             </button>
           }
         />

@@ -1,4 +1,5 @@
 import type { ChangeEventHandler, InputHTMLAttributes, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export interface InputProps {
   value: string;
@@ -68,6 +69,7 @@ export function SearchInput({
   testId,
   type,
 }: SearchInputProps) {
+  const { t } = useTranslation();
   return (
     <Input
       value={value}
@@ -78,7 +80,7 @@ export function SearchInput({
       icon={icon}
       testId={testId ?? 'input-search-md'}
       type={type}
-      aria-label={placeholder ?? 'search'}
+      aria-label={placeholder ?? t('common:input.search', { defaultValue: 'search' })}
     />
   );
 }
