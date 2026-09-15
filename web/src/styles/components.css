@@ -36,14 +36,16 @@
   font-size: var(--font-size-md);
 }
 
+/* WO-013 — lockdown: primary CTA binds to --color-primary (deep teal,
+   foundation §7.1). Continue button on LoginPage uses this class. */
 .button--primary {
-  background: var(--brand-500);
+  background: var(--color-primary);
   color: var(--bg-surface);
-  border-color: var(--brand-500);
+  border-color: var(--color-primary);
 }
 .button--primary:hover {
-  background: var(--brand-600);
-  border-color: var(--brand-600);
+  background: color-mix(in srgb, var(--color-primary) 88%, var(--fg-default) 12%);
+  border-color: color-mix(in srgb, var(--color-primary) 88%, var(--fg-default) 12%);
 }
 .button--primary:disabled {
   background: var(--bg-inset);
@@ -99,7 +101,8 @@
 
 .button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--brand-400);
+  /* WO-013 — lockdown §10.2: 2px --color-primary-tint focus ring. */
+  box-shadow: 0 0 0 2px var(--color-primary-tint);
 }
 .button--danger:focus-visible {
   box-shadow: 0 0 0 2px var(--danger);

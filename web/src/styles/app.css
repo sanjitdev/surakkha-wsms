@@ -199,7 +199,9 @@
 }
 
 .persona:focus-visible {
-  outline: 2px solid var(--brand-400);
+  /* WO-013 — lockdown §10.2: 2px --color-primary-tint focus ring
+     replaces the audit-flagged emerald-600 ring. */
+  outline: 2px solid var(--color-primary-tint);
   outline-offset: 2px;
 }
 
@@ -292,6 +294,9 @@
 .picker-status--pending .picker-status__dot {
   background: var(--warning);
 }
+/* WO-013 — lockdown: alert-red is reserved for consumer-notice
+   issuance paths (T3+). Login's transient backend-unreachable state
+   uses the amber warn colour per cascade rule. */
 .picker-status--error .picker-status__dot {
-  background: var(--danger);
+  background: var(--color-status-warn);
 }
