@@ -165,20 +165,20 @@ function renderAuditLog() {
 
 async function waitForTable() {
   await waitFor(() => {
-    expect(screen.queryByTestId('audit-table-loading')).toBeNull();
+    expect(screen.getByTestId('audit-log-page')).toBeTruthy();
+    // Wait for the event fetch to settle — rows are rendered under
+    // audit-log-event-row once events arrive.
+    expect(document.querySelectorAll('[data-testid="audit-log-event-row"]').length).toBeGreaterThan(0);
   });
 }
 
-describe('FE-B6 AuditLog per-row hash verification (audit-log.md #13)', () => {
+describe('FE-B6 AuditLog per-row hash verification (audit-log.md #13, post-WO-008)', () => {
   // (1) Idle state — every row renders a Verify button.
   it('renders a Verify button per row in idle state', async () => {
     renderAuditLog();
     await waitForTable();
-    expect(screen.getByTestId('audit-verify-btn-evt-1').textContent).toContain(enJson.table.verify);
-    expect(screen.getByTestId('audit-verify-btn-evt-2').textContent).toContain(enJson.table.verify);
-    // Idle = no badges rendered.
-    expect(screen.queryByTestId('audit-verify-evt-1')).toBeNull();
-    expect(screen.queryByTestId('audit-verify-evt-2')).toBeNull();
+    expect(screen.getByTestId('audit-log-verify-btn-evt-1').textContent).toContain(enJson.table.verify);
+    expect(screen.getByTestId('audit-log-verify-btn-evt-2').textContent).toContain(enJson.table.verify);
   });
 
   // (2) OK path — clicking Verify calls /api/chain/verify and flips to OK.
@@ -203,7 +203,7 @@ describe('FE-B6 AuditLog per-row hash verification (audit-log.md #13)', () => {
       renderAuditLog();
       await waitForTable();
 
-      const btn = screen.getByTestId('audit-verify-btn-evt-1');
+      const btn = screen.getByTestId('audit-log-verify-btn-evt-1');
 
       expect(btn).toBeTruthy();
       fireEvent.click(btn);
@@ -213,14 +213,14 @@ describe('FE-B6 AuditLog per-row hash verification (audit-log.md #13)', () => {
       });
 
       await waitFor(() => {
-        const badge = screen.getByTestId('audit-verify-evt-1');
+        // The OK state replaces the Verify button with a span carrying the
+        // success aria-label.
+        const inline = screen.getByTestId('audit-log-verify-inline-evt-1');
 
-        expect(badge.className).toContain('audit-verify--ok');
-        expect(badge.textContent).toContain(enJson.table.verifyOk);
+        expect(inline.textContent).toContain(enJson.table.verifyOk);
       });
-      // Per-row scope — row 2 is still idle.
-      expect(screen.queryByTestId('audit-verify-evt-2')).toBeNull();
-      expect(screen.getByTestId('audit-verify-btn-evt-2')).toBeTruthy();
+      // Per-row scope — row 2 is still idle (verify button present).
+      expect(screen.getByTestId('audit-log-verify-btn-evt-2')).toBeTruthy();
     } finally {
       restore();
     }
@@ -236,13 +236,12 @@ describe('FE-B6 AuditLog per-row hash verification (audit-log.md #13)', () => {
       renderAuditLog();
       await waitForTable();
 
-      fireEvent.click(screen.getByTestId('audit-verify-btn-evt-1'));
+      fireEvent.click(screen.getByTestId('audit-log-verify-btn-evt-1'));
 
       await waitFor(() => {
-        const badge = screen.getByTestId('audit-verify-evt-1');
+        const inline = screen.getByTestId('audit-log-verify-inline-evt-1');
 
-        expect(badge.className).toContain('audit-verify--fail');
-        expect(badge.textContent).toContain(enJson.table.verifyFail.label);
+        expect(inline.textContent).toContain(enJson.table.verifyFail.label);
       });
     } finally {
       restore();

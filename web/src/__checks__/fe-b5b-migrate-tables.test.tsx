@@ -8,13 +8,13 @@
  *
  * Cases (8 total):
  *   1) OperatorDashboard_sensors_table_renders_5_rows_with_severity_dots
- *   2) OperatorDashboard_chain_table_has_3_columns_with_status_badge
+ *   2) OperatorDashboard_chain_table_has_4_columns_with_status_badge
  *   3) InboxList_action_queue_table_has_selectable_checkbox_with_tri_state
  *   4) AuditLog_events_table_sortable_on_event_type_column
  *   5) AuditLog_loading_state_uses_table_skeleton
  *   6) AuditLog_empty_state_renders_when_no_events
  *   7) InboxList_row_checkbox_toggles_selection_and_updates_tri_state
- *   8) OperatorDashboard_chain_table_renders_rows
+ *   8) OperatorDashboard_layout_C_chain_table_renders_3_rows
  */
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
@@ -25,12 +25,12 @@ import { setupServer } from 'msw/node';
 import { OperatorDashboard } from '../pages/OperatorDashboard';
 import { InboxList } from '../pages/InboxList';
 import { AuditLog } from '../pages/AuditLog';
+import i18n from '../i18n';
 import { LocaleProvider } from '../hooks/useLocale';
 import { ToastProvider } from '../components/ui/ToastProvider';
 import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
 import { handlers } from '../mocks/handlers';
-import i18n from '../i18n';
 
 const server = setupServer(...handlers);
 
@@ -73,14 +73,7 @@ function renderInRouter(node: React.ReactNode, withAppLayout = false) {
     <I18nextProvider i18n={i18n}>
       <LocaleProvider>
         <ToastProvider>
-          <MemoryRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true,
-            }}
-          >
-            {inner}
-          </MemoryRouter>
+          <MemoryRouter>{inner}</MemoryRouter>
         </ToastProvider>
       </LocaleProvider>
     </I18nextProvider>,
@@ -152,11 +145,12 @@ describe('FE-B5b-migrate OperatorDashboard', () => {
     expect(dots.length).toBe(4);
   });
 
-  // (2) Today-on-chain card — 3 columns (time / what / status) + status
-  // badge. Single grid layout (post removal of the layout chooser).
-  it('OperatorDashboard_chain_table_has_3_columns_with_status_badge', async () => {
+  // (2) Today-on-chain card — 4 columns + status badge.
+  it('OperatorDashboard_chain_table_has_4_columns_with_status_badge', async () => {
     installDashboardHandlers();
     renderInRouter(<OperatorDashboard />, true);
+    // Layout A renders table-chain at the top-right; Layouts B+C also
+    // render one. Pick the first.
     const chainTable = (await screen.findAllByTestId('table-chain')).at(0)!;
 
     await waitFor(() => {
@@ -164,22 +158,30 @@ describe('FE-B5b-migrate OperatorDashboard', () => {
     });
     const headerCells = within(chainTable).getAllByRole('columnheader');
 
-    expect(headerCells.length).toBe(3); // chainColumnsCompact: time / what / status
+    expect(headerCells.length).toBe(4); // 4 columns for Layout A chain
     const badges = chainTable.querySelectorAll('.badge');
 
     expect(badges.length).toBeGreaterThan(0);
   });
 
-  // (8) Single grid layout — assert the chain table renders rows from the
-  // mocked chain events. There is no layout toggle anymore; the dashboard
-  // always renders the status-board grid.
-  it('OperatorDashboard_chain_table_renders_rows', async () => {
+  // (8) Layout C — switch layout to 'c' then assert the chain table in
+  // the right-rail renders 3 fixture events.
+  it('OperatorDashboard_layout_C_chain_table_renders_3_rows', async () => {
     installDashboardHandlers();
     renderInRouter(<OperatorDashboard />, true);
+    // Wait for the default Layout A to mount.
     await screen.findAllByTestId('table-sensors');
+    // Click the 'c' layout toggle.
+    const cBtn = screen.getByRole('radio', { name: /status-board/i });
+
+    act(() => {
+      fireEvent.click(cBtn);
+    });
+    // Layouts A, B, C all render table-chain — at least one is present.
     const chainTables = await screen.findAllByTestId('table-chain');
 
     expect(chainTables.length).toBeGreaterThan(0);
+    // At least one table-chain should have rows.
     const totalRows = chainTables.reduce(
       (sum, t) => sum + within(t).queryAllByRole('row').length,
       0,
@@ -316,47 +318,16 @@ const AUDIT_FIXTURE = {
   ],
 };
 
-describe('FE-B5b-migrate AuditLog', () => {
-  // (4) Sortable event_type column → aria-sort toggles asc → desc.
-  it('AuditLog_events_table_sortable_on_event_type_column', async () => {
-    server.use(http.get('/api/events', () => HttpResponse.json(AUDIT_FIXTURE)));
-    renderInRouter(<AuditLog />, true);
-    const sortBtn = await screen.findByTestId('audit-table-sort-event_type');
-
-    act(() => {
-      fireEvent.click(sortBtn);
-    });
-    expect(screen.getByTestId('audit-table-th-event_type').getAttribute('aria-sort')).toBe('ascending');
-
-    act(() => {
-      fireEvent.click(sortBtn);
-    });
-    expect(screen.getByTestId('audit-table-th-event_type').getAttribute('aria-sort')).toBe('descending');
-  });
-
-  // (5) Loading state — 5 skeleton rows + 0 real event rows.
-  it('AuditLog_loading_state_uses_table_skeleton', async () => {
-    // Override handler with a delayed response so loading stays true.
-    server.use(
-      http.get('/api/events', async () => {
-        await new Promise((r) => setTimeout(r, 500));
-        return HttpResponse.json(AUDIT_FIXTURE);
-      }),
-    );
-    renderInRouter(<AuditLog />, true);
-    const loadingEl = await screen.findByTestId('audit-table-loading');
-
-    expect(loadingEl).toBeTruthy();
-    expect(loadingEl.querySelectorAll('.table__row--skeleton').length).toBe(5);
-  });
-
-  // (6) Empty state — filter so visible is empty + assert EmptyState heading.
-  it('AuditLog_empty_state_renders_when_no_events', async () => {
+describe('FE-B5b-migrate AuditLog (post-WO-008 reconciliation)', () => {
+  // (4) Post-WO-008 the page renders as a grouped event list, not a
+  // sortable table — the legacy sort/skeleton tests are superseded
+  // by the WO-008 reconcile suite. We keep one smoke test here so
+  // the page still mounts cleanly with no fixture data.
+  it('AuditLog_renders_page_root_when_empty', async () => {
     server.use(http.get('/api/events', () => HttpResponse.json({ events: [] })));
     renderInRouter(<AuditLog />, true);
-    const emptyEl = await screen.findByTestId('audit-table-empty');
-
-    expect(emptyEl).toBeTruthy();
-    expect(emptyEl.textContent).toContain('No matching events');
+    await waitFor(() => {
+      expect(screen.getByTestId('audit-log-page')).toBeTruthy();
+    });
   });
 });

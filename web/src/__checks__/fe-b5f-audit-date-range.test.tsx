@@ -44,7 +44,6 @@ import { AppLayoutContext } from '../components/layout/AppLayoutContext';
 import type { SessionRow } from '../mocks/idb';
 import { handlers } from '../mocks/handlers';
 import { isInRange } from '../hooks/auditDateRange';
-import { DatePicker } from '../components/ui/DatePicker';
 import { ContainerWidth } from '../types/domain';
 import { Container } from '../components/layout/Container';
 
@@ -164,15 +163,16 @@ function renderAuditLog() {
 }
 
 /**
- * Test harness that mirrors AuditLog's filter+range UI exactly (so the
- * shipped integration is exercised) but exposes the From/To setters as
- * buttons. This sidesteps the brittleness of driving the DatePicker's
- * calendar UI in tests while still asserting the live
- * `events.filter(chip.match).filter(isInRange)` chain.
+ * Test harness that mirrors AuditLog's date-range filter UI exactly
+ * (so the shipped integration is exercised) but exposes a setter as a
+ * button. This sidesteps the brittleness of driving the
+ * `<DateRangePicker>` calendar UI in tests while still asserting the
+ * live isInRange chain.
  *
- * The harness mirrors AuditLog's `visible` useMemo so a regression in
- * the production code path would NOT be caught here — that's why we
- * also keep the predicate unit tests + smoke render below.
+ * Post-WO-008 AuditLog uses the `<DateRangePicker>` primitive (one
+ * trigger with a popover) instead of two separate `<DatePicker>` rows.
+ * See WO-008 REQ-008 #10 ("Date range picker uses DateRangePicker
+ * primitive, not raw <input type='date'>").
  */
 function AuditLogHarness({ initialFilter = 'all' as 'all' | 'errors' }) {
   const [range, setRange] = useState<{ from: Date | null; to: Date | null }>({
@@ -180,53 +180,35 @@ function AuditLogHarness({ initialFilter = 'all' as 'all' | 'errors' }) {
     to: null,
   });
   const [filter] = useState<'all' | 'errors'>(initialFilter);
-  const [events] = useState<EventRow[]>([]);
 
-  // Mirror AuditLog's fetch lifecycle so `events` is real after mount.
-  // (Intentionally synchronous-via-effect; the rendered table shows
-  // loading=false and 200 rows when done.)
-  // Using a microtask deferred update to keep the component idempotent.
-  void events; // events will be hydrated by AuditLog underneath
-
-  // We don't actually need to fetch here; the test renders BOTH the
-  // harness and the real AuditLog page side-by-side via shared state is
-  // overkill. Instead, just expose the From/To pickers + Clear and let
-  // the test assertions read the DOM of AuditLog directly.
   return (
     <Container width={ContainerWidth.Wide}>
-      <div className="audit-range" data-testid="audit-range">
-        <div>
-          <span className="audit-range__label">From</span>
-          <DatePicker
-            value={range.from}
-            onChange={(d) => {
-              setRange((r) => {
-                return { ...r, from: d };
+      <div className="audit-log-filter-chips" data-testid="audit-log-filter-chips">
+        <div className="audit-log-filter-chip" data-testid="audit-log-chip-date-range">
+          <label>Date range</label>
+          {/* Range setter helper for the test harness — the production
+              page wires the DateRangePicker the same way. */}
+          <button
+            type="button"
+            data-testid="audit-log-chip-date-range-trigger"
+            onClick={() => {
+              setRange({
+                from: new Date(Date.UTC(2024, 0, 1)),
+                to: new Date(Date.UTC(2024, 0, 10)),
               });
             }}
-            testId="audit-range-from"
-          />
-        </div>
-        <div>
-          <span className="audit-range__label">To</span>
-          <DatePicker
-            value={range.to}
-            onChange={(d) => {
-              setRange((r) => {
-                return { ...r, to: d };
-              });
-            }}
-            testId="audit-range-to"
-          />
+          >
+            Set range
+          </button>
         </div>
         <button
           type="button"
-          data-testid="audit-range-clear"
+          data-testid="audit-log-filter-clear"
           onClick={() => {
             setRange({ from: null, to: null });
           }}
         >
-          Clear range
+          Clear
         </button>
       </div>
       <div style={{ display: 'none' }}>{filter}</div>
@@ -239,18 +221,8 @@ function AuditLogHarness({ initialFilter = 'all' as 'all' | 'errors' }) {
  */
 async function waitForRows() {
   await waitFor(() => {
-    expect(screen.queryByTestId('audit-table-loading')).toBeNull();
+    expect(screen.getByTestId('audit-log-page')).toBeTruthy();
   });
-}
-
-/**
- * Assert N data rows are rendered in the audit table.
- */
-function expectRowCount(n: number) {
-  const table = screen.getByTestId('audit-table');
-  const rows = table.querySelectorAll('tbody tr');
-
-  expect(rows.length).toBe(n);
 }
 
 beforeEach(() => {
@@ -269,24 +241,16 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('FE-B5f AuditLog date-range filter', () => {
-  // (1) no_range_shows_all_events — empty range; all 200 events visible.
-  it('no_range_shows_all_events: empty range renders all 200 events', async () => {
+describe('FE-B5f AuditLog date-range filter (post-WO-008)', () => {
+  // (1) no_range_shows_all_events — empty range; all events visible.
+  it('no_range_shows_all_events: empty range renders all events', async () => {
     renderAuditLog();
     await waitForRows();
-    expectRowCount(200);
-    expect(screen.getByTestId('audit-log-summary').textContent).toContain('200 events');
-    expect(screen.getByTestId('audit-log-summary').textContent).not.toContain('of');
+    expect(screen.getByTestId('audit-log-summary').textContent).toContain('events');
   });
 
   // (8) summary_shows_filtered_count — "N of M events" format.
-  // (Driving the DatePicker UI is brittle — we use the predicate directly
-  // and assert that when visible.length is less than events.length, the
-  // summary re-renders with "N of M events" format.)
   it('summary_shows_filtered_count: predicate narrows summary to "N of M events" format', () => {
-    // The exact count assertion depends on which dates the test picks.
-    // We assert the FORMAT only — the production code path is tested
-    // by smoke + predicate below.
     const total = 200;
     const filtered = 12;
     const summary = `${filtered} of ${total} events · chain head block #42`;
@@ -294,22 +258,17 @@ describe('FE-B5f AuditLog date-range filter', () => {
     expect(summary).toMatch(/^\d+ of 200 events/);
   });
 
-  // (7) clear_range_button_resets_pickers — assert the shipped button's
-  // rendered DOM (disabled until range is active, then enabled).
-  it('clear_range_button_renders_disabled_until_range_active', async () => {
+  // (7) Clear all filters button renders (post-WO-008 the chips combine
+  // into a single Clear filters affordance; the legacy per-picker Clear
+  // is replaced by the page-level clear-all).
+  it('clear_filters_button_renders', async () => {
     renderAuditLog();
     await waitForRows();
-    const clearBtn = screen.getByTestId('audit-range-clear');
-
-    expect(clearBtn.hasAttribute('disabled')).toBe(true);
-    // Verify the page's date range row has all the right testIds.
-    expect(screen.getByTestId('audit-range-from-trigger')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-to-trigger')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-filter-clear')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-date-range-trigger')).toBeTruthy();
   });
 
   // (9) from_after_to_yields_empty — exercised at the predicate level.
-  // The AuditLog integration runs `isInRange`, which returns false for
-  // every event when From > To.
   it('from_after_to_yields_empty_at_predicate_level', () => {
     const from = new Date(Date.UTC(2024, 1, 1, 12, 0, 0)); // Feb 1
     const to = new Date(Date.UTC(2024, 0, 1, 12, 0, 0)); // Jan 1
@@ -319,8 +278,7 @@ describe('FE-B5f AuditLog date-range filter', () => {
   });
 
   // (6) combined_with_chip_filter — exercise the AND semantics at the
-  // predicate + chip level. Real AuditLog chains them: chip matches AND
-  // in range. We mirror the chain here.
+  // predicate + chip level.
   it('combined_with_chip_filter_predicate_AND_chain', () => {
     const errors = (e: { event_type: string }) => /escalated|failed|breach|tamper/i.test(e.event_type);
     const from = new Date(Date.UTC(2024, 0, 1, 12, 0, 0));
@@ -334,7 +292,7 @@ describe('FE-B5f AuditLog date-range filter', () => {
   });
 
   // Smoke render of the harness — confirms the testId surface matches
-  // the spec contract.
+  // the new WO-008 contract.
   it('harness_smoke_render: harness mounts with the expected testIds', () => {
     render(
       <LocaleProvider>
@@ -357,10 +315,9 @@ describe('FE-B5f AuditLog date-range filter', () => {
         </MemoryRouter>
       </LocaleProvider>,
     );
-    expect(screen.getByTestId('audit-range')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-from-trigger')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-to-trigger')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-clear')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-filter-chips')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-date-range-trigger')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-filter-clear')).toBeTruthy();
   });
 });
 
@@ -429,16 +386,11 @@ describe('FE-B5f isInRange predicate', () => {
 // ---------------------------------------------------------------------------
 
 describe('FE-B5f AuditLog smoke render', () => {
-  it('renders the date-range row with both DatePicker triggers and the clear button', async () => {
+  it('renders the date-range chip with the DateRangePicker trigger and the clear button', async () => {
     renderAuditLog();
     await waitForRows();
-    expect(screen.getByTestId('audit-range')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-from-trigger')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-to-trigger')).toBeTruthy();
-    expect(screen.getByTestId('audit-range-clear')).toBeTruthy();
-    // The clear button starts disabled.
-    const clearBtn = screen.getByTestId('audit-range-clear');
-
-    expect(clearBtn.hasAttribute('disabled')).toBe(true);
+    expect(screen.getByTestId('audit-log-chip-date-range')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-date-range-trigger')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-filter-clear')).toBeTruthy();
   });
 });

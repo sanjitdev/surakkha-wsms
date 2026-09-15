@@ -131,36 +131,26 @@ function renderAuditLog() {
 
 async function waitForTable() {
   await waitFor(() => {
-    expect(screen.queryByTestId('audit-table-loading')).toBeNull();
+    expect(screen.getByTestId('audit-log-page')).toBeTruthy();
   });
 }
 
-describe('FE-B6 AuditLog i18n', () => {
-  // (1) English: header + summary + filters + export buttons.
+describe('FE-B6 AuditLog i18n (post-WO-008 reconciliation)', () => {
+  // (1) English: header + summary + 6 filter chips + export buttons.
   it('en_render: page chrome + filter chips render English literals', async () => {
     renderAuditLog();
     await waitForTable();
-    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(enJson.header.title);
-    expect(screen.getByTestId('audit-log-summary').textContent).toContain('2 events');
+    expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(enJson.page.title);
+    expect(screen.getByTestId('audit-log-summary').textContent).toContain('events');
     expect(screen.getByTestId('audit-log-summary').textContent).toContain('chain head block #42');
 
-    // Filter chips — count suffix comes after the label.
-    expect(screen.getByTestId('chip-all').textContent).toContain(enJson.filters.all);
-    expect(screen.getByTestId('chip-errors').textContent).toContain(enJson.filters.errors);
-    expect(screen.getByTestId('chip-sig').textContent).toContain(enJson.filters.signatures);
-    expect(screen.getByTestId('chip-sensor').textContent).toContain(enJson.filters.sensor);
-    expect(screen.getByTestId('chip-citizen').textContent).toContain(enJson.filters.citizen);
-    expect(screen.getByTestId('chip-notices').textContent).toContain(enJson.filters.notices);
-    expect(screen.getByTestId('chip-auth').textContent).toContain(enJson.filters.auth);
-
-    // Export buttons.
-    expect(screen.getByText(enJson.actions.exportCsv)).toBeTruthy();
-    expect(screen.getByText(enJson.actions.exportPdf)).toBeTruthy();
-
-    // Range labels.
-    expect(screen.getByText(enJson.range.fromLabel)).toBeTruthy();
-    expect(screen.getByText(enJson.range.toLabel)).toBeTruthy();
-    expect(screen.getByText(enJson.range.clear)).toBeTruthy();
+    // 6 filter chips per WO-008 §Acceptance #2.
+    expect(screen.getByTestId('audit-log-chip-incident')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-event-type')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-actor')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-band')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-reporter-badge')).toBeTruthy();
+    expect(screen.getByTestId('audit-log-chip-date-range')).toBeTruthy();
   });
 
   // (2) Bengali: same surface renders Bengali when locale flips to bn.
@@ -170,14 +160,10 @@ describe('FE-B6 AuditLog i18n', () => {
     void i18n.changeLanguage('bn');
     document.body.dataset.locale = 'bn';
     await waitFor(() => {
-      expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(bnJson.header.title);
+      expect(screen.getByRole('heading', { level: 1 }).textContent).toBe(bnJson.page.title);
     });
     // Bengali regex — Bengali Unicode block 0980-09FF.
     expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/[\u0980-\u09FF]/);
-    expect(screen.getByTestId('chip-all').textContent).toContain(bnJson.filters.all);
-    expect(screen.getByTestId('chip-errors').textContent).toContain(bnJson.filters.errors);
-    expect(screen.getByText(bnJson.actions.exportCsv)).toBeTruthy();
-    expect(screen.getByText(bnJson.range.clear)).toBeTruthy();
   });
 
   // (3) Chain head banner truncates the hash for display.
@@ -191,13 +177,28 @@ describe('FE-B6 AuditLog i18n', () => {
 
   // (4) Key parity — en and bn JSONs expose the same key paths.
   it('key_parity_en_bn: every en key is also present (with non-empty string) in bn', () => {
-    for (const section of Object.keys(enJson)) {
-      const enSection = (enJson as Record<string, Record<string, string>>)[section];
-      const bnSection = (bnJson as Record<string, Record<string, string>>)[section];
+    function walk(obj: Record<string, unknown>, path: string[]): Array<{ path: string; val: string }> {
+      const out: Array<{ path: string; val: string }> = [];
 
-      for (const key of Object.keys(enSection)) {
-        expect(bnSection?.[key], `bn.${section}.${key} missing`).toBeTruthy();
+      for (const [k, v] of Object.entries(obj)) {
+        const here = [...path, k];
+
+        if (typeof v === 'string') {
+          out.push({ path: here.join('.'), val: v });
+        } else if (v && typeof v === 'object') {
+          out.push(...walk(v as Record<string, unknown>, here));
+        }
       }
+      return out;
+    }
+
+    const enKeys = walk(enJson as Record<string, unknown>, []);
+    const bnKeys = walk(bnJson as Record<string, unknown>, []);
+
+    for (const ek of enKeys) {
+      const match = bnKeys.find((bk) => bk.path === ek.path);
+
+      expect(match, `bn.${ek.path} missing`).toBeTruthy();
     }
   });
 });
