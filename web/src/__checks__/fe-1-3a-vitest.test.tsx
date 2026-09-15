@@ -160,9 +160,9 @@ describe('FE-1.3a · FilterChip', () => {
     cleanup();
   });
 
-  // ─── (4) FilterChip aria-selected flips on click ────────────────────
+  // ─── (4) FilterChip aria-pressed flips on click ────────────────────
 
-  it('(4) starts aria-selected="false" and flips to "true" on click', () => {
+  it('(4) starts aria-pressed="false" and flips to "true" on click', () => {
     function Wrapper() {
       const [active, setActive] = useState(false);
       const clickSpy = vi.fn();
@@ -182,18 +182,20 @@ describe('FE-1.3a · FilterChip', () => {
     render(<Wrapper />);
     const chip = screen.getByTestId('chip-all');
 
-    expect(chip.getAttribute('aria-selected')).toBe('false');
+    // Lockdown-cascade 2026-09-15: FilterChip uses aria-pressed
+    // (toggle group, not tab); see FilterChip.tsx header comment.
+    expect(chip.getAttribute('aria-pressed')).toBe('false');
     act(() => {
       chip.click();
     });
-    expect(chip.getAttribute('aria-selected')).toBe('true');
+    expect(chip.getAttribute('aria-pressed')).toBe('true');
   });
 
-  it('(4b) when rendered with active=true, aria-selected="true" + is-active class', () => {
+  it('(4b) when rendered with active=true, aria-pressed="true" + is-active class', () => {
     render(<FilterChip label="T3 urgent" active={true} onClick={() => {}} testId="chip-t3" />);
     const chip = screen.getByTestId('chip-t3');
 
-    expect(chip.getAttribute('aria-selected')).toBe('true');
+    expect(chip.getAttribute('aria-pressed')).toBe('true');
     expect(chip.className).toContain('is-active');
   });
 
