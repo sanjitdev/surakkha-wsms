@@ -177,6 +177,28 @@ Reconciliation summary:
 
 Files: `web/src/pages/LoginPage.tsx` (+7 LOC ns binding + testid), `web/src/styles/app.css` (+18 lines lockdown binding), `web/src/styles/components.css` (+5 lines --color-primary-tint focus ring + button--primary deep teal), en+bn login.json (verified parallel keys), test file new (454 LOC, 13 tests).
 
+### WO-014 settings-page — Mimir 2026-09-15
+
+Built = ✓  (Tier 3 build 6/9)
+
+Reconciliation summary:
+- Wire contract landed: `POST /api/events` with `{ event_type: "SettingsReset", actor_identity: { kind, ref, display }, payload: { actor: <actor_ref> } }` fires BEFORE `wipeAll()` + `window.location.reload()`. The previous `resetEverything()` helper (which only did wipe + reload) was split into the explicit emit-then-wipe flow so the audit log captures the reset before the IDB is cleared. Added `'SettingsReset'` to the dim-7 §3 closed enum in `mocks/handlers.ts`.
+- `variant="ghost"` + confirm-modal pattern (lockdown §3.4) already in place from the 2026-09-11 cascade — kept as-is. Confirmation modal copy updated to "Reset all settings? This cannot be undone." (en) + "সমস্ত সেটিংস রিসেট করবেন? … এটি ফিরিয়ে আনা যাবে না।" (bn).
+- Cards now wrapped in a `.settings-page__stack` div with `gap: var(--space-xl)` (foundation §4 spacing). The shared `.card` primitive has no built-in margin, so the page wrapper owns the rhythm.
+- Persona readout already uses `badge--t1-locked` (divider neutral `--color-trust-t1`) — no migration needed; verified that `.badge--t1-locked` in `inbox.css` binds to `var(--color-trust-t1)`.
+- `fe-settings-reconcile.test.tsx` new (16 tests, all green): pins the 7 acceptance criteria + Hindi lockdown sweep + focus-ring colour audit + sky-blue audit.
+- `fe-b6-settings-reset-modal.test.tsx` updated to assert the new wire contract: POST `SettingsReset{actor}` lands before `wipeAll()`; cancel is a clean no-op.
+
+Files: `web/src/pages/Settings.tsx` (+50 LOC wire emit + stack wrapper), `web/src/styles/settings.css` (+9 lines `.settings-page__stack`), `web/src/mocks/handlers.ts` (+6 lines `'SettingsReset'` enum entry), en+bn `settings.json` (1-line heading update each), test files (+655 LOC net).
+
+Lockdown sweep (4 checks):
+- `tech.css` focus rings all use `--color-primary-tint` ✓
+- No Hindi letters in en/bn `settings.json` ✓
+- `Settings.tsx` contains no `variant="danger"` literal (only in migration comment) ✓
+- `tech.css` contains no `#0EA5E9` / `sky-` / `sky-blue` ✓
+
+Net test count: 504 baseline → 520 passing (+16 new settings tests; 0 regression).
+
 ---
 
 _End of design log. Updated by Freya at each Design Loop step; by Mimir at each build step._
