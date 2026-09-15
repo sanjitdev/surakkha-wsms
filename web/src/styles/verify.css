@@ -111,3 +111,70 @@
   padding-top: var(--space-lg);
   border-top: 1px solid var(--border-subtle);
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   WO-017 — per-row verify badge (mirror of audit.css .audit-verify).
+
+   Per WO-017 acceptance #3:
+     - pass → --color-safe-green
+     - fail → --color-alert-red-reserved (the lockdown-reserved alert
+       colour, NOT raw red-600 / bg-red)
+
+   The badge is the durable state — it persists across re-renders and
+   across toast auto-dismiss. The toast is the ephemeral signal; the
+   badge is the durable record.
+   ════════════════════════════════════════════════════════════════════ */
+
+.verify-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-xs);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.verify-badge--ok {
+  /* Pass → safe-green (lockdown §2.7 — operator-readable positive). */
+  background: color-mix(in srgb, var(--color-safe-green) 12%, transparent);
+  color: var(--color-safe-green);
+  border-color: color-mix(in srgb, var(--color-safe-green) 40%, transparent);
+}
+.verify-badge--fail {
+  /* Fail → alert-red-reserved. This is the lockdown safe use: the
+     standalone /verify-flow wizard surfaces a single failed-row badge
+     for the operator to act on. NOT the consumer-notice issuance
+     surface (which is reserved per lockdown §2.7). */
+  background: color-mix(in srgb, var(--color-alert-red-reserved) 12%, transparent);
+  color: var(--color-alert-red-reserved);
+  border-color: color-mix(in srgb, var(--color-alert-red-reserved) 40%, transparent);
+}
+.verify-badge--pending {
+  background: var(--bg-subtle);
+  color: var(--fg-tertiary);
+  border-color: var(--border-subtle);
+}
+.verify-badge--pending::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--fg-tertiary);
+  border-top-color: transparent;
+  border-radius: 50%;
+  /* prefers-reduced-motion: the spinner is a non-essential animation;
+     honours the global motion token (foundation §8.3). */
+  animation: verify-spin 0.7s linear infinite;
+}
+@keyframes verify-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .verify-badge--pending::before {
+    animation: none;
+  }
+}
