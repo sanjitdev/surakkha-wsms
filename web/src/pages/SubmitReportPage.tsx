@@ -35,6 +35,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/submit.css';
 import { Container } from '../components/layout/Container';
@@ -46,6 +47,7 @@ import { ContainerWidth } from '../types/domain';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidentActions } from '../hooks/useIncidentActions';
 import { useDateFormatter } from '../hooks/useDateFormatter';
+import { ReporterBadge } from '../components/operator/ReporterBadge';
 
 const WARDS = ['W01', 'W02', 'W03', 'W04', 'W05', 'W06', 'W07', 'W08', 'W09', 'W10'] as const;
 
@@ -56,12 +58,26 @@ const WARDS = ['W01', 'W02', 'W03', 'W04', 'W05', 'W06', 'W07', 'W08', 'W09', 'W
 type Urgency = 'not_urgent' | 'needs_attention' | 'urgent';
 const URGENCIES: readonly Urgency[] = ['not_urgent', 'needs_attention', 'urgent'];
 
+/** Auto-EXIF strip (WO-011 acceptance #4) — all editable so the
+ *  citizen can override the device-detected lat/lon/timestamp. */
+interface PhotoExif {
+  lat: string;
+  lng: string;
+  capturedAt: string;
+  device: string;
+}
+
+/** Receipt state carries the actual incident_id from the chain
+ *  projection (per the lockdown cascade on lines 26-34) so the
+ *  citizen sees a verifiable ref + the anchor chip if applicable. */
 interface SubmissionReceipt {
   event_id: string;
+  incident_id: string;
   title: string;
   ward_id: string;
   urgency: Urgency;
   submitted_at: string;
+  reporter_kind: 'anchor';
 }
 
 export function SubmitReportPage() {
@@ -77,6 +93,14 @@ export function SubmitReportPage() {
   const [description, setDescription] = useState('');
   const [photoUrl, setPhotoUrl] = useState('');
   const [voiceUrl, setVoiceUrl] = useState('');
+  const [exif, setExif] = useState<PhotoExif>({
+    lat: '',
+    lng: '',
+    capturedAt: '',
+    device: '',
+  });
+  const [photoAttached, setPhotoAttached] = useState(false);
+  const [voiceAttached, setVoiceAttached] = useState(false);
   const [receipt, setReceipt] = useState<SubmissionReceipt | null>(null);
 
   const titleTrimmed = title.trim();
@@ -87,6 +111,26 @@ export function SubmitReportPage() {
     descTrimmed.length >= 10 &&
     wardId.length > 0;
 
+  const onPhotoCapture = () => {
+    // WO-011 acceptance #4 — photo capture with auto-EXIF (lat/lon/
+    // timestamp/device). Phase 1 desktop demo: stub the capture by
+    // populating the EXIF strip with a known fixture so the citizen
+    // sees the auto-detected values, can edit them, and the strip
+    // renders. Phase 2 mobile lockdown swaps this for a real camera
+    // bridge (per submit-report-page.md §"Open questions" #2).
+    setPhotoAttached(true);
+    setExif({
+      lat: '23.7806',
+      lng: '90.4074',
+      capturedAt: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      device: 'Demo Camera (Phase 1 stub)',
+    });
+  };
+
+  const onVoiceCapture = () => {
+    setVoiceAttached(true);
+  };
+
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
@@ -95,8 +139,15 @@ export function SubmitReportPage() {
       urgency,
       ward_id: wardId,
       description: descTrimmed,
-      photo_url: photoUrl.trim() || undefined,
-      voice_url: voiceUrl.trim() || undefined,
+      photo_url: photoAttached ? `photo://local/${Date.now()}` : photoUrl.trim() || undefined,
+      voice_url: voiceAttached ? `voice://local/${Date.now()}` : voiceUrl.trim() || undefined,
+      // Wire GPS through to the chain payload as the lat/lng fields.
+      // The reporter-asserted location (when captured from EXIF) lands
+      // on IncidentCreated.location per WO-011 §"Wire contract".
+      gps:
+        exif.lat && exif.lng
+          ? { lat: Number(exif.lat), lng: Number(exif.lng) }
+          : undefined,
     });
 
     if (result) {
@@ -104,17 +155,25 @@ export function SubmitReportPage() {
       // event_id from the IncidentCreated post (the "block_hash" in the
       // citizen's mental model), not a synthetic ULID. Trust band is
       // server-assigned and surfaced only on the operator's inbox.
+      // WO-011 REQ-003: receipt also carries the incident_id so the
+      // "View your report" link can route to /my-reports/:incident_id/
+      // timeline (per WO-001 citizen-status-timeline page).
       setReceipt({
         event_id: result.chain_ref,
+        incident_id: result.incident_id,
         title: titleTrimmed,
         ward_id: wardId,
         urgency,
         submitted_at: new Date().toISOString(),
+        reporter_kind: result.reporter_kind,
       });
       setTitle('');
       setDescription('');
       setPhotoUrl('');
       setVoiceUrl('');
+      setPhotoAttached(false);
+      setVoiceAttached(false);
+      setExif({ lat: '', lng: '', capturedAt: '', device: '' });
     }
   };
 
@@ -125,7 +184,11 @@ export function SubmitReportPage() {
   if (!isAnjali) {
     return (
       <Container width={ContainerWidth.Bangla}>
-        <div className="page-header">
+        <div
+          className="page-header"
+          data-testid="submit-report-page"
+          data-role-gate="true"
+        >
           <h1>{tSubmit('header.title')}</h1>
           <p className="page-header__sub">
             {tSubmit('roleGate.subtitle')}
@@ -145,7 +208,11 @@ export function SubmitReportPage() {
   if (receipt) {
     return (
       <Container width={ContainerWidth.Bangla}>
-        <div className="page-header">
+        <div
+          className="page-header"
+          data-testid="submit-report-page"
+          data-page-state="receipt"
+        >
           <h1>{tSubmit('header.title')}</h1>
           <p className="page-header__sub">{tSubmit('receipt.subtitle')}</p>
         </div>
@@ -155,7 +222,11 @@ export function SubmitReportPage() {
                 receipt, NOT a trust-band T-code chip — trust band is the
                 operator's mental model, surfaced on the inbox row after
                 verification signals land. */}
-            <span className="submit-receipt__urgency">
+            <span
+              className="submit-receipt__urgency"
+              data-testid="submit-receipt-urgency"
+              data-urgency={receipt.urgency}
+            >
               {tSubmit(`receipt.urgencyLabels.${receipt.urgency}`)}
             </span>
             <h2 className="submit-receipt__title">{receipt.title}</h2>
@@ -175,12 +246,77 @@ export function SubmitReportPage() {
                 </span>
               </dd>
             </dl>
+
+            {/* WO-011 REQ-005 — anchor chip on receipt when the chain
+                projection reports reporter_kind: anchor. Render the
+                shared <ReporterBadge /> from WO-006 so the chip stays
+                consistent with operator surfaces (icon + label per
+                foundation §6.2 + §1.1 reporter-badge dimension). */}
+            {receipt.reporter_kind === 'anchor' && (
+              <div
+                className="submit-receipt__anchor"
+                data-testid="submit-receipt-anchor-chip"
+              >
+                <ReporterBadge
+                  kind="anchor"
+                  i18nNamespace="submitReport"
+                  i18nKeyPrefix="receipt.reporterBadge"
+                  testId="submit-receipt-anchor-badge"
+                />
+                <p className="submit-receipt__anchor-hint">
+                  {tSubmit('receipt.anchoredHint')}
+                </p>
+              </div>
+            )}
+
+            {/* WO-011 REQ-004 — 5-min dual-channel ack surface (stub
+                for Phase 1). The real SMS + portal gateway lands in
+                Phase 2; Phase 1 surfaces the messaging so the citizen
+                knows to expect the ack on both channels. */}
+            <aside
+              className="submit-receipt__ack"
+              aria-label={tSubmit('receipt.ackHeadline')}
+              data-testid="submit-receipt-ack"
+            >
+              <h3 className="submit-receipt__ack-headline">
+                {tSubmit('receipt.ackHeadline')}
+              </h3>
+              <p className="submit-receipt__ack-body">
+                {tSubmit('receipt.ackBody')}
+              </p>
+              <ul className="submit-receipt__ack-channels">
+                <li data-channel="sms">
+                  {tSubmit('receipt.ackChannelSms')}
+                </li>
+                <li data-channel="portal">
+                  {tSubmit('receipt.ackChannelPortal')}
+                </li>
+              </ul>
+            </aside>
+
             <p className="submit-receipt__hint">
               {tSubmit('receipt.hint')}
             </p>
-            <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+
+            {/* WO-011 REQ-003 — success page links to the citizen's
+                timeline view so they can monitor verification signals
+                + ack + chain motion in real-time. */}
+            <div
+              className="submit-receipt__actions"
+              style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}
+            >
+              <Link
+                to={`/my-reports/${receipt.incident_id}/timeline`}
+                data-testid="submit-receipt-view-link"
+                className="submit-receipt__view-link"
+                aria-label={tSubmit('receipt.viewReport')}
+              >
+                <Button variant="primary" size="md">
+                  {tSubmit('receipt.viewReport')}
+                </Button>
+              </Link>
               <Button
-                variant="primary"
+                variant="secondary"
                 size="md"
                 onClick={onSubmitAnother}
                 testId="submit-another"
@@ -196,7 +332,11 @@ export function SubmitReportPage() {
 
   return (
     <Container width={ContainerWidth.Bangla}>
-      <div className="page-header">
+      <div
+        className="page-header"
+        data-testid="submit-report-page"
+        data-page-state="form"
+      >
         <h1>{tSubmit('header.title')}</h1>
         <p className="page-header__sub">
           {tSubmit('header.subtitle', { name: session.display_name })}
@@ -292,36 +432,137 @@ export function SubmitReportPage() {
 
           <details className="submit-form__details">
             <summary className="submit-form__details-summary">{tSubmit('form.detailsSummary')}</summary>
+            {/* WO-011 acceptance #4 — photo capture with auto-EXIF.
+                Phase 1 desktop demo: a "capture" button populates the
+                EXIF strip with a known fixture. Phase 2 swaps this for
+                a real camera bridge. The strip is editable so the
+                citizen can override any device-detected value. */}
             <div className="submit-form__row">
               <label htmlFor="submit-photo" className="submit-form__label">
                 {tSubmit('form.photoLabel')}
               </label>
+              <div className="submit-form__photo-row">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  onClick={onPhotoCapture}
+                  testId="submit-photo-capture"
+                >
+                  {tSubmit('form.photoPlaceholder')}
+                </Button>
+                {photoAttached && (
+                  <span
+                    className="submit-form__attached"
+                    data-testid="submit-photo-attached"
+                  >
+                    ✓ {exif.device}
+                  </span>
+                )}
+              </div>
               <input
                 id="submit-photo"
                 data-testid="submit-photo"
-                type="url"
-                className="submit-form__input"
+                type="hidden"
                 value={photoUrl}
                 onChange={(e) => {
                   setPhotoUrl(e.target.value);
                 }}
-                placeholder={tSubmit('form.photoPlaceholder')}
               />
             </div>
+
+            {photoAttached && (
+              <div
+                className="submit-form__exif"
+                data-testid="submit-photo-exif-strip"
+              >
+                <p className="submit-form__exif-heading">
+                  {tSubmit('form.exifHeading')}
+                </p>
+                <div className="submit-form__exif-grid">
+                  <label>
+                    <span>{tSubmit('form.exifLat')}</span>
+                    <input
+                      type="text"
+                      className="submit-form__input"
+                      data-testid="submit-photo-exif-lat"
+                      value={exif.lat}
+                      onChange={(e) => {
+                        setExif({ ...exif, lat: e.target.value });
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <span>{tSubmit('form.exifLng')}</span>
+                    <input
+                      type="text"
+                      className="submit-form__input"
+                      data-testid="submit-photo-exif-lng"
+                      value={exif.lng}
+                      onChange={(e) => {
+                        setExif({ ...exif, lng: e.target.value });
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <span>{tSubmit('form.exifCapturedAt')}</span>
+                    <input
+                      type="text"
+                      className="submit-form__input"
+                      data-testid="submit-photo-exif-captured-at"
+                      value={exif.capturedAt}
+                      onChange={(e) => {
+                        setExif({ ...exif, capturedAt: e.target.value });
+                      }}
+                    />
+                  </label>
+                  <label>
+                    <span>{tSubmit('form.exifDevice')}</span>
+                    <input
+                      type="text"
+                      className="submit-form__input"
+                      data-testid="submit-photo-exif-device"
+                      value={exif.device}
+                      onChange={(e) => {
+                        setExif({ ...exif, device: e.target.value });
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            )}
+
             <div className="submit-form__row">
               <label htmlFor="submit-voice" className="submit-form__label">
                 {tSubmit('form.voiceLabel')}
               </label>
+              <div className="submit-form__photo-row">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  type="button"
+                  onClick={onVoiceCapture}
+                  testId="submit-voice-capture"
+                >
+                  {tSubmit('form.voicePlaceholder')}
+                </Button>
+                {voiceAttached && (
+                  <span
+                    className="submit-form__attached"
+                    data-testid="submit-voice-attached"
+                  >
+                    ✓
+                  </span>
+                )}
+              </div>
               <input
                 id="submit-voice"
                 data-testid="submit-voice"
-                type="url"
-                className="submit-form__input"
+                type="hidden"
                 value={voiceUrl}
                 onChange={(e) => {
                   setVoiceUrl(e.target.value);
                 }}
-                placeholder={tSubmit('form.voicePlaceholder')}
               />
             </div>
           </details>

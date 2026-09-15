@@ -22,6 +22,12 @@
     "ackChannelPortal": "portal notice",
     "anchored": "Anchor citizen reporter",
     "anchoredHint": "Your NID is verified — your report carries the anchor badge on the operator's inbox.",
+    "reporterBadge": {
+      "anchor": "Anchor",
+      "hotline": "Hotline",
+      "webform": "Webform",
+      "sensor": "Sensor"
+    },
     "urgencyLabels": {
       "not_urgent": "Not urgent",
       "needs_attention": "Needs attention",

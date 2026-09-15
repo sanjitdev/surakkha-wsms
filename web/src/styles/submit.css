@@ -78,10 +78,19 @@
 }
 
 .submit-form__input:focus,
-.submit-form__textarea:focus {
+.submit-form__textarea:focus,
+.submit-form__photo-row .submit-form__input:focus {
+  /* WO-011 REQ-005 lockdown sweep: focus ring uses
+     --color-primary-tint per foundation §7.3 + §10.2 (binding). */
   outline: none;
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-500) 20%, transparent);
+  border-color: var(--color-primary-tint, var(--brand-500));
+  box-shadow: 0 0 0 2px var(--color-primary-tint, var(--brand-500));
+  outline-offset: 2px;
+}
+.submit-form__photo-row .submit-form__input:focus-visible,
+.submit-form__exif input:focus-visible {
+  outline: 2px solid var(--color-primary-tint, var(--brand-500));
+  outline-offset: 2px;
 }
 
 .submit-form__textarea {
@@ -307,4 +316,123 @@ fieldset > legend.submit-form__label {
   font-size: var(--font-size-sm);
   color: var(--fg-secondary);
   line-height: var(--line-height-body);
+}
+
+/* ── Receipt additions (WO-011 REQ-003/004/005) ──────────────────── */
+
+/* Anchor chip on receipt (REQ-005). Renders the shared ReporterBadge
+   from WO-006 so the chip stays consistent with operator surfaces.
+   The hint copy underneath explains why the citizen is an anchor
+   reporter so they understand the operator sees an extra badge. */
+.submit-receipt__anchor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+}
+.submit-receipt__anchor-hint {
+  margin: 0;
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  line-height: var(--line-height-body);
+}
+
+/* 5-min dual-channel ack surface (REQ-004). Calm surface — same
+   tone as the operator-side Phase 2 issuance surface minus the
+   alert-red reserved palette. Foundation §1.3 carve-out: ack is
+   not a T3+ consumer-notice issuance so we use neutral-tinted
+   chrome. */
+.submit-receipt__ack {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-inset);
+}
+.submit-receipt__ack-headline {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--fg-default);
+}
+.submit-receipt__ack-body {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  line-height: var(--line-height-body);
+}
+.submit-receipt__ack-channels {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+.submit-receipt__ack-channels li {
+  font-size: var(--font-size-xs);
+  color: var(--fg-default);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+/* View-report link wrapper — link-as-button styling so the
+   <Link> + <Button> combo reads as a single CTA on the receipt. */
+.submit-receipt__view-link {
+  text-decoration: none;
+  display: inline-flex;
+}
+.submit-receipt__view-link:focus-visible {
+  outline: 2px solid var(--color-primary-tint, var(--brand-500));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Photo capture row + EXIF strip (acceptance #4). The strip mirrors
+   the dashboard's settings-row pattern so citizens recognise the
+   label-above-control layout from elsewhere. */
+.submit-form__photo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.submit-form__attached {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  font-weight: var(--font-weight-medium);
+}
+.submit-form__exif {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-inset);
+}
+.submit-form__exif-heading {
+  margin: 0 0 var(--space-sm);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: var(--font-weight-semibold);
+}
+.submit-form__exif-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm) var(--space-md);
+}
+.submit-form__exif-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+}
+@media (max-width: 640px) {
+  .submit-form__exif-grid { grid-template-columns: 1fr; }
 }

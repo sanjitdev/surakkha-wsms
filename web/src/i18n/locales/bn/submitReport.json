@@ -22,6 +22,12 @@
     "ackChannelPortal": "পোর্টাল নোটিশ",
     "anchored": "অ্যাঙ্কর নাগরিক প্রতিবেদক",
     "anchoredHint": "আপনার এনআইডি যাচাই করা হয়েছে — অপারেটরের ইনবক্সে আপনার রিপোর্ট অ্যাঙ্কর ব্যাজ বহন করে।",
+    "reporterBadge": {
+      "anchor": "অ্যাঙ্কর",
+      "hotline": "হটলাইন",
+      "webform": "ওয়েবফর্ম",
+      "sensor": "সেন্সর"
+    },
     "urgencyLabels": {
       "not_urgent": "জরুরি নয়",
       "needs_attention": "মনোযোগ দরকার",
