@@ -109,23 +109,75 @@ test.describe('happy path — full Phase 1 cycle', () => {
     await rowLink.click();
     await expect(page.getByTestId('inbox-detail-title')).toBeVisible({ timeout: 10_000 });
 
-    // ─── STEP 5 — Assign Tech modal ──────────────────────────────
-    await page.getByTestId('inbox-assign-tech').click();
-    await expect(page.getByTestId('assign-tech-modal')).toBeVisible();
-    // Tech select defaults to Karim (first roster entry); priority
-    // defaults to P1; ETA defaults to 30. Summary is required (≥5).
-    await page.getByTestId('assign-tech-summary').fill('Replace chlorine pump #4 at W04.');
-    await page.getByTestId('assign-tech-submit').click();
-    // Modal closes on success.
-    await expect(page.getByTestId('assign-tech-modal')).toBeHidden({ timeout: 10_000 });
+    // ─── STEP 5 — Assign Tech (inline form, inbox-detail.md #14) ──
+    // The modal pair was collapsed into a single inline form rendered
+    // directly under the page header. Both write paths (assignTech +
+    // requestAck) fire on submit when their respective sections have
+    // content. Tech select defaults to Karim (first roster entry);
+    // priority defaults to P1; ETA defaults to 30. Summary ≥5 chars.
+    await expect(page.getByTestId('inbox-inline-action-form')).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId('inline-assign-summary').fill('Replace chlorine pump #4 at W04.');
+    await page.getByTestId('inbox-inline-submit').click();
+    // Form does NOT reset on success and does NOT navigate (the
+    // parent InboxDetail stays put; logout at step 7 is what moves
+    // us off this page). Wait for the TechnicianAssigned chain write
+    // to land before clearing the assign side for step 6 — this is
+    // the durable signal that Karim's /field will see the assignment
+    // on next fetch. The poll runs inside page.evaluate so fetch()
+    // uses the page's baseURL (expect.poll callbacks execute in
+    // Node, where /api/events has no origin).
+    const inboxIncidentId = page.url().split('/inbox/')[1]?.split(/[?#]/)[0] ?? '';
 
-    // ─── STEP 6 — Request Citizen Ack modal ──────────────────────
-    await page.getByTestId('inbox-request-ack').click();
-    await expect(page.getByTestId('request-ack-modal')).toBeVisible();
-    // Channel defaults to sms; summary is required (≥5).
-    await page.getByTestId('request-ack-summary').fill('Please confirm tap water is now safe.');
-    await page.getByTestId('request-ack-submit').click();
-    await expect(page.getByTestId('request-ack-modal')).toBeHidden({ timeout: 10_000 });
+    expect(inboxIncidentId.length).toBeGreaterThan(0);
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(async (id) => {
+            const r = await fetch(
+              '/api/events?event_type=TechnicianAssigned&limit=20',
+            );
+            const body = (await r.json()) as {
+              events: { payload: { incident_id?: string } }[];
+            };
+            return body.events.filter(
+              (e) => e.payload.incident_id === id,
+            ).length;
+          }, inboxIncidentId),
+        { timeout: 10_000 },
+      )
+      .toBeGreaterThanOrEqual(1);
+    await expect(page.getByTestId('inbox-inline-assign-section')).toBeVisible();
+    // Clear the assign-summary so the next submit doesn't refire
+    // assignTech (would produce a duplicate chain event). Leaving
+    // priority/ETA populated is harmless — they're inputs, not state
+    // carried into the ack side.
+    await page.getByTestId('inline-assign-summary').fill('');
+
+    // ─── STEP 6 — Request Citizen Ack (inline form) ──────────────
+    // Channel defaults to sms; copy ≥5 chars. With the assign side
+    // cleared, this submit fires ONLY the ack write path.
+    await page.getByTestId('inline-ack-copy').fill('Please confirm tap water is now safe.');
+    await page.getByTestId('inbox-inline-submit').click();
+    // Confirm the PublicNoticeIssued event landed on chain — the form
+    // does not auto-close, so we wait on the wire signal instead of a
+    // DOM transition.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(async (id) => {
+            const r = await fetch(
+              '/api/events?event_type=PublicNoticeIssued&limit=20',
+            );
+            const body = (await r.json()) as {
+              events: { payload: { incident_id?: string } }[];
+            };
+            return body.events.filter(
+              (e) => e.payload.incident_id === id,
+            ).length;
+          }, inboxIncidentId),
+        { timeout: 10_000 },
+      )
+      .toBeGreaterThanOrEqual(1);
 
     // ─── STEP 7 — Logout + login as Karim ────────────────────────
     await page.getByTestId('sidebar-logout').click();
