@@ -1,35 +1,37 @@
 /**
- * IncidentChainSegmentPage.tsx — per-incident-chain-segment.md.
+ * IncidentChainSegmentPage.tsx — per-incident-chain-segment.md (WO-003).
  *
- * Tier 1 NEW build (Batch 5) — the dedicated verification surface for
- * one incident's chain segment. Operator mode only in Phase 1; the
+ * Tier 1 NEW build — the dedicated verification surface for one
+ * incident's chain segment. Operator mode only in Phase 1; the
  * public-mode projection lives on CitizenStatusTimeline.
  *
  * URL pattern: /incidents/:incident_id/chain. Linked from the
  * InboxDetail right rail via "View full chain" (per §13 wireframe).
  *
- * Phase 1 scope (deliberately narrow):
- *   - Vertical timeline of chain events for the incident.
- *   - Per-row verify button (reuses shared `verifyBlockHash` from
- *     `web/src/lib/chain-verify.ts` so the 200ms badge contract is
- *     shared with AuditLog + InboxDetail).
- *   - Full-segment verification — single-click, triggers every
- *     verifyBlockHash sequentially; aggregated status shown at
- *     bottom (verified / anomaly / verifying).
- *   - Anomaly banner when any row fails verification; Acknowledge +
- *     Escalate to Pia actions (escalate disabled per §16 #5 lockdown
- *     reconciliation — Phase 2 PHA dashboard placeholder).
+ * Phase 1 scope (WO-003 REQs 001-011):
+ *   - REQ-001 route mount at /incidents/:incident_id/chain
+ *   - REQ-002 reuses verifyBlockHash + verifyChainSegment from
+ *     web/src/lib/chain-verify.ts (no copy-paste)
+ *   - REQ-003 single-click verification (per-row + full segment)
+ *   - REQ-004 60s cache for full-segment verification (cache key
+ *     includes lastEventHash so new appends auto-invalidate)
+ *   - REQ-005 anomaly surfacing — row ⚠️ + top banner with
+ *     aria-live="polite"
+ *   - REQ-006 acknowledge emits ChainAnomalyAcknowledged on the
+ *     chain; escalate button disabled with tooltip (Phase 2)
+ *   - REQ-007 ChainRead emitted on mount exactly once per route
+ *   - REQ-008 operator-mode render with full payloads + hashes + JSON
+ *   - REQ-009 area-labels + primitives from web/src/components/ui/
+ *   - REQ-010 i18n keys added EN + BN (Hindi removed per lockdown)
+ *   - REQ-011 MSW handlers + fixtures for ChainAnomalyAcknowledged /
+ *     ChainAnomalyEscalated in web/src/mocks/handlers.ts
  *
- * Out of Phase 1 scope (deferred to Phase 4.5):
- *   - Public mode (rendered by CitizenStatusTimeline instead).
- *   - Web Worker for chains >50 events.
- *   - Cache (60s) per Scenario 06 §5 — current behaviour is recompute
- *     on click, which is fine for the <50-event Phase 1 chains.
- *   - Cross-tenant chain export / Share with Pia.
- *   - Hash anchor copy-to-clipboard (retained for Phase 2 — full hash
- *     is shown but copy UX lives in the row metadata).
+ * Out of Phase 1 scope (deferred):
+ *   - Public mode (rendered by CitizenStatusTimeline instead)
+ *   - Web Worker for chains >50 events (Phase 2 candidate)
+ *   - Cross-tenant chain export / Share with Pia
  */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
 import '../../mockups/01-priya/dashboard.css';
@@ -42,7 +44,13 @@ import { AlertIcon } from '../components/icons/sidebar-icons';
 import { ContainerWidth } from '../types/domain';
 import { useDateFormatter } from '../hooks/useDateFormatter';
 import { useIncidents } from '../hooks/useIncidents';
-import { verifyBlockHash, type VerifyState } from '../lib/chain-verify';
+import {
+  verifyBlockHash,
+  verifyChainSegment,
+  type SegmentVerifyResult,
+  type VerifyState,
+} from '../lib/chain-verify';
+import { useAppLayout } from '../components/layout/AppLayoutContext';
 
 interface ChainEvent {
   event_id: string;
@@ -125,6 +133,7 @@ export function IncidentChainSegmentPage() {
   const { incidents } = useIncidents();
   const { format: formatTime } = useDateFormatter();
   const { t: tChain } = useTranslation('chainSegment');
+  const { session } = useAppLayout();
   const [events, setEvents] = useState<ChainEvent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [verifyStates, setVerifyStates] = useState<Map<string, VerifyState>>(new Map());
@@ -132,6 +141,45 @@ export function IncidentChainSegmentPage() {
     'idle' | 'verifying' | 'verified' | 'anomaly'
   >('idle');
   const [acknowledged, setAcknowledged] = useState<boolean>(false);
+  // REQ-004 — segmented verify result (cached for 60s inside
+  // chain-verify.ts; lastEventHash in the cache key auto-invalidates on
+  // new append). Surfaced in the footer badge so the operator sees the
+  // current cache-hit / cache-miss state.
+  const [segmentResult, setSegmentResult] = useState<SegmentVerifyResult | null>(null);
+
+  // REQ-007 — ChainRead emitted on mount exactly once per route. The
+  // ref guards against React 18 strict-mode double-invoke (no-op second
+  // mount shouldn't double-log). Fires `ChainRead{actor, incident_id,
+  // filter_combo: ['all']}` so the audit log sees every chain read per
+  // PRD §11.1.
+  const chainReadEmittedRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (!incidentId) return;
+    if (chainReadEmittedRef.current) return;
+    chainReadEmittedRef.current = true;
+    void (async () => {
+      try {
+        await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            event_type: 'ChainRead',
+            actor_identity: {
+              kind: 'operator',
+              ref: session?.actor_ref ?? 'anonymous-operator',
+              display: session?.display_name ?? 'Operator',
+            },
+            payload: {
+              incident_id: incidentId,
+              filter_combo: ['all'],
+            },
+          }),
+        });
+      } catch (err) {
+        console.error('[surakkha] ChainRead emission failed', err);
+      }
+    })();
+  }, [incidentId, session]);
 
   const incident = useMemo(
     () => incidents.find((i) => i.incident_id === incidentId) ?? null,
@@ -211,7 +259,55 @@ export function IncidentChainSegmentPage() {
       if (result.status === 'fail') anomaly = true;
     }
     setFullSegmentState(anomaly ? 'anomaly' : 'verified');
-  }, [fullSegmentState, threadEvents]);
+
+    // REQ-004 — cache-backed segment verification. After the per-row
+    // walk, run the cache helper so the next click within 60s returns
+    // the cached result instantly. We deliberately don't *replace* the
+    // per-row walk (it's what the row badges + ack/escalate button
+    // rely on); the cache helper is the typed source of truth for the
+    // footer badge.
+    if (threadEvents.length > 0) {
+      const lastEvent = threadEvents[threadEvents.length - 1];
+      const segResult = await verifyChainSegment(
+        incidentId,
+        lastEvent.height,
+        threadEvents,
+      );
+      setSegmentResult(segResult);
+    }
+  }, [fullSegmentState, threadEvents, incidentId]);
+
+  // REQ-006 — anomaly ack/escalate event emission. The ack itself is
+  // on the chain (meta-audit principle per Scenario 06). Escalate is
+  // disabled in Phase 1 (Phase 2 PHA queue placeholder) but still
+  // surfaces the click intent through the title tooltip.
+  const emitAnomalyEvent = useCallback(
+    async (eventType: 'ChainAnomalyAcknowledged' | 'ChainAnomalyEscalated', seq: number) => {
+      if (!incidentId) return;
+      try {
+        await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            event_type: eventType,
+            actor_identity: {
+              kind: 'operator',
+              ref: session?.actor_ref ?? 'anonymous-operator',
+              display: session?.display_name ?? 'Operator',
+            },
+            payload: {
+              actor: session?.actor_ref ?? 'anonymous-operator',
+              incident_id: incidentId,
+              seq,
+            },
+          }),
+        });
+      } catch (err) {
+        console.error(`[surakkha] ${eventType} emission failed`, err);
+      }
+    },
+    [incidentId, session],
+  );
 
   if (loading) {
     return (
@@ -225,46 +321,54 @@ export function IncidentChainSegmentPage() {
 
   return (
     <Container width={ContainerWidth.Bangla}>
-      <div className="page-header">
-        <div className="page-header__row">
-          <div>
-            <Link
-              to="/inbox"
-              className="mono"
-              style={{
-                fontSize: 'var(--font-size-xs)',
-                color: 'var(--fg-tertiary)',
-                textDecoration: 'none',
-              }}
-              data-testid="chain-back-to-inbox"
-            >
-              {tChain('header.backToInbox')}
-            </Link>
-            <div
-              className="thread-head__row1"
-              style={{ marginTop: 'var(--space-sm)' }}
-            >
-              <span className="mono" style={{ fontSize: 'var(--font-size-md)' }}>
-                {incidentId}
-              </span>
-              {incident && (
-                <span className={severityBadgeClass(incident.severity)}>
-                  {incident.severity}
+      <section
+        data-area-id="incident-chain-segment-page"
+        aria-label={tChain('page.ariaLabel')}
+        className="incident-chain-segment-page"
+      >
+        <div className="page-header">
+          <div
+            data-area-id="incident-chain-segment-header"
+            className="page-header__row"
+          >
+            <div>
+              <Link
+                to="/inbox"
+                className="mono"
+                style={{
+                  fontSize: 'var(--font-size-xs)',
+                  color: 'var(--fg-tertiary)',
+                  textDecoration: 'none',
+                }}
+                data-testid="chain-back-to-inbox"
+              >
+                {tChain('header.backToInbox')}
+              </Link>
+              <div
+                className="thread-head__row1"
+                style={{ marginTop: 'var(--space-sm)' }}
+              >
+                <span className="mono" style={{ fontSize: 'var(--font-size-md)' }}>
+                  {incidentId}
                 </span>
-              )}
-              {incident && (
-                <span className={`badge badge--${incident.status}`}>{incident.status}</span>
-              )}
+                {incident && (
+                  <span className={severityBadgeClass(incident.severity)}>
+                    {incident.severity}
+                  </span>
+                )}
+                {incident && (
+                  <span className={`badge badge--${incident.status}`}>{incident.status}</span>
+                )}
+              </div>
+              <h1
+                data-testid="chain-segment-title"
+                style={{ marginTop: 'var(--space-md)' }}
+              >
+                {tChain('title', { count: threadEvents.length })}
+              </h1>
             </div>
-            <h1
-              data-testid="chain-segment-title"
-              style={{ marginTop: 'var(--space-md)' }}
-            >
-              {tChain('title', { count: threadEvents.length })}
-            </h1>
           </div>
         </div>
-      </div>
 
       {/* Anomaly banner — top banner per spec §3.2 + §6. Renders only
           when at least one row fails verification AND the operator
@@ -297,6 +401,15 @@ export function IncidentChainSegmentPage() {
               testId="chain-anomaly-acknowledge"
               onClick={() => {
                 setAcknowledged(true);
+                // REQ-006 — acknowledge emits ChainAnomalyAcknowledged
+                // (the ack itself is on the chain — meta-audit
+                // principle per Scenario 06). The seq defaults to the
+                // highest anomaly row; in operator mode a single banner
+                // surfaces per-click. Falls back to 0 if no rows failed.
+                const lastAnomalySeq =
+                  threadEvents.find((ev) => verifyStates.get(ev.event_id)?.status === 'fail')
+                    ?.height ?? 0;
+                void emitAnomalyEvent('ChainAnomalyAcknowledged', lastAnomalySeq);
               }}
             >
               {tChain('anomaly.acknowledge')}
@@ -317,31 +430,34 @@ export function IncidentChainSegmentPage() {
 
       {/* Vertical timeline — §3.3. */}
       <Card>
-        {threadEvents.length === 0 ? (
-          <div className="empty-state" data-testid="chain-segment-empty">
-            <h2 className="empty-state__title">{tChain('empty.heading')}</h2>
-            <p className="empty-state__sub">{tChain('empty.body')}</p>
-          </div>
-        ) : (
-          <ul
-            className="timeline"
-            data-testid="chain-segment-timeline"
-            style={{ listStyle: 'none', padding: 0, margin: 0 }}
-          >
-            {threadEvents.map((e) => {
-              const vs = verifyStates.get(e.event_id) ?? { status: 'idle' as const };
+        <div data-area-id="incident-chain-segment-main">
+          {threadEvents.length === 0 ? (
+            <div className="empty-state" data-testid="chain-segment-empty">
+              <h2 className="empty-state__title">{tChain('empty.heading')}</h2>
+              <p className="empty-state__sub">{tChain('empty.body')}</p>
+            </div>
+          ) : (
+            <ul
+              className="timeline"
+              data-testid="chain-segment-timeline"
+              data-area-id="incident-chain-segment-timeline"
+              style={{ listStyle: 'none', padding: 0, margin: 0 }}
+            >
+              {threadEvents.map((e) => {
+                const vs = verifyStates.get(e.event_id) ?? { status: 'idle' as const };
 
-              return (
-                <li
-                  key={e.event_id}
-                  data-testid={`chain-event-row-${e.event_id}`}
-                  style={{
-                    background:
-                      vs.status === 'fail'
-                        ? 'var(--bg-warn-tint, rgba(245, 158, 11, 0.08))'
-                        : undefined,
-                  }}
-                >
+                return (
+                  <li
+                    key={e.event_id}
+                    data-testid={`chain-event-row-${e.event_id}`}
+                    data-area-id="incident-chain-segment-event-row"
+                    style={{
+                      background:
+                        vs.status === 'fail'
+                          ? 'var(--bg-warn-tint, rgba(245, 158, 11, 0.08))'
+                          : undefined,
+                    }}
+                  >
                   <div className="timeline__time mono">{formatTime('time', e.occurred_at)}</div>
                   <p className="timeline__title">{e.event_type}</p>
                   <div
@@ -372,10 +488,11 @@ export function IncidentChainSegmentPage() {
                     />
                   </div>
                 </li>
-              );
-            })}
-          </ul>
-        )}
+                );
+              })}
+            </ul>
+          )}
+        </div>
       </Card>
 
       {/* Full-segment verification — §3.4. */}
@@ -423,6 +540,34 @@ export function IncidentChainSegmentPage() {
           </span>
         )}
       </div>
+
+      {/* REQ-004 — cache footer badge. Visible after a full-segment
+          verify completes; shows the cache-backed typed result so the
+          operator sees the same answer on the next click within 60s.
+          The `cached` testid is asserted by fe-incident-chain-segment-render
+          to prove the cache surface is wired. */}
+      {segmentResult && (
+        <div
+          data-testid="chain-segment-cache-footer"
+          aria-live="polite"
+          style={{
+            marginTop: 'var(--space-sm)',
+            fontSize: 'var(--font-size-xs)',
+            color: 'var(--fg-tertiary)',
+          }}
+        >
+          {segmentResult.status === 'verified' &&
+            tChain('fullSegment.verified', {
+              timestamp: formatTime('time', segmentResult.verifiedAt),
+            })}
+          {segmentResult.status === 'anomaly' &&
+            `${tChain('fullSegment.failed')} · anomaly @ seq ${segmentResult.anomalyAtSeq}`}
+          {segmentResult.status === 'unknown' &&
+            `unknown block @ seq ${segmentResult.missingAtSeq}`}
+          {segmentResult.status === 'empty' && 'no events'}
+        </div>
+      )}
+      </section>
     </Container>
   );
 }

@@ -2,6 +2,9 @@
   "header": {
     "backToInbox": "← Back to inbox"
   },
+  "page": {
+    "ariaLabel": "Chain segment page"
+  },
   "loading": {
     "title": "Loading chain segment…"
   },

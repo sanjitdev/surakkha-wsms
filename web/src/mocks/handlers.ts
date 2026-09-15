@@ -272,6 +272,13 @@ const chainHandlers = [
       // truth. HotlineCallLogged carries outcome: no_incident |
       // wrong_number and the hotline_call_id lineage key.
       'HotlineCallLogged',
+      // WO-003 — Per-incident Chain Segment Viewer. The ack/escalate
+      // actions on the anomaly banner emit chain events (the ack is
+      // itself on the chain — meta-audit principle per Scenario 06).
+      // Phase 2 PHA dashboard will consume these; Phase 1 only writes
+      // them to the chain and surfaces them on the audit log.
+      'ChainAnomalyAcknowledged',
+      'ChainAnomalyEscalated',
     ];
 
     if (!ALLOWED.includes(envelope.event_type)) {
