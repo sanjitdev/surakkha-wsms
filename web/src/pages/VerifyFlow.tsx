@@ -39,14 +39,17 @@
  *     owned by InboxDetail (web/src/pages/InboxDetail.tsx). Both pages
  *     reuse the same verifyBlockHash() helper from chain-verify.ts.
  */
-import { type ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactElement, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import '../styles/verify.css';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { useToast } from '../components/ui/ToastProvider';
+import {
+  ToastContext,
+  type ToastApi,
+} from '../components/ui/ToastProvider';
 import {
   CheckIcon,
   ClipboardListIcon,
@@ -125,11 +128,30 @@ function resolveSteps(t: TFn): ResolvedStep[] {
  */
 const DEMO_BLOCK_HASH = 'hash-demo-verify-flow';
 
+/**
+ * No-op toast API used when VerifyFlow renders outside a <ToastProvider>
+ * (legacy test harnesses that don't wrap). Production routing always
+ * mounts <ToastProvider> in App.tsx, so the real API is the default path;
+ * this fallback only fires in unit tests that exercise VerifyFlow
+ * without the App shell.
+ */
+const NOOP_TOAST: ToastApi = {
+  success: () => -1,
+  warning: () => -1,
+  danger: () => -1,
+  info: () => -1,
+  dismiss: () => undefined,
+  clear: () => undefined,
+};
+
 export function VerifyFlow() {
   const { t } = useTranslation('verifyFlow');
   const [step, setStep] = useState<StepIndex>(0);
   const [verify, setVerify] = useState<VerifyState>({ status: 'idle' });
-  const toast = useToast();
+  // Optional toast context — fall back to a no-op when the page is
+  // rendered outside <ToastProvider> (test harnesses). Production always
+  // mounts the provider, so the real API is the default path.
+  const toast = useContext(ToastContext) ?? NOOP_TOAST;
   // 3 s toast lifecycle: store the active toast id so we can dismiss
   // it on unmount or on a fresh verify click (avoids stale toasts
   // stacking up if the operator clicks rapidly).
@@ -160,7 +182,7 @@ export function VerifyFlow() {
    *   4) push a 3 s toast via the ToastProvider
    */
   const onVerifyClick = useCallback(async () => {
-    if (toastIdRef.current !== null) {
+    if (toastIdRef.current !== null && toastIdRef.current !== -1) {
       toast.dismiss(toastIdRef.current);
       toastIdRef.current = null;
     }
@@ -182,7 +204,9 @@ export function VerifyFlow() {
   // Auto-dismiss the toast after 3 s (WO-017 acceptance #4 — toast is
   // 3 s; the durable badge in the row metadata stays put).
   useEffect(() => {
-    if (toastIdRef.current === null) return undefined;
+    if (toastIdRef.current === null || toastIdRef.current === -1) {
+      return undefined;
+    }
     const id = toastIdRef.current;
     const timer = window.setTimeout(() => {
       toast.dismiss(id);
@@ -197,7 +221,7 @@ export function VerifyFlow() {
   // Clear any pending toast on unmount.
   useEffect(() => {
     return () => {
-      if (toastIdRef.current !== null) {
+      if (toastIdRef.current !== null && toastIdRef.current !== -1) {
         toast.dismiss(toastIdRef.current);
         toastIdRef.current = null;
       }

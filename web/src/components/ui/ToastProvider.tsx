@@ -22,6 +22,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ToastVariant } from '../../types/domain';
 import { Toast } from './Toast';
 
@@ -40,6 +41,15 @@ export interface ToastApi {
 }
 const ToastContext = createContext<ToastApi | null>(null);
 
+/**
+ * Re-exported so consumers (e.g. VerifyFlow) can read the context
+ * directly via useContext() instead of the throwing useToast() hook.
+ * Used by components that need to degrade gracefully when the
+ * provider is missing (e.g. test harnesses that don't mount the
+ * full App shell).
+ */
+export { ToastContext };
+
 const DEFAULT_LIMIT = 5;
 
 export interface ToastProviderProps {
@@ -55,6 +65,7 @@ export interface ToastProviderProps {
 export function ToastProvider({ children, limit = DEFAULT_LIMIT, durationMs }: ToastProviderProps) {
   const [items, setItems] = useState<ToastItem[]>([]);
   const idRef = useRef(0);
+  const { t } = useTranslation();
 
   const dismiss = useCallback((id: number) => {
     setItems((prev) => prev.filter((t) => t.id !== id));
@@ -94,7 +105,12 @@ export function ToastProvider({ children, limit = DEFAULT_LIMIT, durationMs }: T
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="toast-region" role="region" aria-label="Notifications" aria-live="polite">
+      <div
+        className="toast-region"
+        role="region"
+        aria-label={t('common:toast.regionLabel', { defaultValue: 'Notifications' })}
+        aria-live="polite"
+      >
         {items.map((t) => (
           <Toast
             key={t.id}
