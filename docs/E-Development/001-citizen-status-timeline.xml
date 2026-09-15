@@ -13,7 +13,7 @@
 
   <requirements>
 
-    <requirement id="001-REQ-001" type="platform" status="building">
+    <requirement id="001-REQ-001" type="platform" status="built">
       <title>Mount route at /my-reports/:incident_id/timeline for citizen role</title>
       <description>Register route in App.tsx wrapped in RequireSession with role guard for citizen. Route must be inside the citizen-only scope (currently outside AppLayout).</description>
       <acceptance>
@@ -26,7 +26,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-002" type="behavior" status="building">
+    <requirement id="001-REQ-002" type="behavior" status="built">
       <title>Project chain events into public-mode timeline</title>
       <description>Fetch /api/chain/blocks filtered by incident_id; project to citizen-relevant subset (IncidentCreated, Verified, Assigned, TechnicianArrived, DiagnosisSubmitted, FixSubmitted, IncidentResolvedByAdmin, CitizenAckAccepted, ChainAccepted, ChainReopened). Hide payloads, hashes, JSON. Show motion-only: icon + relative time + actor chip.</description>
       <acceptance>
@@ -38,7 +38,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-003" type="behavior" status="building">
+    <requirement id="001-REQ-003" type="behavior" status="built">
       <title>Bangla-first locale default</title>
       <description>On first visit, locale = 'bn'. Operator toggle EN ↔ BN; preference persists in IDB via i18next-browser-languagedetector. Bangla numerals for all timestamps via Intl.NumberFormat('bn-BD').</description>
       <acceptance>
@@ -52,7 +52,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-004" type="behavior" status="building">
+    <requirement id="001-REQ-004" type="behavior" status="built">
       <title>ActionCall: closure tap (✅/❌) when due</title>
       <description>If IncidentResolvedByAdmin event exists and ack is pending, render ActionCall with ✅ Confirm resolved (primary) and ❌ Reopen (ghost). On ✅, emit ChainAccepted event and show 'Thanks for confirming. All set.' On ❌, open reason picker then emit ChainReopened with reason. Surface ack-window expiry (24h from IncidentResolvedByAdmin).</description>
       <acceptance>
@@ -66,7 +66,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-005" type="platform" status="building">
+    <requirement id="001-REQ-005" type="platform" status="built">
       <title>Emit ChainRead on mount (audit requirement)</title>
       <description>On page mount, fire POST /api/events with ChainRead{actor: 'citizen', incident_id, filter_combo: ['all']}. Per PRD §11.1, 100% of chain reads must be logged.</description>
       <acceptance>
@@ -78,7 +78,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-006" type="integration" status="building">
+    <requirement id="001-REQ-006" type="integration" status="built">
       <title>MSW handler: ChainRead event variant</title>
       <description>Extend web/src/mocks/handlers.ts POST /api/events to accept the ChainRead event type. Persist via idb-keyval. Add fixture for chain-read events in fixtures.ts.</description>
       <acceptance>
@@ -90,7 +90,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-007" type="interface" status="building">
+    <requirement id="001-REQ-007" type="interface" status="built">
       <title>i18n keys added (EN + BN parity)</title>
       <description>Add new keys to web/src/i18n/locales/en/citizenStatusTimeline.json and bn/citizenStatusTimeline.json. Keys: page.title, page.subtitle, timeline.empty, timeline.relative.{justNow,minutesAgo,hoursAgo,daysAgo}, actionCall.closurePrompt, actionCall.confirm, actionCall.reopen, actionCall.thanks, actor.{reporter,operator,field}.</description>
       <acceptance>
@@ -102,7 +102,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-008" type="interface" status="building">
+    <requirement id="001-REQ-008" type="interface" status="built">
       <title>Area Labels match WDS spec-writer convention</title>
       <description>Implement data-area-id and aria-label attributes on each rendered region per foundation §13: citizen-status-timeline-page, …-header, …-main, …-timeline, …-event-row, …-actor-chip, …-action-call, …-action-call-confirm-yes, …-action-call-confirm-no.</description>
       <acceptance>
@@ -114,7 +114,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-009" type="interface" status="building">
+    <requirement id="001-REQ-009" type="interface" status="built">
       <title>Use only Card, Button, Toast primitives from web/src/components/ui/</title>
       <description>Per lockdown decision #4 (shadcn/ui adopted). No raw HTML form elements; no upstream shadcn import. ✅ uses Button primary, ❌ uses Button ghost, ActionCall wraps Card. Post-action Toast confirms ack.</description>
       <acceptance>
@@ -126,7 +126,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-010" type="interface" status="building">
+    <requirement id="001-REQ-010" type="interface" status="built">
       <title>Typography + motion follow lockdown</title>
       <description>Use --font-family-bangla (Noto Sans Bengali) primary; line-height --line-height-body-bangla: 1.6. Motion per lockdown 08-motion-lockdown.md; no confetti animation. 200ms green pulse only on ack (per lockdown decision #2).</description>
       <acceptance>
@@ -139,7 +139,7 @@
       </refs>
     </requirement>
 
-    <requirement id="001-REQ-011" type="platform" status="building">
+    <requirement id="001-REQ-011" type="platform" status="built">
       <title>Reconciliation: pre-lockdown draft at web/src/pages/CitizenStatusTimeline.tsx</title>
       <description>The existing file pre-dates the lockdown cascade. Verify no Hindi strings remain; replace any --band-* references with --color-trust-* / --color-reporter-*; remove any confetti animation references; remove any T3 default (citizen never gets T3).</description>
       <acceptance>
