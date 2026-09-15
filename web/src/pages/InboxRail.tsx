@@ -200,12 +200,13 @@ export function InboxIncidentRail({ rows, maxRows = 5 }: InboxIncidentRailProps)
       const next = new URLSearchParams(searchParams.toString());
 
       next.set('selected', row.id);
-      setSearchParams(next, { replace: true });
+      // REQ-003 — click navigates to detail. Carry the ?selected=
+      // query param across the navigation so the parent InboxDetail
+      // (or the back-button) can resolve the same incident.
+      navigate(`/inbox/${row.id}?${next.toString()}`);
       setLocalSelected(row.id);
-      // REQ-003 — click navigates to detail.
-      navigate(`/inbox/${row.id}`);
     },
-    [navigate, searchParams, setSearchParams],
+    [navigate, searchParams],
   );
 
   // Map severity → Band for the compact BandPill.

@@ -57,7 +57,7 @@ import {
   mergeRecentDecisions,
   sortRowsByPriorityAge,
 } from './inboxListModel';
-import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRail';
+import { AwaitingActionRail, InboxIncidentRail, RecentDecisionsRail, SeverityRail } from './InboxRail';
 
 export function InboxList() {
   const { format: formatTime, locale } = useDateFormatter();
@@ -627,6 +627,10 @@ export function InboxList() {
       </div>
       <div className="grid-12" style={{ marginTop: 'var(--space-md)' }}>
         <div className="col-8">
+          {/* WO-010 — compact 240 px ranked-incident rail lives inside
+              the InboxList surface. Rows link to /inbox/:id and the
+              selected id syncs to ?selected=<id>. */}
+          <InboxIncidentRail rows={sortedRows.slice(0, 8)} />
           <Card modifier="with-heading" testId="inbox-card">
             <div
               className="data-card__head"
