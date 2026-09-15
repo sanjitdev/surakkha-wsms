@@ -35,6 +35,14 @@
     "submit": "পদক্ষেপ জমা দিন",
     "submitting": "জমা হচ্ছে…"
   },
+  "pickers": {
+    "karim": "ফিল্ড টেকনিশিয়ান",
+    "karimAria": "ফিল্ড টেকনিশিয়ান নির্বাচন করুন",
+    "dueAt": "সময়সীমা (এখন থেকে মিনিট)",
+    "dueAtAria": "মিনিটে ETA নির্বাচন করুন",
+    "priorityOverride": "অগ্রাধিকার ওভাররাইড",
+    "priorityOverrideAria": "ডিফল্ট অগ্রাধিকার ওভাররাইড করুন"
+  },
   "timeline": {
     "title": "থ্রেড টাইমলাইন",
     "eventCount_one": "{{count}}টি ইভেন্ট",

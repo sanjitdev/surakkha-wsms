@@ -289,11 +289,14 @@ function InlineActionForm({
             </h4>
             <div className="submit-form__row">
               <label htmlFor="inline-assign-tech" className="submit-form__label">
-                {tDetail('assignModal.technicianLabel')}
+                {tDetail('pickers.karim')}
               </label>
               <select
                 id="inline-assign-tech"
                 data-testid="inline-assign-tech"
+                data-picker="karim"
+                data-testid-picker="inbox-detail-karim-picker"
+                aria-label={tDetail('pickers.karimAria')}
                 className="submit-form__input"
                 value={techId}
                 onChange={(e) => {
@@ -311,11 +314,14 @@ function InlineActionForm({
             <div className="submit-form__row submit-form__row--split">
               <div>
                 <label htmlFor="inline-assign-priority" className="submit-form__label">
-                  {tDetail('assignModal.priorityLabel')}
+                  {tDetail('pickers.priorityOverride')}
                 </label>
                 <select
                   id="inline-assign-priority"
                   data-testid="inline-assign-priority"
+                  data-picker="priority-override"
+                  data-testid-picker="inbox-detail-priority-override"
+                  aria-label={tDetail('pickers.priorityOverrideAria')}
                   className="submit-form__input"
                   value={priority}
                   onChange={(e) => {
@@ -330,11 +336,14 @@ function InlineActionForm({
               </div>
               <div>
                 <label htmlFor="inline-assign-eta" className="submit-form__label">
-                  {tDetail('assignModal.etaLabel')}
+                  {tDetail('pickers.dueAt')}
                 </label>
                 <input
                   id="inline-assign-eta"
                   data-testid="inline-assign-eta"
+                  data-picker="due-at"
+                  data-testid-picker="inbox-detail-due-at-picker"
+                  aria-label={tDetail('pickers.dueAtAria')}
                   type="number"
                   min={1}
                   max={1440}

@@ -35,6 +35,14 @@
     "submit": "Submit action",
     "submitting": "Submitting…"
   },
+  "pickers": {
+    "karim": "Field technician",
+    "karimAria": "Choose field technician",
+    "dueAt": "Due at (minutes from now)",
+    "dueAtAria": "Choose ETA in minutes",
+    "priorityOverride": "Priority override",
+    "priorityOverrideAria": "Override the default priority"
+  },
   "timeline": {
     "title": "Thread timeline",
     "eventCount_one": "{{count}} event",
