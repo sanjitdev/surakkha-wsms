@@ -22,7 +22,7 @@
       </acceptance>
       <refs>
         <spec>docs/D-UX-Design/citizen-status-timeline.md</spec>
-        <wireframe>docs/E-Development/wireframes/citizen-status-timeline.excalidraw (future)</wireframe>
+        <wireframe>docs/D-UX-Design/wireframes/citizen-status-timeline-layout.{mmd,svg,png} + citizen-status-timeline-interaction.{mmd,svg,png}</wireframe>
       </refs>
     </requirement>
 

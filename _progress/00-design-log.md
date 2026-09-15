@@ -2,12 +2,13 @@
 
 > WDS Phase 4 / 5 progress.
 > Maintained by Freya (Phase 4) and Mimir (Phase 5).
-> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed).
+> Last updated: 2026-09-15 (Stage 9 complete — ready-for-build; WDS audit complete, GAP-1 closed; GAP-TRIG-KARIM closed; wireframe convention migrated to Mermaid + mmdc; outline rendering-tool updated).
 >
 > **Handoff status:** All 17 PRDs in `docs/E-Development/NNN-[slug].xml` are
 > `status="planned"` and ready for `mimir build`. Master PRD at
 > `docs/E-Development/000-PRD.md`. Open-question resolutions at
-> `docs/E-Development/000-STAGE-7-RESOLUTIONS.md`.
+> `docs/E-Development/000-STAGE-7-RESOLUTIONS.md`. Wireframes at
+> `docs/D-UX-Design/wireframes/*.mmd` (rendered via mmdc 11.17.0).
 
 ---
 
