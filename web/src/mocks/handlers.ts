@@ -279,6 +279,12 @@ const chainHandlers = [
       // them to the chain and surfaces them on the audit log.
       'ChainAnomalyAcknowledged',
       'ChainAnomalyEscalated',
+      // WO-004 — Operator Dashboard quick-dismiss affordance. T1/T2 rows
+      // expose a Dismiss button that emits IncidentDismissed{actor,
+      // incident_id, reason} per operator-dashboard.md §Quick dismiss.
+      // Phase 1 keeps the projection loose — audit log can surface the
+      // event; the row removal from the inbox is optimistic on the client.
+      'IncidentDismissed',
     ];
 
     if (!ALLOWED.includes(envelope.event_type)) {
@@ -585,13 +591,22 @@ const sensorHandlers = [
 // ───────────────────────────────────────────────────────── incidents ─────
 
 const incidentHandlers = [
-  http.get('/api/incidents', async () => {
+  http.get('/api/incidents', async ({ request }) => {
     await delay(LATENCY_MS());
     const all = await getAllBlocks();
     const incidentEvents = all.filter((b) =>
       ['IncidentCreated', 'IncidentEscalated', 'IncidentResolved'].includes(b.event_type),
     );
     const byIncident = new Map<string, { id: string; latest: ChainBlock }>();
+
+    // WO-004 — Operator Dashboard auto-routed tail chip. `?auto_routed=true`
+    // narrows the projection to incidents whose latest event was a system
+    // self-routing action (IncidentDismissed without a human actor, or
+    // IncidentResolved whose resolved_by === 'system'). The chip on the
+    // dashboard calls this to derive the collapsed count without dragging
+    // the full incident payload into the top chrome.
+    const url = new URL(request.url);
+    const autoRoutedOnly = url.searchParams.get('auto_routed') === 'true';
 
     for (const b of incidentEvents) {
       const p = b.payload as { incident_id?: string };
@@ -603,6 +618,26 @@ const incidentHandlers = [
         byIncident.set(p.incident_id, { id: p.incident_id, latest: b });
       }
     }
+
+    // WO-004 — narrow to auto-routed rows when the chip asks for them.
+    // Definition (Phase 1): the chain contains an IncidentDismissed
+    // event authored by 'system' (kind === 'system'), regardless of
+    // whether other events followed. Phase 2 will refine to "the only
+    // touchpoint was system"; for now, presence is enough.
+    if (autoRoutedOnly) {
+      const systemDismissedIds = new Set<string>();
+      const sortedAll = [...all].sort((a, b) => a.height - b.height);
+      for (const b of sortedAll) {
+        if (b.event_type !== 'IncidentDismissed') continue;
+        if (b.actor_identity.kind !== 'system') continue;
+        const p = b.payload as { incident_id?: string };
+        if (p.incident_id) systemDismissedIds.add(p.incident_id);
+      }
+      for (const id of Array.from(byIncident.keys())) {
+        if (!systemDismissedIds.has(id)) byIncident.delete(id);
+      }
+    }
+
     return HttpResponse.json(
       Array.from(byIncident.values()).map(({ id, latest }) => {
         const p = latest.payload as Record<string, unknown>;

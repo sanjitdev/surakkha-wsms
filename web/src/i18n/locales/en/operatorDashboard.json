@@ -133,6 +133,23 @@
       "t1": "T1",
       "t0": "T0"
     },
+    "workflow": {
+      "ariaLabel": "Filter threads by workflow state",
+      "needsMe": "Needs me",
+      "inFlight": "In flight"
+    },
+    "autoRouted": {
+      "label": "{{count}} handled by system",
+      "hide": "Hide",
+      "show": "Show {{count}}",
+      "expandedAria": "Auto-routed incidents"
+    },
+    "quickDismiss": {
+      "label": "Dismiss",
+      "tooltip": "Dismiss this incident",
+      "reasonPlaceholder": "Reason (optional)",
+      "submit": "Dismiss"
+    },
     "reporter": {
       "anchor": "Anchor",
       "hotline": "Hotline",

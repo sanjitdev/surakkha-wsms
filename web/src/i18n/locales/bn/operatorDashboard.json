@@ -133,6 +133,23 @@
       "t1": "T1",
       "t0": "T0"
     },
+    "workflow": {
+      "ariaLabel": "কর্মপ্রবাহ অবস্থা অনুসারে থ্রেড ফিল্টার করুন",
+      "needsMe": "আমার প্রয়োজন",
+      "inFlight": "চলমান"
+    },
+    "autoRouted": {
+      "label": "সিস্টেম {{count}}টি পরিচালনা করেছে",
+      "hide": "লুকান",
+      "show": "{{count}}টি দেখান",
+      "expandedAria": "স্বয়ংক্রিয়ভাবে রাউট করা ঘটনা"
+    },
+    "quickDismiss": {
+      "label": "বাতিল করুন",
+      "tooltip": "এই ঘটনা বাতিল করুন",
+      "reasonPlaceholder": "কারণ (ঐচ্ছিক)",
+      "submit": "বাতিল করুন"
+    },
     "reporter": {
       "anchor": "অ্যাঙ্কর",
       "hotline": "হটলাইন",

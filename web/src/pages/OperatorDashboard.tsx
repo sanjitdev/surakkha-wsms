@@ -22,7 +22,7 @@
  *     inline aside/top-chrome.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
@@ -69,6 +69,13 @@ type Tab = 'overview' | 'sensors' | 'wards';
 type ThreadFilter = 'all' | 'T3' | 'T2' | 'T1' | 'T0';
 type Severity = 'T3' | 'T2' | 'T1' | 'T0';
 const THREAD_FILTERS: readonly ThreadFilter[] = ['all', 'T3', 'T2', 'T1', 'T0'];
+// 004-REQ-006 — workflow-state filter (orthogonal to tier filter).
+// 'needs-me' (default): rows that still need human attention.
+// 'in-flight': rows with active operator assignment (TechnicianAssigned
+// or later in the chain) — Priya wants to hide these so the top of
+// the inbox always shows work only she can clear.
+type WorkflowFilter = 'needs-me' | 'in-flight';
+const WORKFLOW_FILTERS: readonly WorkflowFilter[] = ['needs-me', 'in-flight'];
 
 interface SensorRow {
   sensor_id: string;
@@ -147,6 +154,9 @@ export function OperatorDashboard() {
   const { t: tDash } = useTranslation('operatorDashboard');
   const [tab, setTab] = useState<Tab>('overview');
   const [threadFilter, setThreadFilter] = useState<ThreadFilter>('all');
+  // 004-REQ-006 — workflow-state filter chip group (orthogonal to tier).
+  // Default 'needs-me' so the inbox shows work only Priya can clear.
+  const [workflowFilter, setWorkflowFilter] = useState<WorkflowFilter>('needs-me');
   // operator-dashboard.md #6 — top-chrome `Log hotline call` button.
   // Mounts HotlineIntakeModal. The modal owns its own form state, dirty-
   // check, and submit path; this state only toggles open/close and
@@ -166,6 +176,12 @@ export function OperatorDashboard() {
 
   const [sensors, setSensors] = useState<SensorRow[]>([]);
   const [recent, setRecent] = useState<ChainEventLite[]>([]);
+  // 004-REQ-007 — auto-routed tail. Count comes from a separate
+  // /api/incidents?auto_routed=true projection (handlers.ts gates it).
+  // Collapsed by default; tapping the chip expands to a 1-line summary
+  // per row. Network failure is silent — the chip just renders "0".
+  const [autoRoutedCount, setAutoRoutedCount] = useState<number>(0);
+  const [autoRoutedExpanded, setAutoRoutedExpanded] = useState<boolean>(false);
   // Issue #1 (Critical): fetch failure must surface visibly. AppLayout's
   // pulse-dot shifts to amber via a shared `chainStatus` context, but the
   // dashboard owns its own error banner above the tabs (`role="alert"`)
@@ -188,7 +204,7 @@ export function OperatorDashboard() {
 
     void (async () => {
       try {
-        const [senRes, evtRes] = await Promise.all([
+        const [senRes, evtRes, autoRes] = await Promise.all([
           fetch('/api/sensors').then((r) => {
             if (!r.ok) throw new Error(`/api/sensors returned ${r.status}`);
             return r.json() as Promise<SensorRow[]>;
@@ -197,11 +213,19 @@ export function OperatorDashboard() {
             if (!r.ok) throw new Error(`/api/events returned ${r.status}`);
             return r.json() as Promise<{ events: ChainEventLite[] }>;
           }),
+          // 004-REQ-007 — auto-routed count for the top-right chip.
+          // Failure is silent — chip renders "0" on error so the page
+          // never blocks on this auxiliary fetch.
+          fetch('/api/incidents?auto_routed=true').then((r) => {
+            if (!r.ok) throw new Error(`/api/incidents auto_routed returned ${r.status}`);
+            return r.json() as Promise<IncidentSummary[]>;
+          }),
         ]);
 
         if (cancelled.current) return;
         setSensors(senRes);
         setRecent(evtRes.events);
+        setAutoRoutedCount(autoRes.length);
         setFetchError(null);
       } catch (err) {
         if (cancelled.current) return;
@@ -220,6 +244,39 @@ export function OperatorDashboard() {
   // utility_operator session, but reading it here keeps a stable hook
   // call ordering if a future story needs it for personalised KPIs.
   void session;
+
+  // 004-REQ-008 — quick-dismiss emit. POSTs IncidentDismissed to
+  // /api/events with the operator session as actor + a one-line reason.
+  // On success: refresh the inbox so the row disappears; on failure:
+  // warn the operator. The button is on T1/T2 rows only and is
+  // confirmation-free (low-band, low-risk per spec).
+  const handleQuickDismiss = useCallback(
+    async (incidentId: string): Promise<void> => {
+      try {
+        const res = await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            event_type: 'IncidentDismissed',
+            payload: {
+              incident_id: incidentId,
+              reason: 'quick-dismiss',
+              dismissed_at: new Date().toISOString(),
+            },
+          }),
+        });
+        if (!res.ok) {
+          toast.warning('Could not dismiss row — refresh and retry.');
+          return;
+        }
+        await refetchIncidents();
+      } catch (err) {
+        console.error('[surakkha] quick dismiss failed', err);
+        toast.warning('Could not dismiss row — refresh and retry.');
+      }
+    },
+    [toast, refetchIncidents],
+  );
 
   // derive KPIs from incident list
   const openIncidents = incidents.filter((i) => i.status !== 'resolved');
@@ -261,9 +318,47 @@ export function OperatorDashboard() {
     return counts;
   }, [openIncidents]);
   const filteredThreads = useMemo(() => {
-    if (threadFilter === 'all') return openIncidents;
-    return openIncidents.filter((i) => i.severity === threadFilter);
-  }, [openIncidents, threadFilter]);
+    const byTier =
+      threadFilter === 'all' ? openIncidents : openIncidents.filter((i) => i.severity === threadFilter);
+    // 004-REQ-006 — workflow filter. In-flight = the latest event on the
+    // incident's chain is a TechnicianAssigned / Arrived / Diagnosis /
+    // Fix event (i.e. the technician is the active actor). Needs-me =
+    // anything that is not in-flight (created / escalated / resolved
+    // but unassigned). This is the projection-shaped hint — Phase 2
+    // can read the full chain if a more precise definition is needed.
+    if (workflowFilter === 'in-flight') {
+      return byTier.filter((i) =>
+        ['TechnicianAssigned', 'TechnicianArrived', 'DiagnosisSubmitted', 'FixSubmitted'].includes(
+          i.last_event_type,
+        ),
+      );
+    }
+    return byTier.filter(
+      (i) => !['TechnicianAssigned', 'TechnicianArrived', 'DiagnosisSubmitted', 'FixSubmitted'].includes(i.last_event_type),
+    );
+  }, [openIncidents, threadFilter, workflowFilter]);
+  // 004-REQ-002 — priority-first / age-second sort (locked #1).
+  // T3 is the highest priority band (urgent / alert-red-reserved issuance
+  // candidates), then T2, T1, T0. Within the same band, older incidents
+  // (smaller last_occurred_at) win so the operator's eye lands on the
+  // row that's been waiting longest at the highest priority first. The
+  // sort is applied at render time; the wire payload order is preserved
+  // on disk so the chain read model stays append-only.
+  const rankedThreads = useMemo(() => {
+    const rank: Record<string, number> = { T3: 0, T2: 1, T1: 2, T0: 3 };
+    return [...filteredThreads].sort((a, b) => {
+      const ra = rank[a.severity as string] ?? 99;
+      const rb = rank[b.severity as string] ?? 99;
+      if (ra !== rb) return ra - rb;
+      // ascending age = older first. last_occurred_at is ISO 8601 so a
+      // string compare is correct; we coerce via Date.parse defensively.
+      const ta = Date.parse(a.last_occurred_at);
+      const tb = Date.parse(b.last_occurred_at);
+      const va = Number.isFinite(ta) ? ta : Number.POSITIVE_INFINITY;
+      const vb = Number.isFinite(tb) ? tb : Number.POSITIVE_INFINITY;
+      return va - vb;
+    });
+  }, [filteredThreads]);
   // Per lockdown cascade 2026-09-11: chip dot color for T3 is amber-bright
   // (NOT alert-red — alert-red is reserved for the issuance path).
   const threadChipDotColor: Record<Exclude<ThreadFilter, 'all'>, string> = {
@@ -304,7 +399,7 @@ export function OperatorDashboard() {
 
     return (
 <span
-        className={`chip chip chip-reporter-${k} badge--reporter-${k}`}
+        className={`chip chip chip-reporter-${k} badge--reporter-${k} operator-dashboard-reporter-badge-chip`}
         data-testid={`thread-reporter-${k}`}
         aria-label={tDash(`threads.reporter.ariaLabel.${k}`)}
         title={tDash(`threads.reporter.ariaLabel.${k}`)}
@@ -399,7 +494,8 @@ export function OperatorDashboard() {
         className: 'col-status',
         render: (i) => (
           <span
-            className={`badge badge--${severityBadgeClass(i.severity)}`}
+            className={`badge badge--${severityBadgeClass(i.severity)} operator-dashboard-band-pill`}
+            data-testid={`operator-dashboard-band-pill-${i.incident_id}`}
             aria-label={severityAriaLabel(i.severity, tDash)}
             title={severityAriaLabel(i.severity, tDash)}
           >
@@ -424,6 +520,34 @@ export function OperatorDashboard() {
         header: tDash('threads.tableCompact.colOpened'),
         className: 'col-time',
         render: (i) => formatRelative(i.last_occurred_at),
+      },
+      {
+        key: 'quick-dismiss',
+        header: '',
+        className: 'col-action',
+        // 004-REQ-008 — quick-dismiss affordance on T1/T2 rows. T3 needs
+        // human action so dismiss is hidden there; resolved rows are
+        // closed so dismiss is hidden there too; T0 (info) is below the
+        // dismissal threshold per spec — dismiss shows on T1 + T2 only.
+        render: (i) => {
+          if (i.status === 'resolved') return null;
+          if (i.severity !== 'T1' && i.severity !== 'T2') return null;
+          return (
+            <button
+              type="button"
+              className="operator-quick-dismiss operator-dashboard-quick-dismiss"
+              data-testid={`operator-dashboard-quick-dismiss-${i.incident_id}`}
+              aria-label={tDash('threads.quickDismiss.tooltip')}
+              title={tDash('threads.quickDismiss.tooltip')}
+              onClick={(e) => {
+                e.stopPropagation();
+                void handleQuickDismiss(i.incident_id);
+              }}
+            >
+              {tDash('threads.quickDismiss.label')}
+            </button>
+          );
+        },
       },
       {
         key: 'action',
@@ -474,8 +598,8 @@ export function OperatorDashboard() {
   // Post FE-1.6a AppLayout owns the chrome, so the page returns only the
   // page header + tabs + main content.
   return (
-    <>
-      <div className="page-header">
+    <div className="operator-dashboard-page" data-testid="operator-dashboard-page">
+      <header className="page-header" data-testid="operator-dashboard-header">
         <div className="page-header__row">
           <div>
             <h1>{tDash('pageHeader.title')}</h1>
@@ -488,7 +612,7 @@ export function OperatorDashboard() {
             </div>
           </div>
           {/* operator-dashboard.md #6 — top-chrome action bar. */}
-          <div className="page-header__actions">
+          <div className="page-header__actions" data-testid="operator-dashboard-action-bar">
             <Button
               variant="secondary"
               size="md"
@@ -502,9 +626,32 @@ export function OperatorDashboard() {
               </span>
               {tDash('actions.logHotlineCall')}
             </Button>
+            {/* 004-REQ-007 — auto-routed-tail chip. Collapsed by default;
+                tapping expands a 1-line summary region. Top-right per
+                spec; rendered after the hotline button to preserve the
+                hotline-as-leftmost affordance. */}
+            {autoRoutedCount > 0 && (
+              <button
+                type="button"
+                className="auto-routed-chip"
+                data-testid="operator-dashboard-auto-routed-tail-chip"
+                aria-expanded={autoRoutedExpanded}
+                aria-label={tDash('threads.autoRouted.expandedAria')}
+                onClick={() => {
+                  setAutoRoutedExpanded((v) => !v);
+                }}
+              >
+                <span className="auto-routed-chip__count">
+                  {tDash('threads.autoRouted.label', { count: autoRoutedCount })}
+                </span>
+                <span className="auto-routed-chip__hide">
+                  {tDash('threads.autoRouted.hide')}
+                </span>
+              </button>
+            )}
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Issue #1 (Critical): error banner — `role="alert"` so screen-reader
           users hear the failure, not just see the empty KPI row. */}
@@ -583,7 +730,7 @@ export function OperatorDashboard() {
         </button>
       </div>
 
-      <main className="container container--wide">
+      <main className="container container--wide" data-testid="operator-dashboard-main">
         {/* ── TAB: OVERVIEW ── */}
         <section
           id="tabpanel-overview"
@@ -676,6 +823,32 @@ export function OperatorDashboard() {
                         />
                       ))}
                     </div>
+                    {/* 004-REQ-006 — workflow-state chip group (needs-me /
+                        in-flight). Orthogonal to the tier chips above; sits
+                        immediately below so the eye lands on it after the
+                        tier filter. Default = 'needs-me' per spec. */}
+                    <div
+                      className="filter-chips filter-chips--workflow"
+                      role="group"
+                      aria-label={tDash('threads.workflow.ariaLabel')}
+                      data-testid="operator-dashboard-filter-chips"
+                    >
+                      {WORKFLOW_FILTERS.map((wf) => (
+                        <FilterChip
+                          key={wf}
+                          label={tDash(
+                            wf === 'needs-me'
+                              ? 'threads.workflow.needsMe'
+                              : 'threads.workflow.inFlight',
+                          )}
+                          active={workflowFilter === wf}
+                          onClick={() => {
+                            setWorkflowFilter(wf);
+                          }}
+                          testId={`operator-dashboard-chip-${wf === 'needs-me' ? 'needs-me' : 'in-flight'}`}
+                        />
+                      ))}
+                    </div>
                   </div>
                   {filteredThreads.length === 0 ? (
                     <div
@@ -690,13 +863,18 @@ export function OperatorDashboard() {
                       </p>
                     </div>
                   ) : (
+                    <div
+                      className="operator-dashboard-incident-list"
+                      data-testid="operator-dashboard-incident-list"
+                    >
                     <Table<IncidentSummary>
                       columns={threadColumnsCompact}
-                      rows={filteredThreads}
+                      rows={rankedThreads}
                       rowKey="incident_id"
                       testId="table-threads"
                       className="data-table"
                     />
+                    </div>
                   )}
                 </div>
                 <div
@@ -972,7 +1150,7 @@ export function OperatorDashboard() {
           }
         }}
       />
-    </>
+    </div>
   );
 }
 /**

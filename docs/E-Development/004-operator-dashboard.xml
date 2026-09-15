@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<prd id="004" title="Operator Dashboard" project="surakkha-wsms" created="2026-09-15" status="planned">
+<prd id="004" title="Operator Dashboard" project="surakkha-wsms" created="2026-09-15" status="built">
 
   <overview>
     The Operator Dashboard is Priya's landing page after login. It collapses the previous three-layout toggle (Overview / Sensors / Wards) into a single status-board grid showing ranked incidents. Each row renders BandPill (glyph + text) and reporter-badge chip as independent dimensions. Sort is priority-first / age-second. The hotline-intake trigger lives in the top-chrome action bar (mounted via WO-002). This is the load-bearing surface for Goal 1.1 (incident enters queue &lt; 10s) and Goal 2.2 (status visible across personas).
@@ -13,7 +13,7 @@
 
   <requirements>
 
-    <requirement id="004-REQ-001" type="platform" status="planned">
+    <requirement id="004-REQ-001" type="platform" status="built">
       <title>Status-board grid only (no A/B/C toggle)</title>
       <description>Remove the three-layout (Overview / Sensors / Wards) toggle. Page renders only the status-board grid. Sensor/ward widgets deferred to dedicated routes (Phase 1.7+).</description>
       <acceptance>
@@ -26,7 +26,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-002" type="behavior" status="planned">
+    <requirement id="004-REQ-002" type="behavior" status="built">
       <title>Priority-first / age-second sort (locked)</title>
       <description>Sort incidents: priority P1 > P2 > P3 > P4, then ascending age. Same contract as FieldQueue (WO-006). Sort applied at render time (no re-fetch).</description>
       <acceptance>
@@ -38,7 +38,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-003" type="interface" status="planned">
+    <requirement id="004-REQ-003" type="interface" status="built">
       <title>Trust-band glyph + text pattern</title>
       <description>Each row renders BandPill with glyph + text: ◔ T1 / ◑ T2 / ● T3 / ✓ resolved. Per foundation §4.1; lockdown-binding; never color-only.</description>
       <acceptance>
@@ -50,7 +50,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-004" type="interface" status="planned">
+    <requirement id="004-REQ-004" type="interface" status="built">
       <title>Reporter-badge chip per row (independent dimension)</title>
       <description>Each row renders reporter-badge chip: ⚓ anchor / ☎ hotline / ✎ webform / 📡 sensor. Independent of trust band; never collapses into it. Per foundation §6.2.</description>
       <acceptance>
@@ -62,7 +62,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-005" type="platform" status="planned">
+    <requirement id="004-REQ-005" type="platform" status="built">
       <title>Mount hotline-intake trigger in top-chrome action bar</title>
       <description>Mount `+ New hotline report` button in top-chrome action bar (leftmost position). Click opens HotlineIntakeModal (WO-002). Phone icon (lucide 16px). Button variant: secondary (slate outline).</description>
       <acceptance>
@@ -76,7 +76,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-006" type="interface" status="planned">
+    <requirement id="004-REQ-006" type="interface" status="built">
       <title>Filter chips (needs me / in flight)</title>
       <description>Render two filter chips: "needs me" (default active) and "in flight". Click toggles active state. Filter applied at render time; chip state ephemeral (URL persistence deferred to Phase 1.7+).</description>
       <acceptance>
@@ -89,7 +89,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-007" type="interface" status="planned">
+    <requirement id="004-REQ-007" type="interface" status="built">
       <title>Auto-routed-tail chip (collapsed, top-right)</title>
       <description>Render auto-routed-tail chip top-right showing count + "system handled, hide" affordance. Collapsed by default. Click expands to show 1-line summary per auto-routed incident.</description>
       <acceptance>
@@ -102,7 +102,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-008" type="platform" status="planned">
+    <requirement id="004-REQ-008" type="platform" status="built">
       <title>Quick-dismiss affordance on low-band rows</title>
       <description>Render quick-dismiss button on T1/T2 rows. Click emits POST /api/events with IncidentDismissed{actor, incident_id, reason}. Confirmation not required (low-band, low-risk).</description>
       <acceptance>
@@ -114,7 +114,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-009" type="interface" status="planned">
+    <requirement id="004-REQ-009" type="interface" status="built">
       <title>Focus rings use --color-primary-tint</title>
       <description>Replace brand-400 focus rings with --color-primary-tint per foundation §10.2. Applies to all interactive elements on this page.</description>
       <acceptance>
@@ -126,7 +126,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-010" type="interface" status="planned">
+    <requirement id="004-REQ-010" type="interface" status="built">
       <title>Tab order matches visual order (foundation §10.3)</title>
       <description>Tab order matches visual order: hotline trigger → filter chips → auto-routed chip → first row → ... → last row. Help (?) key opens help modal.</description>
       <acceptance>
@@ -138,7 +138,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-011" type="interface" status="planned">
+    <requirement id="004-REQ-011" type="interface" status="built">
       <title>Area Labels per foundation §13</title>
       <description>Implement Area Labels per foundation §13: operator-dashboard-page, …-header, …-main, …-action-bar, …-button-log-hotline-call, …-filter-chips, …-chip-needs-me, …-chip-in-flight, …-auto-routed-tail-chip, …-incident-list, …-row, …-band-pill, …-reporter-badge-chip, …-quick-dismiss.</description>
       <acceptance>
@@ -149,7 +149,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-012" type="interface" status="planned">
+    <requirement id="004-REQ-012" type="interface" status="built">
       <title>i18n keys (EN + BN only, no Hindi)</title>
       <description>Verify EN + BN parity for all keys; no Hindi strings anywhere. Operator mode locale defaults to English; Bangla-toggleable; preference persists per session.</description>
       <acceptance>
@@ -161,7 +161,7 @@
       </refs>
     </requirement>
 
-    <requirement id="004-REQ-013" type="platform" status="planned">
+    <requirement id="004-REQ-013" type="platform" status="built">
       <title>Reconciliation: collapse 3-layout toggle; mount hotline trigger</title>
       <description>The existing file pre-dates the lockdown cascade. Verify no A/B/C toggle controls in DOM; verify HotlineIntakeModal trigger wired correctly; verify no T3 default for hotline incidents (T1 only).</description>
       <acceptance>
