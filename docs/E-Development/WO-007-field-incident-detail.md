@@ -39,17 +39,17 @@ Reconcile `web/src/pages/FieldIncidentDetailPage.tsx` (601 LOC) — Karim's on-s
 
 ## Acceptance criteria
 
-1. Page renders at `/field/:incident_id` for `field_technician`
-2. Header shows: BandPill, reporter-badge chip, `due_at` countdown, "Mark arrived" button
-3. Photo capture: opens camera/gallery picker; auto-populates EXIF (lat/lon/timestamp/device); all editable
-4. Diagnosis form: structured (severity / category / tags) — never single textarea
-5. Fix form: parts list (add/remove rows) + photo proof (required before submit)
-6. `Submit proof` button enabled only when all required fields filled
-7. On submit: emits `FixSubmitted{actor, incident_id, parts, photo_hash, diagnosis}` in one transaction
-8. Toast confirms "Proof submitted — awaiting review"
-9. `TrustBandOverridden` event in segment shows "View override reasoning" affordance
-10. Bangla toggle works; preference persists
-11. No Hindi strings
+1. Page renders at `/field/:incident_id` for `field_technician` ✅
+2. Header shows: BandPill, reporter-badge chip, `due_at` countdown, "Mark arrived" button ✅
+3. Photo capture: opens camera/gallery picker; auto-populates EXIF (lat/lon/timestamp/device); all editable ✅
+4. Diagnosis form: structured (severity / category / tags) — never single textarea ✅
+5. Fix form: parts list (add/remove rows) + photo proof (required before submit) ✅
+6. `Submit proof` button enabled only when all required fields filled ✅
+7. On submit: emits `FixSubmitted{actor, incident_id, parts, photo_hash, diagnosis}` in one transaction ✅
+8. Toast confirms "Proof submitted — awaiting review" ✅
+9. `TrustBandOverridden` event in segment shows "View override reasoning" affordance ✅
+10. Bangla toggle works; preference persists ✅
+11. No Hindi strings ✅
 
 ## UI rules
 

@@ -49,7 +49,7 @@ Per WDS `references/ux-design-workflow.md`:
 | operator-dashboard.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | inbox-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 | field-queue.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
-| field-incident-detail.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
+| field-incident-detail.md | S✓ | ○ | ○ | B✓ | ○ | T | ✓ | S✓ |
 | audit-log.md | S✓ | ○ | ○ | existing (web/) | ○ | T | ✓ | S✓ |
 
 ### 2.3 Tier 3 — light infrastructure pages
