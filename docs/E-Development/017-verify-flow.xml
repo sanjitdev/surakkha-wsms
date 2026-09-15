@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="017" title="Verify Flow" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Verify Flow is the operator's standalone verification surface (used outside the inbox context, e.g., for ad-hoc chain checks). Reuses web/src/lib/chain-verify.ts (never copy-pasted). Single-click verify per lockdown §12. Pass/fail badge result + 3s auto-dismiss toast + durable row metadata. Tier 3 (light, dev/operator tool).
+  </overview>
+
+  <scope>
+    <scenarios>06-audit-chain-timeline-cross-cutting (use case: ad-hoc verify)</scenarios>
+    <views>/verify-flow for utility_operator</views>
+    <platform>Reconcile web/src/pages/VerifyFlow.tsx (219 LOC); reuse chain-verify.ts helper; single-click verify</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="017-REQ-001" type="platform" status="planned">
+      <title>Mount route at /verify-flow for utility_operator</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for utility_operator.</description>
+      <acceptance>
+        <criterion>Route renders for utility_operator</criterion>
+        <criterion>Non-operator roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/verify-flow.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-002" type="platform" status="planned">
+      <title>Single-click verify reuses chain-verify.ts helper</title>
+      <description>Single-click verify calls verifyBlock() from web/src/lib/chain-verify.ts. Never copy-pasted. Per lockdown §12 audit gap.</description>
+      <acceptance>
+        <criterion>verifyBlock call goes through helper (verified by import trace)</criterion>
+        <criterion>No copy-pasted verify logic in this page</criterion>
+        <criterion>Helper never throws (network failure returns VerifyState.fail)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §7</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-003" type="interface" status="planned">
+      <title>Pass/fail badge with lockdown tokens</title>
+      <description>Pass badge uses --color-safe-green (#2F6E45); fail badge uses --color-alert-red-reserved. Per foundation §1.</description>
+      <acceptance>
+        <criterion>Pass badge resolves --color-safe-green</criterion>
+        <criterion>Fail badge resolves --color-alert-red-reserved</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-004" type="behavior" status="planned">
+      <title>3s auto-dismiss toast + durable row badge</title>
+      <description>After verify, show toast (auto-dismiss at 3s) AND durable badge in row metadata. Toast: pass/fail message. Badge: persistent CheckCircle2 (pass) or AlertTriangle (fail) icon.</description>
+      <acceptance>
+        <criterion>Toast renders and auto-dismisses at 3s</criterion>
+        <criterion>Durable badge persists in row metadata</criterion>
+        <criterion>Pass icon = CheckCircle2; fail icon = AlertTriangle</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-005" type="interface" status="planned">
+      <title>All 4 VerifyState variants render correctly</title>
+      <description>Render all 4 VerifyState union variants from chain-verify.ts: idle / pending / ok / fail. Each has correct icon + text per foundation.</description>
+      <acceptance>
+        <criterion>Idle: muted "Not verified"</criterion>
+        <criterion>Pending: spinner + "Verifying…"</criterion>
+        <criterion>Ok: green badge + "Verified"</criterion>
+        <criterion>Fail: red badge + "Verification failed"</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §6</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-006" type="interface" status="planned">
+      <title>Tab order matches visual order</title>
+      <description>Tab order matches visual order: hash input → verify button → result rows.</description>
+      <acceptance>
+        <criterion>Tab order assertion test passes</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §10.3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-007" type="interface" status="planned">
+      <title>Bangla toggle works on this page</title>
+      <description>Locale toggle (EN/BN). Preference persists in IDB.</description>
+      <acceptance>
+        <criterion>Toggle changes locale on this page</criterion>
+        <criterion>Preference persists across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-008" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: verify-flow-page, …-header, …-main, …-hash-input, …-button-verify, …-result-row, …-verify-badge, …-verify-toast.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-009" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for verify button label, pass/fail toasts, VerifyState text variants. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-017-verify-flow.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="017-REQ-010" type="platform" status="planned">
+      <title>Reconciliation: confirm helper reuse + single-click</title>
+      <description>Verify chain-verify.ts helper reused (no copy-paste); verify single-click verify (no two-click confirm, no captcha); verify no Hindi strings; verify 4 VerifyState variants.</description>
+      <acceptance>
+        <criterion>grep 'verifyBlock' import trace shows helper import</criterion>
+        <criterion>Single-click test passes (no second prompt)</criterion>
+        <criterion>4 VerifyState variants enumeration test passes</criterion>
+        <criterion>grep 'hi' locale returns zero hits</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="017-REQ-002">
+      <steps>Inspect import trace; assert verifyBlock from chain-verify.ts. Force network failure; assert no throw; assert VerifyState.fail returned.</steps>
+      <expected>Helper reused; never throws.</expected>
+    </test>
+    <test ref="017-REQ-003">
+      <steps>Click verify with valid hash; assert pass badge color = --color-safe-green. Click with invalid; assert fail badge color = --color-alert-red-reserved.</steps>
+      <expected>Token resolution correct.</expected>
+    </test>
+    <test ref="017-REQ-004">
+      <steps>Click verify; assert toast appears; assert badge persists after 3s when toast dismisses.</steps>
+      <expected>Toast + durable badge work.</expected>
+    </test>
+    <test ref="017-REQ-005">
+      <steps>Seed each VerifyState; assert correct icon + text rendering for all 4 variants.</steps>
+      <expected>All 4 variants render correctly.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

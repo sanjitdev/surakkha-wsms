@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="001" title="Citizen Status Timeline" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Citizen Status Timeline is the page Anjali opens after submitting a water-safety report. It answers her question: "Did anyone come?" It is informational, not a workflow — she reads the motion of verified events (verified, dispatched, arrived, fixed, closed) and goes back to her day. The only decision it surfaces is the closure tap when one is due. The page is the load-bearing surface for Goal 3.2 (in-progress signal at every state transition) and is the structural answer to keeping her from quietly withdrawing the next time the water looks wrong.
+  </overview>
+
+  <scope>
+    <scenarios>03-anjali-the-anchor-citizen-arc, 06-audit-chain-timeline-cross-cutting (Use Case C)</scenarios>
+    <views>03.3 (in-progress beat), 03.4 (closure holding pattern)</views>
+    <platform>Read /api/chain/blocks filtered by incident_id; emit ChainRead event on mount; emit ChainAccepted / ChainReopened / ChainAnomalyAcknowledged on user action</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="001-REQ-001" type="platform" status="planned">
+      <title>Mount route at /my-reports/:incident_id/timeline for citizen role</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for citizen. Route must be inside the citizen-only scope (currently outside AppLayout).</description>
+      <acceptance>
+        <criterion>Navigating to /my-reports/inc_01HX... as citizen renders CitizenStatusTimeline page</criterion>
+        <criterion>Navigating as non-citizen role redirects to /dashboard or /inbox</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md</spec>
+        <wireframe>docs/E-Development/wireframes/citizen-status-timeline.excalidraw (future)</wireframe>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-002" type="behavior" status="planned">
+      <title>Project chain events into public-mode timeline</title>
+      <description>Fetch /api/chain/blocks filtered by incident_id; project to citizen-relevant subset (IncidentCreated, Verified, Assigned, TechnicianArrived, DiagnosisSubmitted, FixSubmitted, IncidentResolvedByAdmin, CitizenAckAccepted, ChainAccepted, ChainReopened). Hide payloads, hashes, JSON. Show motion-only: icon + relative time + actor chip.</description>
+      <acceptance>
+        <criterion>Only motion-relevant events shown (filter excludes internal ops events like ChainRead, ChainAnomalyAcknowledged)</criterion>
+        <criterion>Row payload/hashes/JSON never rendered in DOM (verified via test that inspects DOM)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md §3, §4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-003" type="behavior" status="planned">
+      <title>Bangla-first locale default</title>
+      <description>On first visit, locale = 'bn'. Operator toggle EN ↔ BN; preference persists in IDB via i18next-browser-languagedetector. Bangla numerals for all timestamps via Intl.NumberFormat('bn-BD').</description>
+      <acceptance>
+        <criterion>First mount renders Bangla strings</criterion>
+        <criterion>Toggle persists across reloads</criterion>
+        <criterion>Timestamp numerals render in Bangla script</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md §1</spec>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-004" type="behavior" status="planned">
+      <title>ActionCall: closure tap (✅/❌) when due</title>
+      <description>If IncidentResolvedByAdmin event exists and ack is pending, render ActionCall with ✅ Confirm resolved (primary) and ❌ Reopen (ghost). On ✅, emit ChainAccepted event and show 'Thanks for confirming. All set.' On ❌, open reason picker then emit ChainReopened with reason. Surface ack-window expiry (24h from IncidentResolvedByAdmin).</description>
+      <acceptance>
+        <criterion>ActionCall renders only when IncidentResolvedByAdmin exists AND ack is pending</criterion>
+        <criterion>✅ button emits ChainAccepted{actor: citizen, incident_id}</criterion>
+        <criterion>❌ button opens reason picker then emits ChainReopened with selected reason</criterion>
+        <criterion>Ack-window expiry visible (e.g., "Acknowledge within 24 hours")</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md §3 Journey D</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-005" type="platform" status="planned">
+      <title>Emit ChainRead on mount (audit requirement)</title>
+      <description>On page mount, fire POST /api/events with ChainRead{actor: 'citizen', incident_id, filter_combo: ['all']}. Per PRD §11.1, 100% of chain reads must be logged.</description>
+      <acceptance>
+        <criterion>ChainRead event fires exactly once per mount</criterion>
+        <criterion>Event payload contains actor='citizen', the incident_id from route, filter_combo=['all']</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §11.1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-006" type="integration" status="planned">
+      <title>MSW handler: ChainRead event variant</title>
+      <description>Extend web/src/mocks/handlers.ts POST /api/events to accept the ChainRead event type. Persist via idb-keyval. Add fixture for chain-read events in fixtures.ts.</description>
+      <acceptance>
+        <criterion>POST /api/events with type=ChainRead returns 200 and persists to IDB</criterion>
+        <criterion>GET /api/events?type=ChainRead returns the recorded event</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-007" type="interface" status="planned">
+      <title>i18n keys added (EN + BN parity)</title>
+      <description>Add new keys to web/src/i18n/locales/en/citizenStatusTimeline.json and bn/citizenStatusTimeline.json. Keys: page.title, page.subtitle, timeline.empty, timeline.relative.{justNow,minutesAgo,hoursAgo,daysAgo}, actionCall.closurePrompt, actionCall.confirm, actionCall.reopen, actionCall.thanks, actor.{reporter,operator,field}.</description>
+      <acceptance>
+        <criterion>EN and BN key sets match exactly (parity check passes)</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-001-citizen-status-timeline.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-008" type="interface" status="planned">
+      <title>Area Labels match WDS spec-writer convention</title>
+      <description>Implement data-area-id and aria-label attributes on each rendered region per foundation §13: citizen-status-timeline-page, …-header, …-main, …-timeline, …-event-row, …-actor-chip, …-action-call, …-action-call-confirm-yes, …-action-call-confirm-no.</description>
+      <acceptance>
+        <criterion>Each rendered region has matching id and aria-label attribute</criterion>
+        <criterion>Area Label hierarchy follows {page}-{section}-{element} pattern</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-009" type="interface" status="planned">
+      <title>Use only Card, Button, Toast primitives from web/src/components/ui/</title>
+      <description>Per lockdown decision #4 (shadcn/ui adopted). No raw HTML form elements; no upstream shadcn import. ✅ uses Button primary, ❌ uses Button ghost, ActionCall wraps Card. Post-action Toast confirms ack.</description>
+      <acceptance>
+        <criterion>Component tree includes only primitives from web/src/components/ui/</criterion>
+        <criterion>No package.json addition for upstream shadcn</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/decisions/00-lockdown-audit.md §3 (decision #4)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-010" type="interface" status="planned">
+      <title>Typography + motion follow lockdown</title>
+      <description>Use --font-family-bangla (Noto Sans Bengali) primary; line-height --line-height-body-bangla: 1.6. Motion per lockdown 08-motion-lockdown.md; no confetti animation. 200ms green pulse only on ack (per lockdown decision #2).</description>
+      <acceptance>
+        <criterion>CSS resolves --font-family-bangla for Bangla strings</criterion>
+        <criterion>No confetti animation in DOM (verified by absence of confetti-* className)</criterion>
+        <criterion>Closure ack triggers 200ms green pulse; no longer animation</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11 (typography)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="001-REQ-011" type="platform" status="planned">
+      <title>Reconciliation: pre-lockdown draft at web/src/pages/CitizenStatusTimeline.tsx</title>
+      <description>The existing file pre-dates the lockdown cascade. Verify no Hindi strings remain; replace any --band-* references with --color-trust-* / --color-reporter-*; remove any confetti animation references; remove any T3 default (citizen never gets T3).</description>
+      <acceptance>
+        <criterion>grep for 'hi' locale key returns zero hits</criterion>
+        <criterion>grep for '--band-' returns zero hits</criterion>
+        <criterion>grep for 'T3' in default state returns zero hits</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2, §4.4</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="001-REQ-001">
+      <steps>Mount at /my-reports/inc_01HX... as citizen; assert page renders. Switch role to utility_operator; assert redirect.</steps>
+      <expected>Page renders for citizen only.</expected>
+    </test>
+    <test ref="001-REQ-002">
+      <steps>Render with fixture chain (10 events incl. ChainRead, ChainAnomalyAcknowledged); inspect DOM for payload/hash/JSON.</steps>
+      <expected>Only motion-relevant rows present; no payload strings in DOM.</expected>
+    </test>
+    <test ref="001-REQ-003">
+      <steps>Clear IDB; mount; assert locale=bn and Bangla numerals. Toggle to en; reload; assert en persists.</steps>
+      <expected>Bangla-first default; persistence works.</expected>
+    </test>
+    <test ref="001-REQ-004">
+      <steps>Render with fixture ending in IncidentResolvedByAdmin (no ack); click ✅; assert ChainAccepted event. Reset; click ❌; pick reason; assert ChainReopened.</steps>
+      <expected>ActionCall events fire with correct payloads.</expected>
+    </test>
+    <test ref="001-REQ-005">
+      <steps>Mount page; intercept POST /api/events; count ChainRead emissions.</steps>
+      <expected>Exactly 1 ChainRead event with correct payload.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

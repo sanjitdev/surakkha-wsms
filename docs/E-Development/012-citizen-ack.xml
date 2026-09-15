@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="012" title="Citizen Ack Page" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Citizen Ack Page is Anjali's closure-ack surface — Confirm resolved (✅) or Reopen (❌) when an admin has resolved her incident. Closes MAJOR #2: VS15 + glyph characters rendering correctly + ack-window expiry surfaced. Bangla-first default; no countdown pressure on this surface. Tier 3 (light) but load-bearing for the closure loop with the citizen.
+  </overview>
+
+  <scope>
+    <scenarios>03-anjali-the-anchor-citizen-arc, 06-audit-chain-timeline-cross-cutting (Use Case C)</scenarios>
+    <views>/my-reports/:incident_id/ack for citizen</views>
+    <platform>Reconcile web/src/pages/CitizenAckPage.tsx (351 LOC); emit CitizenAckAccepted + ChainReopened; MAJOR #2: VS15 + glyph chars + ack-window expiry</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="012-REQ-001" type="platform" status="planned">
+      <title>Mount route at /my-reports/:incident_id/ack for citizen</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for citizen.</description>
+      <acceptance>
+        <criterion>Route renders for citizen</criterion>
+        <criterion>Non-citizen roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-ack-page.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-002" type="interface" status="planned">
+      <title>MAJOR #2: VS15 + glyph characters render correctly</title>
+      <description>Bengali text with joining elements and glyph characters must render without boxes/tofu. Use VS15 (U+FE0E) text variation selector for emoji-as-text. Per lockdown 06-data-formats-lockdown.md.</description>
+      <acceptance>
+        <criterion>Bengali strings render without glyph corruption</criterion>
+        <criterion>VS15 applied to emoji-as-text (verified by codepoint inspection)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/06-data-formats-lockdown.md §VS15</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-003" type="interface" status="planned">
+      <title>MAJOR #2: Ack-window expiry visible (24h from resolved)</title>
+      <description>Surface 24h ack-window from IncidentResolvedByAdmin event. Display "Acknowledge within {hours}h {minutes}m" countdown. Silent after window expires — no pressure on this surface per lockdown.</description>
+      <acceptance>
+        <criterion>Window countdown visible when window open</criterion>
+        <criterion>Countdown silent (no aggressive visual pressure)</criterion>
+        <criterion>After expiry, "Acknowledgement window closed" message renders (not countdown)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-ack-page.md §Ack window</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-004" type="platform" status="planned">
+      <title>✅ Confirm resolved emits CitizenAckAccepted</title>
+      <description>✅ Confirm resolved button (primary) emits POST /api/events with CitizenAckAccepted{actor: citizen, incident_id}. Toast: "Thanks for confirming. All set."</description>
+      <acceptance>
+        <criterion>Click emits CitizenAckAccepted with correct payload</criterion>
+        <criterion>Toast message in BN-first (Bangla default)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md §Journey D</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-005" type="platform" status="planned">
+      <title>❌ Reopen opens reason picker + emits ChainReopened</title>
+      <description>❌ Reopen button (ghost) opens reason picker. On confirm, emits POST /api/events with ChainReopened{actor: citizen, incident_id, reason}.</description>
+      <acceptance>
+        <criterion>Click opens reason picker</criterion>
+        <criterion>Confirm emits ChainReopened with selected reason</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-status-timeline.md §Journey D</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-006" type="behavior" status="planned">
+      <title>Silent-closure reopen UI after 30-day window expiry</title>
+      <description>After 30-day ack window expiry, the page surfaces a low-pressure reopen option (for genuine regressions). Does not aggressively prompt the citizen.</description>
+      <acceptance>
+        <criterion>Reopen option available after 30-day expiry</criterion>
+        <criterion>No countdown pressure displayed</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/citizen-ack-page.md §Silent closure</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-007" type="interface" status="planned">
+      <title>Bangla-first default (no countdown pressure)</title>
+      <description>On first visit, locale = 'bn'. Operator toggle EN ↔ BN; preference persists in IDB. This surface intentionally avoids aggressive countdown visual treatment.</description>
+      <acceptance>
+        <criterion>First mount renders Bangla strings</criterion>
+        <criterion>Toggle persists across reloads</criterion>
+        <criterion>Countdown is muted (not visually aggressive)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-008" type="interface" status="planned">
+      <title>Trust band shows "resolved"; reporter-badge shows "anchor"</title>
+      <description>Render BandPill (✓ resolved) and reporter-badge chip (⚓ anchor) on header. Independent DOM elements.</description>
+      <acceptance>
+        <criterion>BandPill renders ✓ resolved</criterion>
+        <criterion>Reporter-badge chip renders ⚓ anchor</criterion>
+        <criterion>Chips are independent DOM elements</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §6.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-009" type="platform" status="planned">
+      <title>MSW: ChainReopened event handler</title>
+      <description>Extend web/src/mocks/handlers.ts POST /api/events to accept ChainReopened event type. Persist via idb-keyval.</description>
+      <acceptance>
+        <criterion>POST /api/events with type=ChainReopened returns 200</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-010" type="interface" status="planned">
+      <title>MAJOR #2 reconciliation: VS15 + glyph chars + window expiry</title>
+      <description>Verify VS15 applied; verify glyph chars render correctly; verify ack-window expiry surfaced; verify silent after expiry.</description>
+      <acceptance>
+        <criterion>VS15 codepoint present in emoji-as-text DOM (verified by inspection)</criterion>
+        <criterion>Glyph chars render without corruption (visual test)</criterion>
+        <criterion>Window expiry shows closed message (no countdown)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-011" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for confirm/reopen labels, ack-window messaging, reopen reasons, closed-window message. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-012-citizen-ack-page.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="012-REQ-012" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: citizen-ack-page, …-header, …-main, …-band-pill, …-reporter-badge-chip, …-ack-window-countdown, …-button-confirm-yes, …-button-reopen-no, …-reason-picker, …-reopen-reason-row.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="012-REQ-002">
+      <steps>Render Bangla strings; inspect DOM for tofu boxes; inspect codepoints for VS15 (U+FE0E).</steps>
+      <expected>Glyph chars render; VS15 applied.</expected>
+    </test>
+    <test ref="012-REQ-004">
+      <steps>Click ✅; intercept POST /api/events; assert CitizenAckAccepted with correct payload.</steps>
+      <expected>Confirm event fires correctly.</expected>
+    </test>
+    <test ref="012-REQ-005">
+      <steps>Click ❌; assert reason picker opens; pick reason; confirm; assert ChainReopened with reason.</steps>
+      <expected>Reopen flow works.</expected>
+    </test>
+    <test ref="012-REQ-006">
+      <steps>Seed fixture with 30+ day-old IncidentResolvedByAdmin; assert silent reopen UI; assert no countdown.</steps>
+      <expected>Silent closure renders correctly.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

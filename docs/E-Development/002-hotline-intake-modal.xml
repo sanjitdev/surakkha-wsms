@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="002" title="Hotline Intake Modal" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Hotline Intake Modal converts a phone conversation into a chain-anchored incident in under 90 seconds, while the caller is still on the line. The operator who takes the call is the proxy reporter; the resulting incident always defaults to T1 (unverified, divider neutral) and carries the --color-reporter-hotline hotline reporter-badge. T3 is reserved for consumer-notice issuance only. The modal is mounted on the OperatorDashboard top-chrome via a single Log hotline call button.
+  </overview>
+
+  <scope>
+    <scenarios>01-priya-the-pipeline-pilot-triage-verify-assign (Screen 3)</scenarios>
+    <views>operator-dashboard action bar trigger; modal mounted over dashboard</views>
+    <platform>Emit IncidentCreated{reporter_kind: hotline_operator, band: T1} OR HotlineCallLogged{outcome: no_incident} via POST /api/events; mint hotline_call_id (UUID v7)</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="002-REQ-001" type="interface" status="planned">
+      <title>Mount trigger button on OperatorDashboard top-chrome</title>
+      <description>Add Log hotline call button to OperatorDashboard action bar. Leftmost position (before View Audit Log and Settings). Phone icon (lucide 16px). Button variant: secondary (slate outline).</description>
+      <acceptance>
+        <criterion>Button visible on /dashboard for utility_operator</criterion>
+        <criterion>Click opens HotlineIntakeModal with focus trap</criterion>
+        <criterion>Focus restores to trigger button on close</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/hotline-intake-modal.md §Trigger</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-002" type="interface" status="planned">
+      <title>Six-field form in spec order</title>
+      <description>Render 6 fields in order: caller name (opt), caller phone (opt), call time (default now, editable via DatePicker), incident description (req, 500c), location hint (req), call outcome (req, dropdown with 3 options: incident / inquiry / missed).</description>
+      <acceptance>
+        <criterion>Tab order matches: caller name → caller phone → call time → description → location hint → outcome → Cancel → Submit</criterion>
+        <criterion>Description char-counter enforces 500 limit</criterion>
+        <criterion>Required fields marked with asterisk per lockdown 06-data-formats-lockdown.md</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/hotline-intake-modal.md §10 (locked decision #10)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-003" type="behavior" status="planned">
+      <title>Submit gating by required fields</title>
+      <description>Submit button disabled until description, location hint, and outcome are all filled. Visual disabled state per foundation §10.</description>
+      <acceptance>
+        <criterion>Submit disabled when any required field empty</criterion>
+        <criterion>Submit enabled when all 3 required fields filled</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/hotline-intake-modal.md §5 (locked decision #5)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-004" type="behavior" status="planned">
+      <title>Outcome branching: incident vs no-incident</title>
+      <description>Outcome = 'incident': emit IncidentCreated{reporter_kind: hotline_operator, hotline_call_id, description, location_hint, call_time, band: T1}. Close modal. Toast confirms with incident ID. New incident appears at top of inbox with Phone icon + --color-reporter-hotline chip. Outcome = 'inquiry' OR 'missed': emit HotlineCallLogged{reporter_kind: hotline_operator, hotline_call_id, outcome: no_incident, call_time}. Close modal. Different toast: Call logged. No incident created.</description>
+      <acceptance>
+        <criterion>Outcome=incident emits IncidentCreated with band=T1 (not T2/T3) and reporter_kind=hotline_operator</criterion>
+        <criterion>Outcome=inquiry/missed emits HotlineCallLogged, not IncidentCreated</criterion>
+        <criterion>Toast text matches spec exactly per outcome</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/hotline-intake-modal.md §6, §7 (locked decisions #6, #7)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-005" type="behavior" status="planned">
+      <title>ESC / Cancel with dirty confirmation</title>
+      <description>ESC key or Cancel button: if any required field has content, open confirmation dialog (Discard this call log? You can keep editing.). On confirm: discard and close. On keep editing: dismiss dialog. If no dirty fields: close immediately.</description>
+      <acceptance>
+        <criterion>ESC with empty description skips confirmation and closes</criterion>
+        <criterion>ESC with filled description opens confirmation dialog</criterion>
+        <criterion>Cancel button behaves identically to ESC</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/hotline-intake-modal.md §8 (locked decision #8)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-006" type="platform" status="planned">
+      <title>MSW: HotlineCallLogged event handler</title>
+      <description>Extend web/src/mocks/handlers.ts POST /api/events to accept HotlineCallLogged event type. Persist via idb-keyval. Add hotline_call_id mint helper (UUID v7 pattern).</description>
+      <acceptance>
+        <criterion>POST /api/events with type=HotlineCallLogged returns 200 and persists</criterion>
+        <criterion>hotline_call_id is UUID v7 format</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-007" type="interface" status="planned">
+      <title>Modal primitives from web/src/components/ui/</title>
+      <description>Use Modal (640px wide, centred, focus trap), Input, DatePicker, Dropdown, Button (primary + ghost), Toast. Per lockdown decision #4.</description>
+      <acceptance>
+        <criterion>Modal width is 640px on desktop</criterion>
+        <criterion>Focus traps within modal; restore on close</criterion>
+        <criterion>No upstream shadcn imports</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §3.4 (Modal primitive)</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-008" type="interface" status="planned">
+      <title>Bangla-first labels for text-heavy fields</title>
+      <description>All field labels, button text, outcome names translated to BN; Bangla is default on this surface (operator dashboard chrome can be EN). Toggle works; preference persists in IDB.</description>
+      <acceptance>
+        <criterion>Field labels render in Bangla on first mount</criterion>
+        <criterion>Toggle persists across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-009" type="interface" status="planned">
+      <title>i18n keys added (EN + BN parity)</title>
+      <description>Add to web/src/i18n/locales/en/operatorDashboard.json and bn/: actions.logHotlineCall, hotline.modal.{title,subtitle,callerName,callerPhone,callTime,description,locationHint,outcome,button.cancel,button.submit,toast.incidentCreated,toast.callLogged,discardConfirm.{title,body,discard,keepEditing}}. Hotline outcome labels: incident / inquiry / missed.</description>
+      <acceptance>
+        <criterion>EN and BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-002-hotline-intake-modal.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="002-REQ-010" type="behavior" status="planned">
+      <title>Reconciliation: pre-lockdown draft if exists</title>
+      <description>Verify no Hindi strings; replace any band=T3 default; ensure reporter_kind: hotline_operator is the ONLY reporter-kind for hotline events.</description>
+      <acceptance>
+        <criterion>grep 'hi' locale returns zero hits in this component</criterion>
+        <criterion>Default band literal is T1 (not T2/T3)</criterion>
+        <criterion>reporter_kind=hotline_operator on both IncidentCreated and HotlineCallLogged</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="002-REQ-001">
+      <steps>Mount OperatorDashboard as utility_operator; assert Log hotline call button visible. Click; assert modal opens with focus on first input.</steps>
+      <expected>Modal opens; focus trapped.</expected>
+    </test>
+    <test ref="002-REQ-002">
+      <steps>Tab through fields; assert order matches spec. Fill description past 500 chars; assert counter prevents.</steps>
+      <expected>Tab order correct; 500 char limit enforced.</expected>
+    </test>
+    <test ref="002-REQ-003">
+      <steps>Mount modal; assert Submit disabled. Fill description only; assert still disabled. Fill all 3 required; assert enabled.</steps>
+      <expected>Submit gating correct.</expected>
+    </test>
+    <test ref="002-REQ-004">
+      <steps>Fill form; select outcome=incident; submit; assert IncidentCreated event with band=T1 and reporter_kind=hotline_operator. Reset; select outcome=inquiry; submit; assert HotlineCallLogged (not IncidentCreated).</steps>
+      <expected>Outcome branching correct.</expected>
+    </test>
+    <test ref="002-REQ-005">
+      <steps>Open modal; press ESC with empty form; assert closes immediately. Fill description; press ESC; assert confirmation dialog. Click Keep editing; assert stays. Click Discard; assert closes.</steps>
+      <expected>Dirty confirmation correct.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

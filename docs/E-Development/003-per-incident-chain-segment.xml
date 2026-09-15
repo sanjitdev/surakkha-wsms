@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="003" title="Per-Incident Chain Segment Viewer" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Per-Incident Chain Segment Viewer is the dedicated page where operators (Priya/Adi/Karim) and Phase 2's Pia verify chain integrity per-incident in one click. This is the load-bearing surface for Goal 2.1 (chain verifiable by independent hash recomputation) and Goal 2.3 (100% of chain reads logged). Verification is single-click — no two-click confirm, no captcha, no operator-typed challenge phrase. The act of clicking is operator authorization.
+  </overview>
+
+  <scope>
+    <scenarios>06-audit-chain-timeline-cross-cutting (Screen 2); consumed by 01 (Priya dispute), 02 (Adi override audit), 04 (Karim lineage), 05 (Pia drill-to-incident)</scenarios>
+    <views>incidents/:incident_id/chain</views>
+    <platform>Read /api/chain/blocks + /api/chain/head; verify via /api/chain/verify (reuses web/src/lib/chain-verify.ts); emit ChainRead on mount + ChainAnomalyAcknowledged / ChainAnomalyEscalated on user action</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="003-REQ-001" type="platform" status="planned">
+      <title>Mount route at /incidents/:incident_id/chain for utility_operator</title>
+      <description>Register route in App.tsx; wrapped in RequireSession with role guard utility_operator.</description>
+      <acceptance>
+        <criterion>Route renders for utility_operator</criterion>
+        <criterion>Non-operator roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/per-incident-chain-segment.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-002" type="platform" status="planned">
+      <title>Reuse web/src/lib/chain-verify.ts (no copy-paste)</title>
+      <description>Import verifyBlock from web/src/lib/chain-verify.ts. Closes the gap noted in 000-tech-audit.md §7. Helper has typed VerifyState union; never throws.</description>
+      <acceptance>
+        <criterion>verifyBlock call goes through the helper (verified by import trace)</criterion>
+        <criterion>No copy-pasted verify logic in this page</criterion>
+        <criterion>All 4 VerifyState variants render correctly (idle / pending / ok / fail)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §7</spec>
+        <spec>docs/E-Development/000-PRD.md §6</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-003" type="behavior" status="planned">
+      <title>Single-click independent verification</title>
+      <description>Independent verification button (no two-click confirm, no captcha). Calls verifyBlock(latest_block_hash) via helper. Pass: ✅ badge with CheckCircle2 icon within 200ms using --color-safe-green (#2F6E45). Toast auto-dismisses after 3s; durable badge in row metadata.</description>
+      <acceptance>
+        <criterion>One click triggers verify (no second click needed)</criterion>
+        <criterion>Pass badge renders within 200ms (mock); color = --color-safe-green</criterion>
+        <criterion>Toast auto-dismisses at 3s; badge persists in row</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/per-incident-chain-segment.md §locked decision #3, #10</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-004" type="behavior" status="planned">
+      <title>60s hash recomputation cache</title>
+      <description>Cache verified results by (incident_id, last_known_seq) for 60s. Cache hit returns cached VerifyState without re-fetching. Cache miss after 60s recomputes.</description>
+      <acceptance>
+        <criterion>Two clicks within 60s: second click uses cached result (verified by fetch count)</criterion>
+        <criterion>Click after 60s: recomputes (fetch count increments)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/per-incident-chain-segment.md §locked decision #9</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-005" type="behavior" status="planned">
+      <title>Anomaly surfacing (row + banner)</title>
+      <description>Row ⚠️ when recomputed hash ≠ stored hash. Persistent top banner: Chain anomaly detected on inc_... — escalate to Pia. Banner has aria-live=polite and persists across page navigations until acknowledged.</description>
+      <acceptance>
+        <criterion>Anomaly row renders ⚠️ icon</criterion>
+        <criterion>Top banner shows incident ID + escalation prompt</criterion>
+        <criterion>Banner has aria-live=polite attribute</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/per-incident-chain-segment.md §locked decision #7</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-006" type="platform" status="planned">
+      <title>Acknowledge / Escalate anomaly emit chain events</title>
+      <description>Acknowledge button emits ChainAnomalyAcknowledged{actor, incident_id, seq}. Escalate button emits ChainAnomalyEscalated{actor, incident_id, seq} (routes to placeholder Phase 2 queue).</description>
+      <acceptance>
+        <criterion>Acknowledge emits correct event payload</criterion>
+        <criterion>Escalate emits correct event payload</criterion>
+        <criterion>Banner dismisses after acknowledgment</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/per-incident-chain-segment.md §Journey D</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-007" type="platform" status="planned">
+      <title>Emit ChainRead on mount</title>
+      <description>Per PRD §11.1, 100% of chain reads must be logged. On mount, POST /api/events with ChainRead{actor, incident_id, filter_combo: ['all']}.</description>
+      <acceptance>
+        <criterion>Exactly one ChainRead event fires per mount</criterion>
+        <criterion>Payload contains actor (from session), incident_id (from route), filter_combo=['all']</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §11.1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-008" type="interface" status="planned">
+      <title>Operator-mode render (full payloads, hashes, JSON)</title>
+      <description>Each row expandable to show structured payload as JSON. Copy-to-clipboard on hash anchor. Use 27 approved Lucide icons for event types.</description>
+      <acceptance>
+        <criterion>Row expansion shows JSON payload</criterion>
+        <criterion>Hash anchor copy-to-clipboard works</criterion>
+        <criterion>Event-type icon uses one of 27 approved Lucide icons</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/per-incident-chain-segment.md §Journey B</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-009" type="interface" status="planned">
+      <title>Area Labels + primitives from web/src/components/ui/</title>
+      <description>Implement Area Labels per foundation §13: incident-chain-segment-page, …-header, …-main, …-timeline, …-event-row, …-actor-chip, …-seq-marker, …-hash-anchor, …-verify-button, …-verify-badge, …-anomaly-banner, …-anomaly-acknowledge, …-anomaly-escalate. Use Card, Button, Tooltip, Toast, Modal primitives.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+        <criterion>Component tree uses only web/src/components/ui/ primitives</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-010" type="interface" status="planned">
+      <title>i18n keys added (EN + BN)</title>
+      <description>Add keys to web/src/i18n/locales/en/chainSegment.json and bn/chainSegment.json: page.title, page.subtitle, button.{verify,acknowledge,escalate,copyHash}, badge.{verified,anomaly}, banner.anomaly.{title,body}, actor.{operator,field,citizen,pha}.</description>
+      <acceptance>
+        <criterion>EN and BN key sets match</criterion>
+        <criterion>No Hindi keys</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-003-per-incident-chain-segment.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="003-REQ-011" type="platform" status="planned">
+      <title>MSW: chain anomaly fixture + event handlers</title>
+      <description>Add sample anomaly block to web/src/mocks/fixtures.ts (recomputed hash differs). Add MSW handlers for ChainAnomalyAcknowledged + ChainAnomalyEscalated event types.</description>
+      <acceptance>
+        <criterion>Fixture available for testing anomaly UI</criterion>
+        <criterion>POST /api/events accepts both anomaly event types</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="003-REQ-002">
+      <steps>Inspect import trace; assert verifyBlock from chain-verify.ts. Force network failure; assert no throw; assert VerifyState.fail returned.</steps>
+      <expected>Helper reused; never throws.</expected>
+    </test>
+    <test ref="003-REQ-003">
+      <steps>Mount; click verify once; assert no second click prompt; assert badge within 200ms.</steps>
+      <expected>Single-click works; badge renders fast.</expected>
+    </test>
+    <test ref="003-REQ-004">
+      <steps>Click verify; capture fetch count. Click again within 60s; assert no new fetch. Wait 65s; click again; assert new fetch.</steps>
+      <expected>Cache works; recomputes after 60s.</expected>
+    </test>
+    <test ref="003-REQ-005">
+      <steps>Use anomaly fixture; mount; assert ⚠️ row + top banner with aria-live=polite.</steps>
+      <expected>Anomaly UI renders correctly.</expected>
+    </test>
+    <test ref="003-REQ-006">
+      <steps>Mount with anomaly; click Acknowledge; assert ChainAnomalyAcknowledged event. Mount fresh; click Escalate; assert ChainAnomalyEscalated.</steps>
+      <expected>Ack/Escalate emit correct events.</expected>
+    </test>
+    <test ref="003-REQ-007">
+      <steps>Mount; intercept POST /api/events; count ChainRead emissions; assert exactly 1.</steps>
+      <expected>One ChainRead per mount.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

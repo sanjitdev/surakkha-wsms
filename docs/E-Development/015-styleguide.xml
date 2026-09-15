@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="015" title="Styleguide Page" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Styleguide Page is the dev-only design system reference (outside AppLayout per App.tsx). Token reference, 22 primitives gallery, 27 Lucide icons. Closes MAJOR #4: trust band docs updated from 3-band to **5-band** (T0/T1/T2/T3/resolved) and Danger button misuse demo removed. Tier 3 (light, dev-only).
+  </overview>
+
+  <scope>
+    <scenarios>Dev-only reference; not in user journeys</scenarios>
+    <views>/styleguide (outside AppLayout per App.tsx)</views>
+    <platform>Reconcile web/src/pages/StyleguidePage.tsx (847 LOC); MAJOR #4: 5-band docs + Danger misuse removal</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="015-REQ-001" type="platform" status="planned">
+      <title>Mount /styleguide outside AppLayout</title>
+      <description>Register route at /styleguide outside AppLayout per App.tsx. Dev-only; not user-facing.</description>
+      <acceptance>
+        <criterion>Route renders outside AppLayout (no top-chrome)</criterion>
+        <criterion>Route accessible without persona login</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/styleguide-page.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-002" type="interface" status="planned">
+      <title>MAJOR #4: 5-band trust docs (T0/T1/T2/T3/resolved)</title>
+      <description>Update trust band docs from 3-band (T1/T2/T3) to **5-band** (T0/T1/T2/T3/resolved) per lockdown revision. Each band: glyph + text + use-case + example. Closes MAJOR #4 from 02-phase-4-closeout.md §4.3.</description>
+      <acceptance>
+        <criterion>5 bands documented: T0, T1, T2, T3, resolved</criterion>
+        <criterion>Each band has glyph + text + use-case + example</criterion>
+        <criterion>grep 'T1\|T2\|T3' alone (no T0/resolved) returns zero hits in band docs section</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-003" type="interface" status="planned">
+      <title>MAJOR #4: Remove Danger button misuse demo</title>
+      <description>Remove any demo showing Danger variant used for non-alert-red-reserved contexts. Danger variant reserved for alert-red issuance path only. Closes MAJOR #4 from 02-phase-4-closeout.md §4.3.</description>
+      <acceptance>
+        <criterion>Danger variant only shown in reserved context (alert-red issuance)</criterion>
+        <criterion>No "delete account" / "purge" / destructive-action misuse demo present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-004" type="interface" status="planned">
+      <title>Token reference (all --color-trust-* + --color-reporter-*)</title>
+      <description>Render token reference section: all --color-trust-* (5 bands), --color-reporter-* (4 sources), spacing scale, radii scale, motion tokens. Each token: name + value + usage note.</description>
+      <acceptance>
+        <criterion>All --color-trust-* tokens shown</criterion>
+        <criterion>All --color-reporter-* tokens shown</criterion>
+        <criterion>Spacing + radii + motion tokens shown</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-005" type="interface" status="planned">
+      <title>Component gallery (22 primitives + variants)</title>
+      <description>Render component gallery: 22 shadcn primitives (Button, Card, Modal, Dropdown, Toast, Tooltip, Input, DatePicker, DateRangePicker, Pagination, BandPill, Tabs, Accordion, etc.) with all variants.</description>
+      <acceptance>
+        <criterion>All 22 primitives shown with variants</criterion>
+        <criterion>Each primitive documented with usage</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-006" type="interface" status="planned">
+      <title>Icon library (27 approved Lucide icons)</title>
+      <description>Render icon library: all 27 approved Lucide icons with semantic names + use-case notes. Reject any icon not in the approved list.</description>
+      <acceptance>
+        <criterion>All 27 icons render</criterion>
+        <criterion>No icons outside the approved 27 are imported</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §5</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-007" type="behavior" status="planned">
+      <title>Live locale + theme toggles</title>
+      <description>Render live locale (EN/BN) and theme (light/dark) toggles. Toggles affect the entire page in real-time (not just persisted preference).</description>
+      <acceptance>
+        <criterion>Locale toggle affects page strings live</criterion>
+        <criterion>Theme toggle affects page colours live</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/styleguide-page.md §Toggles</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-008" type="interface" status="planned">
+      <title>i18n keys (styleguide labels)</title>
+      <description>Verify styleguide.json (en + bn) is current for section labels, token labels, component labels. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/styleguide-page.md §i18n</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="015-REQ-009" type="platform" status="planned">
+      <title>MAJOR #4 reconciliation: 5-band docs + Danger misuse removed</title>
+      <description>Verify trust band docs show 5 bands (not 3); verify Danger variant only shown in reserved context; verify no Hindi strings; verify 22 primitives + 27 icons render.</description>
+      <acceptance>
+        <criterion>5-band docs test passes</criterion>
+        <criterion>Danger misuse test passes (no misuse demo)</criterion>
+        <criterion>22 primitives + 27 icons enumeration test passes</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #4</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="015-REQ-002">
+      <steps>Mount /styleguide; assert band docs section shows 5 bands (T0/T1/T2/T3/resolved); assert each has glyph + text + use-case + example.</steps>
+      <expected>5-band docs complete.</expected>
+    </test>
+    <test ref="015-REQ-003">
+      <steps>Inspect Danger variant usage; assert only in reserved context (alert-red issuance); assert no destructive-action misuse demo.</steps>
+      <expected>Danger reserved.</expected>
+    </test>
+    <test ref="015-REQ-006">
+      <steps>Enumerate icons in DOM; assert exactly 27 from approved list; assert no others.</steps>
+      <expected>Icon library correct.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

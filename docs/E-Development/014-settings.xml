@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="014" title="Settings Page" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Settings Page is operator preferences: theme (light/dark via [data-theme]), locale (EN/BN persisted in IDB), notification preferences (in-app vs SMS), and Reset. Closes MAJOR #3: Reset → ghost variant + confirmation modal. Reset clears IDB and emits SettingsReset event. Tier 3 (light).
+  </overview>
+
+  <scope>
+    <scenarios>All (operator/cross-cutting surface)</scenarios>
+    <views>/settings for utility_operator</views>
+    <platform>Reconcile web/src/pages/Settings.tsx (278 LOC); theme + locale + notification prefs; MAJOR #3: Reset ghost variant + confirmation modal</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="014-REQ-001" type="platform" status="planned">
+      <title>Mount route at /settings for utility_operator</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for utility_operator.</description>
+      <acceptance>
+        <criterion>Route renders for utility_operator</criterion>
+        <criterion>Non-operator roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/settings-page.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-002" type="interface" status="planned">
+      <title>Theme toggle (light/dark via [data-theme])</title>
+      <description>Render theme toggle (light/dark). Setting [data-theme] attribute on root element. Preference persists in IDB.</description>
+      <acceptance>
+        <criterion>Toggle changes [data-theme] attribute</criterion>
+        <criterion>Preference persists across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/settings-page.md §Theme</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-003" type="interface" status="planned">
+      <title>Locale preference (EN/BN; IDB-persisted)</title>
+      <description>Render locale preference (EN/BN radio or toggle). Preference persists in IDB via i18next-browser-languagedetector.</description>
+      <acceptance>
+        <criterion>Toggle changes locale</criterion>
+        <criterion>Preference persists across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-004" type="interface" status="planned">
+      <title>Notification preferences (in-app toast vs SMS)</title>
+      <description>Render notification preferences: in-app toast (on/off), SMS (on/off). Preferences persist in IDB.</description>
+      <acceptance>
+        <criterion>Both toggles render</criterion>
+        <criterion>Preferences persist across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/settings-page.md §Notifications</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-005" type="behavior" status="planned">
+      <title>MAJOR #3: Reset is ghost variant + confirmation modal</title>
+      <description>Reset button uses ghost variant (NOT destructive). Click opens confirmation modal: "Reset all settings? This cannot be undone." On confirm, clears IDB preferences and emits SettingsReset{actor} event. Closes MAJOR #3 from 02-phase-4-closeout.md §4.3.</description>
+      <acceptance>
+        <criterion>Reset button is ghost variant (not destructive)</criterion>
+        <criterion>Click opens confirmation modal</criterion>
+        <criterion>Confirm clears IDB preferences</criterion>
+        <criterion>Confirm emits SettingsReset{actor} event</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-006" type="platform" status="planned">
+      <title>MSW: SettingsReset event handler</title>
+      <description>Extend web/src/mocks/handlers.ts POST /api/events to accept SettingsReset event type. Persist via idb-keyval.</description>
+      <acceptance>
+        <criterion>POST /api/events with type=SettingsReset returns 200</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-tech-audit.md §8</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-007" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: settings-page, …-header, …-main, …-theme-toggle, …-locale-preference, …-notification-preferences, …-notification-in-app, …-notification-sms, …-button-reset, …-reset-confirmation-modal, …-reset-confirm, …-reset-cancel.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-008" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for theme labels, locale labels, notification options, reset confirmation. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-014-settings-page.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="014-REQ-009" type="platform" status="planned">
+      <title>MAJOR #3 reconciliation: ghost variant + confirmation modal</title>
+      <description>Verify Reset button uses ghost variant (not destructive); verify confirmation modal copy matches spec; verify SettingsReset event payload.</description>
+      <acceptance>
+        <criterion>Reset button class includes ghost variant (not destructive)</criterion>
+        <criterion>Modal copy matches "Reset all settings? This cannot be undone."</criterion>
+        <criterion>SettingsReset event fires with actor field</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #3</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="014-REQ-002">
+      <steps>Toggle theme; assert [data-theme] attribute changes. Reload; assert preference persists.</steps>
+      <expected>Theme toggle works.</expected>
+    </test>
+    <test ref="014-REQ-005">
+      <steps>Click Reset; assert confirmation modal opens. Confirm; intercept POST /api/events; assert SettingsReset event. Verify IDB cleared.</steps>
+      <expected>Reset flow works; modal + event + IDB clear.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

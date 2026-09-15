@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="016" title="Coming Soon Page" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Coming Soon Page is the generic placeholder for the 3 still-pending Phase 2 routes: /approve, /audit, /vendor. /submit is removed from this mapping (now routes to SubmitReportPage per WO-011). Phase 2 notice ("Coming in Phase 2"). Tier 3 (light, placeholder).
+  </overview>
+
+  <scope>
+    <scenarios>All (placeholder for Phase 2 routes)</scenarios>
+    <views>/approve, /audit, /vendor (3 placeholder routes)</views>
+    <platform>Reconcile web/src/pages/ComingSoonPage.tsx (86 LOC); remove /submit mapping in App.tsx</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="016-REQ-001" type="platform" status="planned">
+      <title>Mount 3 placeholder routes (/approve, /audit, /vendor)</title>
+      <description>Register ComingSoonPage at /approve, /audit, /vendor. Each renders generic placeholder with Phase 2 notice.</description>
+      <acceptance>
+        <criterion>3 routes render ComingSoonPage</criterion>
+        <criterion>/submit removed from ComingSoonPage mapping</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/coming-soon-page.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="016-REQ-002" type="platform" status="planned">
+      <title>Remove /submit mapping from ComingSoonPage</title>
+      <description>/submit is now a real route per WO-011. Remove ComingSoonPage mapping from /submit in App.tsx. SubmitReportPage now owns /submit.</description>
+      <acceptance>
+        <criterion>grep '/submit' in ComingSoonPage route registrations returns zero hits</criterion>
+        <criterion>Navigating to /submit renders SubmitReportPage, not ComingSoonPage</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/WO-016-coming-soon-page.md §Note</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="016-REQ-003" type="interface" status="planned">
+      <title>Phase 2 notice ("Coming in Phase 2")</title>
+      <description>Render "Coming in Phase 2" notice on each placeholder route. Role-specific messaging for /approve (PHA), /audit (placeholder audit), /vendor (vendor flow).</description>
+      <acceptance>
+        <criterion>"Coming in Phase 2" message renders</criterion>
+        <criterion>Role-specific message renders for each route</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/coming-soon-page.md §Notice</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="016-REQ-004" type="behavior" status="planned">
+      <title>Bangla toggle works on placeholder pages</title>
+      <description>Locale toggle (EN/BN) on each placeholder page. Preference persists in IDB.</description>
+      <acceptance>
+        <criterion>Toggle changes locale on each placeholder route</criterion>
+        <criterion>Preference persists across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="016-REQ-005" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: coming-soon-page, …-header, …-main, …-phase-notice, …-role-specific-message.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="016-REQ-006" type="interface" status="planned">
+      <title>i18n keys (EN + BN; Phase 2 notice)</title>
+      <description>Add i18n keys for "Coming in Phase 2" + role-specific messaging. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-016-coming-soon-page.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="016-REQ-007" type="platform" status="planned">
+      <title>Reconciliation: confirm /submit removal + 3 placeholder routes</title>
+      <description>Verify /submit removed from ComingSoonPage mapping; verify 3 routes render placeholder; verify no Hindi strings.</description>
+      <acceptance>
+        <criterion>grep '/submit' in ComingSoonPage routes returns zero hits</criterion>
+        <criterion>All 3 placeholder routes render</criterion>
+        <criterion>grep 'hi' locale returns zero hits</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="016-REQ-001">
+      <steps>Navigate to /approve, /audit, /vendor; assert ComingSoonPage renders. Navigate to /submit; assert SubmitReportPage renders.</steps>
+      <expected>3 placeholders + 1 real route correct.</expected>
+    </test>
+    <test ref="016-REQ-003">
+      <steps>Mount /approve; assert "Coming in Phase 2" notice + PHA-specific message.</steps>
+      <expected>Notice + role-specific message render.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

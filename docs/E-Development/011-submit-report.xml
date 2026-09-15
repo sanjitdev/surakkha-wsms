@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="011" title="Submit Report Page (Anjali / citizen)" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Submit Report Page is Anjali's web-form surface for reporting a water-safety concern. Bangla-first default. Plain-language category picker (NOT T1/T2/T3). Photo capture with auto-EXIF. Reporter-badge = anchor (verified NID → anchor). Trust band defaults to T1 (unverified, NOT T3). 5-min dual-channel ack (SMS + portal). Closes MAJOR #1 of the 5 MAJOR items. Tier 3 (light) but load-bearing for anchor citizen flow.
+  </overview>
+
+  <scope>
+    <scenarios>03-anjali-the-anchor-citizen-arc (Screen 1, 2)</scenarios>
+    <views>/submit for citizen</views>
+    <platform>Reconcile web/src/pages/SubmitReportPage.tsx (350 LOC); emit IncidentCreated{reporter_kind: anchor, band: T1}; MAJOR #1 fix: plain-language category</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="011-REQ-001" type="platform" status="planned">
+      <title>Mount route at /submit for citizen</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for citizen. Remove /submit from ComingSoonPage mapping per WO-016.</description>
+      <acceptance>
+        <criterion>Route renders for citizen</criterion>
+        <criterion>/submit removed from ComingSoonPage mapping</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/submit-report-page.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-002" type="interface" status="planned">
+      <title>MAJOR #1: Plain-language category picker (no T1/T2/T3)</title>
+      <description>Category picker uses plain-language categories (e.g., "Discoloured water", "Bad smell", "Low pressure", "No supply"). NO T1/T2/T3 technical categories on this surface. Closes MAJOR #1 from 02-phase-4-closeout.md §4.3.</description>
+      <acceptance>
+        <criterion>Category options are plain-language (no T1/T2/T3 strings)</criterion>
+        <criterion>grep 'T1\|T2\|T3' in category dropdown options returns zero hits</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3 MAJOR #1</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-003" type="behavior" status="planned">
+      <title>Bangla-first default locale</title>
+      <description>On first visit, locale = 'bn'. Operator toggle EN ↔ BN; preference persists in IDB. Bangla numerals for all timestamps via Intl.NumberFormat('bn-BD').</description>
+      <acceptance>
+        <criterion>First mount renders Bangla strings</criterion>
+        <criterion>Toggle persists across reloads</criterion>
+        <criterion>Timestamp numerals render in Bangla script</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-004" type="interface" status="planned">
+      <title>Location (auto-detect + editable + manual)</title>
+      <description>Location control: lat/lon auto-detect via navigator.geolocation (with permission), each field editable, OR manual address string fallback.</description>
+      <acceptance>
+        <criterion>Auto-detect populates lat/lon fields</criterion>
+        <criterion>Lat/lon fields editable</criterion>
+        <criterion>Manual address fallback works when geolocation denied</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/submit-report-page.md §Location</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-005" type="interface" status="planned">
+      <title>Description (500 char limit)</title>
+      <description>Description textarea enforces 500 char limit with running char counter. Bangla numerals for time fields throughout.</description>
+      <acceptance>
+        <criterion>Char counter enforces 500 limit</criterion>
+        <criterion>Counter visible and updates live</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/submit-report-page.md §Description</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-006" type="interface" status="planned">
+      <title>Photo capture with auto-EXIF</title>
+      <description>Photo capture control (camera or gallery). After selection, auto-populate EXIF strip (lat/lon/timestamp/device). All EXIF fields editable.</description>
+      <acceptance>
+        <criterion>Capture control opens camera/gallery</criterion>
+        <criterion>EXIF strip auto-populates</criterion>
+        <criterion>EXIF fields editable</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/submit-report-page.md §Photo</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-007" type="platform" status="planned">
+      <title>Submit emits IncidentCreated (anchor + T1)</title>
+      <description>On submit, emit POST /api/events with IncidentCreated{reporter_kind: anchor, band: T1, description, location, photo_hash, hotline_call_id: null}. Per lockdown, citizen NEVER gets T3 default.</description>
+      <acceptance>
+        <criterion>Submit emits IncidentCreated with reporter_kind=anchor</criterion>
+        <criterion>Submit emits IncidentCreated with band=T1 (NOT T2/T3)</criterion>
+        <criterion>Payload contains description, location, photo_hash</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-008" type="behavior" status="planned">
+      <title>5-min dual-channel ack (SMS + portal notice)</title>
+      <description>After submission, render success page with incident ID + "View your report" link to /my-reports/:incident_id/timeline. Ack surfaces via SMS (mock) + portal notice within 5 minutes (real time). Per Scenario 03 Screen 2.</description>
+      <acceptance>
+        <criterion>Success page renders with incident ID</criterion>
+        <criterion>Link to /my-reports/:incident_id/timeline works</criterion>
+        <criterion>SMS mock surfaces (testable via MSW)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/C-UX-Scenarios/03-anjali-the-anchor-citizen-arc.md §Screen 2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-009" type="interface" status="planned">
+      <title>MAJOR #1 reconciliation: no T1/T2/T3 on this surface</title>
+      <description>Verify category options are plain-language; verify default band = T1 (not T3); verify no Hindi strings; verify anchor reporter-badge (not hotline/webform).</description>
+      <acceptance>
+        <criterion>grep 'T1\|T2\|T3' in user-facing strings returns zero hits</criterion>
+        <criterion>grep 'hi' locale returns zero hits in this component</criterion>
+        <criterion>Default band literal is T1</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §4.3</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-010" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for plain-language categories, ack messaging, success page, button labels. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-011-submit-report-page.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="011-REQ-011" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: submit-report-page, …-header, …-main, …-category-picker, …-location, …-description, …-photo-capture, …-exif-strip, …-button-submit, …-success, …-view-report-link.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="011-REQ-002">
+      <steps>Open category picker; assert options are plain-language; grep for T1/T2/T3 in option strings returns zero.</steps>
+      <expected>Plain-language categories; no technical band names.</expected>
+    </test>
+    <test ref="011-REQ-003">
+      <steps>Clear IDB; mount; assert locale=bn. Toggle to en; reload; assert en persists.</steps>
+      <expected>Bangla-first default; persistence works.</expected>
+    </test>
+    <test ref="011-REQ-007">
+      <steps>Fill form; submit; intercept POST /api/events; assert IncidentCreated with reporter_kind=anchor and band=T1.</steps>
+      <expected>Event payload correct.</expected>
+    </test>
+    <test ref="011-REQ-008">
+      <steps>Submit successfully; assert success page renders with incident ID + link.</steps>
+      <expected>Success page works.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

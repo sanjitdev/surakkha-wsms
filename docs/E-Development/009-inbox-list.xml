@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="009" title="Inbox List" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Inbox List is Priya's ranked incident inbox with filter chips, row-level reporter-badge chips, and missing-evidence chips. Sort priority-first / age-second. URL persistence of filter state. Drill-into-detail via row → /inbox/:id (WO-005). Tier 3 (light) — reconciliation of existing file to spec.
+  </overview>
+
+  <scope>
+    <scenarios>01-priya-the-pipeline-pilot-triage-verify-assign (Screen 2/3)</scenarios>
+    <views>/inbox for utility_operator</views>
+    <platform>Reconcile web/src/pages/InboxList.tsx (454 LOC); URL persistence of filter state; pagination</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="009-REQ-001" type="platform" status="planned">
+      <title>Mount route at /inbox for utility_operator</title>
+      <description>Register route in App.tsx wrapped in RequireSession with role guard for utility_operator.</description>
+      <acceptance>
+        <criterion>Route renders for utility_operator</criterion>
+        <criterion>Non-operator roles redirect</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-list.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-002" type="behavior" status="planned">
+      <title>Priority-first / age-second sort</title>
+      <description>Sort incidents P1 > P2 > P3 > P4, then ascending age. Same contract as OperatorDashboard (WO-004) and FieldQueue (WO-006).</description>
+      <acceptance>
+        <criterion>P1 row above P2 row at same age</criterion>
+        <criterion>Older row first within same priority</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-list.md §Sort</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-003" type="interface" status="planned">
+      <title>Filter chips (priority, band, reporter-badge, status, date range)</title>
+      <description>Render filter chips: priority (multi-select P1-P4), band (multi-select T1/T2/T3/resolved), reporter-badge (multi-select), status (open/in-flight/resolved), date range picker.</description>
+      <acceptance>
+        <criterion>All five filter chips render and function</criterion>
+        <criterion>Each chip is interactive (verified by click/keyboard)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-list.md §Filter chips</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-004" type="behavior" status="planned">
+      <title>Filter chip URL persistence</title>
+      <description>Filter chip state serialises to URL query string. Loading URL params pre-populates chip state. Round-trips correctly.</description>
+      <acceptance>
+        <criterion>Setting chip updates URL</criterion>
+        <criterion>Loading URL populates chip state</criterion>
+        <criterion>Round-trip serialisation preserves all chip values</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-list.md §URL persistence</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-005" type="interface" status="planned">
+      <title>Per-row composition (band + reporter + age + missing-evidence)</title>
+      <description>Each row renders: BandPill (glyph + text), reporter-badge chip, age, missing-evidence chips. Trust band and reporter badge as independent DOM elements per foundation §6.2.</description>
+      <acceptance>
+        <criterion>All four row elements render in order</criterion>
+        <criterion>Band and reporter chips are independent DOM elements</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §6.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-006" type="platform" status="planned">
+      <title>Pagination via Pagination primitive</title>
+      <description>Render Pagination primitive from web/src/components/ui/. Page size fixed at 20 (deferred config to Phase 1.7+).</description>
+      <acceptance>
+        <criterion>Pagination primitive used (no custom pagination)</criterion>
+        <criterion>Page size = 20</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §3.4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-007" type="interface" status="planned">
+      <title>Empty / loading / error states</title>
+      <description>Render empty state when filtered list has 0 rows; loading state during fetch; error state on fetch failure. All use Card + appropriate icon + localized message.</description>
+      <acceptance>
+        <criterion>Empty state renders when filter has 0 matches</criterion>
+        <criterion>Loading state renders during fetch</criterion>
+        <criterion>Error state renders on fetch failure with retry affordance</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-list.md §States</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-008" type="interface" status="planned">
+      <title>Row click navigates to /inbox/:id (WO-005)</title>
+      <description>Click any row → navigate to /inbox/:incident_id (InboxDetail per WO-005). Mouse + keyboard (Enter) both supported.</description>
+      <acceptance>
+        <criterion>Row click navigates to detail page</criterion>
+        <criterion>Enter key on focused row also navigates</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-list.md §Row click</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-009" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: inbox-list-page, …-header, …-main, …-filter-chips, …-chip-priority, …-chip-band, …-chip-reporter-badge, …-chip-status, …-chip-date-range, …-incident-list, …-row, …-band-pill, …-reporter-badge-chip, …-pagination.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-010" type="interface" status="planned">
+      <title>i18n keys (EN + BN)</title>
+      <description>Add i18n keys for filter chip labels, pagination labels, empty/loading/error messages. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-009-inbox-list.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="009-REQ-011" type="platform" status="planned">
+      <title>Reconciliation: confirm sort + URL persistence</title>
+      <description>Verify sort + URL persistence against pre-lockdown code; verify no Hindi strings; verify Pagination primitive used (not custom).</description>
+      <acceptance>
+        <criterion>Sort test passes (priority-first / age-second)</criterion>
+        <criterion>URL round-trip test passes</criterion>
+        <criterion>grep 'hi' locale returns zero hits</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="009-REQ-002">
+      <steps>Seed mixed priorities + ages; assert rendered order.</steps>
+      <expected>Sort correct.</expected>
+    </test>
+    <test ref="009-REQ-004">
+      <steps>Set chips; assert URL update. Reload; assert chips populated.</steps>
+      <expected>URL persistence round-trips.</expected>
+    </test>
+    <test ref="009-REQ-007">
+      <steps>Seed empty list; assert empty state. Mock loading; assert loading state. Mock error; assert error state.</steps>
+      <expected>All three states render.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

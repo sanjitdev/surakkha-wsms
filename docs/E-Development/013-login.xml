@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="013" title="Login Page" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Login Page is the persona-picker login surface for Phase 1. Five personas (Pia, Priya, Anjali, Karim, Vendor). Click persona → POST /api/auth/login → session IDB write → surakkha:session-changed event → redirect to landingFor(session.role). Mock auth via MSW (real auth deferred to Phase 1.7+). Tier 3 (light) — narrow reconciliation.
+  </overview>
+
+  <scope>
+    <scenarios>All scenarios (entry point)</scenarios>
+    <views>/ and /login</views>
+    <platform>Reconcile web/src/pages/LoginPage.tsx (220 LOC); persona picker; MSW-backed login</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="013-REQ-001" type="platform" status="planned">
+      <title>Mount route at / and /login</title>
+      <description>Register route in App.tsx at both / and /login. Wrapped in RequireSession (redirects to landing if session exists).</description>
+      <acceptance>
+        <criterion>Route renders at /</criterion>
+        <criterion>Route renders at /login</criterion>
+        <criterion>Active session redirects to landingFor(role)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/login-page.md</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-002" type="interface" status="planned">
+      <title>Persona picker (5 personas)</title>
+      <description>Render list of 5 personas: Pia (PHA), Priya (utility_operator), Anjali (citizen), Karim (field_technician), Vendor (vendor). Each card: name + role + short bio + role-appropriate icon.</description>
+      <acceptance>
+        <criterion>All 5 personas render</criterion>
+        <criterion>Each card shows name + role + bio</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/login-page.md §Personas</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-003" type="platform" status="planned">
+      <title>Persona click → login → redirect</title>
+      <description>Click persona card → POST /api/auth/login { persona_id } → session IDB write → dispatch surakkha:session-changed event → redirect to landingFor(session.role).</description>
+      <acceptance>
+        <criterion>Click fires POST /api/auth/login</criterion>
+        <criterion>Session persisted in IDB</criterion>
+        <criterion>surakkha:session-changed event dispatched</criterion>
+        <criterion>Redirect to landingFor(role) succeeds</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/login-page.md §Login flow</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-004" type="behavior" status="planned">
+      <title>Session persists across reloads</title>
+      <description>Session stored in IDB. On page reload, RequireSession reads IDB and redirects if session valid. Logout clears IDB and redirects back to /login.</description>
+      <acceptance>
+        <criterion>Login → reload → still logged in</criterion>
+        <criterion>Logout clears IDB and returns to /login</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-005" type="interface" status="planned">
+      <title>Bangla-first toggle on this page</title>
+      <description>Locale toggle on this page. Bangla-first default per lockdown §11.2. Toggle persists in IDB.</description>
+      <acceptance>
+        <criterion>First mount renders Bangla strings</criterion>
+        <criterion>Toggle persists across reloads</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §11.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-006" type="platform" status="planned">
+      <title>Mock auth via MSW (no real auth in Phase 1)</title>
+      <description>POST /api/auth/login is MSW-backed. Real auth flow deferred to Phase 1.7+ when backend lands.</description>
+      <acceptance>
+        <criterion>MSW handler accepts POST /api/auth/login</criterion>
+        <criterion>Response includes session token + role</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/000-PRD.md §4</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-007" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: login-page, …-persona-list, …-persona-card-{pia,priya,anjali,karim,vendor}, …-persona-card-name, …-persona-card-role, …-persona-card-bio.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-008" type="interface" status="planned">
+      <title>i18n keys (EN + BN; persona display names)</title>
+      <description>Add i18n keys for persona display names, role labels, bios, login button. EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-013-login-page.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="013-REQ-009" type="platform" status="planned">
+      <title>Reconciliation: confirm 5 personas + redirect</title>
+      <description>Verify all 5 personas render; verify login flow redirects to landingFor(role) for each role; verify session persists; verify no Hindi strings.</description>
+      <acceptance>
+        <criterion>All 5 personas testable</criterion>
+        <criterion>Redirect test passes for each role</criterion>
+        <criterion>grep 'hi' locale returns zero hits</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="013-REQ-002">
+      <steps>Mount /login; assert 5 persona cards render.</steps>
+      <expected>All personas present.</expected>
+    </test>
+    <test ref="013-REQ-003">
+      <steps>Click Priya card; intercept POST /api/auth/login; assert redirect to /dashboard.</steps>
+      <expected>Login flow works.</expected>
+    </test>
+    <test ref="013-REQ-004">
+      <steps>Login as Anjali; reload; assert still logged in. Logout; assert redirect to /login.</steps>
+      <expected>Session persists + logout works.</expected>
+    </test>
+  </test-protocol>
+
+</prd>

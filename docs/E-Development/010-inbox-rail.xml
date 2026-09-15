@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<prd id="010" title="Inbox Rail" project="surakkha-wsms" created="2026-09-15" status="planned">
+
+  <overview>
+    The Inbox Rail is the 240px left rail inside InboxDetail (per foundation §3.2). Compact ranked list with band pill + reporter badge icons. Used by WO-005 InboxDetail. Tier 3 (light) — narrow reconciliation of existing file.
+  </overview>
+
+  <scope>
+    <scenarios>01-priya-the-pipeline-pilot-triage-verify-assign (Screen 4)</scenarios>
+    <views>Embedded in /inbox/:id (WO-005 InboxDetail)</views>
+    <platform>Reconcile web/src/pages/InboxRail.tsx (123 LOC); compact band + reporter icons; URL selection sync</platform>
+  </scope>
+
+  <requirements>
+
+    <requirement id="010-REQ-001" type="interface" status="planned">
+      <title>240px rail inside InboxDetail</title>
+      <description>Render as 240px rail component inside InboxDetail layout. Used via WO-005 InboxDetail three-column structure.</description>
+      <acceptance>
+        <criterion>Rail width = 240px</criterion>
+        <criterion>Embedded in InboxDetail layout</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §3.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-002" type="interface" status="planned">
+      <title>Compact per-row composition (band glyph + reporter icon + age)</title>
+      <description>Each rail row renders compact variants: BandPill (glyph + text, compact), reporter-badge chip (icon only, compact), age. Sized for 240px width.</description>
+      <acceptance>
+        <criterion>All three elements render in compact variant</criterion>
+        <criterion>Row fits within 240px width without overflow</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Left rail</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-003" type="behavior" status="planned">
+      <title>Selection state syncs to URL</title>
+      <description>Selected rail row syncs to URL query string (incident_id). Loading URL pre-populates selection. Round-trips correctly.</description>
+      <acceptance>
+        <criterion>Click row updates URL</criterion>
+        <criterion>Loading URL highlights correct row</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Selection</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-004" type="behavior" status="planned">
+      <title>Row click navigates to /inbox/:id</title>
+      <description>Click row → navigate to /inbox/:incident_id (parent InboxDetail). Mouse + keyboard (Enter) both supported. Selection state preserved in URL.</description>
+      <acceptance>
+        <criterion>Row click navigates</criterion>
+        <criterion>Enter key also navigates</criterion>
+        <criterion>Navigation triggers InboxDetail mount</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/inbox-detail.md §Rail click</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-005" type="interface" status="planned">
+      <title>Selected row visually highlighted</title>
+      <description>Selected rail row shows visual highlight (background or border per lockdown tokens). Highlight persists across re-renders.</description>
+      <acceptance>
+        <criterion>Selected row has visible highlight</criterion>
+        <criterion>Highlight uses --color-primary-tint or foundation token (not raw color)</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §10.2</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-006" type="interface" status="planned">
+      <title>Area Labels per foundation §13</title>
+      <description>Implement Area Labels per foundation §13: inbox-rail, …-row, …-band-pill, …-reporter-badge-chip, …-age.</description>
+      <acceptance>
+        <criterion>All Area Labels present with matching id and aria-label</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/01-design-system-foundation.md §13</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-007" type="interface" status="planned">
+      <title>i18n keys (compact labels; EN + BN)</title>
+      <description>Add compact labels to inboxCommon.json (en + bn). EN + BN parity. No Hindi.</description>
+      <acceptance>
+        <criterion>EN + BN key sets match</criterion>
+        <criterion>No Hindi keys present</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/E-Development/WO-010-inbox-rail.md §i18n keys</spec>
+      </refs>
+    </requirement>
+
+    <requirement id="010-REQ-008" type="platform" status="planned">
+      <title>Reconciliation: confirm compact variants fit 240px</title>
+      <description>Verify compact band + reporter badges fit within 240px width; verify URL selection sync round-trips; verify click navigation.</description>
+      <acceptance>
+        <criterion>Compact variant width test passes (240px constraint)</criterion>
+        <criterion>URL round-trip test passes</criterion>
+        <criterion>Click navigation test passes</criterion>
+      </acceptance>
+      <refs>
+        <spec>docs/D-UX-Design/02-phase-4-closeout.md §2</spec>
+      </refs>
+    </requirement>
+
+  </requirements>
+
+  <test-protocol>
+    [Added last — written when implementation is near complete]
+    <test ref="010-REQ-002">
+      <steps>Render rail; assert row widths fit within 240px.</steps>
+      <expected>Compact variants fit.</expected>
+    </test>
+    <test ref="010-REQ-003">
+      <steps>Click row; assert URL contains incident_id. Reload from URL; assert row highlighted.</steps>
+      <expected>URL sync works.</expected>
+    </test>
+    <test ref="010-REQ-004">
+      <steps>Click row; assert navigation to /inbox/:id.</steps>
+      <expected>Navigation works.</expected>
+    </test>
+  </test-protocol>
+
+</prd>
