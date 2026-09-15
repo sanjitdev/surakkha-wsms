@@ -673,7 +673,7 @@ export function StyleguidePage() {
             variant="primary"
             size="md"
             className="sg-focus-ring-button"
-            data-testid="styleguide-focus-ring-button"
+            testId="styleguide-focus-ring-button"
           >
             Focus me (button)
           </Button>
