@@ -38,5 +38,16 @@
       "publicKey": "Councillor’s public key signs the same envelope, completing the chain.",
       "allSigners": "All 4 signers are pinned in the block once this step is sealed."
     }
+  },
+  "verify": {
+    "buttonLabel": "Verify this block",
+    "pendingLabel": "Verifying…",
+    "pendingAria": "Verifying block hash",
+    "okLabel": "Verified",
+    "okAria": "Block hash verified",
+    "failLabel": "Failed",
+    "failAria": "Block hash verification failed",
+    "toastOk": "Block hash verified",
+    "toastFail": "Block hash verification failed"
   }
 }
