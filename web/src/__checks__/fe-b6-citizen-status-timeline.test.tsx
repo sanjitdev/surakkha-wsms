@@ -118,7 +118,7 @@ const inFlightEvents = [
   },
   {
     event_id: 'evt_a3',
-    event_type: 'AssignedToTechnician',
+    event_type: 'TechnicianAssigned',
     occurred_at: '2024-01-01T00:10:00Z',
     actor_identity: { kind: 'operator', ref: 'priya', display: 'Priya' },
     payload: { incident_id: 'inc_anjali_001', technician: 'karim' },
@@ -237,7 +237,7 @@ describe('FE-B6 CitizenStatusTimeline (citizen-status-timeline.md)', () => {
     const visibleTypes = [
       'IncidentCreated',
       'TrustBandAssigned',
-      'AssignedToTechnician',
+      'TechnicianAssigned',
       'TechnicianEnRoute',
       'TechnicianArrived',
       'DiagnosisSubmitted',
