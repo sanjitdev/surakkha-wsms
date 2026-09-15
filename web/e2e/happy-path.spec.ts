@@ -29,6 +29,13 @@
  *    15. Select 1 row → bulk-bar Mark reviewed (SignatureAttestation)
  *    16. Logout → login as Anjali → /ack/<incident_id>
  *    17. Click "Approve & close" → expect APPROVED receipt
+ *    18. Anjali opens /my-reports/:id/timeline (WO-001 citizen-timeline)
+ *    19. Assert ≥5 citizen-visible rows; assert no payload/hash/JSON leakage
+ *    20. Assert Bangla locale default (data-locale="bn", .bangla-text)
+ *    21. Assert ActionCall="in-progress" (no admin-resolve yet)
+ *    22. Inject IncidentResolvedByAdmin → reload → assert closure-ack
+ *        ActionCall → tap ✅ → ChainAccepted lands on chain
+ *    23. Visual snapshot → web/e2e/_tier8-snap/citizen-timeline.png
  *
  * Why one spec, not seven
  * -----------------------
@@ -256,5 +263,137 @@ test.describe('happy path — full Phase 1 cycle', () => {
     await expect(page.getByText('You approved the fix')).toBeVisible();
     // Decision card removed after success.
     await expect(page.getByTestId('ack-decision-card')).toBeHidden();
+
+    // ─── STEP 18 — WO-001 citizen-timeline landing ───────────────
+    // Anjali taps "view full motion" from /ack/:id (or navigates
+    // directly to her public-mode timeline). URL pattern is locked by
+    // citizen-status-timeline.md §13 — /my-reports/:incident_id/timeline.
+    // The role guard at the top of CitizenStatusTimeline.tsx redirects
+    // any non-anjali session; we are anjali here so we land on the page.
+    await page.goto(`/my-reports/${incidentId}/timeline`);
+
+    // Title + subtitle render (REQ-001 guard passed; not redirected).
+    await expect(page.getByTestId('citizen-timeline-title')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('citizen-timeline-subtitle')).toBeVisible();
+    // Back-link to / is present.
+    await expect(page.getByTestId('citizen-timeline-back')).toBeVisible();
+
+    // ─── STEP 19 — Citizen-visible event rows render (REQ-002) ──
+    // The chain segment for this incident contains: AnjaliReportSubmitted
+    // (NOT in the visible set — citizen-side filter strips it), IncidentCreated,
+    // TechnicianAssigned, TechnicianArrived, DiagnosisSubmitted, FixSubmitted,
+    // IncidentResolved, CitizenAcknowledgement (also NOT in the visible set),
+    // SignatureAttestation (NOT visible — operator-internal). Plus the
+    // ChainRead the page emits on mount, which is explicitly filtered out.
+    // We expect ≥ 5 visible rows.
+    const visibleRows = page.locator('[data-testid^="citizen-event-row-"]');
+
+    await expect(visibleRows.first()).toBeVisible({ timeout: 10_000 });
+    expect(await visibleRows.count()).toBeGreaterThanOrEqual(5);
+
+    // REQ-002 — public-mode lockdown. No payload/JSON/hash text in the
+    // citizen-timeline DOM. The fixture blocks we wrote DO contain JSON
+    // payloads (description, summary, etc.) but the public-mode projection
+    // must NOT render them. Scan the page HTML for any leakage; if any
+    // substring appears the page is leaking operator-internal data.
+    const pageHtml = await page.content();
+
+    // Field names that would only appear in raw payloads.
+    expect(pageHtml).not.toContain('"payload"');
+    expect(pageHtml).not.toContain('"block_hash"');
+    expect(pageHtml).not.toContain('"actor_identity"');
+    // "hash" appears in copy ("hash mismatch" etc.) but the leaf fixture
+    // values like 'mock-photo-broken-seal-sha256' must not be visible.
+    expect(pageHtml).not.toContain('mock-photo-broken-seal-sha256');
+    expect(pageHtml).not.toContain('mock-fix-payload-hash');
+    // Raw JSON braces are also forbidden in the DOM.
+    expect(pageHtml).not.toMatch(/\{["']event_type["']:/);
+
+    // ─── STEP 20 — Bangla locale default (REQ-003) ───────────────
+    // The page stamps `data-locale` on the section root from the date
+    // formatter's resolved locale. Bangla-first means data-locale="bn"
+    // by default. The .bangla-text class is also applied (REQ-010).
+    const section = page.locator('[data-area-id="citizen-status-timeline-page"]');
+
+    await expect(section).toHaveAttribute('data-locale', /bn/);
+    await expect(section).toHaveClass(/bangla-text/);
+
+    // ─── STEP 21 — ActionCall state for the happy-path chain ─────
+    // After step 17 the chain has IncidentResolved (field-tech resolve)
+    // but NO IncidentResolvedByAdmin. CitizenStatusTimeline derives
+    // state by checking the closed set; without an admin resolve the
+    // ActionCall lands in `in-progress` (the common case).
+    await expect(page.getByTestId('citizen-action-call-in-progress')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    // ─── STEP 22 — Closure-ack path (REQ-004) ────────────────────
+    // To exercise the ✅ tap we need IncidentResolvedByAdmin on chain
+    // without a CitizenAckAccepted. We synthesise it via /api/events
+    // from inside the page (admin-side operator action). The page's
+    // own ChainRead was already emitted on mount; we don't want a
+    // second one, so we POST directly without reloading.
+    const beforeAckCount = await page.evaluate(async (id) => {
+      const r = await fetch(
+        `/api/events?incident_id=${encodeURIComponent(id)}&limit=200`,
+      );
+      const body = (await r.json()) as { events: { event_type: string }[] };
+
+      return body.events.filter((e) => e.event_type === 'IncidentResolvedByAdmin')
+        .length;
+    }, incidentId);
+
+    expect(beforeAckCount).toBe(0);
+
+    await page.evaluate(async (id) => {
+      await fetch('/api/events', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'IncidentResolvedByAdmin',
+          actor_identity: {
+            kind: 'operator',
+            ref: '01J0PRIYA000000000000000000',
+            display: 'Priya (utility operator)',
+          },
+          payload: {
+            incident_id: id,
+            summary: 'Verified field-tech fix and pH stable; ready for citizen ack.',
+          },
+        }),
+      });
+    }, incidentId);
+
+    // Reload so the timeline re-fetches and the ActionCall state flips.
+    await page.reload();
+    await expect(page.getByTestId('citizen-timeline-title')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('citizen-action-call-closure-ack')).toBeVisible({
+      timeout: 10_000,
+    });
+
+    // Tap ✅ — emits ChainAccepted, flips state to all-caught-up.
+    await page.getByTestId('citizen-action-call-confirm-yes').click();
+    await expect(page.getByTestId('citizen-action-call-all-caught-up')).toBeVisible({
+      timeout: 10_000,
+    });
+    // Toast "Thanks for confirming. All set." — uses actionCall.thanks key.
+    await expect(page.getByText(/Thanks for confirming/i)).toBeVisible({ timeout: 5_000 });
+
+    // Confirm ChainAccepted landed on chain.
+    const ackOnChain = await page.evaluate(async (id) => {
+      const r = await fetch(
+        `/api/events?incident_id=${encodeURIComponent(id)}&limit=200`,
+      );
+      const body = (await r.json()) as { events: { event_type: string }[] };
+
+      return body.events.some((e) => e.event_type === 'ChainAccepted');
+    }, incidentId);
+    expect(ackOnChain).toBe(true);
+
+    // ─── STEP 23 — Visual snapshot for WO §Tests required ────────
+    await page.screenshot({
+      path: 'web/e2e/_tier8-snap/citizen-timeline.png',
+      fullPage: true,
+    });
   });
 });

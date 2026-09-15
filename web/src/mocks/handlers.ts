@@ -225,6 +225,11 @@ const chainHandlers = [
       'IncidentCreated',
       'IncidentEscalated',
       'IncidentResolved',
+      // WO-001 — operator-side closure emitted by an admin operator
+      // before the citizen is asked to ack (citizen-status-timeline.md
+      // §6 "closure-ack" branch + deriveActionCallState). Mirror of
+      // the production gateway's closed-enum; same wire shape.
+      'IncidentResolvedByAdmin',
       'PlaybookStepExecuted',
       'DeviationCaptured',
       'OverrideRecorded',
