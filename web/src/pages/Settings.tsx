@@ -4,9 +4,9 @@
  * Settings surface at /settings. Per dim 5 §7.7:
  *   - Container width="bangla" (1080 px) — settings forms fit naturally
  *     in the mid-width column; not narrow (modal-feel) nor wide (table).
- *   - 3 stacked <Card> sections: Theme, Locale, Reset.
- *     Each card groups one concern so the page reads as a vertical
- *     stack of independent settings.
+ *   - Stacked <Card> sections: Theme, Locale, Anjali filter (role-gated),
+ *     Persona (read-only), Reset. Each card groups one concern so the
+ *     page reads as a vertical stack of independent settings.
  *   - Theme + Locale are toggle <Button> pairs reading existing hooks
  *     (useTheme, useLocale) — single source of truth, no prop drilling.
  *   - Role config is read-only — the persona is selected on the login
@@ -14,7 +14,8 @@
  *   - Reset is a destructive action; lockdown §7.1 reserves the Danger
  *     button variant for the T3+ issuance path only. Settings uses
  *     `variant="ghost"` plus a confirmation <Modal> (lockdown §3.4
- *     modal pattern) before calling resetEverything() and reloading.
+ *     modal pattern) before emitting `SettingsReset{actor}` to the
+ *     chain and clearing IDB.
  *
  * Why composition only:
  *   - All real persistence already happens in localStorage (theme,
@@ -27,6 +28,15 @@
  *     before destructive action.
  *   - Persona readout: badge--t1 → badge--t1-locked (divider neutral
  *     --color-trust-t1, not legacy sky-blue).
+ *
+ * WO-014 (2026-09-15) — wire contract:
+ *   - On Reset confirmation, POST /api/events with envelope
+ *     `{ event_type: "SettingsReset", actor_identity: { kind, ref,
+ *     display }, payload: { actor: <actor_ref> } }` BEFORE wiping IDB.
+ *   - Then `wipeAll()` clears local chain + session + meta + theme/locale.
+ *   - Finally `window.location.reload()` to surface the sign-in screen.
+ *   - Failures in the POST are swallowed (best-effort audit) so a
+ *     network blip doesn't block the user from resetting.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +50,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useLocale } from '../hooks/useLocale';
 import { useAnjaliFilter } from '../hooks/useAnjaliFilter';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
-import { resetEverything } from '../mocks/reset';
+import { wipeAll } from '../mocks/idb';
 import { DatePicker } from '../components/ui/DatePicker';
 import { ContainerWidth, Locale, Theme } from '../types/domain';
 
@@ -57,10 +67,39 @@ export function Settings() {
     if (resetting) return;
     setResetting(true);
     try {
-      await resetEverything();
-      // resetEverything() calls window.location.reload() — control
-      // does not return from this branch under normal conditions.
+      // WO-014 wire contract — emit `SettingsReset{actor}` to the chain
+      // BEFORE wiping IDB. This is best-effort: a network blip should
+      // not block the destructive reset. The audit log (and any
+      // downstream dashboards) still receives the canonical event from
+      // the chain projection once the gateway processes the POST.
+      const actorRef = session.actor_ref;
+
+      try {
+        await fetch('/api/events', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            event_type: 'SettingsReset',
+            actor_identity: {
+              kind: session.role,
+              ref: actorRef,
+              display: session.display_name,
+            },
+            payload: { actor: actorRef },
+          }),
+        });
+      } catch (emitErr) {
+        // eslint-disable-next-line no-console
+        console.warn('[surakkha] settings reset emit failed', emitErr);
+      }
+
+      // Clear IDB (chain + session + meta) directly instead of going
+      // through mocks/reset.resetEverything() so the wire emit happens
+      // first. The end state is identical: a wiped DB + a reload.
+      await wipeAll();
+      window.location.reload();
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error('[surakkha] settings reset failed', err);
       setResetting(false);
       setConfirmOpen(false);
@@ -75,6 +114,8 @@ export function Settings() {
           {tSettings('header.subtitle', { name: session.display_name, role: session.role })}
         </p>
       </div>
+
+      <div className="settings-page__stack" data-testid="settings-stack">
 
       {/* ── Theme section ──────────────────────────────────────── */}
       <Card testId="settings-theme-card">
@@ -223,6 +264,7 @@ export function Settings() {
           </div>
         </div>
       </Card>
+      </div>
 
       <Modal
         open={confirmOpen}
