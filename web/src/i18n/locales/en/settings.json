@@ -33,7 +33,7 @@
     "buttonIdle": "Reset everything",
     "buttonBusy": "Resetting…",
     "confirmAria": "Confirm reset",
-    "confirmHeading": "Reset demo data?",
+    "confirmHeading": "Reset all settings?",
     "confirmBody": "This clears the local chain, your session, and your theme/locale preferences, then reloads the page. You will be returned to the sign-in screen with seeded fixtures. This cannot be undone.",
     "confirmCancel": "Cancel",
     "confirmConfirm": "Yes, reset everything"
