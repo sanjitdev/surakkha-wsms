@@ -104,6 +104,29 @@ Add to both `web/src/i18n/locales/en/fieldQueue.json` and `…/bn/`:
 
 - **Phase 1.7+:** `--band-*` → `--color-trust-*` migration in `InboxRow.tsx`-style code if shared
 
+## REQ checklist (Tier 2 build, 2026-09-15)
+
+| REQ | Title | Status |
+|---|---|---|
+| 001 | Sort priority-first / age-second | ✅ built |
+| 002 | BandPill renders glyph + text per row | ✅ built |
+| 003 | Reporter-badge chip per row | ✅ built (shared `<ReporterBadge>`) |
+| 004 | Acknowledge button emits `Acknowledged` event | ✅ built |
+| 005 | En-route button + ETA picker (1/5/15/30/60 min) emits `EnRoute` event | ✅ built |
+| 006 | Distance estimate updates on geolocation change | ✅ built (`navigator.geolocation.watchPosition` with fallback) |
+| 007 | Filter chips: "My assignments" (default) + "Available" | ✅ built |
+| 008 | 5s polling + 100ms crossfade on changed cells | ✅ built |
+| 009 | Lockdown compliance sweep (no Hindi strings, focus rings) | ✅ built (test file `fe-field-queue-reconcile.test.tsx`) |
+
+**Out-of-scope (deferred per spec, MAJOR):**
+
+- Full offline-first layer (IndexedDB cache + sync queue) — `useOfflineCache`/`useSync` hooks
+- Sensor prep mini-map per row (`MiniMapRow` component)
+- `REOPENED` row chip + verbatim `ProofInsufficient` preview
+- `Mark arrived` GPS-confirmed highlight (within 50m / 3 sec)
+- Sync-status chip full sync layer (DOM stub renders; full state machine deferred)
+- `due_at` countdown chip with colour-shift warning at `due_at - 10min`
+
 ## Lockdown compliance
 
 | Decision | Compliance |
