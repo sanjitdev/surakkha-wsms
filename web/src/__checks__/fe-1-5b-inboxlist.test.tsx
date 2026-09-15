@@ -283,14 +283,16 @@ describe('InboxList I/O matrix', () => {
     await renderInboxAndWaitForRows();
     const t3Chip = screen.getByTestId('filter-chip-t3-urgent');
 
-    expect(t3Chip.getAttribute('aria-selected')).toBe('false');
+    // FilterChip uses aria-pressed (toggle group, not tab); WO-009
+    // lockdown reconciled the chip surface per foundation §13.
+    expect(t3Chip.getAttribute('aria-pressed')).toBe('false');
     expect(t3Chip.className).not.toContain('is-active');
 
     act(() => {
       fireEvent.click(t3Chip);
     });
 
-    expect(t3Chip.getAttribute('aria-selected')).toBe('true');
+    expect(t3Chip.getAttribute('aria-pressed')).toBe('true');
     expect(t3Chip.className).toContain('is-active');
 
     // Only the T3 row (high → T3 per SEVERITY_FROM_WIRE) remains.
@@ -340,7 +342,10 @@ describe('InboxList I/O matrix', () => {
       expect(screen.getByTestId('empty-state')).toBeTruthy();
     });
 
-    expect(screen.getByRole('heading', { level: 2, name: 'No incidents' })).toBeTruthy();
+    // WO-009 lockdown sweep split the empty state into two branches:
+    // chain-unreachable (No incidents) vs fetch-error (Failed to load
+    // inbox). A 500 from /api/events surfaces the error branch.
+    expect(screen.getByRole('heading', { level: 2, name: 'Failed to load inbox' })).toBeTruthy();
     expect(screen.queryAllByTestId('inbox-row').length).toBe(0);
     expect(document.querySelector('.inbox-bulkbar')?.hasAttribute('hidden')).toBe(true);
     errSpy.mockRestore();
