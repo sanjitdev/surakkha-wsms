@@ -113,11 +113,13 @@ export function LoginPage() {
           </div>
           <div className="brand-panel__mark-text">Surakkha</div>
         </div>
-        <h1 className="brand-panel__title">
-          {t('brandPanel.title')}
-          <br />
-          {t('brandPanel.titleLine2')}
-        </h1>
+        <div className="brand-panel__hero">
+          <h1 className="brand-panel__title">
+            {t('brandPanel.title')}
+            <br />
+            {t('brandPanel.titleLine2')}
+          </h1>
+        </div>
         <div className="brand-panel__live">
           <span className="brand-panel__live-dot" aria-hidden="true"></span>
           <span>

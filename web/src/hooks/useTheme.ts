@@ -1,5 +1,17 @@
-// Body-level theme switcher (NFR-FE6 + AD-FE-1). Reads localStorage,
-// falls back to prefers-color-scheme, writes document.body.dataset.theme.
+// Theme switcher (NFR-FE6 + AD-FE-1). Reads localStorage,
+// falls back to prefers-color-scheme, writes the data-theme attribute
+// to BOTH <html> and <body> so the cascade matches every selector in
+// src/styles/theme.css.
+//
+// Why both:
+//   - `[data-theme="dark"]` / `[data-theme="light"]` in theme.css match
+//     any element with the attribute, including <html> and <body>.
+//   - Writing to <body> alone leaves :root (which is <html>) on its
+//     declared dark defaults, so <html>-scoped CSS variables resolve
+//     to dark while body-scoped ones resolve to the chosen theme —
+//     producing split-theme rendering.
+//   - The first mount sets both before paint to avoid a flash.
+//
 // Exported here but not yet called at mount — FE-1.1b wires App.tsx.
 
 import { useCallback, useEffect, useState } from 'react';
@@ -20,6 +32,19 @@ function readInitial(): Theme {
     return Theme.Light;
   }
 }
+
+// Apply theme synchronously on module load so the first paint already
+// has the correct <html data-theme>. Without this, the page renders
+// with theme.css's :root dark defaults for ~50ms before useEffect
+// runs, causing a flash on light-theme reloads.
+function applyToDocument(theme: Theme): void {
+  if (typeof document === 'undefined') return;
+  document.documentElement.dataset.theme = theme;
+  document.body.dataset.theme = theme;
+}
+if (typeof document !== 'undefined') {
+  applyToDocument(readInitial());
+}
 export function useTheme(): {
   theme: Theme;
   setTheme: (next: Theme) => void;
@@ -28,9 +53,8 @@ export function useTheme(): {
   const [theme, setThemeState] = useState<Theme>(readInitial);
 
   useEffect(() => {
-    if (typeof document === 'undefined') return;
     try {
-      document.body.dataset.theme = theme;
+      applyToDocument(theme);
       window.localStorage.setItem(STORAGE_KEY, theme);
     } catch {
       // localStorage may throw in privacy mode or quota-exceeded;

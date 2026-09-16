@@ -7,13 +7,12 @@
 /* Lockdown tokens are loaded from src/styles/theme.css via main.tsx.
    This file should never define a new color, font, or spacing value. */
 
-/* ── Login shell (mirrors 00-login/login.html layout) ────────── */
+/* ── Login shell (5/7 split — left brand, right picker) ────────── */
 .login-shell {
   display: grid;
   grid-template-columns: 5fr 7fr;
   min-height: 100vh;
 }
-
 @media (max-width: 900px) {
   .login-shell {
     grid-template-columns: 1fr;
@@ -27,10 +26,15 @@
 .brand-panel {
   background: var(--brand-600);
   color: var(--brand-on-color);
-  padding: var(--space-2xl);
+  padding: var(--space-2xl) var(--space-2xl) var(--space-xl);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  /* space-between pushes three children (mark, title, live) to top,
+     center, and bottom. That centers a short title in dead space.
+     flex-start with a flex:1 spacer above the live pill anchors the
+     live pill to the bottom while letting the title sit just below
+     the mark — reads as "header → hero → status footer". */
+  justify-content: flex-start;
   position: relative;
   overflow: hidden;
   background-image:
@@ -45,13 +49,7 @@
       transparent 60%
     );
 }
-
 [data-theme='dark'] .brand-panel {
-  background: linear-gradient(
-    160deg,
-    var(--brand-gradient-dark-from) 0%,
-    var(--brand-gradient-dark-to) 100%
-  );
   background-image:
     linear-gradient(160deg, var(--brand-gradient-dark-from) 0%, var(--brand-gradient-dark-to) 100%),
     radial-gradient(
@@ -73,14 +71,11 @@
   position: relative;
   z-index: 1;
 }
-
 .brand-panel__mark-glyph {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border: 1.5px solid var(--brand-on-color);
   border-radius: var(--radius-sm);
-  /* WO-013 — lockdown: bind logo glyph background to --color-primary
-     (deep teal) per foundation §7.1. */
   background: var(--color-primary);
   display: flex;
   align-items: center;
@@ -89,7 +84,6 @@
   font-weight: var(--font-weight-bold);
   color: var(--brand-on-color);
 }
-
 .brand-panel__mark-text {
   font-size: var(--font-size-md);
   font-weight: var(--font-weight-semibold);
@@ -97,29 +91,47 @@
   color: var(--brand-on-color);
 }
 
+/* Hero wrapper — flex-grow so the title block sits between the
+   mark (top) and the live pill (bottom), reading as the "pitch"
+   instead of a stranded label. */
+.brand-panel__hero {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--space-xl) 0;
+}
 .brand-panel__title {
-  font-size: 1.875rem;
-  line-height: 1.1;
+  font-size: 2.5rem;
+  line-height: 1.05;
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.03em;
-  margin: 0;
+  letter-spacing: -0.035em;
+  margin: 0 0 var(--space-md);
   color: var(--brand-on-color-strong);
-  max-width: 16ch;
+  max-width: 14ch;
   position: relative;
   z-index: 1;
 }
 
+/* Pill replaces the old "tiny mono label buried in the bottom-left
+   corner" with a proper bordered chip. Reads as a system-status
+   anchor, not a footnote. */
 .brand-panel__live {
   position: relative;
   z-index: 1;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: var(--space-sm);
+  align-self: flex-start;
+  padding: 6px var(--space-md);
+  border: 1px solid color-mix(in srgb, var(--brand-on-color) 25%, transparent);
+  border-radius: 999px;
   font-size: var(--font-size-xs);
-  color: color-mix(in srgb, var(--brand-on-color) 75%, transparent);
+  color: var(--brand-on-color);
   font-family: var(--font-family-mono);
+  background: color-mix(in srgb, var(--brand-on-color) 8%, transparent);
+  backdrop-filter: blur(8px);
 }
-
 .brand-panel__live-dot {
   width: 6px;
   height: 6px;
@@ -161,23 +173,85 @@
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 }
-
 .picker-panel__inner {
   width: 100%;
-  max-width: 440px;
+  max-width: 460px;
   margin: 0 auto;
 }
 
+/* Header hierarchy: eyebrow ("sign in") + heading + subhead.
+   Replaces the old "single-line Sign in" with no context. */
+.picker-panel__eyebrow {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
+  margin: 0 0 var(--space-sm);
+  font-weight: var(--font-weight-semibold);
+}
 .picker-panel__heading {
-  font-size: var(--font-size-xl);
+  font-size: 1.75rem;
+  line-height: 1.15;
   font-weight: var(--font-weight-semibold);
   letter-spacing: -0.025em;
-  line-height: 1.2;
   color: var(--fg-default);
-  margin: 0 0 var(--space-2xl);
+  margin: 0 0 var(--space-sm);
+}
+.picker-panel__subhead {
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--fg-secondary);
+  margin: 0 0 var(--space-xl);
+  max-width: 38ch;
 }
 
+/* Status pill at the top of the picker — properly structured with
+   dot + label. Replaces the previous 10px mono label that read as a
+   console log rather than a system message. */
+.picker-status {
+  /* fit-content + inline-block: shrinks the pill to its actual width so
+     it doesn't stretch to fill the 460px column. align-self: flex-start
+     only works on flex parents; .picker-panel__inner is block, so we
+     need explicit sizing instead. */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px var(--space-md);
+  margin-bottom: var(--space-xl);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  font-size: 11px;
+  font-family: var(--font-family-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fg-secondary);
+  background: var(--bg-surface);
+}
+.picker-status:focus { outline: none; }
+.picker-status:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.picker-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--fg-tertiary);
+  flex-shrink: 0;
+}
+.picker-status--ready .picker-status__dot { background: var(--success); }
+.picker-status--pending .picker-status__dot { background: var(--warning); }
+/* WO-013 — lockdown: alert-red is reserved for consumer-notice
+   issuance paths (T3+). Login's transient backend-unreachable state
+   uses the amber warn colour per cascade rule. */
+.picker-status--error .picker-status__dot { background: var(--color-status-warn); }
+
+/* Persona radio list. */
 .picker-list {
   display: flex;
   flex-direction: column;
@@ -186,14 +260,13 @@
   padding: 0;
   list-style: none;
 }
-
 .persona {
   display: grid;
-  grid-template-columns: 36px 1fr 20px;
+  grid-template-columns: 40px 1fr 20px;
   gap: var(--space-md);
   align-items: center;
   width: 100%;
-  padding: var(--space-sm) var(--space-md);
+  padding: var(--space-md);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
@@ -202,59 +275,71 @@
   font-family: inherit;
   color: var(--fg-default);
   transition:
-    border-color var(--motion-tab-switch) var(--ease-out),
-    background-color var(--motion-tab-switch) var(--ease-out);
+    border-color 120ms var(--ease-out),
+    background-color 120ms var(--ease-out),
+    box-shadow 120ms var(--ease-out);
 }
-
 .persona:hover {
   border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--bg-surface) 80%, var(--bg-subtle));
 }
-
 .persona:focus-visible {
   /* WO-013 — lockdown §10.2: 2px --color-primary-tint focus ring
      replaces the audit-flagged emerald-600 ring. */
   outline: 2px solid var(--color-primary-tint);
   outline-offset: 2px;
 }
-
 .persona--selected {
-  border-color: var(--brand-500);
-  box-shadow: 0 0 0 3px var(--brand-100);
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--bg-surface));
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
-
 [data-theme='dark'] .persona--selected {
-  background: color-mix(in srgb, var(--brand-500) 6%, var(--bg-surface));
-  box-shadow: 0 0 0 3px var(--brand-200);
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--bg-surface));
 }
 
 .persona__avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: var(--bg-subtle);
+  background: var(--bg-inset);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-semibold);
   color: var(--fg-secondary);
+  flex-shrink: 0;
 }
-
 .persona--selected .persona__avatar {
-  background: var(--brand-500);
+  background: var(--color-primary);
   color: var(--bg-surface);
 }
 
+.persona__body { min-width: 0; }
 .persona__name {
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
+  font-weight: var(--font-weight-semibold);
   color: var(--fg-default);
   line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.persona__hint {
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  line-height: 1.4;
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .persona__check {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 1.5px solid var(--border-default);
   flex-shrink: 0;
@@ -262,53 +347,31 @@
   align-items: center;
   justify-content: center;
   color: var(--bg-surface);
-  font-size: 10px;
+  font-size: 11px;
+  transition: border-color 120ms var(--ease-out), background-color 120ms var(--ease-out);
 }
-
 .persona--selected .persona__check {
-  background: var(--brand-500);
-  border-color: var(--brand-500);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
-
 .persona--selected .persona__check::after {
-  content: '✓';
+  content: '\2713'; /* ✓ */
+  font-weight: var(--font-weight-bold);
 }
 
+/* Continue button row — full-width primary + helper text on the left. */
 .picker-actions {
   margin-top: var(--space-xl);
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-md);
   align-items: center;
-  justify-content: flex-end;
 }
-
-/* ── Status strip (top-right of picker) ──────────────────────── */
-.picker-status {
-  font-family: var(--font-family-mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.picker-actions__hint {
+  font-size: var(--font-size-xs);
   color: var(--fg-tertiary);
-  margin-bottom: var(--space-md);
+  font-family: var(--font-family-mono);
 }
-
-.picker-status__dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--fg-tertiary);
-  margin-right: var(--space-xs);
-}
-
-.picker-status--ready .picker-status__dot {
-  background: var(--success);
-}
-.picker-status--pending .picker-status__dot {
-  background: var(--warning);
-}
-/* WO-013 — lockdown: alert-red is reserved for consumer-notice
-   issuance paths (T3+). Login's transient backend-unreachable state
-   uses the amber warn colour per cascade rule. */
-.picker-status--error .picker-status__dot {
-  background: var(--color-status-warn);
+.picker-actions__button {
+  min-width: 140px;
 }

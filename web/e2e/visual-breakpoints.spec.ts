@@ -55,7 +55,9 @@ for (const bp of BREAKPOINTS) {
         animations: 'disabled',
         caret: 'hide',
         maxDiffPixelRatio: 0.02,
-        mask: [page.getByTestId('picker-status')],
+        // picker-status deliberately NOT masked — the 2026-09-16 redesign
+        // turned it into a proper bordered pill (dot + uppercase label) so
+        // regressions to its shape/border/background are worth catching.
       });
     });
   });
