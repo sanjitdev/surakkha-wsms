@@ -1,10 +1,10 @@
 /* ════════════════════════════════════════════════════════════════════
    app.css — React-app-specific styles layered on top of theme.css.
-   theme.css (in mockups/) owns ALL tokens; this file just composes
+   theme.css (in src/styles/) owns ALL tokens; this file just composes
    React-component classes that reference those tokens.
    ════════════════════════════════════════════════════════════════════ */
 
-/* Lockdown tokens are loaded from ../mockups/theme.css via main.tsx.
+/* Lockdown tokens are loaded from src/styles/theme.css via main.tsx.
    This file should never define a new color, font, or spacing value. */
 
 /* ── Login shell (mirrors 00-login/login.html layout) ────────── */

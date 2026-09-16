@@ -36,7 +36,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/submit.css';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';

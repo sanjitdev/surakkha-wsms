@@ -24,7 +24,6 @@
 
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import '../../mockups/01-priya/dashboard.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';

@@ -41,7 +41,6 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useSearchParams } from 'react-router-dom';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 import '../styles/submit.css';
 import { Container } from '../components/layout/Container';

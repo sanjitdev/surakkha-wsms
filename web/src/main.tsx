@@ -13,15 +13,25 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { I18nextProvider } from 'react-i18next';
-// Global styles — the lockdown tokens live here. Importing theme.css
-// from `mockups/` means the React app and the static mockups share
-// one source of truth for color, typography, spacing.
+// Global styles — load order matters.
+//   theme.css              declares the dim 1-4 tokens (color, type, spacing,
+//                          radii, motion). MUST load first; everything else
+//                          references var(--brand-*) / var(--bg-*) etc.
+//   lockdown-bridge.css    the legacy → lockdown alias block (lives at the
+//                          bottom of theme.css as section 8 since 2026-09-16;
+//                          kept here for backward compat with any consumer
+//                          that may still grep for it).
+//   layout.css             the app-shell chrome (sidebar + top-chrome +
+//                          page-header + tabs + pulse dot). Promoted from
+//                          web/mockups/01-priya/dashboard.css on 2026-09-16.
+//   app.css                React-app composition (login picker, brand panel,
+//                          persona radios, picker-status, error screen).
 //
-// lockdown-bridge.css (Phase 5 Batch 3, 2026-09-11) overlays the
-// legacy token system onto the lockdown palette per
-// `docs/D-UX-Design/decisions/01-token-deconfliction-plan.md`.
-import '../mockups/theme.css';
+// Note: theme.css was promoted out of web/mockups/ on 2026-09-16 —
+// no src/* file now imports anything from the mockups/ folder.
+import './styles/theme.css';
 import './styles/lockdown-bridge.css';
+import './styles/layout.css';
 import './styles/app.css';
 import i18n from './i18n';
 import { App } from './App';

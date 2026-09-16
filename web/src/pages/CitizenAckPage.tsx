@@ -35,7 +35,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/submit.css';
 import '../styles/inbox.css';
 import '../styles/citizenAck.css';

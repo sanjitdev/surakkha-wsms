@@ -34,7 +34,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
 import '../styles/audit.css';
 import { Container } from '../components/layout/Container';

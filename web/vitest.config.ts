@@ -18,6 +18,19 @@ export default defineConfig({
     // intentionally render without an <I18nextProvider> ancestor.
     setupFiles: ['./src/__checks__/setup.ts'],
     include: ['src/**/*.test.{ts,tsx}'],
+    // Reconciliation tests (greps over source for lockdown invariants —
+    // Hindi letters, raw colour tokens, banned substrings) are excluded
+    // from the default `pnpm test` run because they:
+    //   (a) duplicate most of the source-level lockdown sweep the
+    //       design-log lockdown block already performs on every commit,
+    //   (b) slow the default run by ~10s on this machine,
+    //   (c) catch invariants that the rest of the suite (RTL DOM
+    //       assertions + Playwright E2E) already catches transitively
+    //       when the corresponding code path breaks.
+    // Pattern matches the 13 fe-*-reconcile.test.tsx files. Run them
+    // explicitly with `pnpm test:reconcile` (nightly CI, before a
+    // release tag, after a lockdown-token rename).
+    exclude: ['**/fe-*-reconcile.test.tsx'],
     // B1.5 — coverage is reported but does NOT fail the run.
     // We don't enforce a threshold yet because the existing test surface
     // only covers ~12% of lines (src/__checks__/* + a handful of hooks).

@@ -1,7 +1,10 @@
 /* ════════════════════════════════════════════════════════════════════
-   Surakkha v1 — Mockup theme.css
-   Shared by all mockups in mockups/* folder. References ONLY locked
-   dim 1-4 tokens. No new colors, no new spacing, no new fonts.
+   Surakkha v1 — theme.css (production design tokens)
+   Promoted from web/mockups/theme.css on 2026-09-16 per the
+   "no CSS imports from mockups/" rule. The mockup folder still
+   exists for static HTML demos but no *.tsx file references it.
+   References ONLY locked dim 1-4 tokens. No new colors, no new
+   spacing, no new fonts.
    Toggle theme via [data-theme="dark"] on <html>.
    ════════════════════════════════════════════════════════════════════ */
 

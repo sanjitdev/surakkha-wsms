@@ -4,13 +4,19 @@
  * The persistent shell for every authenticated route. Wraps its
  * children (a react-router <Outlet>) in:
  *
- *   <div className="app-shell">
+ *   <div className={`app-shell${variant ? ` app-shell--${variant}` : ''}`}>
  *     <Sidebar  navItems={navForRole} brandHref={landingFor(role)} brand="SURAKKHA" footer={<LogoutButton />} />
  *     <div className="main">
  *       <TopChrome personaLabel={chip} chainFreshSeconds={chainFreshSeconds} />
  *       {children}
  *     </div>
  *   </div>
+ *
+ * `variant` is derived from session.role (field_technician → 'tech',
+ * anjali → 'anjali', vendor → 'vendor') and narrows the sidebar to
+ * 200px for those personas via the .app-shell--<variant> selectors
+ * in web/src/styles/layout.css. Priya / message-desk / PHA roles use
+ * the default .app-shell grid (256/280/304px at 1280/1440/1920).
  *
  * Responsibilities (the cross-cutting concerns every page used to
  * re-implement itself):
@@ -113,11 +119,25 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const navItems = NAV_BY_ROLE[session.role] ?? [];
   const chipLabel = session.chip_label ?? session.display_name;
 
+  // Slim 200px sidebar variants for field / citizen-submitter / vendor
+  // personas. The Priya / message-desk / PHA roles keep the default
+  // 256px sidebar. Tokens live in web/src/styles/layout.css under the
+  // .app-shell--{tech,anjali,vendor} selectors (formerly
+  // web/mockups/01-priya/dashboard.css — promoted to a real layout
+  // stylesheet on 2026-09-16).
+  const SHELL_VARIANT_BY_ROLE: Record<string, string | undefined> = {
+    field_technician: 'tech',
+    anjali: 'anjali',
+    vendor: 'vendor',
+  };
+  const shellVariant = SHELL_VARIANT_BY_ROLE[session.role];
+  const shellClass = shellVariant ? `app-shell app-shell--${shellVariant}` : 'app-shell';
+
   return (
     <AppLayoutContext.Provider
       value={{ session, chainHead, chainFreshSeconds: chainFresh, logout }}
     >
-      <div className="app-shell" data-testid="app-layout">
+      <div className={shellClass} data-testid="app-layout">
         <Sidebar
           navItems={[...navItems]}
           currentPath={window.location.pathname}

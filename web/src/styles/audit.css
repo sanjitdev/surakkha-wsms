@@ -7,9 +7,10 @@
    inbox row-severity-dot, and the copy button sits in the trailing
    col-action cell.
 
-   The base .data-table rules live in mockups/01-priya/dashboard.css
-   (imported by AuditLog.tsx). This file fills the audit-table
-   specifics: column widths, dense row height, severity dot, the
+   The base .data-table rules live in src/styles/layout.css (the
+   promoted layout file; imported globally from main.tsx). This file
+   fills the audit-table specifics: column widths, dense row height,
+   severity dot, the
    inline copy button, and the chain-head banner layout.
    ════════════════════════════════════════════════════════════════════ */
 

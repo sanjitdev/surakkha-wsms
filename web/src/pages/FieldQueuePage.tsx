@@ -34,7 +34,6 @@ import {
   useState,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/tech.css';
 import { useAppLayout } from '../components/layout/AppLayoutContext';
 import { useDateFormatter } from '../hooks/useDateFormatter';

@@ -41,7 +41,6 @@
  */
 import { type ReactElement, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/verify.css';
 import { Container } from '../components/layout/Container';
 import { Card } from '../components/ui/Card';

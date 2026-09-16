@@ -41,7 +41,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router-dom';
-import '../../mockups/01-priya/dashboard.css';
 import '../styles/inbox.css';
 import '../styles/audit.css';
 import { Container } from '../components/layout/Container';
@@ -85,9 +84,11 @@ function severityBadgeClass(sev: string): string {
 }
 /**
  * Map a chain event_type to the timeline marker modifier class.
- * Mirrors the mockup contract (mockups/01-priya/dashboard.css
- * .timeline li::before variants): done = success green, active =
- * warning amber, danger = red, info = brand blue. Everything else
+ * Mirrors the production contract (src/styles/layout.css
+ * .timeline li::before variants — formerly
+ * mockups/01-priya/dashboard.css before the 2026-09-16 promotion):
+ * done = success green, active = warning amber, danger = red, info =
+ * brand blue. Everything else
  * falls through to the default neutral ring so the marker still reads
  * as "an event happened here".
  */

@@ -17,7 +17,7 @@
        receipt is allowed to render alert-red on the dispute badge.
 
    Token usage: every color comes from a CSS custom property already
-   declared in mockups/01-priya/dashboard.css (theme.css under it) —
+   declared in src/styles/layout.css (theme.css under it) —
    no new tokens are introduced in this file.
    ════════════════════════════════════════════════════════════════════ */
 
