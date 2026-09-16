@@ -15,11 +15,5 @@
     "heading": "সাম্প্রতিক সিদ্ধান্ত",
     "emptyTime": "—",
     "emptyText": "এখনও কোনো সিদ্ধান্ত নেই"
-  },
-  "inboxIncidentRail": {
-    "heading": "র‍্যাঙ্ক করা ঘটনা",
-    "empty": "কোনো ঘটনা নেই",
-    "rowAriaLabel": "{{title}} ঘটনা দেখুন, তীব্রতা {{severity}}, {{reporter}} মাধ্যমে",
-    "railLabel": "র‍্যাঙ্ক করা ঘটনা সারি"
   }
 }

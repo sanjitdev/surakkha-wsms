@@ -222,15 +222,42 @@
 .page-header {
   padding: var(--space-xl) var(--space-xl) var(--space-md);
 }
-.page-header h1 {
-  font-size: var(--font-size-xxl);
+/* WO-020 — operations-dashboard eyebrow pattern. Big H1 + sub reads
+   as marketing-page hero. The eyebrow + medium h1 + status line reads
+   as a console: "INCIDENTS › Inbox · 8 threads · 1 T3 broadcast". The
+   eyebrow is uppercase mono with letter-spacing so it anchors the
+   surface identity without competing with the heading. */
+.page-header__eyebrow {
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-primary);
   font-weight: var(--font-weight-semibold);
-  letter-spacing: -0.02em;
   margin: 0 0 var(--space-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.page-header__eyebrow-sep {
+  color: var(--fg-tertiary);
+  font-weight: var(--font-weight-regular);
+}
+.page-header h1 {
+  font-size: 1.75rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.025em;
+  margin: 0 0 var(--space-xs);
+  line-height: 1.15;
 }
 .page-header__sub {
   font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+  font-family: var(--font-family-mono);
+}
+.page-header__sub-sep {
   color: var(--fg-tertiary);
+  margin: 0 var(--space-xs);
 }
 
 /* ── Pulse dot (chain-fresh indicator) ───────────────────────── */
@@ -786,6 +813,24 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .data-table--inbox .col-check,
 .data-table--inbox th.col-check { width: 28px; padding-left: var(--space-md); }
 .data-table--inbox .col-check input { cursor: pointer; }
+/* WO-020 — fix the chrome column width. The col-chrome cell holds
+   BandPill + ReporterBadge + age + missing-evidence chips; without
+   an explicit width the column expanded at narrow viewports to fit
+   the longest combination (~280 px) and squeezed the title + where
+   + owner columns off-screen. 160 px matches the col-where width
+   and keeps the row rhythm balanced at 1280 px and up. Both `th`
+   and `td` need the rule because the auto-layout table sizes each
+   column to its widest cell; setting only the th leaves td free
+   to grow past 160 px. */
+.data-table--inbox td.col-chrome,
+.data-table--inbox th.col-chrome {
+  width: 160px;
+  max-width: 160px;
+  overflow: hidden;
+}
+.data-table--inbox td.col-chrome > .inbox-row-chrome {
+  max-width: 160px;
+}
 .data-table--inbox .col-owner,
 .data-table--inbox th.col-owner { width: 110px; font-size: var(--font-size-sm); }
 .data-table--inbox .row-sub {

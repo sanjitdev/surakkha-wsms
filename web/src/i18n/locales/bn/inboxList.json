@@ -1,5 +1,6 @@
 {
   "page": {
+    "eyebrow": "ইনসিডেন্ট",
     "title": "ইনবক্স",
     "subtitle": "{{count}}টি থ্রেড · {{t3}} T3 প্রচার · {{sig}} আপনার স্বাক্ষরের অপেক্ষায়"
   },
@@ -10,7 +11,10 @@
   "toolbar": {
     "filterAriaLabel": "ইনবক্স ফিল্টার",
     "searchPlaceholder": "ওয়ার্ড, সেন্সর, হ্যাশ বা নাগরিকের নাম দিয়ে খুঁজুন…",
-    "searchAriaLabel": "ইনবক্স অনুসন্ধান"
+    "searchAriaLabel": "ইনবক্স অনুসন্ধান",
+    "moreFilters": "আরও ফিল্টার",
+    "moreFiltersHide": "ফিল্টার লুকান",
+    "clearAll": "সব মুছুন"
   },
   "filters": {
     "all": "সব",
@@ -39,6 +43,7 @@
   "card": {
     "title": "পদক্ষেপ সারি",
     "meta": "{{count}} · সর্বশেষ আপডেট {{time}}",
+    "metaTime": "সর্বশেষ আপডেট {{time}}",
     "metaFallback": "—"
   },
   "empty": {

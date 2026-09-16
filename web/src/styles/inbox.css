@@ -50,6 +50,17 @@
 .data-table--inbox__tr {
   min-height: 64px;
 }
+/* WO-020 — table-layout: fixed is what makes the column `width`
+   props on each column definition actually constrain the rendered
+   column width. With auto layout the engine sizes every column to
+   its widest cell and ignores the inline style widths — which is
+   why the chrome column (BandPill + ReporterBadge + age + chips)
+   was expanding past the 168 px we set on every column. */
+.data-table--inbox table.table__inner,
+table.data-table--inbox {
+  table-layout: fixed;
+  width: 100%;
+}
 .data-table--inbox__tr td.col-title strong {
   display: block;
   overflow: hidden;
@@ -196,11 +207,22 @@
 }
 
 /* ── Row chrome (REQ-004) — BandPill + ReporterBadge + age + missing-evidence chips.
-      Trust band is a SEPARATE dimension from the reporter badge. ──── */
+      Trust band is a SEPARATE dimension from the reporter badge.
+
+      WO-020 — stacks the BandPill on its own line and packs the
+      reporter-badge + age + evidence chips on a second line so the
+      chrome column stays at the 160 px width set by layout.css
+      even when the BandPill text is long (e.g. "T1 unverified"). ──── */
 .inbox-row-chrome {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs, 4px);
+}
+.inbox-row-chrome__row {
+  display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs, 4px);
   flex-wrap: wrap;
 }
 .inbox-row-age {
@@ -225,14 +247,47 @@
 }
 
 /* ── Rich filter chip row (REQ-002 / REQ-003) ──────────────────────── */
+/* WO-020 — collapsed by default; rendered as a soft panel when the
+   operator opens it via the "More filters" toggle. The panel sits
+   beneath the toolbar with a hairline separator + inset background
+   so it reads as a drawer, not a competing row of chrome. */
 .inbox-toolbar--rich {
   margin-top: var(--space-sm);
-  padding-top: var(--space-sm);
-  border-top: 1px solid var(--border-subtle);
+  padding: var(--space-md);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--bg-inset);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-md);
+}
+/* WO-020 — "More filters" toggle button. Anchored to the right of the
+   single-row toolbar; caret glyph flips with open/closed state. The
+   is-active variant lights up when any rich filter is doing work even
+   while the panel is collapsed, so the operator doesn't lose track
+   of background filtering. */
+.inbox-more-filters {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs, 4px);
+  white-space: nowrap;
+}
+.inbox-more-filters__caret {
+  font-size: var(--font-size-1, 12px);
+  color: var(--fg-tertiary);
+  line-height: 1;
+}
+.inbox-more-filters.is-active {
+  border-color: var(--color-primary-tint);
+}
+.inbox-more-filters__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-pill, 999px);
+  background: var(--color-primary);
+  margin-left: var(--space-xs, 4px);
 }
 .inbox-toolbar__label {
   font-size: var(--font-size-1, 12px);
@@ -260,91 +315,6 @@
   outline-offset: 2px;
 }
 
-/* ── Inbox incident rail (WO-010) — 240 px compact ranked-incident
-      list rendered left of the main inbox surface. Each row pairs a
-      compact BandPill (glyph only) with an icon-only ReporterBadge,
-      age, and the incident title. Rows are full-width buttons so
-      keyboard activation matches the click target. ──────────────── */
-.inbox-rail {
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs, 4px);
-  padding: var(--space-sm, 8px);
-  border: 1px solid var(--color-divider, var(--border-subtle));
-  border-radius: var(--radius-sm, 4px);
-  background: var(--bg-surface);
-}
-.inbox-rail__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs, 4px);
-  padding: var(--space-xs, 4px) var(--space-sm, 8px);
-  border: 1px solid transparent;
-  border-radius: var(--radius-xs, 2px);
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  width: 100%;
-  outline: none;
-}
-.inbox-rail__row:hover,
-.inbox-rail__row:focus-visible {
-  background: var(--bg-subtle);
-  border-color: var(--border-subtle);
-}
-.inbox-rail__row:focus-visible {
-  outline: 2px solid var(--color-primary-tint);
-  outline-offset: 2px;
-}
-.inbox-rail__row.is-selected {
-  background: var(--bg-subtle);
-  border-color: var(--color-primary-tint);
-}
-.inbox-rail__row-title {
-  font-size: var(--font-size-2, 14px);
-  font-weight: 500;
-  color: var(--fg-default);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.inbox-rail__row-age {
-  font-size: var(--font-size-1, 12px);
-  color: var(--fg-tertiary);
-  white-space: nowrap;
-  flex: 0 0 auto;
-}
-/* Compact band pill — glyph only, ~18 px wide, fits the rail. */
-.band-pill--compact {
-  padding: 2px 4px;
-  font-size: 0;
-  line-height: 1;
-  flex: 0 0 auto;
-}
-.band-pill--compact .band-pill__icon {
-  font-size: 14px;
-  line-height: 1;
-}
-/* Icon-only reporter badge — small inline SVG only, no label. */
-.reporter-badge-chip--icon-only {
-  padding: 2px 4px;
-  font-size: 0;
-  line-height: 1;
-  flex: 0 0 auto;
-}
-.reporter-badge-chip--icon-only svg {
-  display: block;
-  width: 14px;
-  height: 14px;
-}
-
 /* ── Loading state (REQ-006) — calm placeholder, no spinner per §8.4
       sub-second rule (skeleton acceptable for graceful degradation). ── */
 .inbox-loading {
@@ -359,4 +329,37 @@
       vertical rhythm above the bulk-bar. ────────────────────────── */
 .inbox-pagination {
   margin-top: var(--space-md);
+}
+
+/* ── WO-020 — Action queue card head. Title sits left, meta sits
+      right; the right-hand meta uses mono so it reads as a status
+      line, not as competing content. The hairline border matches
+      the foundation dim 4 §4.1 — table-card-head hairline rule. */
+.inbox-card-head {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+.inbox-card-head__title-group {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-md);
+  min-width: 0;
+}
+.inbox-card-head__sub {
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+  font-family: var(--font-family-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inbox-card-head__meta {
+  font-size: var(--font-size-1, 12px);
+  color: var(--fg-tertiary);
+  white-space: nowrap;
+  flex: 0 0 auto;
 }

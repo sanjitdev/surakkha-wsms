@@ -1,5 +1,6 @@
 {
   "page": {
+    "eyebrow": "Incidents",
     "title": "Inbox",
     "subtitle": "{{count}} threads · {{t3}} T3 broadcast · {{sig}} awaiting your sig"
   },
@@ -10,7 +11,10 @@
   "toolbar": {
     "filterAriaLabel": "Filter inbox",
     "searchPlaceholder": "Search by ward, sensor, hash, or citizen name…",
-    "searchAriaLabel": "Search inbox"
+    "searchAriaLabel": "Search inbox",
+    "moreFilters": "More filters",
+    "moreFiltersHide": "Hide filters",
+    "clearAll": "Clear all"
   },
   "filters": {
     "all": "All",
@@ -39,6 +43,7 @@
   "card": {
     "title": "Action queue",
     "meta": "{{count}} · last updated {{time}}",
+    "metaTime": "last updated {{time}}",
     "metaFallback": "—"
   },
   "empty": {

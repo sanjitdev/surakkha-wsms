@@ -56,7 +56,7 @@ import {
   mergeRecentDecisions,
   sortRowsByPriorityAge,
 } from './inboxListModel';
-import { AwaitingActionRail, InboxIncidentRail, RecentDecisionsRail, SeverityRail } from './InboxRail';
+import { AwaitingActionRail, RecentDecisionsRail, SeverityRail } from './InboxRail';
 
 export function InboxList() {
   const { format: formatTime, locale } = useDateFormatter();
@@ -79,6 +79,19 @@ export function InboxList() {
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // WO-020 — collapse the rich filter row behind a "More filters" toggle.
+  // Default closed so the toolbar is a single row of fast-path chips;
+  // opens only when the user explicitly asks for band / reporter / status / date.
+  const [showRichFilters, setShowRichFilters] = useState(false);
+  // True when any rich filter is active — used to flip the toggle into
+  // its "active" visual state so the operator can see at a glance that
+  // advanced filters are doing work even while the panel is collapsed.
+  const richFiltersActive =
+    richFilter.band.length > 0 ||
+    richFilter.reporter.length > 0 ||
+    richFilter.status.length > 0 ||
+    richFilter.from !== null ||
+    richFilter.to !== null;
   // Pagination state (REQ-005).
   const [page, setPage] = useState(1);
   const pageSize = 20;
@@ -248,6 +261,9 @@ export function InboxList() {
 
   const clearFilters = (): void => {
     setRichFilter(EMPTY_FILTERS);
+    // Collapse the panel after clearing so the operator sees the
+    // toolbar return to its single-row fast-path state.
+    setShowRichFilters(false);
   };
 
   // Bulk-bar Mark-reviewed CTA handler. F1's markReviewed posts one
@@ -275,6 +291,10 @@ export function InboxList() {
         // i18n-key-leak that happens when t() resolves a missing/empty
         // value to the key string itself.
         header: '',
+        // WO-020 — explicit px width. Without this the auto-layout
+        // table sizes the column to its content and squeezes the
+        // title / where / owner columns off-screen at 1280 px.
+        width: '16px',
         render: (r) => {
           // Lockdown cascade 2026-09-11: severity dot uses the lockdown
           // palette per inbox-list.md #1 / inbox-rail.md. T3 in operator
@@ -305,6 +325,7 @@ export function InboxList() {
       {
         key: 'chrome',
         header: tInbox('columns.severity'),
+        width: '152px',
         render: (r) => {
           const band =
             r.severity === 'T3'
@@ -318,34 +339,40 @@ export function InboxList() {
               data-testid={`inbox-row-chrome-${r.id}`}
               className="inbox-row-chrome"
             >
+              {/* WO-020 — BandPill sits on its own line so the chrome
+                  column respects the 160 px width even at 1280 px.
+                  Reporter-badge + age + missing-evidence chips pack
+                  onto a second line below. */}
               <BandPill band={band} locked={true} testId={`inbox-row-band-${r.id}`} />
-              <ReporterBadge
-                kind={r.reporterKind}
-                i18nNamespace="inboxList"
-                i18nKeyPrefix="reporterBadge"
-                testId={`inbox-row-reporter-badge-${r.id}`}
-              />
-              <span
-                className="inbox-row-age"
-                data-testid={`inbox-row-age-${r.id}`}
-                title={r.timestamp}
-              >
-                {formatRelative(r.timestamp)}
-              </span>
-              {r.missingEvidence.length > 0 ? (
-                <span className="inbox-row-evidence" data-testid={`inbox-row-evidence-${r.id}`}>
-                  {r.missingEvidence.map((m) => (
-                    <span
-                      key={m}
-                      className="inbox-row-evidence-chip"
-                      data-evidence={m}
-                      data-testid={`inbox-row-evidence-chip-${r.id}-${m}`}
-                    >
-                      {tInbox(`evidence.${m}`)}
-                    </span>
-                  ))}
+              <div className="inbox-row-chrome__row">
+                <ReporterBadge
+                  kind={r.reporterKind}
+                  i18nNamespace="inboxList"
+                  i18nKeyPrefix="reporterBadge"
+                  testId={`inbox-row-reporter-badge-${r.id}`}
+                />
+                <span
+                  className="inbox-row-age"
+                  data-testid={`inbox-row-age-${r.id}`}
+                  title={r.timestamp}
+                >
+                  {formatRelative(r.timestamp)}
                 </span>
-              ) : null}
+                {r.missingEvidence.length > 0 ? (
+                  <span className="inbox-row-evidence" data-testid={`inbox-row-evidence-${r.id}`}>
+                    {r.missingEvidence.map((m) => (
+                      <span
+                        key={m}
+                        className="inbox-row-evidence-chip"
+                        data-evidence={m}
+                        data-testid={`inbox-row-evidence-chip-${r.id}-${m}`}
+                      >
+                        {tInbox(`evidence.${m}`)}
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
+              </div>
             </div>
           );
         },
@@ -354,6 +381,12 @@ export function InboxList() {
       {
         key: 'thread',
         header: tInbox('columns.thread'),
+        // WO-020 — the thread (title) column takes the remaining
+        // width. 240 px keeps the longest title ("Ward 7 chlorination
+        // spike") readable on a single line at 1280 px; the where +
+        // owner + action columns are tight enough (140 + 120 + 80)
+        // that there's always room for the title.
+        width: '240px',
         render: (r) => (
           <div
             className={`data-table--inbox__tr${r.isUrgent ? ' row-urgent' : ''}${
@@ -381,6 +414,7 @@ export function InboxList() {
       {
         key: 'where',
         header: tInbox('columns.where'),
+        width: '120px',
         render: (r) => (
           <>
             <span className="mono">{r.where}</span>
@@ -392,6 +426,7 @@ export function InboxList() {
       {
         key: 'ownerName',
         header: tInbox('columns.owner'),
+        width: '110px',
         render: (r) => (
           <>
             <span
@@ -423,6 +458,7 @@ export function InboxList() {
         // work surface. Empty literal avoids the i18n-key-leak when t()
         // resolves a missing/empty value to the key string itself.
         header: '',
+        width: '80px',
         render: (r) => <a href={r.action.href}>{r.action.label}</a>,
         className: 'col-action',
       },
@@ -434,8 +470,13 @@ export function InboxList() {
     <Container width={ContainerWidth.Wide} testId="inbox-list-page">
       <div className="page-header">
         <div className="page-header__row">
-          <div>
-            <h1>{tInbox('page.title')}</h1>
+          <div className="page-header__head">
+            <div className="page-header__eyebrow">
+              <span>{tInbox('page.eyebrow')}</span>
+              <span className="page-header__eyebrow-sep" aria-hidden="true">›</span>
+              <span>{tInbox('page.title')}</span>
+            </div>
+            <h1 className="page-header__title">{tInbox('page.title')}</h1>
             <div className="page-header__sub">
               {tInbox('page.subtitle', {
                 count: rows.length,
@@ -444,7 +485,7 @@ export function InboxList() {
               })}
             </div>
           </div>
-          <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+          <div className="page-header__actions">
             <Button variant="secondary" size="sm">
               {tInbox('actions.exportQueue')}
             </Button>
@@ -517,144 +558,197 @@ export function InboxList() {
             aria-label={tInbox('toolbar.searchAriaLabel')}
           />
         </div>
+        {/* WO-020 — "More filters" toggle. Single row of fast-path
+            chips by default; rich filter row (band / reporter / status
+            / date) only appears when the operator asks for it. The
+            button shows its active state when any rich filter is on so
+            the operator knows advanced filters are doing work even
+            while the panel is collapsed. */}
+        <Button
+          variant={richFiltersActive ? 'secondary' : 'ghost'}
+          size="sm"
+          aria-expanded={showRichFilters}
+          aria-controls="inbox-rich-filter-row"
+          onClick={() => {
+            setShowRichFilters((cur) => !cur);
+          }}
+          testId="inbox-more-filters-toggle"
+          className={`inbox-more-filters${richFiltersActive ? ' is-active' : ''}`}
+        >
+          <span aria-hidden="true" className="inbox-more-filters__caret">
+            {showRichFilters ? '▾' : '▸'}
+          </span>
+          {showRichFilters
+            ? tInbox('toolbar.moreFiltersHide')
+            : tInbox('toolbar.moreFilters')}
+          {richFiltersActive ? (
+            <span
+              className="inbox-more-filters__dot"
+              aria-hidden="true"
+              data-testid="inbox-more-filters-active-dot"
+            />
+          ) : null}
+        </Button>
       </div>
       {/* Rich filter chip row (REQ-002): priority band, reporter-badge,
           status, date range. Multi-select inside a chip row is OR;
-          chip rows compose AND with the legacy single-filter above. */}
-      <div
-        className="inbox-toolbar inbox-toolbar--rich"
-        data-testid="inbox-rich-filter-row"
-      >
+          chip rows compose AND with the legacy single-filter above.
+          WO-020 — collapsed by default behind the "More filters"
+          toggle above; renders only when showRichFilters is true. */}
+      {showRichFilters ? (
         <div
-          className="filter-chips"
-          role="tablist"
-          aria-label={tInbox('filters.priorityBand')}
-          data-testid="inbox-rich-filter-band"
+          id="inbox-rich-filter-row"
+          className="inbox-toolbar inbox-toolbar--rich"
+          data-testid="inbox-rich-filter-row"
         >
-          <span className="inbox-toolbar__label">{tInbox('filters.priorityBand')}</span>
-          {(['T3', 'T2', 'T1'] as IncidentSeverity[]).map((b) => (
-            <FilterChip
-              key={b}
-              label={tInbox(`bandPill.${b}`)}
-              active={richFilter.band.includes(b)}
-              onClick={() => {
-                toggleBand(b);
-              }}
-              testId={`inbox-rich-band-${b.toLowerCase()}`}
-            />
-          ))}
-        </div>
-        <div
-          className="filter-chips"
-          role="tablist"
-          aria-label={tInbox('filters.reporterBadge')}
-          data-testid="inbox-rich-filter-reporter"
-        >
-          <span className="inbox-toolbar__label">{tInbox('filters.reporterBadge')}</span>
-          {(['anchor', 'hotline', 'webform', 'sensor'] as ReporterKind[]).map((r) => (
-            <FilterChip
-              key={r}
-              label={tInbox(`reporterBadge.${r}`)}
-              active={richFilter.reporter.includes(r)}
-              onClick={() => {
-                toggleReporter(r);
-              }}
-              testId={`inbox-rich-reporter-${r}`}
-            />
-          ))}
-        </div>
-        <div
-          className="filter-chips"
-          role="tablist"
-          aria-label={tInbox('filters.status')}
-          data-testid="inbox-rich-filter-status"
-        >
-          <span className="inbox-toolbar__label">{tInbox('filters.status')}</span>
-          {(['open', 'in-flight', 'resolved'] as const).map((s) => (
-            <FilterChip
-              key={s}
-              label={tInbox(`filters.${s}`)}
-              active={richFilter.status.includes(s)}
-              onClick={() => {
-                toggleStatus(s);
-              }}
-              testId={`inbox-rich-status-${s}`}
-            />
-          ))}
-        </div>
-        <div
-          className="filter-chips"
-          role="tablist"
-          aria-label={tInbox('filters.dateRange')}
-          data-testid="inbox-rich-filter-daterange"
-        >
-          <span className="inbox-toolbar__label">{tInbox('filters.dateRange')}</span>
-          <input
-            type="date"
-            className="inbox-rich-date"
-            data-testid="inbox-rich-date-from"
-            value={richFilter.from ?? ''}
-            onChange={(e) => {
-              setDateRange(e.target.value || null, richFilter.to);
-            }}
+          <div
+            className="filter-chips"
+            role="tablist"
+            aria-label={tInbox('filters.priorityBand')}
+            data-testid="inbox-rich-filter-band"
+          >
+            <span className="inbox-toolbar__label">{tInbox('filters.priorityBand')}</span>
+            {(['T3', 'T2', 'T1'] as IncidentSeverity[]).map((b) => (
+              <FilterChip
+                key={b}
+                label={tInbox(`bandPill.${b}`)}
+                active={richFilter.band.includes(b)}
+                onClick={() => {
+                  toggleBand(b);
+                }}
+                testId={`inbox-rich-band-${b.toLowerCase()}`}
+              />
+            ))}
+          </div>
+          <div
+            className="filter-chips"
+            role="tablist"
+            aria-label={tInbox('filters.reporterBadge')}
+            data-testid="inbox-rich-filter-reporter"
+          >
+            <span className="inbox-toolbar__label">{tInbox('filters.reporterBadge')}</span>
+            {(['anchor', 'hotline', 'webform', 'sensor'] as ReporterKind[]).map((r) => (
+              <FilterChip
+                key={r}
+                label={tInbox(`reporterBadge.${r}`)}
+                active={richFilter.reporter.includes(r)}
+                onClick={() => {
+                  toggleReporter(r);
+                }}
+                testId={`inbox-rich-reporter-${r}`}
+              />
+            ))}
+          </div>
+          <div
+            className="filter-chips"
+            role="tablist"
+            aria-label={tInbox('filters.status')}
+            data-testid="inbox-rich-filter-status"
+          >
+            <span className="inbox-toolbar__label">{tInbox('filters.status')}</span>
+            {(['open', 'in-flight', 'resolved'] as const).map((s) => (
+              <FilterChip
+                key={s}
+                label={tInbox(`filters.${s}`)}
+                active={richFilter.status.includes(s)}
+                onClick={() => {
+                  toggleStatus(s);
+                }}
+                testId={`inbox-rich-status-${s}`}
+              />
+            ))}
+          </div>
+          <div
+            className="filter-chips"
+            role="tablist"
             aria-label={tInbox('filters.dateRange')}
-          />
-          <input
-            type="date"
-            className="inbox-rich-date"
-            data-testid="inbox-rich-date-to"
-            value={richFilter.to ?? ''}
-            onChange={(e) => {
-              setDateRange(richFilter.from, e.target.value || null);
-            }}
-            aria-label={tInbox('filters.dateRange')}
-          />
-          {richFilter.from !== null || richFilter.to !== null ? (
+            data-testid="inbox-rich-filter-daterange"
+          >
+            <span className="inbox-toolbar__label">{tInbox('filters.dateRange')}</span>
+            <input
+              type="date"
+              className="inbox-rich-date"
+              data-testid="inbox-rich-date-from"
+              value={richFilter.from ?? ''}
+              onChange={(e) => {
+                setDateRange(e.target.value || null, richFilter.to);
+              }}
+              aria-label={tInbox('filters.dateRange')}
+            />
+            <input
+              type="date"
+              className="inbox-rich-date"
+              data-testid="inbox-rich-date-to"
+              value={richFilter.to ?? ''}
+              onChange={(e) => {
+                setDateRange(richFilter.from, e.target.value || null);
+              }}
+              aria-label={tInbox('filters.dateRange')}
+            />
+            {richFilter.from !== null || richFilter.to !== null ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setDateRange(null, null);
+                }}
+                testId="inbox-rich-date-clear"
+              >
+                ×
+              </Button>
+            ) : null}
+          </div>
+          {richFiltersActive ? (
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => {
-                setDateRange(null, null);
-              }}
-              testId="inbox-rich-date-clear"
+              onClick={clearFilters}
+              testId="inbox-rich-clear-all"
             >
-              ×
+              {tInbox('toolbar.clearAll')}
             </Button>
           ) : null}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={clearFilters}
-          testId="inbox-rich-clear-all"
-        >
-          {tInbox('filters.all')}
-        </Button>
-      </div>
+      ) : null}
       <div className="grid-12" style={{ marginTop: 'var(--space-md)' }}>
-        <div className="col-8">
-          {/* WO-010 — compact 240 px ranked-incident rail lives inside
-              the InboxList surface. Rows link to /inbox/:id and the
-              selected id syncs to ?selected=<id>. */}
-          <InboxIncidentRail rows={sortedRows.slice(0, 8)} />
+        {/* WO-020 — grid rebalanced 9/3. The Ranked Incidents rail was
+            de-duplicated against the Action queue (the table is the
+            single source of truth for the ranked list); the right rail
+            keeps complementary info: Severity breakdown, Awaiting
+            action, Recent decisions. Action queue gets 9/12 of the
+            grid so the title + meta + 5 visible rows fit comfortably
+            at 1280 px and up. */}
+        <div className="col-9">
           <Card modifier="with-heading" testId="inbox-card">
+            {/* WO-020 — card head rewritten as eyebrow + title + meta
+                row. Title sits left; meta (count + last-updated) sits
+                right in mono so it reads as a status line, not as
+                competing chrome. Last-updated is computed from the
+                most recent row timestamp so the operator can see how
+                fresh the queue is at a glance. */}
             <div
-              className="data-card__head"
-              style={{
-                padding: 'var(--space-md) var(--space-lg)',
-                borderBottom: '1px solid var(--border-subtle)',
-                display: 'flex',
-                justifyContent: 'space-between',
-              }}
+              className="data-card__head inbox-card-head"
+              data-testid="inbox-card-head"
             >
-              <h3 className="data-card__title">{tInbox('card.title')}</h3>
-              <span className="data-card__meta">
-                {tInbox('card.meta', {
-                  count: visibleRows.length,
-                  time: rows[0]?.timestamp
-                    ? formatTime('time-24', rows[0].timestamp)
-                    : tInbox('card.metaFallback'),
-                })}
+              <div className="inbox-card-head__title-group">
+                <h3 className="data-card__title">{tInbox('card.title')}</h3>
+                <span className="inbox-card-head__sub">
+                  {tInbox('card.meta', {
+                    count: visibleRows.length,
+                    time: rows[0]?.timestamp
+                      ? formatTime('time-24', rows[0].timestamp)
+                      : tInbox('card.metaFallback'),
+                  })}
+                </span>
+              </div>
+              <span
+                className="inbox-card-head__meta mono"
+                data-testid="inbox-card-head-meta"
+                title={rows[0]?.timestamp ?? ''}
+              >
+                {rows[0]?.timestamp
+                  ? `${tInbox('card.metaTime', { time: formatRelative(rows[0].timestamp) })}`
+                  : tInbox('card.metaFallback')}
               </span>
             </div>
             {loading ? (
@@ -737,7 +831,7 @@ export function InboxList() {
             </div>
           )}
         </div>
-        <div className="col-4">
+        <div className="col-3">
           <SeverityRail
             T3={sevCounts.T3}
             T2={sevCounts.T2}
