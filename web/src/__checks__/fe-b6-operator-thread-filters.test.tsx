@@ -164,11 +164,13 @@ describe('FE-B6 OperatorDashboard thread filter chips (operator-dashboard.md #7)
     await waitFor(() => {
       const t3Chip = screen.getByTestId('dashboard-thread-chip-t3');
 
-      expect(t3Chip.getAttribute('aria-selected')).toBe('true');
+      // FE-1.5d reconciliation: FilterChip is a toggle group with
+      // aria-pressed (per foundation §13), not aria-selected.
+      expect(t3Chip.getAttribute('aria-pressed')).toBe('true');
     });
 
     // The All chip is no longer active.
-    expect(screen.getByTestId('dashboard-thread-chip-all').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('dashboard-thread-chip-all').getAttribute('aria-pressed')).toBe('false');
   });
 
   // (3) Clicking All restores full list.
@@ -182,9 +184,11 @@ describe('FE-B6 OperatorDashboard thread filter chips (operator-dashboard.md #7)
     fireEvent.click(screen.getByTestId('dashboard-thread-chip-all'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('dashboard-thread-chip-all').getAttribute('aria-selected')).toBe('true');
+      // FE-1.5d reconciliation: FilterChip is a toggle group with
+      // aria-pressed (per foundation §13), not aria-selected.
+      expect(screen.getByTestId('dashboard-thread-chip-all').getAttribute('aria-pressed')).toBe('true');
     });
-    expect(screen.getByTestId('dashboard-thread-chip-t3').getAttribute('aria-selected')).toBe('false');
+    expect(screen.getByTestId('dashboard-thread-chip-t3').getAttribute('aria-pressed')).toBe('false');
   });
 
   // (4) T3 chip dot colour — amber-bright, NOT alert-red.

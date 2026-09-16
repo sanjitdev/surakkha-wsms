@@ -1,14 +1,16 @@
 import type { DropdownOption } from './Dropdown.types';
 import type { KeyboardEvent, MutableRefObject } from 'react';
 
-interface DropdownTriggerProps {
+interface DropdownTriggerProps<T> {
   rootId: string;
   listboxId: string;
   triggerRef: MutableRefObject<HTMLButtonElement | null>;
   open: boolean;
   activeOptionId: string | undefined;
   disabled: boolean;
-  label: string | undefined;
+  /** Accessible name — falls back to `placeholder` when no label prop was
+   *  supplied to the parent Dropdown. Always required for ARIA. */
+  label: string;
   placeholder: string;
   testId: string;
   /** When true, `aria-controls` lists both the listbox and the search input. */
@@ -17,16 +19,28 @@ interface DropdownTriggerProps {
   searchInputId?: string;
   /** Label of the currently-selected option, or `undefined` for placeholder. */
   selectedLabel: string | undefined;
+  /** Multi-mode: selected values rendered as chips inside the trigger. */
+  isMulti: boolean;
+  multiValue: T[];
+  options: DropdownOption<T>[];
+  /** Remove a single chip value (multi mode). */
+  onRemoveChip: (value: T) => void;
   onKeyDown: (e: KeyboardEvent<HTMLButtonElement | HTMLInputElement>) => void;
   onToggle: () => void;
 }
 
 /**
- * Trigger button — ARIA combobox. Renders ONLY plain text inside the
- * `<button>` so chip × buttons can be rendered as siblings by
- * `DropdownChips` (the chips live above the trigger in multi mode).
+ * Trigger button — ARIA combobox. Renders chips (multi-mode) + the
+ * label/placeholder + caret INSIDE the `<button>` so the whole pill
+ * reads as one interactive box. Chip × buttons stopPropagation so the
+ * trigger's onClick does not also toggle the popover open.
+ *
+ * FE-1.5d (2026-09-16): chips moved inside the trigger (used to sit as
+ * a sibling above). With chips in-button the operator sees the
+ * selection rendered inside the box outline, which is what we want on
+ * the inbox toolbar.
  */
-export function DropdownTrigger({
+export function DropdownTrigger<T>({
   rootId,
   listboxId,
   triggerRef,
@@ -39,13 +53,19 @@ export function DropdownTrigger({
   searchable,
   searchInputId,
   selectedLabel,
+  isMulti,
+  multiValue,
+  options,
+  onRemoveChip,
   onKeyDown,
   onToggle,
-}: DropdownTriggerProps) {
+}: DropdownTriggerProps<T>) {
   // WAI-ARIA combobox pattern: when `searchable`, the trigger controls
   // BOTH the listbox AND the search input. `aria-controls` accepts
   // space-separated id tokens, so we concatenate both ids.
   const controls = searchable && searchInputId ? `${listboxId} ${searchInputId}` : listboxId;
+
+  const hasChips = isMulti && multiValue.length > 0;
 
   return (
     <button
@@ -59,58 +79,60 @@ export function DropdownTrigger({
       aria-controls={controls}
       aria-activedescendant={activeOptionId}
       aria-disabled={disabled}
-      aria-label={label ?? placeholder}
+      aria-label={label}
       disabled={disabled}
       onClick={onToggle}
       onKeyDown={onKeyDown}
       data-testid={`${testId}-trigger`}
     >
-      <span
-        className={
-          selectedLabel
-            ? 'dropdown__value'
-            : 'dropdown__value dropdown__value--placeholder'
-        }
-      >
-        {selectedLabel ?? placeholder}
-      </span>
+      {hasChips ? (
+        <span className="dropdown__chips" data-testid={`${testId}-chips`}>
+          {multiValue
+            .map((v) => options.find((o) => o.value === v))
+            .filter((o): o is DropdownOption<T> => o !== undefined)
+            .map((o) => (
+              <span
+                key={String(o.value)}
+                className="dropdown__chip"
+                data-testid={`${testId}-chip-${String(o.value)}`}
+              >
+                {o.label}
+                <span
+                  role="button"
+                  tabIndex={-1}
+                  aria-label={`Remove ${o.label}`}
+                  className="dropdown__chip-remove"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemoveChip(o.value);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onRemoveChip(o.value);
+                    }
+                  }}
+                >
+                  ×
+                </span>
+              </span>
+            ))}
+        </span>
+      ) : (
+        <span
+          className={
+            selectedLabel
+              ? 'dropdown__value'
+              : 'dropdown__value dropdown__value--placeholder'
+          }
+        >
+          {selectedLabel ?? placeholder}
+        </span>
+      )}
       <span className="dropdown__caret" aria-hidden="true">
         ▾
       </span>
     </button>
-  );
-}
-interface DropdownChipProps<T> {
-  values: T[];
-  options: DropdownOption<T>[];
-  testId: string;
-  onRemove: (chipValue: T) => void;
-}
-
-/** Renders selected values as removable chips. Independent of the trigger
- *  so chip × buttons are not nested inside the combobox `<button>`. */
-export function DropdownChips<T>({ values, options, testId, onRemove }: DropdownChipProps<T>) {
-  return (
-    <span className="dropdown__chips">
-      {values
-        .map((v) => options.find((o) => o.value === v))
-        .filter((o): o is DropdownOption<T> => o !== undefined)
-        .map((o) => (
-          <span key={String(o.value)} className="dropdown__chip" data-testid={`${testId}-chip-${String(o.value)}`}>
-            {o.label}
-            <button
-              type="button"
-              className="dropdown__chip-remove"
-              aria-label={`Remove ${o.label}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove(o.value);
-              }}
-            >
-              ×
-            </button>
-          </span>
-        ))}
-    </span>
   );
 }

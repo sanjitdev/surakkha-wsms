@@ -218,6 +218,11 @@ describe('FE-B6 InboxDetail area labels (REQ-014 / foundation §13)', () => {
   // (7) Trust-band pill carries its own testId + data-band so the
   // trust band is independently queryable (foundation §1.1 — band ×
   // reporter-badge separation).
+  // FE-1.5d (2026-09-16): the pill now renders through the locked
+  // BandPill primitive so the operator sees the resolved i18n label
+  // (Pending / Verified / Issuance / Resolved) instead of the raw
+  // tier code. The `data-band` attribute preserves the audit trail
+  // for tooling + tests.
   it('trust-band pill carries inbox-detail-band-pill testId + data-band', async () => {
     renderInboxDetail();
     await waitFor(() => {
@@ -227,7 +232,12 @@ describe('FE-B6 InboxDetail area labels (REQ-014 / foundation §13)', () => {
     const pill = screen.getByTestId('inbox-detail-band-pill');
 
     expect(pill.getAttribute('data-band')).toBe('T2');
-    expect(pill.className).toContain('badge');
+    expect(pill.className).toContain('band-pill');
+    expect(pill.className).toContain('band-pill--t2-locked');
+    // Operator-visible text resolves through the common i18n namespace,
+    // not the wire tier code — this is the FE-1.5d invariant.
+    expect(pill.textContent).toMatch(/Verified/i);
+    expect(pill.textContent).not.toContain('T2');
   });
 
   // (8) Override affordance carry-over from REQ-009 — verify the

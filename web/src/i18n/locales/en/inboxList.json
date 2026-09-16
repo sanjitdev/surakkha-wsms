@@ -2,7 +2,7 @@
   "page": {
     "eyebrow": "Incidents",
     "title": "Inbox",
-    "subtitle": "{{count}} threads · {{t3}} T3 broadcast · {{sig}} awaiting your sig"
+    "subtitle": "{{count}} threads · {{t3}} urgent broadcast · {{sig}} awaiting your sig"
   },
   "actions": {
     "exportQueue": "Export queue",
@@ -12,18 +12,14 @@
     "filterAriaLabel": "Filter inbox",
     "searchPlaceholder": "Search by ward, sensor, hash, or citizen name…",
     "searchAriaLabel": "Search inbox",
-    "moreFilters": "More filters",
-    "moreFiltersHide": "Hide filters",
-    "clearAll": "Clear all"
+    "clearAll": "Clear filters"
   },
   "filters": {
-    "all": "All",
-    "t3Urgent": "T3 urgent",
+    "t3Urgent": "Urgent",
     "awaitingSigs": "Awaiting sigs",
     "myDrafts": "My drafts",
     "citizenReports": "Citizen reports",
-    "resolvedToday": "Resolved · today",
-    "priorityBand": "Priority band",
+    "priorityBand": "Priority",
     "status": "Status",
     "reporterBadge": "Source",
     "dateRange": "Date range",
@@ -37,14 +33,12 @@
     "owner": "Owner",
     "ownerUnknown": "?",
     "severity": "Severity",
+    "source": "Source",
     "age": "Age",
     "missingEvidence": "Missing evidence"
   },
   "card": {
-    "title": "Action queue",
-    "meta": "{{count}} · last updated {{time}}",
-    "metaTime": "last updated {{time}}",
-    "metaFallback": "—"
+    "title": "Action queue"
   },
   "empty": {
     "icon": "○",
@@ -70,20 +64,10 @@
     "gps": "gps",
     "description": "description"
   },
-  "bandPill": {
-    "T1": "T1 unverified",
-    "T2": "T2 verified",
-    "T3": "T3 issuance",
-    "resolved": "Resolved"
-  },
   "bulkBar": {
     "count_one": "{{count}} selected",
     "count_other": "{{count}} selected",
-    "assignToMe": "Assign to me",
-    "markReviewed": "Mark reviewed",
-    "archive": "Archive"
-  },
-  "pager": {
-    "meta": "{{visible}} of {{total}}"
+    "clear": "Clear",
+    "markReviewed": "Mark reviewed"
   }
 }

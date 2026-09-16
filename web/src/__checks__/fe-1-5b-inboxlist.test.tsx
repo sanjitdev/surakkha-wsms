@@ -250,8 +250,18 @@ describe('InboxList bulk-bar', () => {
     const visibleRows = screen.queryAllByTestId('inbox-row');
 
     expect(visibleRows.length).toBeGreaterThan(0);
+    // FE-1.5d reconciliation (2026-09-16): the action-queue redesign moved
+    // `is-selected` from the row chrome onto the title `<td>` so the
+    // selected tint paints only the title cell (not the whole row). The
+    // row remains visually unselected; selection lives on the title
+    // column per `cellClassName` on the thread column. The `inbox-row`
+    // testid lives on the title <Link>, so we walk up to its parent
+    // <tr> via .closest('tr') before looking for the title <td>.
     visibleRows.forEach((row) => {
-      expect(row.classList.contains('is-selected')).toBe(true);
+      const tr = row.closest('tr');
+      const titleCell = tr?.querySelector('td.col-title');
+
+      expect(titleCell?.classList.contains('is-selected')).toBe(true);
     });
 
     const bulkbar = document.querySelector('.inbox-bulkbar');
@@ -267,7 +277,10 @@ describe('InboxList bulk-bar', () => {
     });
 
     visibleRows.forEach((row) => {
-      expect(row.classList.contains('is-selected')).toBe(false);
+      const tr = row.closest('tr');
+      const titleCell = tr?.querySelector('td.col-title');
+
+      expect(titleCell?.classList.contains('is-selected')).toBe(false);
     });
     expect(bulkbar?.hasAttribute('hidden')).toBe(true);
     expect(selectAll.checked).toBe(false);
@@ -279,21 +292,36 @@ describe('InboxList bulk-bar', () => {
  * Locks 4 unwritten I/O rows + route wiring + dim-4 colour lockdown.
  */
 describe('InboxList I/O matrix', () => {
-  it('filter_T3: clicking the T3 urgent chip shows only T3 rows; chip is active', async () => {
+  it('filter_T3: selecting Urgent in the Status dropdown shows only T3 rows; option is active', async () => {
     await renderInboxAndWaitForRows();
-    const t3Chip = screen.getByTestId('filter-chip-t3-urgent');
+    // FE-1.5d reconciliation (2026-09-16): the chip row was replaced by a
+    // row of multi-select `<Dropdown>` primitives. The "Urgent" filter
+    // now lives inside the Status dropdown (value: 'urgent') instead of
+    // as a standalone FilterChip. The wire row with severity 'high' is
+    // mapped to T3 by `SEVERITY_FROM_WIRE` and is the only isUrgent row.
+    const statusDropdown = screen.getByTestId('inbox-filter-status');
 
-    // FilterChip uses aria-pressed (toggle group, not tab); WO-009
-    // lockdown reconciled the chip surface per foundation §13.
-    expect(t3Chip.getAttribute('aria-pressed')).toBe('false');
-    expect(t3Chip.className).not.toContain('is-active');
+    expect(statusDropdown).toBeDefined();
+
+    // Open the dropdown — listbox testid is `${rootTestId}-listbox`.
+    act(() => {
+      fireEvent.click(screen.getByTestId('inbox-filter-status-trigger'));
+    });
+    const urgentOption = await screen.findByTestId('inbox-filter-status-option-urgent');
+
+    // Inactive by default — no row has the multi-select "selected" class.
+    expect(urgentOption.getAttribute('aria-selected')).toBe('false');
+    expect(urgentOption.className).not.toContain('dropdown__option--selected');
 
     act(() => {
-      fireEvent.click(t3Chip);
+      fireEvent.click(urgentOption);
     });
 
-    expect(t3Chip.getAttribute('aria-pressed')).toBe('true');
-    expect(t3Chip.className).toContain('is-active');
+    // After commit, the same option node now reflects the multi-select
+    // selection state. The popover stays open in multi mode so the
+    // operator can keep narrowing; we assert in place.
+    expect(urgentOption.getAttribute('aria-selected')).toBe('true');
+    expect(urgentOption.className).toContain('dropdown__option--selected');
 
     // Only the T3 row (high → T3 per SEVERITY_FROM_WIRE) remains.
     const visibleRows = screen.queryAllByTestId('inbox-row');

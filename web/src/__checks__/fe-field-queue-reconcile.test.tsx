@@ -195,10 +195,13 @@ describe('WO-006 Field Queue reconciliation', () => {
     // BandPill — locked = true renders glyph + text per row.
     const t3Pill = screen.getByTestId('field-queue-band-pill-inc-t3-old');
 
-    // Glyph set: ◔ (T1 unverified) / ◑ (T2 verified) / ◒ (T3 issuance) / ✓ (resolved).
-    // The lockdown palette uses ◒ for T3 per BandPill.LOCKED_ICONS.
+    // Glyph set: ◔ (Pending) / ◑ (Verified) / ◒ (Issuance) / ✓ (Resolved).
+    // The lockdown palette uses ◒ for the issuance tier per
+    // BandPill.LOCKED_ICONS. Tier codes (T1/T2/T3) are internal —
+    // they drive the colour bridge and sort order but never appear
+    // in operator-visible text.
     expect(t3Pill.textContent).toMatch(/[◔◑◒●✓]/);
-    expect(t3Pill.textContent).toMatch(/T3/);
+    expect(t3Pill.textContent).toMatch(/Issuance|ইস্যু/);
 
     // Reporter-badge chip — anchor kind renders for inc-t3-old.
     const anchorBadge = screen.getByTestId('field-queue-reporter-badge-inc-t3-old');

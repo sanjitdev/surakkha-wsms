@@ -90,7 +90,15 @@ export function TableBody<T>(props: TableBodyProps<T>): ReactNode {
                 width,
                 textAlign: align,
               };
-              const tdClass = `table__cell ${col.cellClassName ?? ''} ${col.className ?? ''}`.trim();
+              // cellClassName may be a static string or a row-aware
+              // function. The function form lets the cell pick up row
+              // state (urgent / selected) that the Table primitive
+              // can't carry at the <tr> level via its row-level
+              // modifiers alone.
+              const cc = typeof col.cellClassName === 'function'
+                ? col.cellClassName(row)
+                : (col.cellClassName ?? '');
+              const tdClass = `table__cell ${cc} ${col.className ?? ''}`.trim();
 
               return (
                 <td

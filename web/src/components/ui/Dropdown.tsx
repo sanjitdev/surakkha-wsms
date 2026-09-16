@@ -12,7 +12,7 @@ import '../../styles/dropdown.css';
 import { useRef } from 'react';
 import { type TypeAheadBuffer, useDropdownKeyboard } from './useDropdownKeyboard';
 import { useDropdownState } from './useDropdownState';
-import { DropdownChips, DropdownTrigger } from './DropdownTrigger';
+import { DropdownTrigger } from './DropdownTrigger';
 import { DropdownPopover } from './DropdownPopover';
 import type { DropdownOption, DropdownProps } from './Dropdown.types';
 
@@ -93,19 +93,12 @@ export function Dropdown<T>(props: DropdownProps<T>) {
   }
   return (
     <div ref={rootRef} className={`dropdown ${className}`.trim()} data-testid={testId}>
-      {label ? (
-        <label className="dropdown__label" htmlFor={`${rootId}-trigger`}>
-          {label}
-        </label>
-      ) : null}
-      {isMulti ? (
-        <DropdownChips<T>
-          values={(value as T[] | undefined) ?? []}
-          options={options}
-          testId={testId}
-          onRemove={removeChip}
-        />
-      ) : null}
+      {/* FE-1.5d (2026-09-16): the external `<label>` element was removed.
+         The trigger's aria-label still carries the field name so screen
+         readers announce it; the visual label is gone so the toolbar
+         stays compact. The chips live INSIDE the trigger button so the
+         selected-value row sits inside the box outline when the
+         dropdown is collapsed. */}
       <DropdownTrigger
         rootId={rootId}
         listboxId={listboxId}
@@ -113,12 +106,16 @@ export function Dropdown<T>(props: DropdownProps<T>) {
         open={open}
         activeOptionId={activeOptionId}
         disabled={disabled}
-        label={label}
+        label={label ?? placeholder}
         placeholder={placeholder}
         testId={testId}
         searchable={searchable}
         searchInputId={searchInputId}
         selectedLabel={selectedLabel}
+        isMulti={isMulti}
+        multiValue={(value as T[] | undefined) ?? []}
+        options={options}
+        onRemoveChip={removeChip}
         onKeyDown={onKeyDown}
         onToggle={onToggle}
       />

@@ -446,7 +446,12 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  padding: var(--space-xs) var(--space-md);
+  /* FE-1.5d (2026-09-16): tightened horizontal padding from
+     var(--space-md) (16 px) → 8 px so the locked BandPill fits
+     inside the 170 px severity column with the "! N" missing-
+     evidence marker. Vertical padding kept at 4 px so the glyph
+     + label stay vertically centred against the 28 px row. */
+  padding: 4px 8px;
   border-radius: var(--radius-xs);
   min-width: 88px;
   font-size: var(--font-size-xs);

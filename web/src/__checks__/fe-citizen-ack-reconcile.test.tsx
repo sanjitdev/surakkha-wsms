@@ -287,12 +287,18 @@ describe('WO-012 Citizen Ack Page reconciliation', () => {
 
     // Locked class (foundation §4.1 palette).
     expect(bandPill.className).toContain('band-pill--t2-locked');
-    // Glyph + text per §4.1 — ◔ T1 / ◑ T2 / ◒ T3 / ✓ resolved.
+    // Glyph + status text per §4.1 — ◔ Pending / ◑ Verified /
+    // ◒ Issuance / ✓ Resolved. Tier codes (T1/T2/T3) are internal —
+    // they drive the colour bridge and sort order but never appear
+    // in operator-visible text.
     expect(bandPill.textContent).toMatch(/[◔◑◒◐◒✓]/);
-    expect(bandPill.textContent).toMatch(/T2/);
+    expect(bandPill.textContent).toMatch(/Verified/i);
   });
 
   // (3) Reporter badge via shared <ReporterBadge /> (WO-006).
+  // Carbonized shape (FO-052ea155): avatar-dot decomposition. The
+  // class identifies the carbonized variant + the per-kind colour
+  // bridge from lockdown-bridge.css.
   it('(3) renders a ReporterBadge with the anchor source attribute', async () => {
     renderAck();
     await waitFor(() => {
@@ -301,7 +307,9 @@ describe('WO-012 Citizen Ack Page reconciliation', () => {
     const badge = screen.getByTestId('citizen-ack-reporter-badge-anchor');
 
     expect(badge.getAttribute('data-reporter-kind')).toBe('anchor');
-    expect(badge.className).toContain('chip-reporter-anchor');
+    expect(badge.className).toContain('reporter-badge-chip--avatar');
+    expect(badge.className).toContain('reporter-badge-chip--avatar-anchor');
+    expect(badge.querySelector('.reporter-avatar-dot')).toBeTruthy();
   });
 
   // (4) Ack-window expiry surface — calm "closed" message; Confirm +

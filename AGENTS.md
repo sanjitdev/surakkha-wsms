@@ -215,3 +215,174 @@ These are tracked follow-ups. Before suggesting one as "next", check the deferre
 ---
 
 **If you only read one thing: read section 0 (the bash-permit trap).** Everything else is recoverable from the codebase; wasting 10 turns retrying `cd && pnpm` is not.
+
+---
+
+## 11. UI/UX skills — when and how to use them
+
+Two local skills are available for design-quality work. They live at
+`~/.claude/skills/{ui-ux-pro-max,impeccable}/SKILL.md`. Load the relevant
+one as soon as a UI task surfaces — not after the design is already
+shaped.
+
+### 11.1 `ui-ux-pro-max` — design intelligence (load FIRST, on any UI task)
+
+Use for: new pages, new components, component refactors, design reviews,
+visual fixes, accessibility audits, responsive layout, typography, color,
+icons, charts, motion, design-system decisions.
+
+Skip for: pure backend, API/DB design, non-visual infra, performance-only
+work that doesn't touch the interface.
+
+Primary use cases (per the skill's own brief):
+- Building or refactoring a page / component / form / table / chart.
+- Choosing palette, font system, spacing, layout system.
+- Reviewing UI code for UX, a11y, or visual consistency.
+- Cross-platform alignment (web / iOS / Android).
+- Raising perceived quality, clarity, or usability.
+- Pre-ship UI polish.
+
+Rule priorities (must-have checks, in order):
+1. **Accessibility** — contrast ≥4.5:1 body / ≥3:1 large, alt text,
+   keyboard nav, aria-labels. Never remove focus rings.
+2. **Touch & interaction** — targets ≥44×44 px, 8 px+ spacing,
+   loading feedback, no hover-only flows.
+3. **Performance** — WebP/AVIF, lazy load, reserve space (CLS < 0.1).
+4. **Style selection** — match product type, consistency, SVG icons
+   (never emoji as icons).
+5. **Layout & responsive** — mobile-first breakpoints, no horizontal
+   scroll, no fixed-px container widths.
+6. **Typography & color** — base 16 px, line-height 1.5, semantic
+   color tokens. **Surakkha's lockdown extends this: no raw hex/rgb
+   in components; no new tokens without amending the dim doc.**
+7. **Animation** — context-aware timing, spatial continuity,
+   respect `prefers-reduced-motion`.
+8. **Forms & feedback** — visible labels, error near field, helper
+   text, progressive disclosure.
+9. **Navigation** — clear current location, breadcrumbs where deep.
+10. **Data display** — tabular numerals, monospace for refs/digits,
+    right-align numerics, empty states.
+
+When to invoke: as soon as the user says "build", "design", "polish",
+"redesign", "fix the look", "make this page better", "review this UI",
+or any variant. Do not wait for the implementation subagent.
+
+### 11.2 `impeccable` — design craft floor (load on refinement / polish / critique)
+
+Use for: refining an existing surface, polishing before ship, critiquing
+a UI, distilling complexity out of a page, hardening i18n/edge cases,
+adapting to a new device class, improving typography hierarchy, fixing
+spacing rhythm, adapting a design to a stricter visual world.
+
+Skip for: greenfield design (use `ui-ux-pro-max` first), backend work,
+non-UI refactors.
+
+Sub-commands (the work the skill actually performs):
+
+| Sub-command | When to invoke |
+|---|---|
+| `shape <feature>` | New surface / replacement visual world — upfront design plan before code. |
+| `audit <target>` | Mechanical quality checks (a11y, perf, responsive). Use on shipped pages. |
+| `critique <target>` | UX heuristic review with scoring. Use when "is this good?" is the question. |
+| `polish <target>` | Final pre-ship pass. Use once, near the end. |
+| `distill <target>` | Strip to essence, remove complexity / AI slop. **Default for "clean this up" requests.** |
+| `harden <target>` | Production-ready: errors, i18n, edge cases. Use before feature freeze. |
+| `clarify <target>` | UX copy / labels / errors. Use when copy is the blocker. |
+| `adapt <target>` | Responsive / device-class adaptation. |
+| `layout <target>` | Spacing / rhythm / visual hierarchy fixes. |
+| `typeset <target>` | Typography hierarchy / fonts. |
+| `colorize <target>` | Strategic color in monochromatic UI. |
+| `animate <target>` | Purposeful motion. |
+| `delight <target>` | Personality + memorable touches. |
+| `bolder` / `quieter` / `overdrive` | Tone shifts. |
+| `init` / `document` / `extract` | Product / DESIGN.md / system extraction. |
+
+### 11.3 Combined workflow (recommended)
+
+For a non-trivial UI change (new page, refactor of an existing surface,
+"make this better"):
+
+1. **`ui-ux-pro-max`** — load first, BEFORE writing code. Use its rule
+   priorities (a11y → touch → perf → style → layout → type → motion
+   → forms → nav → data) to set the floor. Pick the visual direction.
+2. **`impeccable shape`** — when the surface is new or the visual
+   world is changing. Use its discovery interview before any code.
+3. **Write / dispatch the implementation** — subagent or in-thread,
+   per the bmad-build workflow (§3).
+4. **`impeccable distill`** — after the implementation lands, sweep
+   for AI slop: empty `useEffect`s, hidden stub DOM, duplicate
+   wrapper testids, "X of Y" copy that says nothing, inline SVG
+   components that should live in `components/ui/icons/`.
+5. **`impeccable polish`** — final pre-ship pass. Inspect at desktop
+   and mobile; check the four verification gates per §4.
+6. **`ui-ux-pro-max`** — re-check against its 10 priority categories.
+   Fix anything below the floor.
+7. **`impeccable detect`** — run the mechanical detector:
+   `node ~/.claude/skills/impeccable/scripts/detect.mjs --json <paths>`.
+   Empty output = clean.
+
+### 11.4 When the user just says "make it better"
+
+Default to **`impeccable distill`** for an existing page, or
+**`impeccable shape`** if a brief needs clarification first. If the
+user mentions visual hierarchy / typography / spacing / motion
+specifically, jump to the matching `impeccable` sub-command or to
+`ui-ux-pro-max`.
+
+### 11.5 Loading the skills
+
+Both skills ship as `SKILL.md` files at `~/.claude/skills/<name>/`.
+When invoking, read the `SKILL.md` directly via `Read` (not via the
+`Skill` tool — the CLI's skill registry does not include these), then
+run the skill's own scripts (`node ~/.claude/skills/impeccable/scripts/...`)
+for the mechanical work. The `impeccable` skill also expects the
+agent to run `node ~/.claude/skills/impeccable/scripts/context.mjs --target <path>`
+once per session before acting.
+
+### 11.6 Surakkha-specific overrides
+
+Both skills assume a generic project. Apply these Surakkha locks on top:
+
+- **No new tokens.** If `impeccable polish` suggests a new color or
+  spacing value, look it up in `web/src/styles/theme.css` first —
+  chances are it already exists under `--*`. If it doesn't, the
+  suggestion violates the lockdown (see §2.2 Token lockdown) and
+  must be declined.
+- **No third-party deps for primitives.** `ui-ux-pro-max` may suggest
+  a library; Surakkha's primitives are zero-dep by lockdown. Decline
+  the dep, keep the suggestion's intent.
+- **≤200 LoC per component file** (AD-FE-5). If `impeccable distill`
+  produces a longer component, split it into the layer-A/B/C hierarchy
+  in §2.1.
+- **Bangla parity.** Any UI copy change must update both
+  `web/src/i18n/locales/en/*.json` AND `web/src/i18n/locales/bn/*.json`
+  in the same commit. `impeccable harden` covers this; `distill` does
+  not — check manually.
+- **Testid preservation.** If `impeccable distill` wants to drop a
+  testid-bearing wrapper (e.g. a `<span data-testid="…">` around an
+  inner component), first check whether the wrapping testid is asserted
+  on by any test in `web/src/__checks__/`. If yes, keep the wrapper
+  or update the test in the same commit.
+
+### 11.7 Anti-patterns to refuse
+
+Both skills can recommend AI-slop defaults — refuse them explicitly:
+
+| Suggestion | Why refuse |
+|---|---|
+| Hero metric (big number + small label + stats + accent) | Template; not a craft choice. The Surakkha foundation already defines the dim-5 page templates — match them, don't re-roll. |
+| Eyebrow / kicker label above a heading | The foundation's heading carries its own weight; the kicker is decoration. |
+| Card-per-feature homepage layout | Cards are the lazy container; never nest cards. |
+| Modal for an in-page task | Use inline editing or a dedicated route. |
+| `border-left: 4px solid <color>` on a list/callout | Decoration, not hierarchy. Foundation uses hairline borders + tokens. |
+| Gradient text / glass / blur as decoration | Reserved for specific effects, never as default emphasis. |
+| Hard offset shadow (`4px 4px 0`) outside a committed neobrutalist world | Costume, not depth. |
+| Emoji / unicode glyphs as icon system | Surakkha uses inline SVG (Lucide mapping per dim §4.2). |
+| `box-shadow: 0 0 24px` colored halo without offset | Zero-offset halo is decoration, not depth. |
+| Section numbers (01 / 02 / 03) | Only when the sequence itself carries meaning. |
+
+---
+
+**If you only read one thing: read section 0 (the bash-permit trap).**
+Everything else is recoverable from the codebase; wasting 10 turns
+retrying `cd && pnpm` is not.

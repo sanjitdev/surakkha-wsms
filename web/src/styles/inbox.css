@@ -42,26 +42,16 @@
 .inbox-row__title-link:hover strong {
   color: var(--brand-600);
 }
-/* ── row rhythm — single-line title with text-overflow ellipsis keeps
-      every row at a consistent comfortable height (~64 px) so the
-      table fits 8-10 incidents in one viewport instead of 3. The old
-      2-line clamp + 88 px min-height produced 150-180 px rows and a
-      scroll graveyard. ─────────────────────────────────────────────── */
-.data-table--inbox__tr {
-  min-height: 64px;
-}
 /* WO-020 — table-layout: fixed is what makes the column `width`
    props on each column definition actually constrain the rendered
    column width. With auto layout the engine sizes every column to
-   its widest cell and ignores the inline style widths — which is
-   why the chrome column (BandPill + ReporterBadge + age + chips)
-   was expanding past the 168 px we set on every column. */
+   its widest cell and ignores the inline style widths. */
 .data-table--inbox table.table__inner,
 table.data-table--inbox {
   table-layout: fixed;
   width: 100%;
 }
-.data-table--inbox__tr td.col-title strong {
+.data-table--inbox td.col-title strong {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -69,40 +59,188 @@ table.data-table--inbox {
   line-height: var(--line-height-snug, 1.35);
 }
 
-/* WO-020 — strip the shared header chrome. The Action queue is
-   small enough (≤ 8 rows on screen) that sticky headers add no
-   value, and the .table__head background + .table__header-cell
-   height was creating an extra band that shifted the THREAD /
-   WHERE labels above the row content. Single-row header sits
-   flush with the body cells. Also drop the `position: relative`
-   the TableHeader primitive applies inline (it's a vestigial
-   anchor for the sort + resize handle but those don't exist in
-   the inbox rows) so the header cells flow identically to body
-   cells. The header <th>s still get their column-width inline
-   style — only the position / background / height chrome is
-   scrubbed. */
+/* ── Severity column (single-data BandPill only) ─────────────────────
+   The BandPill already carries the verification tier via glyph +
+   colour + label, so the cell carries no auxiliary chips. Single
+   vertical-centred line keeps the column tight (no 88 px chrome).
+   The missing-evidence marker sits beside the BandPill as a compact
+   "! N" badge — keeps the visual signal without the chip-line. */
+.data-table--inbox td.col-severity {
+  padding-block: var(--space-md);
+}
+.inbox-row-severity {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+.inbox-row-evidence-marker {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 5px 1px 4px;
+  border-radius: 999px;
+  background: var(--warning);
+  color: var(--fg-on-status-dark);
+  font-size: 10px;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--font-family-mono);
+  line-height: 1;
+  white-space: nowrap;
+  letter-spacing: -0.01em;
+}
+.inbox-row-evidence-marker__count {
+  font-size: 9px;
+}
+
+/* ── Source column (ReporterBadge only) ─────────────────────────────
+   Carbonized avatar-dot decomposition lives in lockdown-bridge.css;
+   the inbox column just centers it vertically with the row. */
+.data-table--inbox td.col-source {
+  padding-block: var(--space-md);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Age column — mono digit string with full ISO timestamp tooltip. ──
+   Replaces the age text that previously lived in the chrome column's
+   sub-line. Lockdown §1.2 — mono digit rule. */
+.data-table--inbox td.col-age {
+  padding-block: var(--space-md);
+  white-space: nowrap;
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-1, 12px);
+}
+
+/* ── Owner column — compact avatar-dot + truncated name. ───────────
+   Hard width clamps the column so the header doesn't balloon to fit
+   long names like "Karim Hossain". The name truncates with ellipsis
+   and the full name rides on the cell's title attribute. */
+.data-table--inbox td.col-owner {
+  padding-block: var(--space-md);
+  vertical-align: middle;
+}
+.inbox-row-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  max-width: 100%;
+}
+.inbox-row-owner__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-bold);
+  color: var(--bg-surface);
+  letter-spacing: -0.02em;
+  flex: none;
+  user-select: none;
+}
+.inbox-row-owner__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+/* ── Title-row verb — tertiary type-only affordance that carries the
+   action label (Edit / Review / Schedule / Inspect / Open) without
+   being a second button. The title <Link> already navigates to the
+   same target (r.href === r.action.href). Sits inline beside the
+   <strong> title; flex: none keeps it from collapsing on tight rows
+   while the <strong> still ellipsises. Uppercase tracked mono so it
+   reads as a status label, not a body word. */
+.inbox-row-verb {
+  flex: none;
+  margin-left: var(--space-xs);
+  padding-left: var(--space-xs);
+  border-left: 1px solid var(--border-subtle);
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-tertiary);
+  white-space: nowrap;
+  user-select: none;
+}
+.inbox-row__title-link:hover .inbox-row-verb {
+  color: var(--brand-600);
+}
+
+/* WO-020 — strip the shared header chrome (background tint + fixed
+   height) so the header row reads as a single visual band with the
+   body cells instead of a tinted band sitting on top. FE-1.5d
+   (2026-09-16): the card now has a viewport-anchored max-height with
+   internal scroll (`.inbox-card__scroll`), so the operator needs
+   sticky column headers — without them the THREAD / WHERE labels
+   scroll out of view the moment the operator moves into the queue.
+   Re-enable the Table primitive's `position: sticky` for the header
+   row and pin it at `top: 0` of the scroll pane (the primitive's
+   default `top: var(--space-md)` was tuned for a page-level header
+   with 16 px breathing room — not applicable inside the scroll pane).
+   The header cells get `background: var(--bg-surface)` so scrolling
+   body rows don't bleed through the sticky band, and a hairline
+   border-bottom so the stuck row reads as a single chrome strip. */
 .data-table--inbox .table__head,
 .data-table--inbox .table__head tr {
   background: transparent;
   border-bottom: 0;
 }
-.data-table--inbox .table__header-cell {
-  height: auto;
+@media (min-width: 768px) {
+  .data-table--inbox .table__head .table__header-cell,
+  .data-table--inbox .table__head .table__select-cell {
+    /* !important needed to override the `position: relative` the
+       TableHeader primitive applies inline on every `.table__header-cell`
+       (table.css line 52 + TableHeader.tsx thStyle). The relative
+       positioning is a vestigial anchor for the sort + resize handle
+       and silently kills sticky behavior — without `!important` the
+       inline rule wins by CSS cascade priority regardless of selector
+       specificity. The select-all <th> doesn't carry the inline
+       style so it stays sticky without `!important`, but we apply
+       both for consistency in case the primitive adds the inline
+       style there later. */
+    position: sticky !important;
+    top: 0;
+    z-index: 2;
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}
+/* FE-1.5d (2026-09-16) — align the select-all <th> with the rest of
+   the inbox header row. The Table primitive's `.table__select-cell`
+   ships with `padding: 0 var(--space-sm)` (no vertical padding) so
+   the checkbox sat a few px above the header-cell text midline. We
+   adopt the same `padding: var(--space-sm) var(--space-md)` as the
+   other header cells, drop `text-align: center` so the checkbox
+   sits flush-left with the body checkbox column underneath, and
+   set the same `background: transparent` so it shares the scrubbed
+   header band (no tinted strip when every other header is flat).
+   `vertical-align: middle` is added explicitly so the checkbox
+   sits on the same midline as the uppercase header text even when
+   the row has mixed-height cells. */
+.data-table--inbox .table__select-cell {
   padding: var(--space-sm) var(--space-md);
   background: transparent;
-  /* !important needed to override the `position: relative` the
-     TableHeader primitive applies via inline style. The relative
-     positioning is a vestigial anchor for the sort + resize handle
-     (neither of which exist on the inbox rows) and was making the
-     <th> sit a few px off from the body <td>. */
-  position: static !important;
+  text-align: left;
+  vertical-align: middle;
 }
 
-/* ── selection state — strip row background per dim 1 (no colour tokens
-      transition; row bg switches instantly via attribute). ──────────── */
-.data-table--inbox__tr.is-selected td {
-  background: var(--bg-inset);
-}
+/* ── selection state — FE-1.5d (2026-09-16): the cell-level
+      `td.col-title.is-selected` rule was removed (see layout.css).
+      Selection is now painted entirely at the row level via
+      `.table__row--selected` (table.css). The className is still
+      emitted on the <td> by InboxList.cellClassName so the
+      primitive can re-paint without re-rendering the row, but
+      it no longer carries visual chrome on the title cell. ── */
 
 /* ── avatar dot — 18px circle with first-letter initial. Per dim 4 §8.1
       the icon-stroke stays 2 px and the icon-text gap is 8 px. ───────── */
@@ -235,44 +373,22 @@ table.data-table--inbox {
   padding-block: calc(var(--space-md) + var(--space-xs));
 }
 
-/* ── Row chrome (REQ-004) — BandPill + ReporterBadge + age + missing-evidence chips.
-      Trust band is a SEPARATE dimension from the reporter badge.
+/* (Removed — old chrome column packed BandPill + ReporterBadge + age +
+   missing-evidence chips into one 88 px-tall row. Replaced by the
+   single-data columns above: severity / source / age / owner.) */
 
-      WO-020 — stacks the BandPill on its own line and packs the
-      reporter-badge + age + evidence chips on a second line so the
-      chrome column stays at the 160 px width set by layout.css
-      even when the BandPill text is long (e.g. "T1 unverified"). ──── */
-.inbox-row-chrome {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-xs, 4px);
-}
-.inbox-row-chrome__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-xs, 4px);
-  flex-wrap: wrap;
-}
-.inbox-row-age {
-  font-size: var(--font-size-1, 12px);
-  color: var(--fg-tertiary);
-  white-space: nowrap;
-}
-.inbox-row-evidence {
-  display: inline-flex;
-  gap: 4px;
-  flex-wrap: wrap;
-}
-.inbox-row-evidence-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 6px;
-  border-radius: var(--radius-xs, 2px);
-  background: var(--bg-subtle);
-  color: var(--fg-secondary);
-  font-size: var(--font-size-1, 12px);
-  border: 1px solid var(--border-default);
+/* FE-1.5d (2026-09-16) — narrow the filter dropdowns when they sit
+   inside the inbox toolbar. The default `Dropdown` max-width is 320 px
+   (full form-control width), which makes the toolbar wrap to a second
+   row before any selection is made. Inside `.inbox-toolbar` each
+   `.dropdown` collapses to 168 px so the Status / Priority / Source
+   trio fits on one line with the search box + date range + Clear at
+   1280 px and up. The popover still spans the trigger width + extends
+   as needed (the option list has no width cap), so reading the values
+   is not constrained. */
+.inbox-toolbar .dropdown {
+  max-width: 152px;
+  flex: 0 1 auto;
 }
 
 /* ── Rich filter chip row (REQ-002 / REQ-003) ──────────────────────── */
@@ -288,6 +404,11 @@ table.data-table--inbox {
   background: var(--bg-inset);
   display: flex;
   flex-wrap: wrap;
+  /* FE-1.5d (2026-09-16): the rich-filter row groups label + chip
+     rail side-by-side. Each .filter-chips group is itself a flex row,
+     so the row-level alignment here just keeps the inner groups
+     centred vertically against each other; the label→chip alignment
+     lives inside .filter-chips (see below). */
   align-items: center;
   gap: var(--space-md);
 }
@@ -324,6 +445,14 @@ table.data-table--inbox {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   margin-right: var(--space-xs);
+  /* FE-1.5d (2026-09-16): line-height: 1 prevents the uppercase
+     label from carrying an extra descender band that pushed it
+     below the chip mid-line. The parent .filter-chips uses
+     align-items: center; this lets that centering land cleanly
+     on the glyph midline. */
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
 }
 .inbox-rich-date {
   font-family: var(--font-family-mono);
@@ -391,4 +520,107 @@ table.data-table--inbox {
   color: var(--fg-tertiary);
   white-space: nowrap;
   flex: 0 0 auto;
+}
+
+/* ── FE-1.5d (2026-09-16) — Action queue card spans full container
+   width and has a viewport-anchored max-height with internal scroll.
+   The card becomes a flex column so the head + scroll pane + bulkbar
+   stack; the pane (`.inbox-card__scroll`) is the only scroll surface
+   so the operator never loses track of the card head or the bulk
+   actions. The sticky <thead> (table.css @ ≥768 px) anchors to the
+   top of this pane — column labels stay visible while the body
+   scrolls underneath. The card-head and bulkbar get `flex-shrink: 0`
+   so they're pinned; the scroll pane gets `flex: 1 1 auto` +
+   `min-height: 0` so it owns the remaining height and overflows
+   inside the card instead of pushing past max-height.
+
+   The chrome estimate (page-header ≈96 px + toolbar ≈56 px +
+   container padding ≈24 px + card-head ≈56 px + bulkbar ≈48 px =
+   ~280 px) is subtracted from 100vh to leave the scroll pane the
+   remaining viewport. A min-height guard keeps the card from
+   collapsing below the head + 4 visible rows on very short
+   viewports (laptop split-pane, etc.). */
+.inbox-card--scrollable {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 280px);
+  min-height: 420px;
+  overflow: hidden;
+}
+.inbox-card--scrollable .inbox-card-head {
+  flex: 0 0 auto;
+}
+.inbox-card--scrollable .inbox-bulkbar {
+  flex: 0 0 auto;
+  border-top: 1px solid var(--border-subtle);
+}
+/* The scroll pane — flex: 1 + min-height: 0 so the <Table> inside
+   overflows inside this box instead of expanding the card. Empty /
+   loading / error states render centered inside this pane so they
+   don't collapse to a single line. */
+.inbox-card__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+}
+/* Subtract the card padding (--space-xl ≈24 px top/bottom in the
+   with-heading modifier) so the table starts flush with the
+   scroll pane edge and the sticky header sits above the body
+   cleanly. Without this the first row of the table sits below the
+   card padding inset and the visual rhythm looks detached. The
+   `.inbox-card-head` rule already carries `padding-block: var(--space-md)`
+   so we don't need to re-add it here — the card-head keeps its
+   inner rhythm. */
+.inbox-card--scrollable.card--with-heading {
+  padding-block: 0;
+}
+/* The <Table> primitive's outer `.table` div gets an explicit
+   flex: 1 so it claims the scroll-pane height; without it the table
+   would size to its content and not fill the pane. */
+.inbox-card__scroll > .table {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+}
+.inbox-card__scroll > .table > .table__inner {
+  flex: 1 1 auto;
+}
+
+/* Empty / loading / error states — center vertically + horizontally
+   inside the scroll pane so they don't collapse to a single line at
+   the top edge of the card. The pane is a flex column, so `margin:
+   auto` on the state child pushes it into the geometric middle. */
+.inbox-card__scroll > .inbox-loading,
+.inbox-card__scroll > .empty-state {
+  margin: auto;
+  width: 100%;
+  max-width: 480px;
+}
+
+/* The 3-rail row sits below the action queue card. Per the FE-1.5d
+   layout pass the rails are no longer a sidebar — they read as
+   supplementary summaries in their own row. The grid-12 wrapper
+   keeps the 3-up rhythm; `align-items: stretch` (default on grid)
+   matches the card heights visually so the three rails feel like
+   one row instead of three independent cards. */
+.inbox-rails {
+  align-items: stretch;
+}
+
+/* Small-viewport fallback — below 768 px the sticky-header rule in
+   table.css drops off, and the calc(100vh - 280px) cap becomes too
+   short to host more than a single row. Let the card grow with
+   content and let the page scroll instead. */
+@media (max-width: 767px) {
+  .inbox-card--scrollable {
+    max-height: none;
+    min-height: 0;
+    overflow: visible;
+  }
+  .inbox-card__scroll {
+    overflow: visible;
+  }
 }

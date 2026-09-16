@@ -49,7 +49,8 @@ import { EmptyState } from '../components/layout/EmptyState';
 import { Button } from '../components/ui/Button';
 import { AlertIcon, InboxIcon, ReporterPhoneIcon } from '../components/icons/sidebar-icons';
 
-import { ContainerWidth } from '../types/domain';
+import { BandPill } from '../components/ui/BandPill';
+import { Band, ContainerWidth } from '../types/domain';
 import { useIncidents } from '../hooks/useIncidents';
 import { useDateFormatter } from '../hooks/useDateFormatter';
 import { useIncidentActions } from '../hooks/useIncidentActions';
@@ -76,11 +77,10 @@ const TECH_ROSTER = [
 
 type TechId = (typeof TECH_ROSTER)[number]['id'];
 
-function severityBadgeClass(sev: string): string {
-  if (sev === 'T3' || sev === 't3') return 'badge badge--t3';
-  if (sev === 'T2' || sev === 't2') return 'badge badge--t2';
-  if (sev === 'T1' || sev === 't1') return 'badge badge--t1';
-  return 'badge badge--t0';
+function severityToBand(severity: string): Band {
+  if (severity === 'T3' || severity === 't3') return Band.Low;
+  if (severity === 'T2' || severity === 't2') return Band.Medium;
+  return Band.High;
 }
 /**
  * Map a chain event_type to the timeline marker modifier class.
@@ -724,14 +724,22 @@ export function InboxDetail() {
               {/* foundation §1.1 — trust-band × reporter-badge separation:
                   the severity badge is one dimension (band pill); the
                   reporter chip below is a separate dimension. Both render
-                  independently on the same row. */}
-              <span
-                className={severityBadgeClass(incident.severity)}
-                data-testid="inbox-detail-band-pill"
+                  independently on the same row.
+                  FE-1.5d reconciliation (2026-09-16): BandPill in locked
+                  mode renders the resolved i18n label
+                  (Pending / Verified / Issuance / Resolved) so the
+                  operator never sees the raw tier code (T1 / T2 / T3) in
+                  user-visible text. The `data-band` attribute preserves
+                  the audit trail for tooling + tests. T1 was renamed
+                  "Unverified" → "Pending" so the pill fits inside the
+                  170 px severity column on the action queue without
+                  clipping. */}
+              <BandPill
+                band={severityToBand(incident.severity)}
+                locked={true}
+                testId="inbox-detail-band-pill"
                 data-band={incident.severity}
-              >
-                {tDetail('header.severityUrgent', { severity: incident.severity })}
-              </span>
+              />
               <span className={`badge badge--${incident.status}`}>{incident.status}</span>
               {/* inbox-detail.md #14 + REQ-008 — reporter-badge chip on the
                   detail header. Renders ONLY when reporter_kind = 'hotline'
@@ -840,7 +848,13 @@ export function InboxDetail() {
                       style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}
                       data-testid={`inbox-related-${r.incident_id}`}
                     >
-                      <span className={severityBadgeClass(r.severity)}>{r.severity}</span>
+                      <BandPill
+                        band={severityToBand(r.severity)}
+                        locked={true}
+                        compact={true}
+                        testId={`inbox-related-band-${r.incident_id}`}
+                        data-band={r.severity}
+                      />
                       <span style={{ flex: 1 }}>
                         <span className="mono" style={{ fontSize: 'var(--font-size-sm)' }}>
                           {r.incident_id.slice(0, 12)}

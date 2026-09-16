@@ -32,8 +32,11 @@ export interface TableColumn<T> {
   resizable?: boolean;
   /** Extra className appended to the `<th>` only (use for column-level modifiers). */
   className?: string;
-  /** Extra className appended to the matching `<td>` cells (e.g. `table__cell--mono`). */
-  cellClassName?: string;
+  /** Extra className appended to the matching `<td>` cells (e.g. `table__cell--mono`).
+   *  Either a static string or a row-aware function — the row-aware form is
+   *  used when cell-level state depends on row data (e.g. urgent/selected
+   *  highlights that the `<tr>` can't carry through the Table primitive). */
+  cellClassName?: string | ((row: T) => string);
 }
 /** Top-level Table props. Generic over the row record type. */
 export interface TableProps<T> {

@@ -2,7 +2,6 @@
   "header": {
     "backToInbox": "← ইনবক্সে ফিরুন",
     "loading": "লোড হচ্ছে…",
-    "severityUrgent": "{{severity}} জরুরি",
     "incidentTitle": "ঘটনা {{id}}",
     "metaLine": "ওয়ার্ড {{ward}} · ব্লক #{{block}} · {{eventType}}",
     "reporterChip": {

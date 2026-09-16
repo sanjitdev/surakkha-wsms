@@ -67,7 +67,13 @@
     "high": "High",
     "medium": "Medium",
     "low": "Low",
-    "ariaTrustBand": "{{band}} trust band"
+    "ariaTrustBand": "{{band}} trust band",
+    "tier": {
+      "T1": "Pending",
+      "T2": "Verified",
+      "T3": "Issuance",
+      "resolved": "Resolved"
+    }
   },
   "status": {
     "active": "active",

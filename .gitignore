@@ -35,3 +35,11 @@ skills/
 progress/
 
 .tmp/
+
+# Skill runtime caches (not project artifacts)
+.impeccable/
+web/.impeccable/
+
+# Skill-generated design/product docs (regenerated on demand)
+DESIGN.md
+PRODUCT.md

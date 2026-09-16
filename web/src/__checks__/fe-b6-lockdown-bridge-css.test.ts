@@ -59,6 +59,13 @@ const EXPECTATIONS: Expect[] = [
   { selector: '.avatar-dot.owner-kind-reporter', token: 'color-safe-green', rationale: 'reporter avatar' },
   { selector: '.avatar-dot.owner-kind-tech', token: 'color-primary', rationale: 'tech avatar' },
 
+  // Reporter-avatar-dot prime (FO-052ea155) — colour bridge from
+  // .reporter-avatar-dot--{kind} → --color-reporter-{kind}.
+  { selector: '.reporter-avatar-dot--anchor', token: 'color-reporter-anchor', rationale: 'reporter avatar dot (anchor)' },
+  { selector: '.reporter-avatar-dot--hotline', token: 'color-reporter-hotline', rationale: 'reporter avatar dot (hotline)' },
+  { selector: '.reporter-avatar-dot--webform', token: 'color-reporter-webform', rationale: 'reporter avatar dot (webform)' },
+  { selector: '.reporter-avatar-dot--sensor', token: 'color-reporter-sensor', rationale: 'reporter avatar dot (sensor)' },
+
   // Hbar severity colours (operator-side rail).
   { selector: '.severity-bar-t3', token: 'color-amber-bright', rationale: 'rail T3 bar' },
   { selector: '.severity-bar-t1', token: 'color-trust-t1', rationale: 'rail T1 bar' },

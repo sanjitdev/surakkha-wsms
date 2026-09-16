@@ -729,6 +729,13 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 }
 .filter-chips {
   display: flex;
+  /* FE-1.5d (2026-09-16): the rich-filter row pairs an UPPERCASE
+     label with a chip rail. Without align-items: center the label's
+     baseline sits above the chip mid-line when the chips are
+     pill-shaped (28 px) and the label is a 12 px uppercase text —
+     the eye reads it as misaligned. Centring the row keeps the
+     label visually anchored to the chip rail. */
+  align-items: center;
   gap: var(--space-xs);
   flex-wrap: wrap;
 }
@@ -736,9 +743,14 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
-  height: var(--height-control-md);
-  padding: 0 var(--space-md);
-  border-radius: var(--radius-md);
+  /* FE-1.5d reconciliation (2026-09-16): pill shape + narrower. The
+     toolbar is a dense row that should feel like a chip rail, not a
+     button bar — full pill rounding (999px) reads as a chip at a
+     glance, and the 28 px control height matches the search box so
+     the strip stays on a single horizontal axis at 1280 px and up. */
+  height: var(--height-control-sm);
+  padding: 0 var(--space-sm);
+  border-radius: var(--radius-pill);
   background: var(--bg-subtle);
   border: 1px solid transparent;
   color: var(--fg-secondary);
@@ -790,11 +802,16 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   gap: var(--space-sm);
   background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  /* FE-1.5d (2026-09-16): match the filter-chip pill geometry so the
+     toolbar reads as one chip rail. The full-pill rounding + 28 px
+     height keeps the search box visually at parity with the chips
+     that follow. */
+  border-radius: var(--radius-pill);
   padding: 0 var(--space-md);
-  height: var(--height-control-md);
-  width: 320px;
+  height: var(--height-control-sm);
+  width: 280px;
   max-width: 100%;
+  flex: 0 0 auto;
 }
 .inbox-search__input {
   border: none;
@@ -813,35 +830,52 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .data-table--inbox .col-check,
 .data-table--inbox th.col-check { width: 28px; padding-left: var(--space-md); }
 .data-table--inbox .col-check input { cursor: pointer; }
-/* WO-020 — fix the chrome column width. The col-chrome cell holds
-   BandPill + ReporterBadge + age + missing-evidence chips; without
-   an explicit width the column expanded at narrow viewports to fit
-   the longest combination (~280 px) and squeezed the title + where
-   + owner columns off-screen. 160 px matches the col-where width
-   and keeps the row rhythm balanced at 1280 px and up. Both `th`
-   and `td` need the rule because the auto-layout table sizes each
-   column to its widest cell; setting only the th leaves td free
-   to grow past 160 px. */
-.data-table--inbox td.col-chrome,
-.data-table--inbox th.col-chrome {
-  width: 160px;
-  max-width: 160px;
+/* Single-data columns (severity / source / age / owner / action).
+   Hard widths + max-width keep each column at its declared size even
+   when the body cell content is longer than the header label. Both
+   `th` and `td` are constrained; otherwise the auto-layout table
+   sizes to the widest cell and the header (uppercase "OWNER") ends
+   up looking visibly wider than the other headers because the body
+   cell widens to fit "Karim Hossain" (5–6 chars at sm + 18 px dot). */
+.data-table--inbox td.col-severity,
+.data-table--inbox th.col-severity {
+  /* FE-1.5d (2026-09-16): widened from 96 → 140 → 160 → 170 px so
+     the locked BandPill (88 px min-width + glyph + 4/8 padding
+     ≈ 100 px) plus the "! N" missing-evidence marker fit on one
+     axis with breathing room, without overflowing into the thread
+     column. T1 was renamed "Unverified" → "Pending" (en) and
+     "যাচাই হয়নি" → "অপেক্ষমান" (bn) so "Pending" + "Verified" +
+     "Issuance" / "অপেক্ষমান" + "যাচাইকৃত" + "ইস্যু পথ" all fit
+     inside 170 px. The `overflow: hidden` clip keeps any future
+     label growth from bleeding past the column boundary. */
+  width: 170px;
+  max-width: 170px;
   overflow: hidden;
 }
-.data-table--inbox td.col-chrome > .inbox-row-chrome {
-  max-width: 160px;
+.data-table--inbox td.col-source,
+.data-table--inbox th.col-source   { width: 104px; max-width: 104px; }
+.data-table--inbox td.col-age,
+.data-table--inbox th.col-age      { width: 88px; max-width: 88px; }
+.data-table--inbox td.col-owner,
+.data-table--inbox th.col-owner {
+  width: 120px;
+  max-width: 120px;
+  overflow: hidden;
 }
-.data-table--inbox .col-owner,
-.data-table--inbox th.col-owner { width: 110px; font-size: var(--font-size-sm); }
+/* Owner header gets the same uppercase label styling as every other
+   column header so it doesn't appear visibly larger than its peers.
+   The body cell has its own font-size from inbox.css. */
+.data-table--inbox th.col-owner { font-size: var(--font-size-xs); }
+
+/* ── Row sub-line (kept for surfaces still using it: audit, verify,
+      sensors). Dropped from the inbox action-queue where the title +
+      meta pattern collapsed into a single link + tooltip. Kept here
+      so non-inbox surfaces don't regress. */
 .data-table--inbox .row-sub {
   font-size: var(--font-size-xs);
   color: var(--fg-tertiary);
   font-family: var(--font-family-mono);
   margin-top: 2px;
-  /* WO-019 — density fix: clamp meta to one line with ellipsis so long
-     meta strings ("citizen-ack request sent · Anjali (reporter) · SN-2208
-     silent 8 min") don't ripple row height. Full meta still readable in
-     the row's title attribute (see InboxList.tsx row render). */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -854,6 +888,25 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   background: rgba(216, 128, 110, 0.06);
 }
 .data-table--inbox tr.row-urgent td { border-bottom-color: var(--danger); }
+/* FE-1.5d (2026-09-16): the per-cell `td.col-title.is-urgent` /
+   `td.col-title.is-selected` left-rail rules were removed. Both
+   stripes are redundant:
+     - Urgent: the row-level `tr.row-urgent` already paints
+       var(--danger-bg) on the entire <tr> (see above), and the
+       title-row carries an `is-t3` urgent dot at the leading edge
+       of the title. The cell-level red border + padding offset
+       was a duplicate signal.
+     - Selected: the Table primitive's `.table__row--selected`
+       (table.css) already paints `box-shadow: inset 3px 0 0
+       var(--brand-500)` + `background: var(--brand-100)` on the
+       entire <tr>. The cell-level brand-500 stripe was stacked
+       on top of the row-level one — visually the same — and the
+       bg-inset was already implied by the row bg.
+   The `is-urgent` / `is-selected` classNames are still emitted
+   on the <td> by InboxList.cellClassName (foundation §4.1 — row
+   state belongs on the cell so Table primitives can re-paint
+   without re-rendering the row), they just no longer paint
+   visual chrome. */
 .data-table--inbox td.col-title strong { display: block; }
 
 /* ── Avatar dot (owner chip) ────────────────────────────────────── */

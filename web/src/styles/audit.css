@@ -1,201 +1,287 @@
 /* ════════════════════════════════════════════════════════════════════
    audit.css — AuditLog (FE-1.5c) composition styles.
 
-   Tokens only. Per dim 5 §7.6 the chain-explorer ships in "dense"
-   mode: rows are --height-row-default (40px), chain refs use
-   --font-family-mono with tabular-nums, the severity dot mirrors the
-   inbox row-severity-dot, and the copy button sits in the trailing
-   col-action cell.
-
-   The base .data-table rules live in src/styles/layout.css (the
-   promoted layout file; imported globally from main.tsx). This file
-   fills the audit-table specifics: column widths, dense row height,
-   severity dot, the
-   inline copy button, and the chain-head banner layout.
+   Tokens only — every visual value references a `var(--*)`. Dim 5 §7.6
+   "dense" mode: rows are 40 px tall, mono digits for chain refs +
+   timestamps, severity dot mirrors the inbox row-severity-dot. Copy
+   button sits in the trailing col-action cell. Impeccable pass
+   (2026-09-16): dead selectors pruned, the filter chip row mirrors
+   the InboxList compact toolbar, the chain-head strip is a single
+   status line instead of a competing Card, the row uses a 7-column
+   CSS grid for one-line-per-row rhythm.
    ════════════════════════════════════════════════════════════════════ */
 
-/* ── audit table — column widths locked at the wide container (1280px).
-      Time + severity dot are tight; event + actor + ward get the
-      readable middle; type + action sit at the trailing edge. ────── */
-.audit-table colgroup,
-.audit-table thead th {
-  /* No explicit widths — defaults come from the shared .data-table
-     rules in dashboard.css. AuditLog only overrides what it needs. */
-}
-
-/* Dense row height — dim 5 §7.6 calls out 40px rows. The shared
-   .data-table--inbox__tr rule sets 56px comfortable; we override
-   here for the audit table only. */
-.audit-row td {
-  height: var(--height-row-default);
-  padding-block: var(--space-sm);
-  padding-inline: var(--space-md);
-}
-
-/* Severity dot — same shape as inbox row-severity-dot, but inline in
-   its own cell rather than absolute-positioned. ──────────────────── */
-.row-severity-dot {
-  display: inline-block;
-  width: var(--space-sm);
-  height: var(--space-sm);
-  border-radius: var(--radius-pill, 999px);
-  flex-shrink: 0;
-}
-
-/* Copy-to-clipboard button — lives in the col-action cell. ────────── */
-.audit-copy {
-  background: transparent;
-  border: 1px solid var(--border-subtle);
-  color: var(--fg-secondary);
-  font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  transition:
-    border-color var(--motion-press-120) var(--ease-out),
-    color var(--motion-press-120) var(--ease-out);
-}
-
-.audit-copy:hover {
-  border-color: var(--brand-500);
-  color: var(--brand-500);
-}
-
-.audit-copy:active {
-  border-color: var(--brand-600);
-  color: var(--brand-600);
-}
-
-.audit-copy:focus-visible {
-  outline: 2px solid var(--brand-500);
-  outline-offset: 2px;
-}
-
-/* Trailing column — keep the copy button right-aligned within the
-   col-action cell, matching inbox-row conventions. ──────────────── */
-.audit-row .col-action {
-  text-align: right;
-}
-
-/* Plex Mono cells inherit tabular-nums for the chain-ref + time
-   columns so columns line up at a glance. ───────────────────────── */
-.audit-row .col-time,
-.audit-row .col-where,
-.audit-row td.mono {
-  font-variant-numeric: tabular-nums;
-}
-
-/* Tighten the row-meta subtext so the table doesn't get vertical
-   bloat from a 2-line cell on every row. ─────────────────────────── */
-.audit-row .row-sub {
-  margin-top: var(--space-xs);
-  line-height: var(--line-height-tight);
-}
-
-/* Chain-head banner — 3-column grid (head info · events total ·
-   blocks) collapses to a single column below <bp-md>. The grid
-   template lives inline in AuditLog.tsx; this just tightens the
-   cell padding inside the Card. ────────────────────────────────── */
-.card > div[style*='grid-template-columns'] {
-  padding-block: var(--space-xs);
-}
-
-/* Date-range row (FE-B5f) — two DatePickers + Clear button. Sits
-   between the FilterChips row and the events table. Tokens-only
-   per AD-FE-4. ─────────────────────────────────────────────────── */
-.audit-range {
+/* ── Filter chip row — compact toolbar (FE-1.5d) ──────────────────
+   Mirrors the InboxList toolbar pattern: pills sit on a single line,
+   the dropdowns drop their visible labels (placeholder doubles as
+   the aria-label). The row wraps below 768 px so the layout stays
+   usable on split-pane / laptop screens. */
+.audit-log-filter-chips {
   display: flex;
-  gap: var(--space-md);
-  align-items: flex-end;
-  padding: var(--space-md);
-  border-bottom: 1px solid var(--border-subtle);
   flex-wrap: wrap;
-}
-.audit-range > div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-xs);
-  font-size: var(--font-size-xs);
-  color: var(--fg-secondary);
-}
-.audit-range__label {
-  font-size: var(--font-size-xs);
-  color: var(--fg-secondary);
-}
-.audit-range button {
-  margin-left: auto;
-}
-
-/* ── Per-row Verify button + outcome badge (audit-log.md #13) ──────
-   Single-click independent hash verification. The button is the idle
-   state; on click it flips to a pending state, then to ok or fail
-   based on the /api/chain/verify response.
-
-   The ok state uses --color-safe-green (operator-readable positive).
-   The fail state uses --color-status-warn (NOT alert-red-reserved —
-   the verification is operator-readable and does not escalate into
-   the issuance path on its own; a single failed row is data for the
-   operator, not a chain failure surface).
-   ─────────────────────────────────────────────────────────────────── */
-.audit-verify-btn {
-  background: transparent;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  margin-block: var(--space-md);
+  background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
-  color: var(--fg-secondary);
+  border-radius: var(--radius-md);
+}
+.audit-log-filter-chip {
+  display: flex;
+  align-items: center;
+  flex: 0 1 auto;
+}
+/* The dropdown + search inputs inside the toolbar share a compact
+   geometry so they read as one chip rail. */
+.audit-log-filter-chip .dropdown {
+  max-width: 180px;
+}
+.audit-log-filter-chip input[type='search'] {
+  height: 28px;
+  padding: 0 var(--space-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--bg-subtle);
+  color: var(--fg-default);
+  font-family: inherit;
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: var(--space-xs) var(--space-md);
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  transition:
-    border-color var(--motion-press-120) var(--ease-out),
-    color var(--motion-press-120) var(--ease-out);
+  min-width: 160px;
 }
-.audit-verify-btn:hover {
-  border-color: var(--color-primary-tint);
-  color: var(--color-primary);
-}
-.audit-verify-btn:focus-visible {
+.audit-log-filter-chip input[type='search']:focus-visible {
   outline: 2px solid var(--color-primary-tint);
   outline-offset: 2px;
 }
-.audit-verify {
+.audit-log-filter-chip input[type='search']::placeholder {
+  color: var(--fg-tertiary);
+}
+
+/* ── Chain-head strip — single status line, not a competing card. ──
+   Sits between the toolbar and the event list as a quiet horizontal
+   line. height / hash / prev / sealed / root all on one line so it
+   reads as a status header, not as a card competing with the rows
+   for attention. Mono numbers because they're chain references. */
+.audit-log-chain-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-block: 1px solid var(--border-subtle);
+  background: var(--bg-subtle);
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Event list + grouped rows ──────────────────────────────────── */
+.audit-log-event-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.audit-log-group__header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: var(--space-sm);
+}
+.audit-log-group__header h3 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+}
+.audit-log-group__count {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+}
+.audit-log-group__summary {
+  font-size: var(--font-size-xs);
+  color: var(--fg-tertiary);
+}
+.audit-log-button-open-chain-segment {
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-primary);
+  text-decoration: none;
+  padding: 2px var(--space-sm);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  transition:
+    border-color var(--motion-press-120) var(--ease-out),
+    color var(--motion-press-120) var(--ease-out);
+}
+.audit-log-button-open-chain-segment:hover {
+  border-color: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+.audit-log-button-open-chain-segment:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+
+/* ── Per-row grid: time | actor | event-type | band | reporter |
+   hash | verify. Each cell flex-1's to its own width tier via the
+   grid-template-columns below so the operator can scan one column
+   at a time and the row reads as one line at 1280 px wide. ────── */
+.audit-log-group__rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.audit-log-event-row {
+  display: grid;
+  grid-template-columns: 92px 140px 1fr 90px 110px 140px 96px;
+  align-items: center;
+  gap: var(--space-md);
+  padding-block: var(--space-sm);
+  min-height: 40px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.audit-log-event-row:last-child { border-bottom: 0; }
+.audit-log-event-row--anomaly {
+  background: color-mix(in srgb, var(--color-status-warn) 6%, transparent);
+}
+.audit-log-event-row--anomaly .audit-log-anomaly-badge {
+  color: var(--color-status-warn);
+}
+
+@media (max-width: 1100px) {
+  /* Below 1100 px the 7-col layout gets cramped — drop the actor
+     column name to the icon row so the timing column + first column
+     stay scannable. The actor ref still appears on the chain-head
+     and group header. */
+  .audit-log-event-row {
+    grid-template-columns: 80px 1fr 90px 110px 130px 96px;
+  }
+  .audit-log-event-row .audit-log-actor-chip { display: none; }
+}
+
+/* ── Cell-level spans ───────────────────────────────────────────── */
+.audit-log-event-timestamp {
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+}
+.audit-log-actor-chip {
+  font-size: var(--font-size-xs);
+  color: var(--fg-default);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.audit-log-event-type-icon {
   display: inline-flex;
   align-items: center;
   gap: var(--space-xs);
   font-size: var(--font-size-xs);
-  font-weight: var(--font-weight-medium);
-  padding: var(--space-xs) var(--space-md);
+  color: var(--fg-default);
+  overflow: hidden;
+}
+.audit-log-event-type-icon > svg { flex: 0 0 auto; }
+.audit-log-event-type-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.audit-log-hash-anchor button {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+  font-family: var(--font-family-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xs);
+  padding: 2px var(--space-sm);
   border-radius: var(--radius-xs);
-  border: 1px solid transparent;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-press-120) var(--ease-out),
+    color var(--motion-press-120) var(--ease-out);
 }
-.audit-verify--ok {
-  background: color-mix(in srgb, var(--color-safe-green) 12%, transparent);
-  color: var(--color-safe-green);
-  border-color: color-mix(in srgb, var(--color-safe-green) 40%, transparent);
+.audit-log-hash-anchor button:hover {
+  border-color: var(--color-primary-tint);
+  color: var(--color-primary);
 }
-.audit-verify--fail {
-  background: color-mix(in srgb, var(--color-status-warn) 12%, transparent);
+.audit-log-hash-anchor button:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.audit-log-verify-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: var(--font-size-xs);
+  color: var(--fg-secondary);
+}
+.audit-log-verify-inline button {
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  color: var(--fg-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  padding: 2px var(--space-sm);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.audit-log-verify-inline button:hover {
+  border-color: var(--color-primary-tint);
+  color: var(--color-primary);
+}
+.audit-log-verify-inline button:focus-visible {
+  outline: 2px solid var(--color-primary-tint);
+  outline-offset: 2px;
+}
+.audit-log-verify-fail-label {
   color: var(--color-status-warn);
-  border-color: color-mix(in srgb, var(--color-status-warn) 40%, transparent);
+  font-weight: var(--font-weight-medium);
 }
-.audit-verify--pending {
-  background: var(--bg-subtle);
-  color: var(--fg-tertiary);
-  border-color: var(--border-subtle);
+.audit-log-anomaly-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--space-xs);
 }
-.audit-verify--pending::before {
-  content: '';
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border: 1.5px solid var(--fg-tertiary);
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: audit-verify-spin 0.7s linear infinite;
+
+/* ── Anomaly banner — calm message + acknowledge control ─────────── */
+.audit-log-anomaly-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid color-mix(in srgb, var(--color-status-warn) 40%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-status-warn) 10%, transparent);
+  margin-bottom: var(--space-md);
 }
-@keyframes audit-verify-spin {
-  to {
-    transform: rotate(360deg);
-  }
+.audit-log-anomaly-banner__icon {
+  font-size: var(--font-size-lg);
+  color: var(--color-status-warn);
+  line-height: 1;
+}
+.audit-log-anomaly-banner__body {
+  flex: 1;
+  min-width: 0;
+}
+.audit-log-anomaly-banner__body p {
+  margin: var(--space-xs) 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--fg-secondary);
+}
+
+/* ── Empty state ────────────────────────────────────────────────── */
+.audit-log-empty {
+  text-align: center;
+  color: var(--fg-secondary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-xl);
 }

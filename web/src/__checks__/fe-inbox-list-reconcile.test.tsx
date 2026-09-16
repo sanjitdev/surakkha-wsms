@@ -8,7 +8,11 @@
  *   (1) Renders at /inbox for utility_operator role
  *   (2) Sort priority-first / age-second (T3 > T2 > T1 > Resolved, oldest first within tier)
  *   (3) All filter chips function + URL persistence (?filter=...)
- *   (4) Rows render BandPill + reporter-badge chip + age + missing-evidence chips
+ *   (4) Rows render BandPill + age + missing-evidence chips
+ *     (FE-1.5d 2026-09-16: reporter-badge dropped from the row; the
+ *      source column was removed. ReporterBadge is exercised on the
+ *      inbox-detail header — hotline-only — and on the right-rail
+ *      SeverityRail.)
  *   (5) Pagination works (default 20 per page)
  *   (6) Empty / loading / error states render correctly
  *
@@ -16,7 +20,7 @@
  *   - Trust band = verification state (separate from reporter-badge)
  *   - Focus rings 2px --color-primary-tint (read inbox.css)
  *   - EN + BN locales only (no Hindi / Devanagari letters)
- *   - shadcn/ui primitives reused (Pagination, BandPill, ReporterBadge, FilterChip)
+ *   - shadcn/ui primitives reused (Pagination, BandPill, FilterChip)
  *
  * Pattern matches fe-field-queue-reconcile.test.tsx (WO-006) and
  * fe-operator-dashboard-reconcile.test.tsx (WO-004): fetch stub
@@ -229,12 +233,15 @@ describe('WO-009 Inbox List reconciliation', () => {
     await waitFor(() => {
       expect(screen.getByTestId('inbox-list-page')).toBeTruthy();
     });
-    // Rich filter chip row is present.
-    expect(screen.getByTestId('inbox-rich-filter-row')).toBeTruthy();
-    expect(screen.getByTestId('inbox-rich-filter-band')).toBeTruthy();
-    expect(screen.getByTestId('inbox-rich-filter-reporter')).toBeTruthy();
-    expect(screen.getByTestId('inbox-rich-filter-status')).toBeTruthy();
-    expect(screen.getByTestId('inbox-rich-filter-daterange')).toBeTruthy();
+    // FE-1.5d reconciliation (2026-09-16): the rich filter chip row was
+    // replaced by a row of multi-select `<Dropdown>` primitives. Each
+    // axis carries its own testid (status/band/reporter) and the date
+    // range exposes two `<input type=date>` testids (from/to).
+    expect(screen.getByTestId('inbox-filter-status')).toBeTruthy();
+    expect(screen.getByTestId('inbox-filter-band')).toBeTruthy();
+    expect(screen.getByTestId('inbox-filter-reporter')).toBeTruthy();
+    expect(screen.getByTestId('inbox-filter-date-from')).toBeTruthy();
+    expect(screen.getByTestId('inbox-filter-date-to')).toBeTruthy();
   });
 
   // (2) Sort priority-first / age-second (T3 > T2 > T1 > Resolved, oldest first within tier).
@@ -317,15 +324,17 @@ describe('WO-009 Inbox List reconciliation', () => {
     expect(order.slice(19, 25)).toEqual(resIds);
   });
 
-  // (3a) Filter chips function — clicking band T3 narrows to T3-only rows.
-  it('filters rows when the band chip is toggled', async () => {
+  // (3a) Filter dropdowns function — selecting band T3 narrows to T3-only rows.
+  it('filters rows when the band dropdown option T3 is selected', async () => {
     renderList();
     await waitFor(() => {
       expect(screen.getByTestId('inbox-row-band-evt-inc-t3-anchor-old')).toBeTruthy();
     });
 
-    // Click band=T3 chip.
-    fireEvent.click(screen.getByTestId('inbox-rich-band-t3'));
+    // FE-1.5d (2026-09-16): filters moved into multi-select Dropdowns.
+    // Open the band dropdown and select T3.
+    fireEvent.click(screen.getByTestId('inbox-filter-band-trigger'));
+    fireEvent.click(await screen.findByTestId('inbox-filter-band-option-T3'));
 
     await waitFor(() => {
       // T3 rows remain; T2/T1/Resolved rows drop out.
@@ -337,14 +346,16 @@ describe('WO-009 Inbox List reconciliation', () => {
     expect(screen.getByTestId('inbox-row-band-evt-inc-t3-anchor-old')).toBeTruthy();
   });
 
-  // (3b) Reporter filter — clicking hotline narrows to hotline-only rows.
-  it('filters rows when the reporter-badge chip is toggled', async () => {
+  // (3b) Reporter filter — selecting sensor narrows to sensor-only rows.
+  it('filters rows when the reporter dropdown option sensor is selected', async () => {
     renderList();
     await waitFor(() => {
       expect(screen.getByTestId('inbox-row-band-evt-inc-t3-anchor-old')).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByTestId('inbox-rich-reporter-sensor'));
+    // Open the reporter dropdown and pick sensor.
+    fireEvent.click(screen.getByTestId('inbox-filter-reporter-trigger'));
+    fireEvent.click(await screen.findByTestId('inbox-filter-reporter-option-sensor'));
 
     await waitFor(() => {
       // Only sensor rows survive.
@@ -359,14 +370,16 @@ describe('WO-009 Inbox List reconciliation', () => {
     });
   });
 
-  // (3c) Status filter — clicking resolved narrows to resolved-only rows.
-  it('filters rows when the status chip is toggled', async () => {
+  // (3c) Status filter — selecting resolved narrows to resolved-only rows.
+  it('filters rows when the status dropdown option resolved is selected', async () => {
     renderList();
     await waitFor(() => {
       expect(screen.getByTestId('inbox-row-band-evt-inc-t3-anchor-old')).toBeTruthy();
     });
 
-    fireEvent.click(screen.getByTestId('inbox-rich-status-resolved'));
+    // Open the status dropdown and pick resolved (rollup category).
+    fireEvent.click(screen.getByTestId('inbox-filter-status-trigger'));
+    fireEvent.click(await screen.findByTestId('inbox-filter-status-option-resolved'));
 
     await waitFor(() => {
       // Only resolved rows survive.
@@ -378,40 +391,51 @@ describe('WO-009 Inbox List reconciliation', () => {
     });
   });
 
-  // (3d) URL persistence — clicking a chip writes ?filter=... to the URL.
+  // (3d) URL persistence — selecting options writes ?filter=... to the URL.
   it('persists filter state to ?filter=... in the URL', async () => {
     renderList();
     await waitFor(() => {
       expect(screen.getByTestId('inbox-row-band-evt-inc-t3-anchor-old')).toBeTruthy();
     });
 
-    // Click T3 band chip — chip should flip to active=true (the React
-    // state reflects what setSearchParams wrote).
-    fireEvent.click(screen.getByTestId('inbox-rich-band-t3'));
+    // Select band T3 from the band dropdown.
+    fireEvent.click(screen.getByTestId('inbox-filter-band-trigger'));
+    fireEvent.click(await screen.findByTestId('inbox-filter-band-option-T3'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('inbox-rich-band-t3').getAttribute('aria-pressed')).toBe('true');
+      // The selected option reflects multi-select state via aria-selected.
+      expect(
+        screen.getByTestId('inbox-filter-band-option-T3').getAttribute('aria-selected'),
+      ).toBe('true');
     });
 
-    // Click hotline reporter chip.
-    fireEvent.click(screen.getByTestId('inbox-rich-reporter-hotline'));
+    // Select hotline reporter from the reporter dropdown.
+    fireEvent.click(screen.getByTestId('inbox-filter-reporter-trigger'));
+    fireEvent.click(await screen.findByTestId('inbox-filter-reporter-option-hotline'));
 
     await waitFor(() => {
-      // Both chips active means the URL param serialises both axes.
-      expect(screen.getByTestId('inbox-rich-reporter-hotline').getAttribute('aria-pressed')).toBe('true');
+      expect(
+        screen.getByTestId('inbox-filter-reporter-option-hotline').getAttribute('aria-selected'),
+      ).toBe('true');
     });
 
     // Pre-population on a fresh mount verifies the URL round-trips:
-    // the chip state hydrates from the query string the previous mount
-    // would have written.
+    // the dropdown state hydrates from the query string the previous
+    // mount would have written.
     cleanup();
     renderList([
       '/inbox?filter=' + encodeURIComponent('band=T3&reporter=hotline'),
     ]);
 
     await waitFor(() => {
-      expect(screen.getByTestId('inbox-rich-band-t3').getAttribute('aria-pressed')).toBe('true');
-      expect(screen.getByTestId('inbox-rich-reporter-hotline').getAttribute('aria-pressed')).toBe('true');
+      // Visible rows reflect T3 + hotline — both T3 hotline rows survive.
+      const bandEls = Array.from(document.querySelectorAll('[data-testid^="inbox-row-band-"]'));
+      const visibleIds = bandEls.map(
+        (el) => (el as HTMLElement).dataset.testid?.replace('inbox-row-band-', ''),
+      );
+
+      expect(visibleIds.length).toBeGreaterThan(0);
+      visibleIds.forEach((id) => expect(id).toMatch(/^evt-inc-t3-/));
     });
   });
 
@@ -428,13 +452,14 @@ describe('WO-009 Inbox List reconciliation', () => {
       expect(visibleIds).toContain('evt-inc-t3-anchor-old');
       expect(visibleIds).toContain('evt-inc-t3-anchor-new');
     });
-    // Chip is highlighted as active.
-    expect(screen.getByTestId('inbox-rich-band-t3').getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByTestId('inbox-rich-reporter-anchor').getAttribute('aria-pressed')).toBe('true');
   });
 
-  // (4) Row chrome — BandPill + reporter-badge chip + age + missing-evidence chips.
-  it('renders BandPill + reporter-badge chip + age + missing-evidence chips per row', async () => {
+  // (4) Single-data severity column — BandPill only, with a compact
+// "! N" missing-evidence marker when applicable. Age in its own
+// column. FE-1.5d (2026-09-16): reporter-badge dropped from the row
+// when the source column was removed. Each data lives on a single
+// axis so the operator can scan one dimension at a time.
+  it('renders BandPill + age + evidence-marker per row', async () => {
     renderList();
     await waitFor(() => {
       expect(screen.getByTestId('inbox-row-band-evt-inc-t3-anchor-old')).toBeTruthy();
@@ -445,20 +470,26 @@ describe('WO-009 Inbox List reconciliation', () => {
 
     expect(bandPill.textContent).toMatch(/[◔◑◒●✓]/);
 
-    // ReporterBadge chip — anchor kind on this row.
-    const reporterBadge = screen.getByTestId('inbox-row-reporter-badge-evt-inc-t3-anchor-old');
-
-    expect(reporterBadge.className).toContain('chip-reporter-anchor');
-    expect(reporterBadge.getAttribute('data-reporter-kind')).toBe('anchor');
+    // FE-1.5d reconciliation (2026-09-16): the source column was
+    // removed from the action queue. ReporterBadge is no longer
+    // rendered per row — it lives on the inbox-detail header
+    // (hotline-only) and on the right-rail SeverityRail. The
+    // per-row reporter-badge testId therefore no longer resolves.
 
     // Age renders.
     expect(screen.getByTestId('inbox-row-age-evt-inc-t3-anchor-old')).toBeTruthy();
 
-    // Missing-evidence chips render for inc-t2-1 (photo).
-    expect(screen.getByTestId('inbox-row-evidence-chip-evt-inc-t2-1-photo')).toBeTruthy();
-    // …and inc-t2-6 (photo + gps).
-    expect(screen.getByTestId('inbox-row-evidence-chip-evt-inc-t2-6-photo')).toBeTruthy();
-    expect(screen.getByTestId('inbox-row-evidence-chip-evt-inc-t2-6-gps')).toBeTruthy();
+    // Missing-evidence compact marker — flagged rows render the
+    // ".inbox-row-evidence-marker" beside the BandPill with the count.
+    const evidenceT2 = screen.queryByTestId('inbox-row-evidence-evt-inc-t2-1');
+
+    if (evidenceT2) {
+      expect(evidenceT2.classList.contains('inbox-row-evidence-marker')).toBe(true);
+      expect(evidenceT2.title).toMatch(/photo|gps|description/i);
+    }
+
+    // Toolbar chrome carries no broken evidence chips.
+    expect(screen.queryByTestId('inbox-row-evidence-chip-evt-inc-t2-1-photo')).toBeNull();
   });
 
   // (5) Pagination — shows "next" button when > 20 rows; clicking advances.

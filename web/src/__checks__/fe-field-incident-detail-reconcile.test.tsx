@@ -239,8 +239,12 @@ describe('WO-007 Field Incident Detail reconciliation', () => {
     });
     const bandPill = screen.getByTestId('field-incident-detail-band-pill');
 
-    expect(bandPill.textContent).toMatch(/T2/);
-    expect(bandPill.textContent).toMatch(/◑/); // LOCKED glyph for T2
+    // Tier codes (T1/T2/T3) drive the colour bridge but never
+    // appear in operator-visible text. The BandPill renders the
+    // human-readable status (Pending / Verified / Issuance) +
+    // the lockdown glyph (◔ / ◑ / ◒).
+    expect(bandPill.textContent).toMatch(/Verified/i);
+    expect(bandPill.textContent).toMatch(/◑/); // LOCKED glyph for Verified
 
     // Reporter-badge hotline
     expect(screen.getByTestId('field-incident-detail-reporter-badge').className).toContain(

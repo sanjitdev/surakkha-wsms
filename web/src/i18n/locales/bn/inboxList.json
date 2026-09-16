@@ -2,7 +2,7 @@
   "page": {
     "eyebrow": "ইনসিডেন্ট",
     "title": "ইনবক্স",
-    "subtitle": "{{count}}টি থ্রেড · {{t3}} T3 প্রচার · {{sig}} আপনার স্বাক্ষরের অপেক্ষায়"
+    "subtitle": "{{count}}টি থ্রেড · {{t3}}টি জরুরি প্রচার · {{sig}} আপনার স্বাক্ষরের অপেক্ষায়"
   },
   "actions": {
     "exportQueue": "সারি রপ্তানি",
@@ -12,18 +12,14 @@
     "filterAriaLabel": "ইনবক্স ফিল্টার",
     "searchPlaceholder": "ওয়ার্ড, সেন্সর, হ্যাশ বা নাগরিকের নাম দিয়ে খুঁজুন…",
     "searchAriaLabel": "ইনবক্স অনুসন্ধান",
-    "moreFilters": "আরও ফিল্টার",
-    "moreFiltersHide": "ফিল্টার লুকান",
-    "clearAll": "সব মুছুন"
+    "clearAll": "ফিল্টার মুছুন"
   },
   "filters": {
-    "all": "সব",
-    "t3Urgent": "T3 জরুরি",
+    "t3Urgent": "জরুরি",
     "awaitingSigs": "স্বাক্ষরের অপেক্ষায়",
     "myDrafts": "আমার খসড়া",
     "citizenReports": "নাগরিক প্রতিবেদন",
-    "resolvedToday": "আজ সমাধান",
-    "priorityBand": "অগ্রাধিকার স্তর",
+    "priorityBand": "অগ্রাধিকার",
     "status": "অবস্থা",
     "reporterBadge": "উৎস",
     "dateRange": "তারিখ পরিসীমা",
@@ -37,14 +33,12 @@
     "owner": "মালিক",
     "ownerUnknown": "?",
     "severity": "তীব্রতা",
+    "source": "উৎস",
     "age": "বয়স",
     "missingEvidence": "অনুপস্থিত প্রমাণ"
   },
   "card": {
-    "title": "পদক্ষেপ সারি",
-    "meta": "{{count}} · সর্বশেষ আপডেট {{time}}",
-    "metaTime": "সর্বশেষ আপডেট {{time}}",
-    "metaFallback": "—"
+    "title": "পদক্ষেপ সারি"
   },
   "empty": {
     "icon": "○",
@@ -57,7 +51,7 @@
   },
   "error": {
     "title": "ইনবক্স লোড ব্যর্থ",
-    "body": "চেইন সাড়া দেয়নি। রিফ্রেশ করতে আবার চেষ্টা করুন।"
+    "body": "চেইন সাড়া দেয়নি। রিফ্রেশ করতে আবার চেষ্ষা করুন।"
   },
   "reporterBadge": {
     "anchor": "নাগরিক প্রতিবেদক",
@@ -70,20 +64,10 @@
     "gps": "জিপিএস",
     "description": "বিবরণ"
   },
-  "bandPill": {
-    "T1": "T1 যাচাই হয়নি",
-    "T2": "T2 যাচাইকৃত",
-    "T3": "T3 ইস্যু পথ",
-    "resolved": "সমাধান"
-  },
   "bulkBar": {
     "count_one": "{{count}} নির্বাচিত",
     "count_other": "{{count}} নির্বাচিত",
-    "assignToMe": "আমাকে নিযুক্ত করুন",
-    "markReviewed": "পর্যালোচিত হিসেবে চিহ্নিত",
-    "archive": "আর্কাইভ"
-  },
-  "pager": {
-    "meta": "{{total}} এর মধ্যে {{visible}}"
+    "clear": "মুছুন",
+    "markReviewed": "পর্যালোচিত হিসেবে চিহ্নিত"
   }
 }

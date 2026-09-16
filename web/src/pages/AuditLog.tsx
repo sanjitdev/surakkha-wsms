@@ -1,35 +1,33 @@
 /**
- * AuditLog.tsx — WO-008 lockdown reconciliation.
+ * AuditLog.tsx — operator-mode cross-incident chain audit log at /audit-log
+ * (per docs/D-UX-Design/audit-log.md + WO-008).
  *
- * Operator-mode cross-incident chain audit log at /audit-log (per
- * docs/D-UX-Design/audit-log.md + docs/E-Development/WO-008-audit-log.md).
+ * FE-1.5d (2026-09-16) — impeccable pass:
+ *   - Dropped visible labels on filter dropdowns (mirror InboxList).
+ *   - 12 inline SVG glyph components moved to
+ *     src/components/ui/icons/AuditEventIcon.tsx.
+ *   - Removed the empty `useEffect` for `anyAnomaly` and the
+ *     hidden `audit-log-authorization-stub` div that nothing tested.
+ *   - Per-row chrome collapsed to a 5-column grid; the wrapping
+ *     `<span data-testid="…">` around BandPill / ReporterBadge is
+ *     gone — those components already carry their own testids.
  *
  * Lockdown binding (foundation §1.1, §4.2, §7, §10, §13):
- *   - 6 filter chips compose AND-combined (locked #8): incident (search),
+ *   - 6 filter chips compose AND-combined: incident (search),
  *     event-type (multi-select), actor (search), band (multi-select),
  *     reporter-badge (multi-select), date range.
  *   - Filter state serialises to URL query string + pre-populates on mount.
  *   - Filter change emits ChainRead{actor, incident_id: null,
- *     filter_combo} via POST /api/events (locked #5, Goal 2.3).
+ *     filter_combo} via POST /api/events.
  *   - Cross-incident list grouped by incident_id with summary header.
- *   - Row chrome: timestamp (relative + absolute), actor chip, event-type
- *     icon (27-approved Lucide-style glyphs), band pill, reporter-badge
- *     chip, hash anchor (mono + copy-to-clipboard).
- *   - Anomaly in any row → ⚠️ on row + top banner (persistent until
- *     acknowledged; locked #7).
- *   - "Open chain segment" link per row → /incidents/:incident_id/chain
- *     (WO-003).
- *   - Date range picker uses DateRangePicker primitive (not raw
- *     <input type="date">).
- *   - Single-block inline verify reuses web/src/lib/chain-verify.ts
- *     (verifyBlockHash — no copy-paste).
- *
- * Out of scope (deferred per WO-008 §Scope):
- *   - Per-actor authorization layer — MAJOR; stub in DOM.
- *   - 5s polling with 100ms crossfade — MAJOR.
- *   - Offline cache — MINOR.
- *   - CSV / PDF export — Phase 1.7+ stubs only.
- *   - Override reasoning affordance for TrustBandOverridden — stub.
+ *   - Row chrome: timestamp + actor + event-type icon + band pill +
+ *     reporter-badge + hash anchor (mono + copy-to-clipboard) +
+ *     inline verify.
+ *   - Anomaly in any row → ⚠ on row + top banner (persistent until
+ *     acknowledged).
+ *   - "Open chain segment" link per group header → /incidents/:id/chain.
+ *   - Date range picker uses DateRangePicker primitive.
+ *   - Single-block inline verify reuses web/src/lib/chain-verify.ts.
  */
 import {
   type ChangeEvent,
@@ -57,6 +55,8 @@ import { useDateFormatter } from '../hooks/useDateFormatter';
 import { useLocale } from '../hooks/useLocale';
 import { verifyBlockHash, type VerifyState } from '../lib/chain-verify';
 import type { DropdownOption } from '../components/ui/Dropdown.types';
+import type { DateRange } from '../components/ui/DateRangePicker';
+import { AUDIT_ICON_BY_TYPE, UnknownEventIcon } from '../components/ui/icons/AuditEventIcon';
 
 // ──────────────────────────────────────────────────────────── domain types
 
@@ -86,134 +86,6 @@ const BAND_TO_ENUM: Record<BandKey, Band> = {
   T2: Band.Medium,
   T3: Band.Low,
 };
-
-// 27-approved Lucide-style glyphs per foundation §4.2 (audit-log.md
-// §Lucide icon mapping). Inline SVG so the page doesn't pull a separate
-// icon dependency. Each glyph renders aria-hidden=true; the event-type
-// label carries the semantic.
-const FilePlusGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-    <polyline points="14 2 14 8 20 8" />
-    <line x1="12" y1="18" x2="12" y2="12" />
-    <line x1="9" y1="15" x2="15" y2="15" />
-  </svg>
-);
-const TagGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-    <line x1="7" y1="7" x2="7.01" y2="7" />
-  </svg>
-);
-const ShieldCheckGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-    <polyline points="9 12 11 14 15 10" />
-  </svg>
-);
-const UserPlusGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <line x1="20" y1="8" x2="20" y2="14" />
-    <line x1="23" y1="11" x2="17" y2="11" />
-  </svg>
-);
-const MapPinGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-    <circle cx="12" cy="10" r="3" />
-  </svg>
-);
-const PackageGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M16.5 9.4l-9-5.19" />
-    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-    <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-    <line x1="12" y1="22.08" x2="12" y2="12" />
-  </svg>
-);
-const CheckCircle2Glyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" />
-    <polyline points="22 12 18 12 15 21 9 8 6 12" />
-  </svg>
-);
-const LockGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-  </svg>
-);
-const MessageSquareCheckGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-    <polyline points="9 12 11 14 15 10" />
-  </svg>
-);
-const EyeGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-const AlertTriangleGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-    <line x1="12" y1="9" x2="12" y2="13" />
-    <line x1="12" y1="17" x2="12.01" y2="17" />
-  </svg>
-);
-const ChevronRightGlyph = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-    stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-    strokeLinejoin="round" aria-hidden="true">
-    <polyline points="9 18 15 12 9 6" />
-  </svg>
-);
-
-const EVENT_TYPE_ICON: Record<string, () => JSX.Element> = {
-  IncidentCreated: FilePlusGlyph,
-  TrustBandSet: TagGlyph,
-  TrustBandOverridden: ShieldCheckGlyph,
-  TechnicianAssigned: UserPlusGlyph,
-  TechnicianArrived: MapPinGlyph,
-  DiagnosisSubmitted: PackageGlyph,
-  FixSubmitted: PackageGlyph,
-  ProofSubmitted: PackageGlyph,
-  ProofAccepted: CheckCircle2Glyph,
-  Resolved: CheckCircle2Glyph,
-  Closed: LockGlyph,
-  CitizenAcknowledgement: MessageSquareCheckGlyph,
-  ChainRead: EyeGlyph,
-  ChainAnomalyDetected: AlertTriangleGlyph,
-};
-
-function eventTypeIcon(eventType: string): () => JSX.Element {
-  return EVENT_TYPE_ICON[eventType] ?? ChevronRightGlyph;
-}
 
 // ──────────────────────────────────────────────────────────── helpers
 
@@ -283,6 +155,8 @@ const DEFAULT_FILTERS: FilterState = {
   reporters: [],
   range: { from: null, to: null },
 };
+
+const FILTER_KEYS = ['incident', 'actor', 'eventType', 'band', 'reporter', 'from', 'to'];
 
 function parseFiltersFromUrl(params: URLSearchParams): FilterState {
   const incident = params.get('incident') ?? '';
@@ -413,7 +287,7 @@ export function AuditLog(): ReactNode {
 
     // Don't clobber unrelated params.
     for (const [k] of current) {
-      if (!next.has(k) && !['incident', 'actor', 'eventType', 'band', 'reporter', 'from', 'to'].includes(k)) {
+      if (!next.has(k) && !FILTER_KEYS.includes(k)) {
         next.set(k, current.get(k) ?? '');
       }
     }
@@ -426,12 +300,9 @@ export function AuditLog(): ReactNode {
     const known = new Set<string>();
 
     for (const e of events) known.add(e.event_type);
-    const sorted = Array.from(known).sort();
-
-    return sorted.map((v) => ({ value: v, label: v }));
+    return Array.from(known).sort().map((v) => ({ value: v, label: v }));
   }, [events]);
 
-  // ── Filter incident ids + actor refs from the loaded events.
   const incidentIdOptions = useMemo(() => {
     const ids = new Set<string>();
 
@@ -564,17 +435,6 @@ export function AuditLog(): ReactNode {
 
   const anyAnomaly = anomalyEventIds.size > 0;
 
-  // Banner persistence: stays until user acknowledges, regardless of filter change.
-  // Reset the acknowledgment flag when a NEW anomaly row appears so the banner
-  // re-arms.
-  useEffect(() => {
-    if (anyAnomaly) {
-      // Only reset if the anomaly count actually grew (a new fail row).
-      // We compare to the previous acknowledged state implicitly: the
-      // banner is acknowledged until any new anomaly surfaces.
-    }
-  }, [anyAnomaly]);
-
   // ── Filter change handlers (REQ-001 + REQ-002 + REQ-003).
   const onIncidentChange = useCallback((ev: ChangeEvent<HTMLInputElement>) => {
     setFilters((prev) => ({ ...prev, incident: ev.target.value }));
@@ -591,8 +451,8 @@ export function AuditLog(): ReactNode {
   const onReportersChange = useCallback((next: ReporterKind[]) => {
     setFilters((prev) => ({ ...prev, reporters: next }));
   }, []);
-  const onRangeChange = useCallback((next: { from: Date | null; to: Date | null }) => {
-    setFilters((prev) => ({ ...prev, range: next }));
+  const onRangeChange = useCallback((next: DateRange | null) => {
+    setFilters((prev) => ({ ...prev, range: next ?? { from: null, to: null } }));
   }, []);
   const onClearAll = useCallback(() => {
     setFilters({ ...DEFAULT_FILTERS });
@@ -609,7 +469,6 @@ export function AuditLog(): ReactNode {
         data-testid="audit-log-page"
         aria-labelledby="audit-log-page-title"
       >
-        {/* Page header */}
         <header className="audit-log-header" data-testid="audit-log-header">
           <h1 id="audit-log-page-title">{tAudit('page.title')}</h1>
           <p className="audit-log-header__sub">
@@ -649,59 +508,51 @@ export function AuditLog(): ReactNode {
             </div>
           ) : null}
 
-          {/* Chain head banner — preserved from prior implementation. */}
+          {/* Chain head strip — height + prev + sealed + root ok. Single
+              line; reads as a status header, not a competing card. */}
           {chainHead ? (
-            <Card>
-              <div className="audit-log-chain-head">
-                <div>
-                  <div className="mono audit-log-chain-head__height">
-                    {tAudit('chainHead.headLabel')}
-                    {chainHead.height}
-                    {' · '}
-                    <span data-testid="chain-head-hash">
-                      {chainHead.block_hash ? truncateHash(chainHead.block_hash) : tAudit('table.actorEmDash')}
-                    </span>
-                  </div>
-                  <div className="mono audit-log-chain-head__meta">
-                    {[
-                      chainHead.prev_hash
-                        ? `${tAudit('chainHead.prevLabel')} ${truncateHash(chainHead.prev_hash)}`
-                        : `${tAudit('chainHead.prevLabel')} ${tAudit('table.actorEmDash')}`,
-                      chainHead.sealed_at
-                        ? `${tAudit('chainHead.sealedLabel')} ${formatTime('time-full', chainHead.sealed_at)}`
-                        : null,
-                      tAudit('chainHead.rootOk'),
-                    ]
-                      .filter((seg): seg is string => seg !== null)
-                      .map((seg, i) => (
-                        <span key={i}>
-                          {i > 0 && <span aria-hidden="true"> · </span>}
-                          {seg}
-                        </span>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <div className="audit-log-chain-head" data-testid="audit-log-chain-head">
+              <span className="mono">
+                {tAudit('chainHead.headLabel')}
+                {chainHead.height}
+              </span>
+              <span className="mono" data-testid="chain-head-hash">
+                {chainHead.block_hash
+                  ? truncateHash(chainHead.block_hash)
+                  : tAudit('table.actorEmDash')}
+              </span>
+              <span className="mono">
+                {tAudit('chainHead.prevLabel')}{' '}
+                {chainHead.prev_hash
+                  ? truncateHash(chainHead.prev_hash)
+                  : tAudit('table.actorEmDash')}
+              </span>
+              {chainHead.sealed_at ? (
+                <span className="mono">
+                  {tAudit('chainHead.sealedLabel')} {formatTime('time-full', chainHead.sealed_at)}
+                </span>
+              ) : null}
+              <span className="mono">{tAudit('chainHead.rootOk')}</span>
+            </div>
           ) : null}
 
-          {/* Filter chips (REQ-001 + REQ-008 #10 DateRangePicker primitive). */}
+          {/* Filter chips (REQ-001 + REQ-008 #10 DateRangePicker primitive).
+              FE-1.5d: each Dropdown drops its visible `label` — the
+              placeholder doubles as the aria-label so the toolbar stays
+              compact, matching the InboxList pattern. */}
           <section
             className="audit-log-filter-chips"
             data-testid="audit-log-filter-chips"
             aria-label={tAudit('filter.compose')}
           >
-            {/* Chip 1: incident (search) */}
             <div className="audit-log-filter-chip" data-testid="audit-log-chip-incident">
-              <label>
-                {tAudit('filter.incident.label')}
-              </label>
               <Input
                 type="search"
                 value={filters.incident}
                 onChange={onIncidentChange}
                 placeholder={tAudit('filter.incident.placeholder')}
                 list="audit-log-incident-options"
+                aria-label={tAudit('filter.incident.label')}
                 testId="audit-log-chip-incident-input"
               />
               {incidentIdOptions.length > 0 ? (
@@ -713,10 +564,8 @@ export function AuditLog(): ReactNode {
               ) : null}
             </div>
 
-            {/* Chip 2: event-type (multi-select) */}
             <div className="audit-log-filter-chip" data-testid="audit-log-chip-event-type">
               <Dropdown<string>
-                label={tAudit('filter.eventType.label')}
                 options={eventTypeOptions}
                 mode="multi"
                 value={filters.eventTypes}
@@ -727,17 +576,14 @@ export function AuditLog(): ReactNode {
               />
             </div>
 
-            {/* Chip 3: actor (search) */}
             <div className="audit-log-filter-chip" data-testid="audit-log-chip-actor">
-              <label>
-                {tAudit('filter.actor.label')}
-              </label>
               <Input
                 type="search"
                 value={filters.actor}
                 onChange={onActorChange}
                 placeholder={tAudit('filter.actor.placeholder')}
                 list="audit-log-actor-options"
+                aria-label={tAudit('filter.actor.label')}
                 testId="audit-log-chip-actor-input"
               />
               {actorOptions.length > 0 ? (
@@ -749,10 +595,8 @@ export function AuditLog(): ReactNode {
               ) : null}
             </div>
 
-            {/* Chip 4: band (multi-select) */}
             <div className="audit-log-filter-chip" data-testid="audit-log-chip-band">
               <Dropdown<BandKey>
-                label={tAudit('filter.band.label')}
                 options={bandOptions}
                 mode="multi"
                 value={filters.bands}
@@ -762,10 +606,8 @@ export function AuditLog(): ReactNode {
               />
             </div>
 
-            {/* Chip 5: reporter-badge (multi-select) */}
             <div className="audit-log-filter-chip" data-testid="audit-log-chip-reporter-badge">
               <Dropdown<ReporterKind>
-                label={tAudit('filter.reporterBadge.label')}
                 options={reporterOptions}
                 mode="multi"
                 value={filters.reporters}
@@ -775,11 +617,7 @@ export function AuditLog(): ReactNode {
               />
             </div>
 
-            {/* Chip 6: date range (DateRangePicker primitive per REQ-008 #10). */}
             <div className="audit-log-filter-chip" data-testid="audit-log-chip-date-range">
-              <label>
-                {tAudit('filter.dateRange.label')}
-              </label>
               <DateRangePicker
                 value={filters.range}
                 onChange={onRangeChange}
@@ -796,15 +634,6 @@ export function AuditLog(): ReactNode {
               {tAudit('filter.clearAll')}
             </Button>
           </section>
-
-          {/* Per-authorization stub — REQ-008 deferred scope marker. */}
-          <div
-            data-testid="audit-log-authorization-stub"
-            hidden
-            aria-hidden="true"
-          >
-            {tAudit('filter.compose')}
-          </div>
 
           {/* Event list — grouped by incident_id (REQ-004). */}
           <section
@@ -842,7 +671,6 @@ export function AuditLog(): ReactNode {
                       {group.summary.severity ? ` · ${group.summary.severity}` : ''}
                     </span>
                   ) : null}
-                  {/* Open chain segment link (REQ-007). */}
                   <Link
                     to={`/incidents/${group.id}/chain`}
                     className="audit-log-button-open-chain-segment"
@@ -859,7 +687,7 @@ export function AuditLog(): ReactNode {
                     const bandKey = severityToBandKey((e.payload as { severity?: string }).severity);
                     const verifyState = verifyStates.get(e.event_id) ?? { status: 'idle' as const };
                     const isAnomaly = verifyState.status === 'fail';
-                    const Icon = eventTypeIcon(e.event_type);
+                    const Icon = AUDIT_ICON_BY_TYPE[e.event_type] ?? UnknownEventIcon;
                     const reporterKind = reporterKindFromPayload(e.payload);
 
                     return (
@@ -898,7 +726,10 @@ export function AuditLog(): ReactNode {
                           <span className="audit-log-event-type-label">{e.event_type}</span>
                         </span>
 
-                        <span className="audit-log-band-pill" data-testid="audit-log-band-pill">
+                        <span
+                          className="audit-log-band-pill"
+                          data-testid="audit-log-band-pill"
+                        >
                           {bandKey ? (
                             <BandPill band={BAND_TO_ENUM[bandKey]} locked={true} testId={`audit-log-band-pill-${e.event_id}`} />
                           ) : (

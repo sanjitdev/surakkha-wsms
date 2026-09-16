@@ -16,19 +16,24 @@
   max-width: 320px;
   font-family: inherit;
 }
+/* FE-1.5d (2026-09-16) — compact trigger. The inbox toolbar uses these
+   inline so the trigger should read as a small toolbar pill, not as a
+   full-height form control. Reduced height, smaller font, less padding,
+   no extra label gap above. */
 .dropdown__trigger {
   display: flex;
   align-items: center;
-  gap: var(--space-sm);
+  gap: var(--space-xs);
   width: 100%;
-  height: var(--height-control-md);
-  padding: 0 var(--space-md);
+  min-height: 28px;
+  padding: 2px var(--space-xs) 2px var(--space-sm);
   background: var(--bg-surface);
   color: var(--fg-default);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   font-family: inherit;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
   text-align: left;
   cursor: pointer;
 }
@@ -49,6 +54,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  padding-left: 2px;
 }
 .dropdown__value--placeholder { color: var(--fg-disabled); }
 .dropdown__caret {
@@ -56,8 +62,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--space-md);
-  font-size: var(--font-size-sm);
+  width: 14px;
+  font-size: var(--font-size-xs);
   color: var(--fg-secondary);
 }
 
@@ -65,7 +71,7 @@
 .dropdown__chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-sm);
+  gap: 2px;
   flex: 1;
   min-width: 0;
   align-items: center;
@@ -73,29 +79,29 @@
 .dropdown__chip {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-sm);
-  padding: 2px var(--space-sm);
+  gap: 2px;
+  padding: 1px 4px 1px 6px;
   background: var(--bg-subtle);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm, 3px);
   font-size: var(--font-size-xs);
   color: var(--fg-default);
-  line-height: 1;
+  line-height: 1.2;
 }
 .dropdown__chip-remove {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--space-md);
-  height: var(--space-md);
+  width: 14px;
+  height: 14px;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--fg-secondary);
   cursor: pointer;
-  font-size: var(--font-size-sm);
+  font-size: 11px;
   line-height: 1;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm, 3px);
 }
 .dropdown__chip-remove:hover {
   color: var(--fg-default);

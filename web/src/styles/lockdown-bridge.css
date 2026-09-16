@@ -153,6 +153,54 @@ textarea:focus,
 .chip-reporter-webform { color: var(--color-reporter-webform); }
 .chip-reporter-sensor { color: var(--color-reporter-sensor); }
 
+/* ── 9b. Reporter-avatar-dot primitive (FO-052ea155) ────────────────
+   Structural decomposition of the chip into a 16 px mono-typed dot
+   beside the visible label. Replaces the pill footprint with a
+   mono-typed status mark (lockdown §6). Colour bridges to the same
+   --color-reporter-* tokens as the legacy chip. */
+
+.reporter-avatar-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: var(--bg-inset);
+  color: var(--fg-default);
+  border: 1px solid var(--border-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-family-mono);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  flex: none;
+  user-select: none;
+}
+.reporter-avatar-dot--anchor { color: var(--color-reporter-anchor); }
+.reporter-avatar-dot--hotline { color: var(--color-reporter-hotline); }
+.reporter-avatar-dot--webform { color: var(--color-reporter-webform); }
+.reporter-avatar-dot--sensor { color: var(--color-reporter-sensor); }
+
+.reporter-badge-chip--avatar {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--fg-default);
+  vertical-align: middle;
+  /* Align the avatar-dot to the cap-height of the surrounding row so
+     it doesn't sit too high when the row carries a BandPill. */
+  line-height: 1;
+}
+.reporter-badge-chip--avatar > .reporter-badge-chip__label {
+  font-size: 11px;
+  line-height: 14px;
+  font-weight: 500;
+}
+
 /* ── 10. Glyph + text redundancy for existing band badge ─────────────
    If a component renders an existing .band-pill--high/medium/low but
    also wants the lockdown §4.1 glyph next to the text, the

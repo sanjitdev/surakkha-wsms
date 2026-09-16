@@ -50,14 +50,41 @@ export interface InboxRow {
 /**
  * Rich filter state (REQ-002). Each dimension is optional; an absent
  * dimension means "no filter" (matches everything in that axis).
+ *
+ * FE-1.5d (2026-09-16) — the toolbar collapsed into a row of
+ * multi-select dropdowns; the fast-path status values that used to
+ * live as standalone chips (urgent / awaiting-sig / my-drafts /
+ * citizen) merged into the `status` dimension so the operator has
+ * one place to refine. The legacy buckets (open / in-flight /
+ * resolved) stay as the wider "rollup" view.
  */
 export interface FilterState {
   band: IncidentSeverity[];
   reporter: ReporterKind[];
-  status: ('open' | 'in-flight' | 'resolved')[];
+  status: InboxStatusFilter[];
   from: string | null;
   to: string | null;
 }
+/**
+ * Status filter values. Two layers co-exist:
+ *  - The three rollups (`open` / `in-flight` / `resolved`) match
+ *    `rowStatusFilterCategory` — they give the operator a coarse
+ *    view of the queue.
+ *  - The four fast-path values (`urgent` / `awaiting-sig` /
+ *    `my-drafts` / `citizen`) match the legacy chip rows — they
+ *    give the operator targeted narrowing on the action sub-
+ *    state of a row.
+ * Both layers apply OR within the status dimension; the dimension
+ * ANDs with band + reporter + date.
+ */
+export type InboxStatusFilter =
+  | 'open'
+  | 'in-flight'
+  | 'resolved'
+  | 'urgent'
+  | 'awaiting-sig'
+  | 'my-drafts'
+  | 'citizen';
 
 export const EMPTY_FILTERS: FilterState = {
   band: [],
@@ -74,6 +101,19 @@ export function isFilterEmpty(f: FilterState): boolean {
     f.status.length === 0 &&
     f.from === null &&
     f.to === null
+  );
+}
+/** Type guard — keeps the URL-parser narrowing honest. Used by both
+ *  `parseFiltersFromQuery` and the InboxList dropdown builder. */
+export function isInboxStatusFilter(s: string): s is InboxStatusFilter {
+  return (
+    s === 'open' ||
+    s === 'in-flight' ||
+    s === 'resolved' ||
+    s === 'urgent' ||
+    s === 'awaiting-sig' ||
+    s === 'my-drafts' ||
+    s === 'citizen'
   );
 }
 
@@ -128,12 +168,7 @@ export function parseFiltersFromQuery(query: string): FilterState {
             s === 'anchor' || s === 'hotline' || s === 'webform' || s === 'sensor',
         );
     } else if (k === 'status') {
-      state.status = v
-        .split(',')
-        .filter(
-          (s): s is 'open' | 'in-flight' | 'resolved' =>
-            s === 'open' || s === 'in-flight' || s === 'resolved',
-        );
+      state.status = v.split(',').filter(isInboxStatusFilter);
     } else if (k === 'from') {
       state.from = decodeURIComponent(v);
     } else if (k === 'to') {
@@ -157,8 +192,8 @@ export function applyFilters(rows: InboxRow[], f: FilterState): InboxRow[] {
     if (f.band.length > 0 && !f.band.includes(r.severity)) return false;
     if (f.reporter.length > 0 && !f.reporter.includes(r.reporterKind)) return false;
     if (f.status.length > 0) {
-      const mapped = rowStatusFilterCategory(r);
-      if (!f.status.includes(mapped)) return false;
+      const matched = f.status.some((s) => rowMatchesStatusFilter(r, s));
+      if (!matched) return false;
     }
     if (f.from !== null && r.timestamp < f.from) return false;
 
@@ -169,7 +204,7 @@ export function applyFilters(rows: InboxRow[], f: FilterState): InboxRow[] {
 }
 
 /**
- * Map an InboxRow to one of the three filter-status buckets:
+ * Map an InboxRow to one of the three rollup filter-status buckets:
  *   - open      = rows needing operator action (awaiting_ack / awaiting_sig / awaiting_draft / citizen_report / info)
  *   - in-flight = rows where verification or on-site work is actively in progress
  *   - resolved  = rows that have been verified/closed (chain_verify status)
@@ -184,4 +219,26 @@ function rowStatusFilterCategory(r: InboxRow): 'open' | 'in-flight' | 'resolved'
   if (r.isUrgent) return 'in-flight';
 
   return 'open';
+}
+/**
+ * Check whether a single row matches a single status filter value.
+ * Status values fall into two families:
+ *  - Rollups (`open` / `in-flight` / `resolved`) match by category.
+ *  - Fast-path values (`urgent` / `awaiting-sig` / `my-drafts` /
+ *    `citizen`) match by row sub-state. The legacy fast-path values
+ *    supersede the rollups for the rows they cover — so a row with
+ *    `isUrgent=true` matches BOTH `urgent` and `in-flight`, and
+ *    selecting either one narrows the queue to that row.
+ *
+ * `rowStatusFilterCategory` is reused for the rollup family so the
+ * existing semantics (resolved = chain_verify, etc.) carry over
+ * without duplication.
+ */
+function rowMatchesStatusFilter(r: InboxRow, s: InboxStatusFilter): boolean {
+  if (s === 'urgent') return r.isUrgent;
+  if (s === 'awaiting-sig') return r.isAwaitingSig;
+  if (s === 'my-drafts') return r.isDraft;
+  if (s === 'citizen') return r.isCitizen;
+
+  return rowStatusFilterCategory(r) === s;
 }

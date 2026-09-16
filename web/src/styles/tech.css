@@ -346,24 +346,10 @@
   }
 }
 
-/* Reporter-badge chip wrapper (foundation §6.2 — never colour-only).
-   Colour comes from lockdown-bridge.css .chip-reporter-*; this file
-   adds the chip shell + spacing. */
-.field-queue-reporter-badge-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid currentColor;
-  background: transparent;
-  font-family: var(--font-family-mono);
-  font-size: 10px;
-  font-weight: var(--font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-}
+/* Reporter-badge carbonized as avatar-dot decomposition (FO-052ea155).
+   The shape lives in lockdown-bridge.css (.reporter-badge-chip--avatar
+   + .reporter-avatar-dot--*). This surface carries no extra shell —
+   distance + age cells below stay mono per foundation §1.2. */
 
 /* Distance estimate (foundation §1.2 — mono digit rule). */
 .field-queue-distance-estimate {

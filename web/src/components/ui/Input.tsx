@@ -10,6 +10,8 @@ export interface InputProps {
   testId?: string;
   type?: InputHTMLAttributes<HTMLInputElement>['type'];
   disabled?: boolean;
+  /** Native `<datalist>` id for autocomplete suggestions. */
+  list?: string;
   'aria-label'?: string;
 }
 export function Input({
@@ -21,6 +23,7 @@ export function Input({
   testId,
   type = 'text',
   disabled = false,
+  list,
   'aria-label': ariaLabel,
 }: InputProps) {
   if (icon) {
@@ -36,6 +39,7 @@ export function Input({
           onChange={onChange}
           placeholder={placeholder}
           disabled={disabled}
+          list={list}
           aria-label={ariaLabel}
           data-testid={testId ?? `input-icon-${size}`}
         />
@@ -50,6 +54,7 @@ export function Input({
       onChange={onChange}
       placeholder={placeholder}
       disabled={disabled}
+      list={list}
       aria-label={ariaLabel}
       data-testid={testId ?? `input-${size}`}
     />
@@ -57,7 +62,7 @@ export function Input({
 }
 export type SearchInputProps = Pick<
   InputProps,
-  'value' | 'onChange' | 'placeholder' | 'size' | 'disabled' | 'icon' | 'testId' | 'type'
+  'value' | 'onChange' | 'placeholder' | 'size' | 'disabled' | 'icon' | 'testId' | 'type' | 'list'
 >;
 export function SearchInput({
   value,
@@ -68,6 +73,7 @@ export function SearchInput({
   icon,
   testId,
   type,
+  list,
 }: SearchInputProps) {
   const { t } = useTranslation();
   return (
@@ -80,6 +86,7 @@ export function SearchInput({
       icon={icon}
       testId={testId ?? 'input-search-md'}
       type={type}
+      list={list}
       aria-label={placeholder ?? t('common:input.search', { defaultValue: 'search' })}
     />
   );
