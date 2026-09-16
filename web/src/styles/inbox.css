@@ -23,23 +23,38 @@
   text-decoration: none;
   display: block;
 }
+/* WO-019 — title row: inline dot + title sits on a single 22 px-tall
+   row so the col-title stays compact. Dot is the lead severity signal;
+   the BandPill in the chrome column carries the textual label. */
+.inbox-row__title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+  min-width: 0;
+}
+.inbox-row__title-row strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
 .inbox-row__title-link:hover strong {
   color: var(--brand-600);
 }
-/* ── row rhythm — clamp title to 2 lines + give every row a comfortable
-      min-height so wrapping titles + long summaries still align vertically.
-      Without this the rows ripple (one short, two tall, one short) and
-      the table reads as jittery. ───────────────────────────────────── */
+/* ── row rhythm — single-line title with text-overflow ellipsis keeps
+      every row at a consistent comfortable height (~64 px) so the
+      table fits 8-10 incidents in one viewport instead of 3. The old
+      2-line clamp + 88 px min-height produced 150-180 px rows and a
+      scroll graveyard. ─────────────────────────────────────────────── */
 .data-table--inbox__tr {
-  min-height: 88px;
+  min-height: 64px;
 }
 .data-table--inbox__tr td.col-title strong {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
+  display: block;
   overflow: hidden;
-  /* keep rows with 1-line titles vertically aligned with rows that wrap */
+  text-overflow: ellipsis;
+  white-space: nowrap;
   line-height: var(--line-height-snug, 1.35);
 }
 
@@ -251,9 +266,9 @@
       age, and the incident title. Rows are full-width buttons so
       keyboard activation matches the click target. ──────────────── */
 .inbox-rail {
-  width: 240px;
-  min-width: 240px;
-  max-width: 240px;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
   display: flex;
   flex-direction: column;
   gap: var(--space-xs, 4px);

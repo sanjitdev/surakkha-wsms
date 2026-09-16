@@ -364,8 +364,15 @@ export function InboxList() {
             data-read={r.read ? 'true' : 'false'}
           >
             <Link to={r.href} className="inbox-row__title-link">
-              <strong>{r.title}</strong>
-              <div className="row-sub">{r.meta}</div>
+              <div className="inbox-row__title-row">
+                <span
+                  className={`row-severity-dot is-${r.severity.toLowerCase()}`}
+                  aria-hidden="true"
+                  data-testid={`inbox-row-severity-dot-${r.id}`}
+                />
+                <strong>{r.title}</strong>
+              </div>
+              <div className="row-sub" title={r.meta}>{r.meta}</div>
             </Link>
           </div>
         ),

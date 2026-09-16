@@ -430,12 +430,25 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .data-table .col-action a { font-size: var(--font-size-sm); color: var(--brand-500); text-decoration: none; font-weight: var(--font-weight-medium); white-space: nowrap; }
 .data-table .col-action a:hover { color: var(--brand-600); }
 .data-table .row-severity-dot {
-  /* Slightly larger than the 8 px the mockup used — the T1 info-blue
-     dot was getting lost in row whitespace at 1440 px viewport. The
-     10 px circle is still smaller than the row badge pill so it reads
-     as a status marker, not a primary control. */
-  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  /* WO-019 — severity dot: previously rendered as a 10 px default-text
+     coloured circle (no background set, fell through to currentColor),
+     which read as a generic "bullet" next to the BandPill badge. Now
+     each variant carries the same colour as the SeverityRail hbar so
+     the dot is the LEAD visual signal for severity, with the BandPill
+     as the textual companion. T0 = neutral divider, T1 = neutral low,
+     T2 = amber, T3 = amber-bright (alert-red is reserved for the
+     consumer-notice issuance path per WO-013 lockdown §10.1). */
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-divider, var(--border-subtle));
+  flex-shrink: 0;
 }
+.data-table .row-severity-dot.is-t3 { background: var(--color-amber-bright, #E9A23B); }
+.data-table .row-severity-dot.is-t2 { background: var(--color-amber, var(--warning)); }
+.data-table .row-severity-dot.is-t1 { background: var(--color-trust-t1, var(--band-low)); }
+.data-table .row-severity-dot.is-t0 { background: var(--color-divider, var(--border-subtle)); }
 .data-table .col-warn .row-severity-dot { display: inline-block; }
 
 /* ── Data card wrapper (used inside .data-card) ──────────────── */
@@ -546,12 +559,19 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   gap: var(--space-md);
   margin-bottom: var(--space-sm);
 }
+/* WO-019 — KPI labels: uppercase mono so "T3 URGENT" reads as a
+   metric axis label, not body copy. 11 px size matches the picker-status
+   pill typography in app.css. */
 .hbar-label {
-  font-size: var(--font-size-sm);
-  color: var(--fg-default);
+  font-family: var(--font-family-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-secondary);
+  font-weight: var(--font-weight-semibold);
 }
 .hbar-track {
-  height: 18px;
+  height: 10px;
   background: var(--bg-inset);
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -559,11 +579,15 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
 .hbar-fill {
   height: 100%;
   transition: width 200ms ease-out;
+  border-radius: var(--radius-sm);
 }
 .hbar-value {
+  font-family: var(--font-family-mono);
   font-size: var(--font-size-xs);
-  color: var(--fg-secondary);
+  color: var(--fg-default);
   text-align: right;
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -769,6 +793,14 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
   color: var(--fg-tertiary);
   font-family: var(--font-family-mono);
   margin-top: 2px;
+  /* WO-019 — density fix: clamp meta to one line with ellipsis so long
+     meta strings ("citizen-ack request sent · Anjali (reporter) · SN-2208
+     silent 8 min") don't ripple row height. Full meta still readable in
+     the row's title attribute (see InboxList.tsx row render). */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .data-table--inbox tr.row-urgent {
   background: var(--danger-bg);
@@ -1350,7 +1382,7 @@ main.container--wide { padding: var(--space-md) var(--space-xl) var(--space-xl);
    ════════════════════════════════════════════════════════════════════ */
 .data-table .col-where,
 .data-table th.col-where {
-  width: 140px;
+  width: 160px;
   font-size: var(--font-size-xs);
   color: var(--fg-secondary);
 }
