@@ -69,6 +69,24 @@ table.data-table--inbox {
   line-height: var(--line-height-snug, 1.35);
 }
 
+/* WO-020 — strip the shared header chrome. The Action queue is
+   small enough (≤ 8 rows on screen) that sticky headers add no
+   value, and the .table__head background + .table__header-cell
+   height was creating an extra band that shifted the THREAD /
+   WHERE labels above the row content. Single-row header sits
+   flush with the body cells. */
+.data-table--inbox .table__head,
+.data-table--inbox .table__head tr {
+  background: transparent;
+  border-bottom: 0;
+}
+.data-table--inbox .table__header-cell {
+  height: auto;
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  position: static;
+}
+
 /* ── selection state — strip row background per dim 1 (no colour tokens
       transition; row bg switches instantly via attribute). ──────────── */
 .data-table--inbox__tr.is-selected td {
