@@ -74,7 +74,13 @@ table.data-table--inbox {
    value, and the .table__head background + .table__header-cell
    height was creating an extra band that shifted the THREAD /
    WHERE labels above the row content. Single-row header sits
-   flush with the body cells. */
+   flush with the body cells. Also drop the `position: relative`
+   the TableHeader primitive applies inline (it's a vestigial
+   anchor for the sort + resize handle but those don't exist in
+   the inbox rows) so the header cells flow identically to body
+   cells. The header <th>s still get their column-width inline
+   style — only the position / background / height chrome is
+   scrubbed. */
 .data-table--inbox .table__head,
 .data-table--inbox .table__head tr {
   background: transparent;
@@ -84,7 +90,12 @@ table.data-table--inbox {
   height: auto;
   padding: var(--space-sm) var(--space-md);
   background: transparent;
-  position: static;
+  /* !important needed to override the `position: relative` the
+     TableHeader primitive applies via inline style. The relative
+     positioning is a vestigial anchor for the sort + resize handle
+     (neither of which exist on the inbox rows) and was making the
+     <th> sit a few px off from the body <td>. */
+  position: static !important;
 }
 
 /* ── selection state — strip row background per dim 1 (no colour tokens
